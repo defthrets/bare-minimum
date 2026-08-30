@@ -89,6 +89,23 @@ namespace BareMinimum.UI
         public Icon TitleLeft;
         public Icon TitleRight;
 
+        /// <summary>
+        /// A picture to use INSTEAD of the title text: a shop's own sign over its counter.
+        ///
+        /// When this is set the title text and the two flanking marks are not drawn at all.
+        /// A brand mark is already a piece of typography; putting an apple and an eye either
+        /// side of the LTD logo would be two designs arguing in the same forty pixels.
+        /// </summary>
+        public Icon TitleImage;
+
+        /// <summary>
+        /// The artwork's own width over its height. Brand marks are wide.
+        ///
+        /// It has to be told rather than measured: an Icon is a texture handle and a path,
+        /// and nothing in SHVDN reports the pixel size of a CustomSprite's source file.
+        /// </summary>
+        public float TitleImageRatio = 3.2f;
+
         /// <summary>Tint for those marks. The header's accent colour.</summary>
         private static readonly Color Accent = Color.FromArgb(255, 240, 170, 56);
 
@@ -405,10 +422,26 @@ namespace BareMinimum.UI
             // without spending a whole row of height on a gap.
             Hud.Bar(left, y + height - 0.0022f, PanelW, 0.0022f, Accent);
 
-            Hud.Text(Title, PanelX, y + padTop, titleScale,
-                     Color.FromArgb(245, 245, 245, 248), Plain, true);
+            if (TitleImage != null)
+            {
+                // Tinted WHITE, which is the identity for a sprite: CustomSprite multiplies
+                // its colour with the texture, so white leaves the brand's own reds and greys
+                // exactly as they were painted. Every other icon in this mod relies on the
+                // opposite -- white art taking a tint -- so this is the one deliberate
+                // exception and it is worth the sentence.
+                var logoH = titleH * 1.35f;
 
-            Marks(y + padTop, titleH, titleScale);
+                TitleImage.DrawSized(PanelX, y + padTop + titleH / 2f,
+                                     logoH * TitleImageRatio / Aspect(), logoH,
+                                     Color.FromArgb(255, 255, 255, 255));
+            }
+            else
+            {
+                Hud.Text(Title, PanelX, y + padTop, titleScale,
+                         Color.FromArgb(245, 245, 245, 248), Plain, true);
+
+                Marks(y + padTop, titleH, titleScale);
+            }
 
             if (subH > 0f)
             {

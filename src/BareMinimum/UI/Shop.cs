@@ -37,6 +37,19 @@ namespace BareMinimum.UI
 
         private Counter _at = Counter.None;
 
+        /// <summary>
+        /// The chains we know how to brand, and their marks. See Brands.
+        ///
+        /// The counter is found by till prop, which is what lets it work in every shop in
+        /// the game without a coordinate list -- and the price of that is that it does not
+        /// know whose shop it is in. This puts the sign back over the counter.
+        /// </summary>
+        private readonly Venues.Brands _brands = new Venues.Brands();
+
+        /// <summary>One Icon per logo file. An Icon owns a texture handle, so it is kept.</summary>
+        private readonly System.Collections.Generic.Dictionary<string, Icon> _marks =
+            new System.Collections.Generic.Dictionary<string, Icon>(StringComparer.OrdinalIgnoreCase);
+
         public Shop(Core.Settings cfg, Catalogue menu, Counters counters, Eating eating,
                     Needs.Needs needs)
         {
@@ -45,6 +58,10 @@ namespace BareMinimum.UI
             _counters = counters;
             _eating = eating;
             _needs = needs;
+
+            // Loaded here rather than on first use: reading a file the frame a menu opens is
+            // a stutter at exactly the moment the player is looking at the screen.
+            _brands.Load();
         }
 
         public bool IsOpen => _ui.IsOpen;
@@ -172,7 +189,8 @@ namespace BareMinimum.UI
 
         private void Begin()
         {
-            _ui.Title = _at == Counter.Till ? "COUNTER" : "VENDING MACHINE";
+            _ui.Title = "COUNTER";
+            _ui.TitleImage = Mark();
             _ui.Tabs.Clear();
 
             foreach (var c in _menu.Categories)
@@ -189,6 +207,37 @@ namespace BareMinimum.UI
             _ui.Tab = 0;
             _ui.Open();
             Refill();
+        }
+
+        /// <summary>
+        /// The sign for the shop we are standing in, or null for the plain text header.
+        ///
+        /// NULL IS A FINE ANSWER. Most tills in the game belong to a chain nobody has added
+        /// to brands.json yet, and those keep the word COUNTER -- which is honest, rather
+        /// than putting somebody else's logo over a shop it does not belong to.
+        /// </summary>
+        private Icon Mark()
+        {
+            try
+            {
+                var brand = _brands.At(Game.Player.Character);
+                if (brand == null) return null;
+
+                Icon icon;
+                if (_marks.TryGetValue(brand.Logo, out icon)) return icon;
+
+                icon = new Icon(brand.Logo);
+                _marks[brand.Logo] = icon;
+
+                Log.Once("brand-" + brand.Id, "Counter branded as " + brand.Name + ".");
+
+                return icon;
+            }
+            catch (Exception ex)
+            {
+                Log.Once("brand-mark", "Could not brand the counter: " + ex.Message);
+                return null;
+            }
         }
 
         private static bool IsHotFood(string category)

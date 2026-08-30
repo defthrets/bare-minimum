@@ -1,0 +1,36 @@
+{
+  "_comment": [
+    "Shop chains, so the counter header shows whose shop you are standing in rather",
+    "than the word COUNTER.",
+    "",
+    "  id        internal name, for the log.",
+    "  name      the chain, in words.",
+    "  logo      a file in data/icons. Brand marks are FULL COLOUR, unlike the product",
+    "            icons: see tools/make_logos.py.",
+    "  roomKeys  interior room keys this chain uses. THE GOOD SIGNAL -- every branch of",
+    "            a chain shares one interior asset, so one key brands all of them.",
+    "  at        positions known to be inside one. The fallback until a key is known.",
+    "  radius    how far from one of those positions still counts. Metres.",
+    "",
+    "HOW TO ADD THE KEY. Stand at the counter once and Bare Minimum writes the room key",
+    "of wherever you are to BareMinimum.log:",
+    "",
+    "    Counter room key: 123456789  (put this in data/brands.json under roomKeys ...)",
+    "",
+    "Paste that number into roomKeys for the chain and every branch of it is branded, no",
+    "rebuild needed. Until then the position below covers the one store it names."
+  ],
+  "version": 1,
+  "brands": [
+    {
+      "id": "ltd",
+      "name": "LTD Gasoline",
+      "logo": "brand_ltd.png",
+      "roomKeys": [],
+      "radius": 25.0,
+      "at": [
+        { "x": -47.7, "y": -1757.0, "z": 29.4 }
+      ]
+    }
+  ]
+}
