@@ -347,6 +347,24 @@ namespace BareMinimum.Core
         /// </summary>
         public bool HudAnimate = true;
 
+        /// <summary>
+        /// How strong the constant shimmer is. 0 switches it off, 1 is very obvious.
+        ///
+        /// A DIAL RATHER THAN A CONSTANT because "subtle" is not a number anybody can guess
+        /// right first time. The first attempt at this was five per cent of brightness over
+        /// four seconds and was, correctly, reported as invisible; whatever is chosen here
+        /// will be wrong for somebody's monitor too, so it is in the ini.
+        /// </summary>
+        public float HudShimmer = 0.55f;
+
+        /// <summary>
+        /// How strong the low-meter sway is. 0 switches it off, 1 is a wobble.
+        ///
+        /// Only ever applied on the bottom stages, where the picture has run out of room to
+        /// get any worse and movement is the only channel left.
+        /// </summary>
+        public float HudSway = 0.6f;
+
         // ---- Keys ------------------------------------------------------------
 
         /// <summary>
@@ -487,6 +505,8 @@ namespace BareMinimum.Core
                 cfg.HudGap = ini.GetFloat("HUD", "Gap", cfg.HudGap, 0f, 3f);
                 cfg.HudOpacity = ini.GetFloat("HUD", "Opacity", cfg.HudOpacity, 0.05f, 1f);
                 cfg.HudAnimate = ini.GetBool("HUD", "Animate", cfg.HudAnimate);
+                cfg.HudShimmer = ini.GetFloat("HUD", "Shimmer", cfg.HudShimmer, 0f, 1f);
+                cfg.HudSway = ini.GetFloat("HUD", "Sway", cfg.HudSway, 0f, 1f);
                 cfg.HudHideWhenFine = ini.GetBool("HUD", "HideWhenFine", cfg.HudHideWhenFine);
                 cfg.HudFineAbove = ini.GetFloat("HUD", "FineAbove", cfg.HudFineAbove, 0f, 1f);
                 cfg.HudFlashWhenCritical = ini.GetBool("HUD", "FlashWhenCritical",

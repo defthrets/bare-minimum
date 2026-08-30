@@ -392,7 +392,7 @@ namespace BareMinimum.UI
 
             Bool("Animate the icons", "HUD", "Animate",
                  () => _cfg.HudAnimate, v => _cfg.HudAnimate = v,
-                 "A faint shimmer, and a slow sway once a meter is nearly empty.");
+                 "The icons breathe, and sway once a meter is nearly out.");
 
             Bool("HUD auto position", "HUD", "AutoPosition",
                  () => _cfg.HudAutoPosition, v => _cfg.HudAutoPosition = v,

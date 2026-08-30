@@ -277,25 +277,37 @@ namespace BareMinimum.UI
 
             var y = centreY;
             var turn = 0f;
+            var grow = 1f;
 
             if (_cfg.HudAnimate)
             {
                 colour = Shimmer(colour, need, offset);
 
-                if (stage == 0)
-                {
-                    // A slow drift up and down, and a lean that lags a third of a cycle
-                    // behind it. The lag is what makes it a sway rather than a rocking
-                    // horse: the two moving together is a rigid thing being waggled.
-                    var bob = Wave(2400f, offset);
-                    var lean = Wave(2400f, offset + 0.33f);
+                // A BREATH IN SIZE AS WELL AS BRIGHTNESS. Brightness alone is the weakest
+                // signal on a small sprite over a moving world -- especially on the green
+                // end of the ramp, which is already bright -- and it was reported invisible.
+                // A couple of per cent of scale is what the eye actually picks up.
+                grow = 1f + 0.030f * Clamp01(_cfg.HudShimmer) * Wave(ShimmerMs, offset);
 
-                    y += tall * 0.045f * bob;
-                    turn = 4.5f * lean;
+                // THE BOTTOM TWO STAGES, not just the last. Waiting for a meter to bottom out
+                // completely means most players never see this at all, and the point of it is
+                // to be seen before things are already as bad as they get. Stage 1 gets half
+                // of it, so there is a build rather than a switch being thrown.
+                var lean = stage == 0 ? 1f : stage == 1 ? 0.5f : 0f;
+
+                if (lean > 0f)
+                {
+                    var strength = lean * Clamp01(_cfg.HudSway);
+
+                    // A drift up and down, and a tilt that lags a third of a cycle behind it.
+                    // The lag is what makes it a sway rather than a rocking horse: the two
+                    // moving together is a rigid thing being waggled.
+                    y += tall * 0.095f * strength * Wave(SwayMs, offset);
+                    turn = 9f * strength * Wave(SwayMs, offset + 0.33f);
                 }
             }
 
-            icon.DrawSized(centreX + wide / 2f, y, wide, tall, colour, turn);
+            icon.DrawSized(centreX + wide / 2f, y, wide * grow, tall * grow, colour, turn);
         }
 
         /// <summary>
@@ -315,10 +327,24 @@ namespace BareMinimum.UI
 
             // 0 to 1 rather than -1 to 1: brightness only ever goes UP from the ramp colour,
             // so the icon never dips darker than the state it is reporting.
-            var lift = 0.5f + 0.5f * Wave(4000f, offset);
+            var lift = 0.5f + 0.5f * Wave(ShimmerMs, offset);
 
-            return Mix(c, Color.FromArgb(c.A, 255, 252, 244), 0.05f * lift);
+            return Mix(c, Color.FromArgb(c.A, 255, 252, 244),
+                       0.22f * Clamp01(_cfg.HudShimmer) * lift);
         }
+
+        /// <summary>
+        /// How long one breath takes.
+        ///
+        /// Four seconds was too slow to register as movement at all -- the change per frame
+        /// was below what anybody would notice, so it read as a static icon that happened to
+        /// be a slightly different colour each time you looked. Two and a bit is slow enough
+        /// to be calm and fast enough to be a rhythm.
+        /// </summary>
+        private const float ShimmerMs = 2200f;
+
+        /// <summary>How long one sway takes. Faster than the shimmer, because it is a warning.</summary>
+        private const float SwayMs = 1600f;
 
         private static int Stage(Need need)
         {
