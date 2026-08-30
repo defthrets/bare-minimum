@@ -174,6 +174,23 @@
     },
 
     {
+      "_note": "Lucky Plucker. Sold at the door AND at the drive-through lane, so it is",
+      "_note2": "set up as a combo and given a minute at the wheel.",
+      "id": "plucker_box",
+      "name": "Lucky Plucker Box",
+      "category": "Food",
+      "price": 11,
+      "hunger": 0.55,
+      "wake": 0.03,
+      "shop": false,
+      "prop": ["prop_food_bs_chicken", "prop_cs_bs_chicken", "prop_food_bs_burger1", "prop_cs_burger_01"],
+      "drinkProp": ["prop_cs_bs_cup", "prop_food_bs_cup", "prop_ld_can_01", "prop_ecola_can"],
+      "combo": true,
+      "seconds": 5.5,
+      "vehicleSeconds": 60
+    },
+
+    {
       "id": "crisps",
       "name": "Bag of Crisps",
       "category": "Snacks",

@@ -39,6 +39,18 @@
 
   "version": 1,
 
+  "_pending": [
+    "Places noted but NOT built yet. The loader only reads \"vendors\", so anything here is",
+    "inert -- it is a parking space, not a disabled entry.",
+    "",
+    "  Liquor store  x 98.832  y -1308.740  z 29.274  heading 296.627",
+    "                Noted 2026-08-30. Needs deciding what it sells: beer and spirits are",
+    "                drinks, but this mod has no drunk mechanic, and the sleep effects",
+    "                already use the drunk walk and camera -- so alcohol here would either",
+    "                do nothing or collide with being exhausted. Worth settling that before",
+    "                writing the items."
+  ],
+
   "vendors": [
     {
       "id": "hotdog_vespucci",
@@ -193,6 +205,49 @@
       "blip": true,
       "blipSprite": 52,
       "blipColour": 5
+    },
+
+    {
+      "_note": "Lucky Plucker, the walk-up door. Blipped -- the drive-through beside it is",
+      "_note2": "the same restaurant and does not get a second marker on top of this one.",
+
+      "id": "lucky_plucker",
+      "name": "Lucky Plucker",
+      "label": "Plucker box",
+      "item": "plucker_box",
+
+      "x": 132.134,
+      "y": -1462.064,
+      "z": 29.357,
+      "heading": 248.557,
+
+      "spawnRange": 90.0,
+      "reach": 2.2,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+
+    {
+      "_note": "Lucky Plucker, the drive-through lane. Same food, ordered from the car.",
+      "_note2": "No blip: one restaurant, one marker.",
+
+      "id": "lucky_plucker_drivethru",
+      "name": "Lucky Plucker",
+      "label": "Plucker box",
+      "item": "plucker_box",
+
+      "x": 144.209,
+      "y": -1461.475,
+      "z": 28.643,
+      "heading": 52.580,
+
+      "fromVehicle": true,
+      "spawnRange": 90.0,
+      "reach": 5.0,
+
+      "blip": false
     },
 
     {
