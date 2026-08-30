@@ -3,6 +3,7 @@ using GTA;
 using BareMinimum.Core;
 using BareMinimum.Needs;
 using BareMinimum.UI;
+using BareMinimum.Venues;
 
 namespace BareMinimum
 {
@@ -30,6 +31,8 @@ namespace BareMinimum
 
         private readonly Needs.Needs _needs;
         private readonly Effects _effects;
+        private readonly Beds _beds;
+        private readonly Sleeping _sleeping;
         private readonly Gauge _gauge;
 
         private int _failures;
@@ -42,6 +45,8 @@ namespace BareMinimum
 
             _needs = new Needs.Needs(_cfg);
             _effects = new Effects(_cfg);
+            _beds = new Beds();
+            _sleeping = new Sleeping(_cfg, _needs, _beds);
             _gauge = new Gauge(_cfg);
 
             Interval = 0;
@@ -76,9 +81,14 @@ namespace BareMinimum
                 // state file get written on a stutter.
                 if (dt < 0f || dt > 1f) dt = 0f;
 
-                // Nothing owns the player yet. Sleeping will, once it exists, and both the
-                // effects and the HUD have to stand down while it does.
-                const bool suspended = false;
+                // FIRST, so the prompt and the keypress are handled before anything else
+                // reads input on the same frame.
+                _sleeping.Update();
+
+                // While the sleep sequence owns the screen, the effects and the HUD stand
+                // down -- a limp applied through a fade is still applied when you wake up,
+                // and an icon drawn over black is an icon floating on a black screen.
+                var suspended = _sleeping.Busy;
 
                 _needs.Update(dt);
                 _effects.Update(_needs, suspended);
@@ -149,6 +159,7 @@ namespace BareMinimum
         /// </summary>
         private void Cleanup()
         {
+            try { _sleeping.Shutdown(); } catch (Exception ex) { Log.Error("Sleep shutdown", ex); }
             try { _effects.Clear(); } catch (Exception ex) { Log.Error("Clearing effects", ex); }
             try { _needs.SaveNow(); } catch (Exception ex) { Log.Error("Final save", ex); }
 
