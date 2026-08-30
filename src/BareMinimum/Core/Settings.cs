@@ -228,15 +228,20 @@ namespace BareMinimum.Core
         /// <summary>
         /// Game scripts to terminate while stood at one of our counters.
         ///
-        /// EMPTY BY DEFAULT, and it has to be. Enhanced opens its own convenience-store menu
-        /// at an LTD counter, and the obvious guess for what owns it -- shop_controller --
-        /// also runs Ammu-Nation, the clothing shops and the barbers. Guessing costs three
-        /// shops to fix one menu.
+        /// ob_cashregister IS THE VANILLA STORE MENU -- the "P's & Q's $1 / EgoChaser $2"
+        /// list with Shoplift and Select on it. Confirmed by name off a live counter rather
+        /// than guessed: Shop.NameTheScripts logs every running script the first time a
+        /// counter is used, and that list had shop_controller and ShopRobberies on it too.
         ///
-        /// Shop.NameTheScripts logs every running script the first time a counter is used.
-        /// Once the right name is in that list, it goes here and no rebuild is needed.
+        /// WHICH IS EXACTLY WHY GUESSING WAS NOT ON. shop_controller is the obvious suspect
+        /// and it also runs Ammu-Nation, the clothing shops and the barbers -- terminating it
+        /// would have cost three shops to fix one menu. ShopRobberies is how you rob a store,
+        /// which is a whole game mechanic. ob_ is the prefix for a script attached to ONE
+        /// object, so this ends the register's own interaction and nothing else.
+        ///
+        /// Anything else that turns up can go here without a rebuild.
         /// </summary>
-        public string[] SuppressScripts = new string[0];
+        public string[] SuppressScripts = { "ob_cashregister" };
 
         // ---- Social ----------------------------------------------------------
 
@@ -485,7 +490,14 @@ namespace BareMinimum.Core
                 cfg.PriceMultiplier = ini.GetFloat("Money", "PriceMultiplier",
                                                    cfg.PriceMultiplier, 0f, 50f);
 
-                cfg.SuppressScripts = Split(ini.GetString("Counters", "SuppressScripts", ""));
+                // THE FALLBACK IS THE CURRENT VALUE, not an empty string. With "" there, a
+                // missing key silently wiped the built-in default instead of leaving it
+                // alone -- so the one script we actually know the name of would never have
+                // been terminated on any install whose ini predates it. An ini that names
+                // the key and leaves it blank still means "suppress nothing", which is the
+                // behaviour somebody typing that would expect.
+                cfg.SuppressScripts = Split(ini.GetString("Counters", "SuppressScripts",
+                                                          string.Join(",", cfg.SuppressScripts)));
 
                 cfg.SocialEnabled = ini.GetBool("Social", "Enabled", cfg.SocialEnabled);
                 cfg.SocialChance = ini.GetInt("Social", "ChancePercent", cfg.SocialChance);

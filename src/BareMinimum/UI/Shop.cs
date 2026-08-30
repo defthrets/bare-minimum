@@ -165,9 +165,20 @@ namespace BareMinimum.UI
         /// the player three shops to fix one menu. Once the log above has named the right one,
         /// putting it in the ini is a one-line change and no rebuild.
         /// </summary>
+        /// <summary>When the next sweep is due. Real milliseconds.</summary>
+        private int _nextHush;
+
         private void Hush()
         {
             if (_cfg.SuppressScripts.Length == 0) return;
+
+            // FOUR TIMES A SECOND, NOT EVERY FRAME. The game restarts an object script the
+            // moment you are near its object again, so this is a standing argument rather
+            // than a one-off -- and having it out at sixty frames a second is a native call
+            // per name per frame to accomplish exactly what four of them do.
+            var now = Game.GameTime;
+            if (now < _nextHush) return;
+            _nextHush = now + 250;
 
             foreach (var name in _cfg.SuppressScripts)
             {
