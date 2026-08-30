@@ -153,8 +153,16 @@ namespace BareMinimum
 
             try
             {
+                // NAMES THE KEY, like every other mod in this scripts\ folder does -- Posted
+                // Up says F2 for the phone, Overspray says F3 for the can. A load message that
+                // only says a version tells somebody nothing they can act on, and the whole
+                // point of the line is to be read once and remembered.
+                //
+                // The key comes from the settings rather than being written out, so rebinding
+                // it in the ini changes what the greeting says.
                 GTA.UI.Notification.PostTicker(
-                    "~b~" + Build.Name + "~s~ " + Build.Version + " by " + Build.By, false, false);
+                    "~b~" + Build.Name + " " + Build.Version + " - by " + Build.By + "~s~ loaded.  " +
+                    "Press ~b~" + _cfg.MenuKey + "~s~ for settings.", false, false);
             }
             catch
             {
