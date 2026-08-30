@@ -151,6 +151,18 @@ namespace BareMinimum.Food
                                                     Clip = "loop_bottle" };
 
         /// <summary>
+        /// Ambient speech names, by occasion. Read from foods.json, handed to Speech.
+        ///
+        /// HERE RATHER THAN IN Speech BECAUSE THIS IS THE FILE READER. Every other piece of
+        /// content in the mod comes out of a json through the class that owns that json, and
+        /// a second class opening the same file to pick two keys out of it would be two
+        /// things to keep in step for no gain.
+        /// </summary>
+        public readonly System.Collections.Generic.Dictionary<string, string[]> Lines =
+            new System.Collections.Generic.Dictionary<string, string[]>(
+                StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
         /// Smoking. The MP interaction set, same family as the eat and drink ones.
         ///
         /// A separate entry rather than reusing the drink loop, because the two look nothing
@@ -240,6 +252,29 @@ namespace BareMinimum.Food
 
                 ReadAnim(doc["animations"]["eat"], Eat);
                 ReadAnim(doc["animations"]["drink"], Sip);
+
+                Lines.Clear();
+
+                var speech = doc["speech"];
+
+                foreach (var key in speech.Keys)
+                {
+                    // _comment is documentation, not a set of things to say. Every json in
+                    // this mod carries its own explanation inside itself, and a reader that
+                    // does not skip those keys loads the manual as content.
+                    if (key.StartsWith("_")) continue;
+
+                    var node = speech[key];
+                    var list = new System.Collections.Generic.List<string>();
+
+                    for (var i = 0; i < node.Count; i++)
+                    {
+                        var name = node[i].AsString("");
+                        if (name.Length > 0) list.Add(name);
+                    }
+
+                    if (list.Count > 0) Lines[key] = list.ToArray();
+                }
                 ReadAnim(doc["animations"]["smoke"], Smoke);
 
                 if (_items.Count == 0)

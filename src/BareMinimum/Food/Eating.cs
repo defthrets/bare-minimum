@@ -57,10 +57,14 @@ namespace BareMinimum.Food
         /// <summary>When to swap hands between the food and the cup. Zero when not a combo.</summary>
         private int _swapAt;
 
-        public Eating(Catalogue menu, Needs.Needs needs)
+        /// <summary>What he says about it. Never null; silent when switched off.</summary>
+        private readonly Speech _speech;
+
+        public Eating(Catalogue menu, Needs.Needs needs, Speech speech)
         {
             _menu = menu;
             _needs = needs;
+            _speech = speech;
         }
 
         /// <summary>True while something is being eaten. Stops a second one being started.</summary>
@@ -128,6 +132,10 @@ namespace BareMinimum.Food
             // A meal at the wheel runs on its own clock: you pick at it between junctions
             // rather than putting it away in four seconds at a serving window.
             var seconds = driving && item.VehicleSeconds > 0f ? item.VehicleSeconds : item.Seconds;
+
+            // BEFORE THE PROP AND THE ANIMATION, so the line lands while his hands are
+            // still empty. Said after, he is thanking the cashier around a mouthful.
+            _speech.Say(item.Smoke ? "smoke" : item.Booze > 0f ? "booze" : "buy");
 
             _item = item;
             _animStarted = false;

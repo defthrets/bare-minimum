@@ -2020,5 +2020,34 @@
       "clip": "loop_bottle",
       "hand": "left"
     }
+  },
+  "speech": {
+    "_comment": [
+      "What the player says when he buys something, using THE GAME'S OWN ambient",
+      "speech bank -- so it comes out in whichever character you are playing, in",
+      "their own voice, with no audio shipped by this mod.",
+      "",
+      "A NAME THAT IS NOT IN THE BANK PLAYS NOTHING AND REPORTS NOTHING. There is no",
+      "validating these the way the model lists are validated; the failure is silent",
+      "by nature. To test one: set [Speech] ChancePercent = 100 and GapSeconds = 5 in",
+      "the ini, set LogLevel = Debug, buy something, and look for 'Said <name>' in",
+      "the log. The line being logged only means it was asked for -- if you hear",
+      "nothing, the name is wrong.",
+      "",
+      "GENERIC_THANKS is the safe one and is listed twice on purpose, so it comes up",
+      "more often than the others."
+    ],
+    "buy": [
+      "GENERIC_THANKS",
+      "GENERIC_THANKS",
+      "GENERIC_HOWS_IT_GOING"
+    ],
+    "booze": [
+      "GENERIC_THANKS",
+      "GENERIC_YES"
+    ],
+    "smoke": [
+      "GENERIC_THANKS"
+    ]
   }
 }

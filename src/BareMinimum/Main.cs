@@ -41,6 +41,9 @@ namespace BareMinimum
 
         /// <summary>The shops' voice on Hoodrich's feed. Dormant when Hoodrich is absent.</summary>
         private readonly Social.Socials _socials;
+
+        /// <summary>What the player says over a purchase. Silent when switched off.</summary>
+        private readonly Speech _speech;
         private readonly Shop _shop;
         private readonly SettingsPanel _settings;
         private readonly Gauge _gauge;
@@ -59,7 +62,14 @@ namespace BareMinimum
             _sleeping = new Sleeping(_cfg, _needs, _beds);
 
             _catalogue = new Catalogue(_cfg);
-            _eating = new Eating(_catalogue, _needs);
+
+            // The catalogue reads the lines out of foods.json; Speech decides when any of
+            // them is worth saying. Handed over AFTER the catalogue has loaded, or the sets
+            // are copied while still empty.
+            _speech = new Speech(_cfg);
+            _speech.Load(_catalogue.Lines);
+
+            _eating = new Eating(_catalogue, _needs, _speech);
             _counters = new Counters();
             _socials = new Social.Socials(_cfg);
             _socials.Load();

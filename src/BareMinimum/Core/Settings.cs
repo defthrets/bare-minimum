@@ -243,6 +243,28 @@ namespace BareMinimum.Core
         /// </summary>
         public string[] SuppressScripts = { "ob_cashregister" };
 
+        // ---- Speech ----------------------------------------------------------
+
+        /// <summary>
+        /// Whether the player says anything when he buys something.
+        ///
+        /// The game's own ambient speech bank, in whichever character's voice you happen to
+        /// be -- so it is a Franklin line for Franklin and a Trevor line for Trevor, which
+        /// is more in character than anything written here could be.
+        /// </summary>
+        public bool SpeechEnabled = true;
+
+        /// <summary>Percent chance a purchase actually gets a line out of him.</summary>
+        public int SpeechChance = 45;
+
+        /// <summary>
+        /// Shortest gap between two lines, in real seconds.
+        ///
+        /// A character who thanks the cashier every single time has a tic. The gap is what
+        /// keeps it feeling like a person rather than a trigger being pulled.
+        /// </summary>
+        public int SpeechGapSeconds = 45;
+
         // ---- Social ----------------------------------------------------------
 
         /// <summary>
@@ -498,6 +520,10 @@ namespace BareMinimum.Core
                 // behaviour somebody typing that would expect.
                 cfg.SuppressScripts = Split(ini.GetString("Counters", "SuppressScripts",
                                                           string.Join(",", cfg.SuppressScripts)));
+
+                cfg.SpeechEnabled = ini.GetBool("Speech", "Enabled", cfg.SpeechEnabled);
+                cfg.SpeechChance = ini.GetInt("Speech", "ChancePercent", cfg.SpeechChance);
+                cfg.SpeechGapSeconds = ini.GetInt("Speech", "GapSeconds", cfg.SpeechGapSeconds);
 
                 cfg.SocialEnabled = ini.GetBool("Social", "Enabled", cfg.SocialEnabled);
                 cfg.SocialChance = ini.GetInt("Social", "ChancePercent", cfg.SocialChance);
