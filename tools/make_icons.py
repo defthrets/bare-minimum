@@ -154,6 +154,22 @@ APPLE_TOP = 70.0
 APPLE_BOTTOM = 236.0
 APPLE_DIP = 24.0                # how far the crown sinks between the shoulders
 
+# A final squash, applied to the finished fruit before the rim goes on.
+#
+# WHY A TRANSFORM AND NOT NEW NUMBERS. The profile, the four bite positions, the two core
+# ellipses and the pips are all absolute coordinates tuned against each other, and the
+# order of the five stages is asserted by pixel count in tools/check_stages.py. Editing the
+# geometry to change the proportions means re-tuning all of it and re-proving the order;
+# scaling the finished shape keeps every one of those relationships exactly as it was.
+#
+# BEFORE THE OUTLINE, which is the other half of why it goes here rather than in save():
+# squashing an image that already has a 13-unit rim gives it a 13-by-11 one, and an
+# outline that is thinner on the top and bottom than the sides is the first thing that
+# looks wrong about an icon.
+APPLE_SQUASH_Y = 0.88           # shorter
+APPLE_SQUASH_X = 1.05           # and a little wider with it
+APPLE_PIVOT = 153.0             # the fruit's own middle, so it squashes in place
+
 APPLE_PROFILE = [
     (0.00, 46.0),
     (0.10, 68.0),
@@ -309,7 +325,26 @@ def apple(stage):
 
     img.alpha_composite(body)
     _stem_and_leaf(d, img)
-    return img
+
+    return _squash(img, APPLE_SQUASH_X, APPLE_SQUASH_Y, 128.0, APPLE_PIVOT)
+
+
+def _squash(img, sx, sy, px, py):
+    """Scales an image about a point, on the same canvas."""
+    if sx == 1.0 and sy == 1.0:
+        return img
+
+    w, h = img.size
+    scaled = img.resize((max(1, int(round(w * sx))), max(1, int(round(h * sy)))),
+                        Image.LANCZOS)
+
+    out = Image.new("RGBA", img.size, CLEAR)
+
+    # The pivot has to land back on itself, or the fruit walks up the canvas as the
+    # squash gets stronger and the stem ends up off the top.
+    out.alpha_composite(scaled, (int(round(s(px) - s(px) * sx)),
+                                 int(round(s(py) - s(py) * sy))))
+    return out
 
 
 # ===========================================================================
