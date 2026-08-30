@@ -43,12 +43,15 @@
     "Places noted but NOT built yet. The loader only reads \"vendors\", so anything here is",
     "inert -- it is a parking space, not a disabled entry.",
     "",
-    "  Liquor store  x 98.832  y -1308.740  z 29.274  heading 296.627",
-    "                Noted 2026-08-30. Needs deciding what it sells: beer and spirits are",
-    "                drinks, but this mod has no drunk mechanic, and the sleep effects",
-    "                already use the drunk walk and camera -- so alcohol here would either",
-    "                do nothing or collide with being exhausted. Worth settling that before",
-    "                writing the items."
+    "  Liquor store 1  x 98.832  y -1308.740  z 29.274  heading 296.627",
+    "  Liquor store 2  x 170.355  y -1336.946  z 29.293  heading 95.355",
+    "                  Mount Whiskey on the door, Debonaire in the window.",
+    "",
+    "  Both noted 2026-08-30. Needs deciding what they sell: beer and spirits are",
+    "  drinks, but this mod has no drunk mechanic, and the sleep effects already use",
+    "  the drunk walk and camera -- so alcohol here would either do nothing or",
+    "  collide with being exhausted. Worth settling that before writing any items.",
+    ""
   ],
 
   "vendors": [
