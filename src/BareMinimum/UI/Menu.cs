@@ -23,6 +23,18 @@ namespace BareMinimum.UI
         /// <summary>A greyed row can be selected and read, but not activated.</summary>
         public bool Enabled = true;
 
+        /// <summary>
+        /// A picture for this row, by FILE NAME rather than by Icon.
+        ///
+        /// A name, because an Icon owns a texture handle and the rows are rebuilt every time
+        /// the selection moves -- see IconCache. A row holding its own Icon would leak one
+        /// handle per row per keypress.
+        /// </summary>
+        public string IconFile = "";
+
+        /// <summary>What colour to draw it. The products are white art, tinted per item.</summary>
+        public Color IconTint = Color.FromArgb(255, 235, 235, 240);
+
         /// <summary>Whatever the owner needs back when this row is chosen.</summary>
         public object Tag;
     }
@@ -49,11 +61,18 @@ namespace BareMinimum.UI
 
         private const float HeaderH = 0.052f;
         private const float TabsH = 0.030f;
-        private const float RowH = 0.036f;
+        /// <summary>
+        /// Row height. Taller than a plain list needs, to leave room for a product picture.
+        ///
+        /// A menu of food with no pictures is a spreadsheet; a picture squeezed into a row
+        /// sized for text is a smudge. The rows are sized for the picture and the text sits
+        /// beside it.
+        /// </summary>
+        private const float RowH = 0.046f;
         private const float NoteH = 0.044f;
 
         /// <summary>Rows on screen at once. More than this scrolls.</summary>
-        private const int Window = 8;
+        private const int Window = 7;
 
         /// <summary>Chalet Comprime Cologne, the game's own block font.</summary>
         private const int Plain = 4;
@@ -119,9 +138,38 @@ namespace BareMinimum.UI
             Sound("SELECT");
         }
 
+        /// <summary>
+        /// Until when the game's own controls stay blocked after a menu closes.
+        ///
+        /// THIS IS WHY CLOSING A SHOP DOES NOT THROW A PUNCH. The key that dismisses the menu
+        /// is still physically down on the frame after IsOpen goes false, and by then nothing
+        /// is calling Update, so nothing is disabling Attack -- the game reads the tail of that
+        /// same press as an input and Franklin swings at the cashier.
+        ///
+        /// STATIC because only one menu is ever open at a time. The codebase already leans on
+        /// that (Vendors keeps ONE menu for every shop), and a per-instance timer would leave
+        /// a gap the moment one menu closed while another was about to open.
+        /// </summary>
+        private static int _quietUntil;
+
+        /// <summary>
+        /// Keeps the block up for a few frames after any menu closes.
+        ///
+        /// Must be called EVERY TICK, from Main, not from Update: the whole point is the
+        /// frames after the menu stopped being updated.
+        /// </summary>
+        public static void Cooldown()
+        {
+            if (Game.GameTime < _quietUntil) Suppress();
+        }
+
         public void Close()
         {
             if (!IsOpen) return;
+
+            // 300ms rather than a frame or two: a key held down through a menu closing is a
+            // human holding a key, and humans hold them for about that long.
+            _quietUntil = Game.GameTime + 300;
 
             IsOpen = false;
             Activated = null;
@@ -498,11 +546,36 @@ namespace BareMinimum.UI
                 : row.Enabled ? Color.FromArgb(235, 232, 232, 238)
                               : Color.FromArgb(160, 150, 150, 158);
 
-            Hud.Text(row.Left, left + 0.010f, y + 0.007f, 0.34f, ink, Plain, false, false, !selected);
+            var textLeft = left + 0.010f;
+
+            var icon = IconCache.Get(row.IconFile);
+
+            if (icon != null && !icon.Missing)
+            {
+                var tall = RowH * 0.80f;
+                var wide = tall / Aspect();          // square on screen, not in the canvas
+
+                // A greyed row's picture greys with it, or an item you cannot afford still
+                // looks available at a glance and only the text says otherwise.
+                var tint = row.Enabled
+                    ? row.IconTint
+                    : Color.FromArgb(120, row.IconTint.R / 2 + 60,
+                                     row.IconTint.G / 2 + 60, row.IconTint.B / 2 + 60);
+
+                icon.DrawSized(textLeft + wide / 2f, y + RowH / 2f, wide, tall, tint);
+
+                textLeft += wide + 0.006f;
+            }
+
+            // Vertically centred against the row rather than pinned near its top, now that a
+            // row is half again taller than the line of text in it.
+            var textY = y + (RowH - Hud.Height(0.34f, Plain)) / 2f;
+
+            Hud.Text(row.Left, textLeft, textY, 0.34f, ink, Plain, false, false, !selected);
 
             if (string.IsNullOrEmpty(row.Right)) return;
 
-            Hud.Text(row.Right, left + PanelW - 0.010f, y + 0.007f, 0.34f, ink,
+            Hud.Text(row.Right, left + PanelW - 0.010f, textY, 0.34f, ink,
                      Plain, false, true, !selected);
         }
 
@@ -514,14 +587,65 @@ namespace BareMinimum.UI
             var row = Rows[Clamp(Index, 0, Rows.Count - 1)];
             if (string.IsNullOrEmpty(row.Note)) return;
 
-            Hud.Bar(left, y, PanelW, NoteH, Color.FromArgb(236, 12, 12, 15));
+            // WRAPPED BY HAND, over two lines. GTA's own text wrapping needs a wrap window
+            // set and then applies it to every subsequent draw call until something else
+            // changes it, which is a trap for anything drawn afterwards. Splitting on spaces
+            // and drawing two lines is local, and cannot leak into the next thing on screen.
+            var lines = Wrap(row.Note, 0.28f, PanelW - 0.020f, 2);
+
+            var height = NoteH + (lines.Count > 1 ? 0.016f : 0f);
+
+            Hud.Bar(left, y, PanelW, height, Color.FromArgb(236, 12, 12, 15));
             Hud.Bar(left, y, PanelW, 0.0018f, Color.FromArgb(190, 240, 170, 56));
 
-            Hud.Text(row.Note, left + 0.010f, y + 0.009f, 0.28f,
-                     Color.FromArgb(220, 205, 205, 212), Plain);
+            for (var i = 0; i < lines.Count; i++)
+            {
+                Hud.Text(lines[i], left + 0.010f, y + 0.009f + i * 0.016f, 0.28f,
+                         Color.FromArgb(220, 205, 205, 212), Plain);
+            }
         }
 
         // ======================================================================
+
+        /// <summary>
+        /// Splits text into at most `max` lines that each fit a width.
+        ///
+        /// Measured with Draw.Width rather than counted in characters, because the font is
+        /// proportional and "WWW" is three times the width of "iii". Anything past the last
+        /// line is dropped with an ellipsis rather than silently cut mid-word.
+        /// </summary>
+        private static List<string> Wrap(string text, float scale, float width, int max)
+        {
+            var lines = new List<string>();
+            if (string.IsNullOrEmpty(text)) return lines;
+
+            var current = "";
+
+            foreach (var word in text.Split(' '))
+            {
+                var candidate = current.Length == 0 ? word : current + " " + word;
+
+                if (Hud.Width(candidate, scale, Plain) <= width)
+                {
+                    current = candidate;
+                    continue;
+                }
+
+                if (current.Length > 0) lines.Add(current);
+
+                if (lines.Count >= max)
+                {
+                    lines[max - 1] = lines[max - 1] + "...";
+                    return lines;
+                }
+
+                current = word;
+            }
+
+            if (current.Length > 0 && lines.Count < max) lines.Add(current);
+
+            return lines;
+        }
 
         private static int Clamp(int v, int lo, int hi)
         {

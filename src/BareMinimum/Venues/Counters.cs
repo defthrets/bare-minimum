@@ -15,7 +15,13 @@ namespace BareMinimum.Venues
         /// <summary>A shop till: the full menu.</summary>
         Till,
 
-        /// <summary>A vending machine: drinks and snacks only.</summary>
+        /// <summary>
+        /// A vending machine. NOT USED -- machines are left vanilla, deliberately.
+        ///
+        /// Kept in the enum rather than deleted so the shape of Nearest() still reads as "one
+        /// of several kinds of counter", and so that turning them back on is uncommenting a
+        /// block rather than reconstructing a concept.
+        /// </summary>
         Machine
     }
 
@@ -53,25 +59,15 @@ namespace BareMinimum.Venues
             "prop_cashregister_01"
         };
 
-        /// <summary>
-        /// Vending machines: fizzy drinks, water, coffee and snacks.
-        ///
-        /// Kept apart from the tills because they sell a DIFFERENT menu -- there is no hot food
-        /// in a drinks machine, and offering a club sandwich out of one would be silly.
-        /// </summary>
-        private static readonly string[] MachineModels =
-        {
-            "prop_vend_soda_01",
-            "prop_vend_soda_02",
-            "prop_vend_water_01",
-            "prop_vend_coffe_01",
-            "prop_vend_snak_01",
-            "prop_vend_snak_01_tu",
-            "prop_vend_fridge01"
-        };
+        // VENDING MACHINES ARE LEFT VANILLA and the model list has gone with them, rather
+        // than sitting here unused: the game already sells a drink out of one and plays its
+        // own animation, and a second purchase on top is two mods fighting over one machine.
+        //
+        // If they are ever wanted back, the models were: prop_vend_soda_01, prop_vend_soda_02,
+        // prop_vend_water_01, prop_vend_coffe_01, prop_vend_snak_01, prop_vend_snak_01_tu,
+        // prop_vend_fridge01 -- all seven of which exist in this build.
 
         private int[] _tills;
-        private int[] _machines;
 
         private int _nextScan;
         private Counter _kind = Counter.None;
@@ -79,8 +75,6 @@ namespace BareMinimum.Venues
 
         /// <summary>How close you have to stand. A till is behind a counter, so it is generous.</summary>
         public float TillReach = 1.9f;
-
-        public float MachineReach = 1.5f;
 
         /// <summary>The prop currently being offered, or null.</summary>
         public Prop Found => _found;
@@ -136,8 +130,7 @@ namespace BareMinimum.Venues
 
             if (now < _nextScan && _found != null && _found.Exists())
             {
-                var reach = _kind == Counter.Till ? TillReach : MachineReach;
-                if (_found.Position.DistanceTo(from) <= reach) return _kind;
+                if (_found.Position.DistanceTo(from) <= TillReach) return _kind;
             }
 
             _nextScan = now + 200;
@@ -154,14 +147,13 @@ namespace BareMinimum.Venues
                     return _kind;
                 }
 
-                var machine = Closest(from, MachineReach,
-                                      Resolve(MachineModels, "Vending machines", ref _machines));
-                if (machine != null)
-                {
-                    _found = machine;
-                    _kind = Counter.Machine;
-                    return _kind;
-                }
+                // VENDING MACHINES ARE LEFT ALONE. The game already sells you a drink out of
+                // one and plays its own animation for it, and putting a second, different
+                // purchase on top of that is two mods fighting over the same machine -- ours
+                // silently doing nothing about the health the vanilla one restores.
+                //
+                // The model list below is kept because it costs nothing and the next person
+                // to want them will look for exactly this comment.
             }
             catch (Exception ex)
             {

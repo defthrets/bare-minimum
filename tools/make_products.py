@@ -375,6 +375,101 @@ def pack():
     return img
 
 
+def shake():
+    """
+    A milkshake: tall tapered cup, domed top, straw out at an angle.
+
+    THE STRAW IS THE WHOLE IDENTITY. Without it this is the coffee cup with the lid off,
+    and a shop that sells both would be showing the same picture twice.
+    """
+    img, d = canvas()
+
+    d.polygon([(s(84), s(96)), (s(172), s(96)), (s(158), s(238)), (s(98), s(238))], fill=WHITE)
+    el(d, (80, 66, 176, 122))                                    # domed top
+    rr(d, (74, 92, 182, 112), 8)                                 # rim
+    d.polygon([(s(150), s(30)), (s(168), s(36)), (s(140), s(104)), (s(126), s(100))], fill=WHITE)
+
+    return img
+
+
+def cone():
+    """An ice cream cone: two scoops and a waffle cone, with the lattice cut back out."""
+    img, d = canvas()
+
+    el(d, (74, 62, 142, 128))                                    # scoop, left
+    el(d, (116, 54, 186, 124))                                   # scoop, right
+    el(d, (92, 96, 168, 158))                                    # the pair sitting on the cone
+
+    d.polygon([(s(84), s(132)), (s(176), s(132)), (s(130), s(240))], fill=WHITE)
+
+    # The waffle, cut out rather than drawn on, so it survives the tint.
+    for i in range(-3, 5):
+        d.line([(s(70 + i * 22), s(126)), (s(126 + i * 22), s(246))], fill=CLEAR, width=s(5))
+        d.line([(s(190 - i * 22), s(126)), (s(134 - i * 22), s(246))], fill=CLEAR, width=s(5))
+
+    return img
+
+
+def donut():
+    """
+    A ring with icing drooling down one side and sprinkles punched through it.
+
+    Deliberately not the bagel. Same ring underneath, but the icing has a wavy lower edge
+    and the holes are little bars rather than round seeds, which is enough at row size.
+    """
+    img, d = canvas()
+
+    el(d, (34, 58, 222, 222))
+    el(d, (100, 118, 156, 166), CLEAR)
+
+    for i, (cx, cy, a) in enumerate(((78, 108, 40), (170, 104, -35), (128, 82, 5),
+                                     (94, 178, -25), (166, 176, 30), (128, 200, 0),
+                                     (62, 142, 80), (196, 146, -80))):
+        r = math.radians(a)
+        dx, dy = math.cos(r) * 11, math.sin(r) * 11
+        d.line([(s(cx - dx), s(cy - dy)), (s(cx + dx), s(cy + dy))], fill=CLEAR, width=s(7))
+
+    return img
+
+
+def slice():
+    """A wedge of pizza: crust along the top, point at the bottom, holes for the pepperoni."""
+    img, d = canvas()
+
+    d.polygon([(s(48), s(74)), (s(208), s(74)), (s(128), s(240))], fill=WHITE)
+    rr(d, (42, 52, 214, 92), 18)                                 # crust
+
+    for cx, cy, r in ((96, 122, 15), (158, 118, 14), (128, 168, 13), (110, 204, 10)):
+        el(d, (cx - r, cy - r, cx + r, cy + r), CLEAR)
+
+    return img
+
+
+def noodles():
+    """
+    A takeaway box with two chopsticks and a tangle over the rim.
+
+    The China buffet needed something that was not the chilli bowl, and the wire-handled
+    box is the one silhouette everybody reads as Chinese food without a word of text.
+    """
+    img, d = canvas()
+
+    # Chopsticks first, so the box front covers where they enter it.
+    d.polygon([(s(146), s(26)), (s(160), s(30)), (s(140), s(150)), (s(128), s(148))], fill=WHITE)
+    d.polygon([(s(176), s(34)), (s(190), s(40)), (s(152), s(152)), (s(140), s(148))], fill=WHITE)
+
+    # A tangle of noodles over the rim, drawn as arcs so it is not a solid lump.
+    for i in range(3):
+        d.arc([s(64 + i * 8), s(78 + i * 10), s(192 - i * 8), s(140 + i * 6)],
+              200, 340, fill=WHITE, width=s(9))
+
+    d.polygon([(s(62), s(110)), (s(194), s(110)), (s(170), s(240)), (s(86), s(240))], fill=WHITE)
+    rr(d, (56, 100, 200, 126), 8)                                # rim
+    rr(d, (104, 152, 152, 214), 8, CLEAR)                        # label panel
+
+    return img
+
+
 def fruit():
     """An apple. The HUD already draws one; this is the whole, unbitten shape."""
     return base.apple(4)
@@ -401,6 +496,11 @@ SHAPES = {
     "bagel": bagel,
     "pack": pack,
     "fruit": fruit,
+    "shake": shake,
+    "cone": cone,
+    "donut": donut,
+    "slice": slice,
+    "noodles": noodles,
 }
 
 

@@ -53,6 +53,20 @@ namespace BareMinimum.Core
         /// </summary>
         public float SleepHoursToEmpty = 44f;
 
+        /// <summary>
+        /// GAME hours of sleep that take you from empty to fully rested.
+        ///
+        /// SEPARATE FROM HoursToEmpty, and much smaller, because recovery is not the same rate
+        /// as decline. You drain over forty-four waking hours; you do not need forty-four hours
+        /// in bed to undo it. Sharing one number meant a six-hour night gave back six
+        /// forty-fourths -- about a seventh -- and a full night barely moved the meter, which
+        /// read as sleeping being broken rather than as sleeping being slow.
+        ///
+        /// Twelve, so two normal nights take somebody from nothing to full and one six-hour
+        /// night is worth half a meter.
+        /// </summary>
+        public float SleepHoursToFull = 12f;
+
         // ---- Effects ---------------------------------------------------------
 
         /// <summary>Below this, hunger starts to slow the player down.</summary>
@@ -211,6 +225,19 @@ namespace BareMinimum.Core
         /// </summary>
         public float OutsideSleepQuality = 1f;
 
+        /// <summary>
+        /// Game scripts to terminate while stood at one of our counters.
+        ///
+        /// EMPTY BY DEFAULT, and it has to be. Enhanced opens its own convenience-store menu
+        /// at an LTD counter, and the obvious guess for what owns it -- shop_controller --
+        /// also runs Ammu-Nation, the clothing shops and the barbers. Guessing costs three
+        /// shops to fix one menu.
+        ///
+        /// Shop.NameTheScripts logs every running script the first time a counter is used.
+        /// Once the right name is in that list, it goes here and no rebuild is needed.
+        /// </summary>
+        public string[] SuppressScripts = new string[0];
+
         // ---- Map -------------------------------------------------------------
 
         /// <summary>Whether shops get map markers at all.</summary>
@@ -344,6 +371,8 @@ namespace BareMinimum.Core
                 cfg.SleepEnabled = ini.GetBool("Sleep", "Enabled", cfg.SleepEnabled);
                 cfg.SleepHoursToEmpty = ini.GetFloat("Sleep", "HoursToEmpty",
                                                      cfg.SleepHoursToEmpty, 0.5f, 500f);
+                cfg.SleepHoursToFull = ini.GetFloat("Sleep", "HoursToFull",
+                                                    cfg.SleepHoursToFull, 0.5f, 200f);
 
                 cfg.HungerSlowAt = ini.GetFloat("Effects", "HungerSlowAt", cfg.HungerSlowAt, 0f, 1f);
                 cfg.HungerHurtAt = ini.GetFloat("Effects", "HungerHurtAt", cfg.HungerHurtAt, 0f, 1f);
@@ -400,6 +429,8 @@ namespace BareMinimum.Core
 
                 cfg.PriceMultiplier = ini.GetFloat("Money", "PriceMultiplier",
                                                    cfg.PriceMultiplier, 0f, 50f);
+
+                cfg.SuppressScripts = Split(ini.GetString("Counters", "SuppressScripts", ""));
 
                 cfg.ShowShopBlips = ini.GetBool("Map", "ShowShopBlips", cfg.ShowShopBlips);
                 cfg.ShopBlipRange = ini.GetFloat("Map", "ShopBlipRange",
@@ -474,6 +505,23 @@ namespace BareMinimum.Core
                 SleepDrunkAt = SleepTiredAt;
                 SleepTiredAt = t;
             }
+        }
+
+        /// <summary>A comma-separated ini value as a trimmed list, empties dropped.</summary>
+        private static string[] Split(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return new string[0];
+
+            var parts = text.Split(',');
+            var list = new System.Collections.Generic.List<string>();
+
+            foreach (var part in parts)
+            {
+                var s = part.Trim();
+                if (s.Length > 0) list.Add(s);
+            }
+
+            return list.ToArray();
         }
 
         private static LogLevel ParseLevel(string text, LogLevel fallback)

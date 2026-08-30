@@ -43,6 +43,35 @@ namespace BareMinimum.Venues
         /// </summary>
         public bool FromVehicle;
 
+        /// <summary>
+        /// Open a shop MENU rather than the one-key prompt.
+        ///
+        /// The split is between a stall and a shop. A hot dog stand sells hot dogs: a menu in
+        /// front of one item is ceremony, and the prompt was asked for precisely to avoid it.
+        /// A liquor store has a shelf, and picking off a shelf is what a menu is for.
+        /// </summary>
+        public bool UseMenu;
+
+        /// <summary>
+        /// What fraction of the marked price this place actually charges. 1 is full price.
+        ///
+        /// FOR THE SHOP THAT IS CLOSING DOWN. Its windows are papered with BIG SALE, FINAL
+        /// DAY and 70% OFF, and a shop that says 70% off while charging the same as the one
+        /// down the road is a sign, not a shop. Putting it on the VENDOR rather than the item
+        /// is what lets the same bag of crisps be three dollars everywhere and ninety cents
+        /// here, without a second copy of every snack in the catalogue.
+        /// </summary>
+        public float Discount = 1f;
+
+        /// <summary>What this vendor charges for an item. Never less than a dollar.</summary>
+        public int PriceOf(Item item)
+        {
+            if (item == null) return 0;
+            if (Discount >= 0.999f) return item.Price;
+
+            return Math.Max(1, (int)Math.Round(item.Price * Discount));
+        }
+
         public string[] PropModels = new string[0];
         public string[] PedModels = new string[0];
         public string Scenario = "WORLD_HUMAN_STAND_IMPATIENT";
@@ -200,8 +229,25 @@ namespace BareMinimum.Venues
         private readonly Core.Settings _cfg;
         private readonly Catalogue _menu;
         private readonly Eating _eating;
+        private readonly Needs.Needs _needs;
 
         private readonly List<Vendor> _vendors = new List<Vendor>();
+
+        /// <summary>
+        /// ONE menu for every shop vendor, not one each.
+        ///
+        /// Only one can be open at a time -- you cannot stand at two counters -- so a menu per
+        /// vendor would be twenty-odd idle objects and twenty-odd chances for two of them to
+        /// disagree about how a shop looks. It is refilled when a shop is opened.
+        /// </summary>
+        private readonly UI.Menu _ui = new UI.Menu
+        {
+            TitleLeft = new UI.Icon("p_burger.png"),
+            TitleRight = new UI.Icon("p_cup.png")
+        };
+
+        /// <summary>The vendor whose shelf is currently on screen.</summary>
+        private Vendor _shopping;
 
         /// <summary>The vendor currently within reach, if any.</summary>
         private Vendor _at;
@@ -218,11 +264,12 @@ namespace BareMinimum.Venues
         private bool _keyWasDown;
         private float _sinceScan;
 
-        public Vendors(Core.Settings cfg, Catalogue menu, Eating eating)
+        public Vendors(Core.Settings cfg, Catalogue menu, Eating eating, Needs.Needs needs)
         {
             _cfg = cfg;
             _menu = menu;
             _eating = eating;
+            _needs = needs;
 
             Load();
         }
@@ -230,7 +277,10 @@ namespace BareMinimum.Venues
         public int Count => _vendors.Count;
 
         /// <summary>True while a stand is offering, so nothing else reads the interact key.</summary>
-        public bool Offering => _at != null;
+        public bool Offering => _at != null || _ui.IsOpen;
+
+        /// <summary>True while a shop's shelf is on screen.</summary>
+        public bool MenuOpen => _ui.IsOpen;
 
         // ======================================================================
         // Loading
@@ -263,6 +313,8 @@ namespace BareMinimum.Venues
                         SpawnRange = node["spawnRange"].AsFloat(90f),
                         Reach = node["reach"].AsFloat(2.4f),
                         FromVehicle = node["fromVehicle"].AsBool(false),
+                        UseMenu = node["ui"].AsBool(false),
+                        Discount = Clamp(node["discount"].AsFloat(1f), 0.05f, 1f),
                         Scenario = node["scenario"].AsString("WORLD_HUMAN_STAND_IMPATIENT"),
                         AnimDict = node["anim"]["dict"].AsString(""),
                         AnimClip = node["anim"]["clip"].AsString(""),
@@ -411,10 +463,12 @@ namespace BareMinimum.Venues
 
             try
             {
-                if (suspended) { _at = null; return; }
+                if (suspended) { _at = null; Close(); return; }
 
                 var me = Game.Player.Character;
-                if (me == null || !me.Exists() || me.IsDead) { _at = null; return; }
+                if (me == null || !me.Exists() || me.IsDead) { _at = null; Close(); return; }
+
+                if (_ui.IsOpen) { Shelf(me); return; }
 
                 // Spawning is checked on a clock, not every frame. Nothing here can change
                 // faster than a player can walk, and each check is a distance per vendor.
@@ -1013,7 +1067,8 @@ namespace BareMinimum.Venues
             _eating.Preload(item);
 
             var money = Money();
-            var afford = money >= item.Price;
+            var price = here.PriceOf(item);
+            var afford = money >= price;
 
             // What it is CALLED here, which is not always what the item is called. The
             // catalogue's taco is a branded thing from a shop shelf; at a street window it is
@@ -1026,9 +1081,16 @@ namespace BareMinimum.Venues
             // instruction, and it is the only place where ~INPUT_CONTEXT~ resolves to the
             // button they have actually got bound -- so it reads E on a keyboard and the
             // right glyph on a pad, without this code knowing which they are using.
-            Hud.Help(afford
-                ? "Press ~INPUT_CONTEXT~ to buy a " + what + ".  ~c~$" + item.Price
-                : "~r~You cannot afford a " + what + ".~s~  ~c~$" + item.Price);
+            if (here.UseMenu)
+            {
+                Hud.Help("Press ~INPUT_CONTEXT~ to shop at ~b~" + here.Name + "~s~.");
+            }
+            else
+            {
+                Hud.Help(afford
+                    ? "Press ~INPUT_CONTEXT~ to buy a " + what + ".  ~c~$" + price
+                    : "~r~You cannot afford a " + what + ".~s~  ~c~$" + price);
+            }
 
             // THE HORN. In a vehicle the interact key is also the horn, so ordering at a
             // drive-through would blare at the window every time -- and holding the key would
@@ -1040,10 +1102,134 @@ namespace BareMinimum.Venues
                 catch { /* nothing to do about it */ }
             }
 
-            if (!afford || !Pressed()) return;
+            if (!Pressed()) return;
 
             Hud.ClearHelp();
-            Buy(here, item);
+
+
+            if (here.UseMenu) { OpenShelf(here); return; }
+
+            if (afford) Buy(here, item);
+        }
+
+        // ======================================================================
+        // The shelf
+        // ======================================================================
+
+        /// <summary>Opens a shop's shelf: every item it stocks, in one list.</summary>
+        private void OpenShelf(Vendor v)
+        {
+            _shopping = v;
+
+            _ui.Title = v.Name.ToUpperInvariant();
+            _ui.Tabs.Clear();
+            _ui.Open();
+
+            Refill();
+        }
+
+        /// <summary>
+        /// Rebuilds the shelf.
+        ///
+        /// EVERYTHING THE VENDOR STOCKS, not just what the hour allows. The hours pick what a
+        /// one-key stall is selling today; a shop with a menu shows its shelf, and a bagel you
+        /// can see but not buy before eleven would just be a row that does nothing.
+        /// </summary>
+        private void Refill()
+        {
+            _ui.Rows.Clear();
+
+            if (_shopping == null) return;
+
+            var money = Money();
+
+            var hour = 12;
+            try { hour = GameClock.Hour; }
+            catch { /* the shelf is worth more than the hours */ }
+
+            foreach (var offer in _shopping.Offers)
+            {
+                var item = Find(offer.Id);
+                if (item == null) continue;
+
+                // OUT-OF-HOURS ITEMS ARE SHOWN AND GREYED, not dropped. A lunch menu that
+                // simply is not in the list at midnight teaches the player nothing; one that
+                // is there saying "11am to 3pm" tells them to come back.
+                var closed = offer.AtHour(hour) ? null : "Only " + Window(offer) + ".";
+
+                _ui.Rows.Add(UI.Stock.RowFor(item, money, _shopping.PriceOf(item), closed));
+            }
+        }
+
+        /// <summary>Runs the shelf while it is up.</summary>
+        private void Shelf(Ped me)
+        {
+            _ui.Update();
+
+            if (_ui.JustClosed) { _shopping = null; return; }
+
+            // Walking away shuts it, or you could buy from a shelf across the street.
+            if (_shopping == null || !InReach(me, _shopping)) { Close(); return; }
+
+            _ui.Subtitle = UI.Stock.Header(Money(), _needs.Hunger.Value,
+                                           _needs.Sleep.Value, _needs.Drunk);
+
+            if (_ui.Rows.Count > 0)
+            {
+                var at = _ui.Index;
+                if (at >= 0 && at < _ui.Rows.Count) _eating.Preload(_ui.Rows[at].Tag as Item);
+            }
+
+            if (_ui.Activated != null)
+            {
+                var item = _ui.Activated.Tag as Item;
+
+                if (item != null && !_eating.Busy)
+                {
+                    Buy(_shopping, item);
+                    Close();
+                    return;
+                }
+            }
+
+            _ui.Draw();
+        }
+
+        /// <summary>An offer's hours, as somebody would say them out loud.</summary>
+        private static string Window(Offer offer)
+        {
+            return "from " + Oclock(offer.From) + " to " + Oclock(offer.To);
+        }
+
+        private static string Oclock(int hour)
+        {
+            var h = ((hour % 24) + 24) % 24;
+
+            if (h == 0) return "midnight";
+            if (h == 12) return "midday";
+
+            return (h % 12) + (h < 12 ? "am" : "pm");
+        }
+
+        private bool InReach(Ped me, Vendor v)
+        {
+            try
+            {
+                if (!v.InRange || !v.AtPost) return false;
+
+                var at = v.Stand != null && v.Stand.Exists() ? v.Stand.Position : v.Position;
+                return at.DistanceTo(me.Position) <= v.Reach + 0.6f;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void Close()
+        {
+            if (_ui.IsOpen) _ui.Close();
+            _shopping = null;
         }
 
         private Vendor Nearest(Vector3 from, bool driving)
@@ -1092,9 +1278,11 @@ namespace BareMinimum.Venues
 
         private void Buy(Vendor v, Item item)
         {
+            var price = v.PriceOf(item);
+
             // Re-checked here rather than trusted from the prompt: money can fall between the
             // frame that drew the offer and the frame the key was pressed.
-            if (Money() < item.Price)
+            if (Money() < price)
             {
                 Notify("~r~Not enough money.");
                 return;
@@ -1102,7 +1290,7 @@ namespace BareMinimum.Venues
 
             try
             {
-                Game.Player.Money = Math.Max(0, Game.Player.Money - item.Price);
+                Game.Player.Money = Math.Max(0, Game.Player.Money - price);
             }
             catch (Exception ex)
             {
@@ -1128,8 +1316,8 @@ namespace BareMinimum.Venues
 
             // Refunded rather than swallowed. Taking the money and producing nothing is the
             // one failure a shop of any kind must never have.
-            try { Game.Player.Money += item.Price; }
-            catch (Exception ex) { Log.Error("Could not refund " + item.Price, ex); }
+            try { Game.Player.Money += price; }
+            catch (Exception ex) { Log.Error("Could not refund " + price, ex); }
 
             Notify("~r~Could not eat that - refunded.");
         }
@@ -1154,6 +1342,12 @@ namespace BareMinimum.Venues
             {
                 return false;
             }
+        }
+
+        /// <summary>Keeps an ini or json number inside the range that makes sense.</summary>
+        private static float Clamp(float v, float lo, float hi)
+        {
+            return v < lo ? lo : v > hi ? hi : v;
         }
 
         private static int Money()
@@ -1203,6 +1397,8 @@ namespace BareMinimum.Venues
         /// </summary>
         public void Shutdown()
         {
+            Close();
+
             foreach (var v in _vendors)
             {
                 Despawn(v);

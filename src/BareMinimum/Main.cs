@@ -58,7 +58,7 @@ namespace BareMinimum
             _catalogue = new Catalogue(_cfg);
             _eating = new Eating(_catalogue, _needs);
             _counters = new Counters();
-            _vendors = new Vendors(_cfg, _catalogue, _eating);
+            _vendors = new Vendors(_cfg, _catalogue, _eating, _needs);
             _shop = new Shop(_cfg, _catalogue, _counters, _eating, _needs);
 
             _settings = new SettingsPanel(_cfg, _needs);
@@ -89,6 +89,10 @@ namespace BareMinimum
 
                 Greet();
 
+                // Runs before anything else and regardless of state: it is the tail end of a
+                // menu that has ALREADY closed, and its whole job is the frames after.
+                UI.Menu.Cooldown();
+
                 // THE SETTINGS MENU RUNS EVEN WHEN THE MOD IS SWITCHED OFF, and it has to:
                 // "Mod enabled" is a row inside it, so gating it behind that flag would make
                 // turning the mod off a one-way trip that could only be undone by editing the
@@ -98,7 +102,7 @@ namespace BareMinimum
                 // control-suppression cannot block it the way it blocks the game's own inputs
                 // -- without this, pressing F7 at a till draws both menus on top of each other
                 // and every arrow press drives both of them at once.
-                _settings.Update(_sleeping.Busy || _shop.IsOpen);
+                _settings.Update(_sleeping.Busy || _shop.IsOpen || _vendors.MenuOpen);
 
                 if (!_cfg.Enabled) return;
 
@@ -115,7 +119,7 @@ namespace BareMinimum
                 // A menu owns the interact key while it is up, so nothing else may read it.
                 // Without this, pressing E to buy a sandwich at a counter next to a bed would
                 // also be pressing E to go to sleep.
-                var menuOpen = _shop.IsOpen || _settings.IsOpen;
+                var menuOpen = _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen;
 
                 if (!menuOpen && !_vendors.Offering) _sleeping.Update();
 

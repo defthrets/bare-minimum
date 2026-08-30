@@ -344,9 +344,12 @@ namespace BareMinimum.Needs
 
             if (_cfg.SleepEnabled)
             {
-                // Proportional to the hours, then scaled by how good a bed it was. A car
-                // sleep is both shorter AND worse, which is what stops it being a free bed.
-                var gained = (gameHours / _cfg.SleepHoursToEmpty) * restoreFraction;
+                // AGAINST HoursToFull, NOT HoursToEmpty. Recovery is not the reverse of
+                // decline at the same rate: you wear down over forty-four waking hours and
+                // recover over about twelve in bed. Dividing by the drain figure made a
+                // six-hour night worth a seventh of a meter, which reads as sleeping being
+                // broken rather than as sleeping being slow.
+                var gained = (gameHours / _cfg.SleepHoursToFull) * restoreFraction;
                 Sleep.Restore(gained);
             }
 

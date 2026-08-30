@@ -41,6 +41,29 @@ namespace BareMinimum.Food
         public bool InShop = true;
 
         /// <summary>
+        /// Which product shape represents it in a shop: "can", "burger", "pack" and so on.
+        ///
+        /// A SHAPE NAME, not a file per item. Eighteen shapes serve thirty-odd items because a
+        /// can is a can whether it holds eCola or Sprunk; the tint and the name do the rest.
+        /// See tools/make_products.py.
+        /// </summary>
+        public string Icon = "";
+
+        /// <summary>What colour to draw that shape. The art is white; this is the product.</summary>
+        public System.Drawing.Color Tint = System.Drawing.Color.FromArgb(255, 235, 235, 240);
+
+        /// <summary>
+        /// The line the shop shows about it. Where the character lives.
+        ///
+        /// Somebody reading a list of eight snacks wants a reason to pick one, and a hunger
+        /// figure is not a reason. Written per item in foods.json.
+        /// </summary>
+        public string Desc = "";
+
+        /// <summary>Something you smoke rather than eat or drink. Cigarettes.</summary>
+        public bool Smoke;
+
+        /// <summary>
         /// The model held while consuming it: the one that was found to exist.
         ///
         /// Chosen from Props by CheckProps once the game is running. Empty means this build
@@ -127,6 +150,15 @@ namespace BareMinimum.Food
         public readonly AnimRef Sip = new AnimRef { Dict = "mp_player_intdrink",
                                                     Clip = "loop_bottle" };
 
+        /// <summary>
+        /// Smoking. The MP interaction set, same family as the eat and drink ones.
+        ///
+        /// A separate entry rather than reusing the drink loop, because the two look nothing
+        /// alike and a cigarette drunk like a bottle would be worse than no animation at all.
+        /// </summary>
+        public readonly AnimRef Smoke = new AnimRef { Dict = "mp_player_intsmoke",
+                                                      Clip = "mp_player_int_smoke" };
+
         public IList<Item> Items => _items;
         public IList<string> Categories => _categories;
         public int Count => _items.Count;
@@ -178,6 +210,10 @@ namespace BareMinimum.Food
                         Drink = node["drink"].AsBool(false),
                         Booze = node["booze"].AsFloat(0f),
                         InShop = node["shop"].AsBool(true),
+                        Icon = node["icon"].AsString(""),
+                        Tint = Colour(node["tint"].AsString("")),
+                        Desc = node["desc"].AsString(""),
+                        Smoke = node["smoke"].AsBool(false),
                         Props = PropNames(node["prop"]),
                         Seconds = node["seconds"].AsFloat(4f),
                         VehicleSeconds = node["vehicleSeconds"].AsFloat(0f),
@@ -204,6 +240,7 @@ namespace BareMinimum.Food
 
                 ReadAnim(doc["animations"]["eat"], Eat);
                 ReadAnim(doc["animations"]["drink"], Sip);
+                ReadAnim(doc["animations"]["smoke"], Smoke);
 
                 if (_items.Count == 0)
                 {
@@ -237,6 +274,36 @@ namespace BareMinimum.Food
         /// Both spellings are allowed so the file stays readable: most items want one name and
         /// should not have to be written as a one-element array to say so.
         /// </summary>
+        /// <summary>
+        /// Reads a "#rrggbb" tint, falling back to near-white.
+        ///
+        /// Hand-parsed rather than via ColorTranslator: that lives in System.Drawing's
+        /// Windows-only half, and this assembly references System.Drawing for Color and
+        /// nothing else. Six hex digits is not worth the risk of a type that may not resolve.
+        /// </summary>
+        private static System.Drawing.Color Colour(string hex)
+        {
+            var fallback = System.Drawing.Color.FromArgb(255, 235, 235, 240);
+
+            if (string.IsNullOrEmpty(hex)) return fallback;
+
+            hex = hex.TrimStart('#').Trim();
+            if (hex.Length != 6) return fallback;
+
+            try
+            {
+                var r = Convert.ToInt32(hex.Substring(0, 2), 16);
+                var g = Convert.ToInt32(hex.Substring(2, 2), 16);
+                var b = Convert.ToInt32(hex.Substring(4, 2), 16);
+
+                return System.Drawing.Color.FromArgb(255, r, g, b);
+            }
+            catch
+            {
+                return fallback;
+            }
+        }
+
         private static string[] PropNames(Json node)
         {
             if (node == null || node.IsNull) return new string[0];

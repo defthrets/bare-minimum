@@ -204,7 +204,13 @@ namespace BareMinimum.Food
             {
                 var msg = "~g~" + item.Name + "~s~.  ";
 
-                if (item.Booze > 0f)
+                if (item.Smoke)
+                {
+                    // A cigarette has no stomach reading to give and no drunk state to
+                    // report. It says what it did, which is very little, on purpose.
+                    msg += "That is better.";
+                }
+                else if (item.Booze > 0f)
                 {
                     msg += Tipsy();
                 }
@@ -305,7 +311,9 @@ namespace BareMinimum.Food
                 _held = World.CreateProp(model, me.Position, false, false);
                 if (_held == null || !_held.Exists()) { _held = null; return; }
 
-                var anim = (item.Drink || drinking) ? _menu.Sip : _menu.Eat;
+                var anim = item.Smoke ? _menu.Smoke
+                         : (item.Drink || drinking) ? _menu.Sip
+                         : _menu.Eat;
 
                 var bone = Function.Call<int>(Hash.GET_PED_BONE_INDEX, me.Handle,
                                               anim.LeftHanded ? LeftHandBone : RightHandBone);
@@ -351,7 +359,10 @@ namespace BareMinimum.Food
         private void Animate(Ped me, Item item, bool drinking)
         {
             // A combo drinks from a cup on its drink stretch; a plain drink always drinks.
-            var anim = (item.Drink || drinking) ? _menu.Sip : _menu.Eat;
+            var anim = item.Smoke ? _menu.Smoke
+                     : (item.Drink || drinking) ? _menu.Sip
+                     : _menu.Eat;
+
             if (!anim.Valid) return;
 
             try
@@ -403,6 +414,8 @@ namespace BareMinimum.Food
                                       _menu.Eat.Dict, _menu.Eat.Clip, 3f);
                         Function.Call(Hash.STOP_ANIM_TASK, me.Handle,
                                       _menu.Sip.Dict, _menu.Sip.Clip, 3f);
+                        Function.Call(Hash.STOP_ANIM_TASK, me.Handle,
+                                      _menu.Smoke.Dict, _menu.Smoke.Clip, 3f);
                     }
                 }
                 catch

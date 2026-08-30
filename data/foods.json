@@ -25,13 +25,18 @@
     "          for anything that comes with a drink.",
     "  drinkProp  the cup, for a combo. Same single-or-list rule as prop.",
     "",
-    "Categories are the tabs across the top of the counter menu, in this order."
+    "Categories are the tabs across the top of the counter menu, in this order.",
+    "  icon    which product shape shows in a shop. See tools/make_products.py.",
+    "  tint    what colour to draw that shape, #rrggbb. The art is white.",
+    "  desc    the line the shop shows. Where the character lives.",
+    "  smoke   something you smoke rather than eat or drink."
   ],
-
   "version": 1,
-
-  "categories": ["Food", "Snacks", "Drinks"],
-
+  "categories": [
+    "Food",
+    "Snacks",
+    "Drinks"
+  ],
   "items": [
     {
       "id": "sandwich",
@@ -40,16 +45,26 @@
       "price": 8,
       "hunger": 0.42,
       "prop": "prop_sandwich_01",
-      "seconds": 4.5
+      "seconds": 4.5,
+      "icon": "sandwich",
+      "tint": "#e8d9a8",
+      "desc": "Cut into triangles by somebody who did not care."
     },
     {
       "id": "burger",
       "name": "Bleeder Burger",
       "category": "Food",
       "price": 10,
-      "hunger": 0.50,
-      "prop": ["prop_cs_burger_01", "prop_food_bs_burger1", "ng_proc_food_burg01a"],
-      "seconds": 5.0
+      "hunger": 0.5,
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burger1",
+        "ng_proc_food_burg01a"
+      ],
+      "seconds": 5.0,
+      "icon": "burger",
+      "tint": "#e2a355",
+      "desc": "Bleeds a bit. That is the name, and the experience."
     },
     {
       "id": "hotdog",
@@ -57,8 +72,16 @@
       "category": "Food",
       "price": 6,
       "hunger": 0.34,
-      "prop": ["prop_cs_hotdog_01", "prop_hotdog_01", "prop_food_bs_hotdog", "prop_cs_burger_01"],
-      "seconds": 4.0
+      "prop": [
+        "prop_cs_hotdog_01",
+        "prop_hotdog_01",
+        "prop_food_bs_hotdog",
+        "prop_cs_burger_01"
+      ],
+      "seconds": 4.0,
+      "icon": "hotdog",
+      "tint": "#e6b45c",
+      "desc": "Ninety per cent mystery. Ten per cent mustard."
     },
     {
       "id": "pie",
@@ -67,7 +90,10 @@
       "price": 7,
       "hunger": 0.36,
       "prop": "prop_cs_burger_01",
-      "seconds": 4.0
+      "seconds": 4.0,
+      "icon": "plate",
+      "tint": "#d8a765",
+      "desc": "Meat is on the label. That is as far as the label goes."
     },
     {
       "id": "noodles",
@@ -76,7 +102,10 @@
       "price": 4,
       "hunger": 0.28,
       "prop": "prop_cs_burger_01",
-      "seconds": 4.5
+      "seconds": 4.5,
+      "icon": "bowl",
+      "tint": "#e4cf8f",
+      "desc": "Add water and low expectations."
     },
     {
       "id": "taco",
@@ -84,10 +113,18 @@
       "category": "Food",
       "price": 7,
       "hunger": 0.33,
-      "prop": ["prop_taco_01", "prop_taco_02", "ng_proc_food_taco1", "prop_food_bs_taco", "prop_cs_burger_01"],
-      "seconds": 4.0
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02",
+        "ng_proc_food_taco1",
+        "prop_food_bs_taco",
+        "prop_cs_burger_01"
+      ],
+      "seconds": 4.0,
+      "icon": "taco",
+      "tint": "#e0a24e",
+      "desc": "Branded, shrink-wrapped and faintly warm."
     },
-
     {
       "_note": "Bishop's Chicken. Sold at their door only, never off a shop shelf.",
       "id": "old_yeller",
@@ -96,10 +133,17 @@
       "price": 9,
       "hunger": 0.46,
       "shop": false,
-      "prop": ["prop_cs_burger_01", "prop_food_bs_burger1", "ng_proc_food_burg01a", "prop_burger_01"],
-      "seconds": 5.0
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burger1",
+        "ng_proc_food_burg01a",
+        "prop_burger_01"
+      ],
+      "seconds": 5.0,
+      "icon": "burger",
+      "tint": "#e5b352",
+      "desc": "Bishop's finest. Named after a dog. Do not think about it."
     },
-
     {
       "_note": "La Vaca Loca's drive-through board: pastrami sandwich, fries and a med soda.",
       "_note2": "One combo, so the soda's small caffeine lift comes with it.",
@@ -107,16 +151,29 @@
       "name": "Pastrami Combo",
       "category": "Food",
       "price": 12,
-      "hunger": 0.60,
+      "hunger": 0.6,
       "wake": 0.04,
       "shop": false,
-      "prop": ["prop_sandwich_01", "prop_cs_sandwich_01", "prop_food_bs_burger1", "prop_cs_burger_01"],
-      "drinkProp": ["prop_cs_bs_cup", "prop_food_bs_cup", "prop_plastic_cup_02", "prop_ecola_can", "prop_ld_flow_bottle"],
+      "prop": [
+        "prop_sandwich_01",
+        "prop_cs_sandwich_01",
+        "prop_food_bs_burger1",
+        "prop_cs_burger_01"
+      ],
+      "drinkProp": [
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup",
+        "prop_plastic_cup_02",
+        "prop_ecola_can",
+        "prop_ld_flow_bottle"
+      ],
       "combo": true,
       "seconds": 5.5,
-      "vehicleSeconds": 60
+      "vehicleSeconds": 60,
+      "icon": "sandwich",
+      "tint": "#dda06a",
+      "desc": "Sandwich, fries and a med soda. The board says so."
     },
-
     {
       "_note": "Gabrielle's Market. One of these is on the board at a time.",
       "id": "bagel",
@@ -125,8 +182,15 @@
       "price": 4,
       "hunger": 0.26,
       "shop": false,
-      "prop": ["prop_bakery_bagel", "ng_proc_food_bagel", "prop_sandwich_01"],
-      "seconds": 4.0
+      "prop": [
+        "prop_bakery_bagel",
+        "ng_proc_food_bagel",
+        "prop_sandwich_01"
+      ],
+      "seconds": 4.0,
+      "icon": "bagel",
+      "tint": "#dcb872",
+      "desc": "A bread product with a hole in it. Charged accordingly."
     },
     {
       "id": "fruit",
@@ -135,8 +199,16 @@
       "price": 3,
       "hunger": 0.18,
       "shop": false,
-      "prop": ["prop_food_bs_apple", "ng_proc_food_apple01a", "prop_orange_01", "prop_sandwich_01"],
-      "seconds": 3.5
+      "prop": [
+        "prop_food_bs_apple",
+        "ng_proc_food_apple01a",
+        "prop_orange_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 3.5,
+      "icon": "fruit",
+      "tint": "#8ec96f",
+      "desc": "Nobody has bought one of these in a while."
     },
     {
       "id": "deli_sandwich",
@@ -145,8 +217,14 @@
       "price": 9,
       "hunger": 0.48,
       "shop": false,
-      "prop": ["prop_sandwich_01", "prop_cs_sandwich_01"],
-      "seconds": 5.0
+      "prop": [
+        "prop_sandwich_01",
+        "prop_cs_sandwich_01"
+      ],
+      "seconds": 5.0,
+      "icon": "sandwich",
+      "tint": "#e2cf9c",
+      "desc": "Cut properly, by somebody who did care."
     },
     {
       "_note": "Aguila Burrito. Plain spelling: the accented A is not worth risking in the",
@@ -157,10 +235,17 @@
       "price": 8,
       "hunger": 0.44,
       "shop": false,
-      "prop": ["prop_burrito_01", "ng_proc_food_burrito", "prop_taco_01", "prop_sandwich_01"],
-      "seconds": 4.5
+      "prop": [
+        "prop_burrito_01",
+        "ng_proc_food_burrito",
+        "prop_taco_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 4.5,
+      "icon": "taco",
+      "tint": "#d99a55",
+      "desc": "Foil-wrapped and structurally ambitious."
     },
-
     {
       "_note": "Ring of Fire Chilli House. Filling, and the soda is not optional.",
       "id": "chilli",
@@ -169,13 +254,25 @@
       "price": 10,
       "hunger": 0.52,
       "shop": false,
-      "prop": ["prop_cs_bowl_01", "prop_food_bs_bowl", "prop_bowl_01", "v_res_mbowl", "prop_food_bs_chips"],
-      "drinkProp": ["prop_ld_can_01", "prop_ecola_can", "prop_ld_flow_bottle"],
+      "prop": [
+        "prop_cs_bowl_01",
+        "prop_food_bs_bowl",
+        "prop_bowl_01",
+        "v_res_mbowl",
+        "prop_food_bs_chips"
+      ],
+      "drinkProp": [
+        "prop_ld_can_01",
+        "prop_ecola_can",
+        "prop_ld_flow_bottle"
+      ],
       "combo": true,
       "seconds": 5.5,
-      "vehicleSeconds": 45
+      "vehicleSeconds": 45,
+      "icon": "bowl",
+      "tint": "#d4693f",
+      "desc": "Named Ring of Fire. They were not being coy."
     },
-
     {
       "_note": "Lucky Plucker. Sold at the door AND at the drive-through lane, so it is",
       "_note2": "set up as a combo and given a minute at the wheel.",
@@ -186,13 +283,25 @@
       "hunger": 0.55,
       "wake": 0.03,
       "shop": false,
-      "prop": ["prop_food_bs_chicken", "prop_cs_bs_chicken", "prop_food_bs_burger1", "prop_cs_burger_01"],
-      "drinkProp": ["prop_cs_bs_cup", "prop_food_bs_cup", "prop_ld_can_01", "prop_ecola_can"],
+      "prop": [
+        "prop_food_bs_chicken",
+        "prop_cs_bs_chicken",
+        "prop_food_bs_burger1",
+        "prop_cs_burger_01"
+      ],
+      "drinkProp": [
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup",
+        "prop_ld_can_01",
+        "prop_ecola_can"
+      ],
       "combo": true,
       "seconds": 5.5,
-      "vehicleSeconds": 60
+      "vehicleSeconds": 60,
+      "icon": "box",
+      "tint": "#e2a04c",
+      "desc": "A box of chicken and one small regret."
     },
-
     {
       "_note": "Cosas Baratas. Both of these are painted on the shop wall.",
       "id": "sardines",
@@ -201,8 +310,15 @@
       "price": 3,
       "hunger": 0.24,
       "shop": false,
-      "prop": ["prop_food_bs_sardines", "prop_cs_tin_can", "prop_food_bs_chips"],
-      "seconds": 4.0
+      "prop": [
+        "prop_food_bs_sardines",
+        "prop_cs_tin_can",
+        "prop_food_bs_chips"
+      ],
+      "seconds": 4.0,
+      "icon": "tin",
+      "tint": "#9fb8c4",
+      "desc": "Tinned fish, on a shelf, in the sun. Bargain."
     },
     {
       "id": "candybox",
@@ -211,10 +327,16 @@
       "price": 2,
       "hunger": 0.11,
       "shop": false,
-      "prop": ["prop_choc_meto", "prop_choc_ego", "prop_choc_pq"],
-      "seconds": 3.0
+      "prop": [
+        "prop_choc_meto",
+        "prop_choc_ego",
+        "prop_choc_pq"
+      ],
+      "seconds": 3.0,
+      "icon": "bar",
+      "tint": "#d4884f",
+      "desc": "Box of candy. The name did all the work it was going to."
     },
-
     {
       "_note": "Drink. booze is how drunk one makes you; the meter caps at 1, so the",
       "_note2": "fourth beer does less than the first. Keep buying and you get there.",
@@ -223,11 +345,19 @@
       "category": "Drinks",
       "price": 4,
       "hunger": 0.08,
-      "booze": 0.20,
+      "booze": 0.2,
       "drink": true,
       "shop": false,
-      "prop": ["prop_beer_pissh", "prop_cs_beer_bot_01", "prop_ld_can_01", "prop_ecola_can"],
-      "seconds": 4.0
+      "prop": [
+        "prop_beer_pissh",
+        "prop_cs_beer_bot_01",
+        "prop_ld_can_01",
+        "prop_ecola_can"
+      ],
+      "seconds": 4.0,
+      "icon": "bottle",
+      "tint": "#c9a24a",
+      "desc": "Pisswasser. The name is the review."
     },
     {
       "id": "beer_logger",
@@ -238,8 +368,16 @@
       "booze": 0.24,
       "drink": true,
       "shop": false,
-      "prop": ["prop_beer_logger", "prop_cs_beer_bot_40oz", "prop_ld_can_01", "prop_ecola_can"],
-      "seconds": 4.0
+      "prop": [
+        "prop_beer_logger",
+        "prop_cs_beer_bot_40oz",
+        "prop_ld_can_01",
+        "prop_ecola_can"
+      ],
+      "seconds": 4.0,
+      "icon": "bottle",
+      "tint": "#b8863f",
+      "desc": "Logger. Chops down a man twice your size."
     },
     {
       "id": "whiskey",
@@ -250,10 +388,16 @@
       "booze": 0.45,
       "drink": true,
       "shop": false,
-      "prop": ["prop_whiskey_bottle", "prop_cs_whiskey_bottle", "prop_ld_flow_bottle"],
-      "seconds": 4.5
+      "prop": [
+        "prop_whiskey_bottle",
+        "prop_cs_whiskey_bottle",
+        "prop_ld_flow_bottle"
+      ],
+      "seconds": 4.5,
+      "icon": "flask",
+      "tint": "#b07a3a",
+      "desc": "Mount Whiskey, $15.99. You get what you pay for."
     },
-
     {
       "_note": "The 24-hour Mexican and American diner. Breakfast is on 5 to 11 only;",
       "_note2": "the plate is what you get the rest of the day and night.",
@@ -264,11 +408,23 @@
       "hunger": 0.58,
       "wake": 0.06,
       "shop": false,
-      "prop": ["prop_food_bs_bowl", "prop_cs_bowl_01", "prop_sandwich_01"],
-      "drinkProp": ["prop_amb_coffeecup_01", "p_amb_coffeecup_01", "prop_cs_bs_cup", "prop_ld_can_01"],
+      "prop": [
+        "prop_food_bs_bowl",
+        "prop_cs_bowl_01",
+        "prop_sandwich_01"
+      ],
+      "drinkProp": [
+        "prop_amb_coffeecup_01",
+        "p_amb_coffeecup_01",
+        "prop_cs_bs_cup",
+        "prop_ld_can_01"
+      ],
       "combo": true,
       "seconds": 5.5,
-      "vehicleSeconds": 50
+      "vehicleSeconds": 50,
+      "icon": "plate",
+      "tint": "#e6c073",
+      "desc": "Two eggs, hash browns and a coffee. Served at a reasonable hour."
     },
     {
       "id": "diner_plate",
@@ -277,13 +433,23 @@
       "price": 13,
       "hunger": 0.62,
       "shop": false,
-      "prop": ["prop_food_bs_bowl", "prop_cs_bowl_01", "prop_sandwich_01"],
-      "drinkProp": ["prop_cs_bs_cup", "prop_food_bs_cup", "prop_ld_can_01"],
+      "prop": [
+        "prop_food_bs_bowl",
+        "prop_cs_bowl_01",
+        "prop_sandwich_01"
+      ],
+      "drinkProp": [
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup",
+        "prop_ld_can_01"
+      ],
       "combo": true,
       "seconds": 5.5,
-      "vehicleSeconds": 50
+      "vehicleSeconds": 50,
+      "icon": "plate",
+      "tint": "#dcae66",
+      "desc": "Whatever is on the flat top at this time of night."
     },
-
     {
       "id": "wine",
       "name": "Bottle of Wine",
@@ -293,10 +459,17 @@
       "booze": 0.34,
       "drink": true,
       "shop": false,
-      "prop": ["prop_wine_bot_01", "prop_bottle_wine", "prop_cs_wine_bot", "prop_ld_flow_bottle"],
-      "seconds": 4.5
+      "prop": [
+        "prop_wine_bot_01",
+        "prop_bottle_wine",
+        "prop_cs_wine_bot",
+        "prop_ld_flow_bottle"
+      ],
+      "seconds": 4.5,
+      "icon": "bottle",
+      "tint": "#8e4a6b",
+      "desc": "Wine from a shop with a security grille. Bold choice."
     },
-
     {
       "_note": "Fowl Mouthed Fried Chicken. Distinct from Lucky Plucker: a bucket to share",
       "_note2": "rather than a box, so it is bigger, dearer and takes longer to get through.",
@@ -306,13 +479,24 @@
       "price": 14,
       "hunger": 0.66,
       "shop": false,
-      "prop": ["prop_food_bs_chicken", "prop_cs_bs_chicken", "prop_food_bs_burger1", "prop_cs_burger_01"],
-      "drinkProp": ["prop_cs_bs_cup", "prop_food_bs_cup", "prop_ld_can_01"],
+      "prop": [
+        "prop_food_bs_chicken",
+        "prop_cs_bs_chicken",
+        "prop_food_bs_burger1",
+        "prop_cs_burger_01"
+      ],
+      "drinkProp": [
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup",
+        "prop_ld_can_01"
+      ],
       "combo": true,
       "seconds": 6.5,
-      "vehicleSeconds": 70
+      "vehicleSeconds": 70,
+      "icon": "bucket",
+      "tint": "#e0994a",
+      "desc": "A bucket. For one person. Nobody is judging."
     },
-
     {
       "_note": "Hearty Taco, 'Eat Your Heart Out'. A sit-down plate, not the street taco",
       "_note2": "from the hatch -- bigger, dearer, and it comes with a drink.",
@@ -320,15 +504,26 @@
       "name": "Hearty Taco Plate",
       "category": "Food",
       "price": 12,
-      "hunger": 0.60,
+      "hunger": 0.6,
       "shop": false,
-      "prop": ["prop_taco_01", "prop_taco_02", "prop_food_bs_bowl", "prop_sandwich_01"],
-      "drinkProp": ["prop_cs_bs_cup", "prop_food_bs_cup", "prop_ld_can_01"],
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02",
+        "prop_food_bs_bowl",
+        "prop_sandwich_01"
+      ],
+      "drinkProp": [
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup",
+        "prop_ld_can_01"
+      ],
       "combo": true,
       "seconds": 5.5,
-      "vehicleSeconds": 55
+      "vehicleSeconds": 55,
+      "icon": "taco",
+      "tint": "#dd8f4a",
+      "desc": "Eat your heart out. Their words."
     },
-
     {
       "_note": "Attack-A-Taco. Its own wall says HEAVY SHELLS and CHOOSE SIDES, so that is",
       "_note2": "what it sells -- a loaded plate, distinct from Hearty Taco's and from the",
@@ -339,13 +534,24 @@
       "price": 11,
       "hunger": 0.59,
       "shop": false,
-      "prop": ["prop_taco_01", "prop_taco_02", "prop_food_bs_bowl", "prop_sandwich_01"],
-      "drinkProp": ["prop_cs_bs_cup", "prop_food_bs_cup", "prop_ld_can_01"],
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02",
+        "prop_food_bs_bowl",
+        "prop_sandwich_01"
+      ],
+      "drinkProp": [
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup",
+        "prop_ld_can_01"
+      ],
       "combo": true,
       "seconds": 5.5,
-      "vehicleSeconds": 55
+      "vehicleSeconds": 55,
+      "icon": "taco",
+      "tint": "#dc9a52",
+      "desc": "Heavy shells, choose sides. A war has broken out in your mouth."
     },
-
     {
       "id": "crisps",
       "name": "Bag of Crisps",
@@ -353,7 +559,10 @@
       "price": 3,
       "hunger": 0.14,
       "prop": "prop_food_bs_chips",
-      "seconds": 3.0
+      "seconds": 3.0,
+      "icon": "chips",
+      "tint": "#e8c452",
+      "desc": "Mostly air, sold by weight."
     },
     {
       "id": "choc_ego",
@@ -362,7 +571,10 @@
       "price": 3,
       "hunger": 0.13,
       "prop": "prop_choc_ego",
-      "seconds": 3.0
+      "seconds": 3.0,
+      "icon": "bar",
+      "tint": "#c98a4a",
+      "desc": "For the man who has everything, including this."
     },
     {
       "id": "choc_meteorite",
@@ -371,7 +583,10 @@
       "price": 3,
       "hunger": 0.13,
       "prop": "prop_choc_meto",
-      "seconds": 3.0
+      "seconds": 3.0,
+      "icon": "bar",
+      "tint": "#b0764a",
+      "desc": "The candy that kids and stoners love."
     },
     {
       "id": "choc_pq",
@@ -380,16 +595,22 @@
       "price": 3,
       "hunger": 0.12,
       "prop": "prop_choc_pq",
-      "seconds": 3.0
+      "seconds": 3.0,
+      "icon": "bar",
+      "tint": "#c47f52",
+      "desc": "Peace and quiet. Comes in a loud wrapper."
     },
     {
       "id": "jerky",
       "name": "Beef Jerky",
       "category": "Snacks",
       "price": 6,
-      "hunger": 0.20,
+      "hunger": 0.2,
       "prop": "prop_food_bs_chips",
-      "seconds": 3.5
+      "seconds": 3.5,
+      "icon": "tin",
+      "tint": "#a9663f",
+      "desc": "Chewing it counts as exercise."
     },
     {
       "id": "apple",
@@ -397,10 +618,17 @@
       "category": "Snacks",
       "price": 2,
       "hunger": 0.15,
-      "prop": ["prop_apple_01", "ng_proc_food_apple01a", "prop_food_bs_apple", "v_res_tt_apple"],
-      "seconds": 3.5
+      "prop": [
+        "prop_apple_01",
+        "ng_proc_food_apple01a",
+        "prop_food_bs_apple",
+        "v_res_tt_apple"
+      ],
+      "seconds": 3.5,
+      "icon": "fruit",
+      "tint": "#8ec96f",
+      "desc": "A whole apple. Revolutionary."
     },
-
     {
       "id": "ecola",
       "name": "eCola",
@@ -410,7 +638,10 @@
       "wake": 0.04,
       "drink": true,
       "prop": "prop_ecola_can",
-      "seconds": 3.5
+      "seconds": 3.5,
+      "icon": "can",
+      "tint": "#d84a44",
+      "desc": "Deliciously infectious. Their slogan, not mine."
     },
     {
       "id": "sprunk",
@@ -421,7 +652,10 @@
       "wake": 0.03,
       "drink": true,
       "prop": "prop_ld_can_01",
-      "seconds": 3.5
+      "seconds": 3.5,
+      "icon": "can",
+      "tint": "#63c264",
+      "desc": "Sprunk up your life. Sixty grams of sugar."
     },
     {
       "id": "water",
@@ -431,7 +665,10 @@
       "hunger": 0.05,
       "drink": true,
       "prop": "prop_ld_flow_bottle",
-      "seconds": 3.5
+      "seconds": 3.5,
+      "icon": "bottle",
+      "tint": "#8fc4dd",
+      "desc": "Water, in a bottle, for money."
     },
     {
       "id": "coffee",
@@ -439,10 +676,19 @@
       "category": "Drinks",
       "price": 4,
       "hunger": 0.05,
-      "wake": 0.10,
+      "wake": 0.1,
       "drink": true,
-      "prop": ["p_amb_coffeecup_01", "prop_amb_coffeecup_01", "prop_coffee_cup_01", "ng_proc_coffee_cup_01", "prop_plastic_cup_02"],
-      "seconds": 4.0
+      "prop": [
+        "p_amb_coffeecup_01",
+        "prop_amb_coffeecup_01",
+        "prop_coffee_cup_01",
+        "ng_proc_coffee_cup_01",
+        "prop_plastic_cup_02"
+      ],
+      "seconds": 4.0,
+      "icon": "cup",
+      "tint": "#a9754c",
+      "desc": "Bean Machine. Tastes like the inside of a thermos."
     },
     {
       "id": "energy",
@@ -453,7 +699,10 @@
       "wake": 0.14,
       "drink": true,
       "prop": "prop_energy_drink",
-      "seconds": 3.5
+      "seconds": 3.5,
+      "icon": "can",
+      "tint": "#c8d84a",
+      "desc": "Legally a drink. Spiritually a dare."
     },
     {
       "id": "orangotang",
@@ -464,17 +713,259 @@
       "wake": 0.03,
       "drink": true,
       "prop": "prop_ld_can_01",
+      "seconds": 3.5,
+      "icon": "can",
+      "tint": "#e08a3a",
+      "desc": "Contains no orangutan. Contains no orange either."
+    },
+    {
+      "id": "cig_redwood",
+      "name": "Redwood",
+      "category": "Snacks",
+      "price": 12,
+      "hunger": 0.0,
+      "wake": 0.05,
+      "shop": false,
+      "smoke": true,
+      "icon": "pack",
+      "tint": "#d24a44",
+      "desc": "Ask your doctor if smoking is right for you.",
+      "prop": [
+        "prop_cigar_01",
+        "prop_cs_ciggy_01",
+        "prop_amb_ciggy_01",
+        "p_cs_ciggy_01"
+      ],
+      "seconds": 6.0
+    },
+    {
+      "id": "cig_debonaire",
+      "name": "Debonaire",
+      "category": "Snacks",
+      "price": 16,
+      "hunger": 0.0,
+      "wake": 0.05,
+      "shop": false,
+      "smoke": true,
+      "icon": "pack",
+      "tint": "#7a8fb0",
+      "desc": "For the discerning gentleman who wants a cough with class.",
+      "prop": [
+        "prop_cigar_01",
+        "prop_cs_ciggy_01",
+        "prop_amb_ciggy_01",
+        "p_cs_ciggy_01"
+      ],
+      "seconds": 6.0
+    },
+    {
+      "_note": "The Coop, Cluckin' Bell's walk-up kiosk. Its board is burgers, shakes, donuts, Sludgie, ice cream, pizza and hot dogs.",
+      "id": "coop_burger",
+      "name": "Cluckin' Burger",
+      "category": "Food",
+      "price": 8,
+      "hunger": 0.42,
+      "shop": false,
+      "icon": "burger",
+      "tint": "#e0a84e",
+      "desc": "Chicken, they say. It has been in a fryer, that much is certain.",
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burger1",
+        "ng_proc_food_burg01a"
+      ],
+      "seconds": 5.0
+    },
+    {
+      "id": "coop_shake",
+      "name": "Milkshake",
+      "category": "Drinks",
+      "price": 5,
+      "hunger": 0.14,
+      "wake": 0.02,
+      "drink": true,
+      "shop": false,
+      "icon": "shake",
+      "tint": "#efd6c0",
+      "desc": "Thick enough to stand a spoon in. The straw does not stand a chance.",
+      "prop": [
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup",
+        "prop_plastic_cup_02"
+      ],
+      "seconds": 4.5
+    },
+    {
+      "id": "coop_donut",
+      "name": "Donut",
+      "category": "Snacks",
+      "price": 3,
+      "hunger": 0.13,
+      "wake": 0.03,
+      "shop": false,
+      "icon": "donut",
+      "tint": "#e79ab4",
+      "desc": "Pink icing, sprinkles, no further questions.",
+      "prop": [
+        "prop_amb_donut",
+        "prop_donut_01",
+        "v_res_donut"
+      ],
+      "seconds": 3.0
+    },
+    {
+      "id": "sludgie",
+      "name": "Sludgie",
+      "category": "Drinks",
+      "price": 4,
+      "hunger": 0.08,
+      "wake": 0.06,
+      "drink": true,
+      "shop": false,
+      "icon": "cup",
+      "tint": "#6fb8e0",
+      "desc": "Brain freeze, sold by the cup. Legally a drink.",
+      "prop": [
+        "prop_plastic_cup_02",
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup"
+      ],
+      "seconds": 4.0
+    },
+    {
+      "id": "ice_cream",
+      "name": "Ice Cream",
+      "category": "Snacks",
+      "price": 4,
+      "hunger": 0.11,
+      "shop": false,
+      "icon": "cone",
+      "tint": "#f0e2c4",
+      "desc": "Melting faster than you can eat it. That is the whole game.",
+      "prop": [
+        "prop_choc_ego",
+        "prop_cs_ice_cream",
+        "prop_amb_donut"
+      ],
       "seconds": 3.5
+    },
+    {
+      "id": "pizza_slice",
+      "name": "Pizza Slice",
+      "category": "Food",
+      "price": 6,
+      "hunger": 0.3,
+      "shop": false,
+      "icon": "slice",
+      "tint": "#dd9a48",
+      "desc": "Reheated under a lamp since some point this morning.",
+      "prop": [
+        "prop_pizza_box_01",
+        "v_res_tt_pizzaplate",
+        "prop_food_bs_burger1"
+      ],
+      "seconds": 4.5
+    },
+    {
+      "_note": "Wok It Off, the China buffet. The window says ALL YOU CAN EAT FOR $20 and SPECIAL LUNCH MENU, so it sells exactly those two things and a couple of boxes to take away.",
+      "id": "wok_buffet",
+      "name": "All You Can Eat",
+      "category": "Food",
+      "price": 20,
+      "hunger": 1.0,
+      "shop": false,
+      "icon": "plate",
+      "tint": "#e3bb72",
+      "desc": "Twenty dollars, no time limit, no dignity. You will not need dinner.",
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_food_bs_burger1",
+        "prop_cs_burger_01"
+      ],
+      "seconds": 9.0
+    },
+    {
+      "id": "wok_lunch",
+      "name": "Special Lunch Menu",
+      "category": "Food",
+      "price": 11,
+      "hunger": 0.55,
+      "shop": false,
+      "icon": "noodles",
+      "tint": "#e0c184",
+      "desc": "The same food, before three, for less money. Nobody knows why.",
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burger1"
+      ],
+      "seconds": 6.0
+    },
+    {
+      "id": "wok_chow",
+      "name": "Chow Mein Box",
+      "category": "Food",
+      "price": 7,
+      "hunger": 0.34,
+      "shop": false,
+      "icon": "noodles",
+      "tint": "#dcc078",
+      "desc": "Comes in a box with a little wire handle. Traditional.",
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burger1"
+      ],
+      "seconds": 5.0
+    },
+    {
+      "id": "wok_soup",
+      "name": "Wonton Soup",
+      "category": "Food",
+      "price": 6,
+      "hunger": 0.26,
+      "wake": 0.04,
+      "shop": false,
+      "icon": "bowl",
+      "tint": "#e6cf9a",
+      "desc": "Mostly broth. Two wontons, if the ladle likes you.",
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burger1"
+      ],
+      "seconds": 5.0
+    },
+    {
+      "_note": "For the shop whose windows say BANKRUPT and REPOSSESSION SALE. Sold nowhere else, because nowhere else has given up.",
+      "id": "dented_tins",
+      "name": "Dented Can",
+      "category": "Snacks",
+      "price": 4,
+      "hunger": 0.22,
+      "shop": false,
+      "icon": "tin",
+      "tint": "#a8a49a",
+      "desc": "Label long gone, big dent in the side. Could be peaches. Could be dog food.",
+      "prop": [
+        "prop_food_bs_tins",
+        "prop_food_cb_can",
+        "prop_cs_beer_bot_01"
+      ],
+      "seconds": 4.0
     }
   ],
-
   "_animations": [
     "The two interaction animation sets used. Both are checked at load; if one will not",
     "stream, the item is still eaten and only the animation is skipped."
   ],
-
   "animations": {
-    "eat": { "dict": "mp_player_inteat@burger", "clip": "mp_player_int_eat_burger", "hand": "left" },
-    "drink": { "dict": "mp_player_intdrink", "clip": "loop_bottle", "hand": "left" }
+    "eat": {
+      "dict": "mp_player_inteat@burger",
+      "clip": "mp_player_int_eat_burger",
+      "hand": "left"
+    },
+    "drink": {
+      "dict": "mp_player_intdrink",
+      "clip": "loop_bottle",
+      "hand": "left"
+    }
   }
 }

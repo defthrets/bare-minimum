@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using GTA;
+using GTA.Native;
 using BareMinimum.Core;
 using BareMinimum.Food;
 using BareMinimum.Venues;
@@ -30,8 +31,8 @@ namespace BareMinimum.UI
         private readonly Menu _ui = new Menu
         {
             // The same two marks as the settings panel, so both menus read as this mod's.
-            TitleLeft = new Icon("apple2.png"),
-            TitleRight = new Icon("eye2.png")
+            TitleLeft = new Icon("p_burger.png"),
+            TitleRight = new Icon("p_cup.png")
         };
 
         private Counter _at = Counter.None;
@@ -80,14 +81,93 @@ namespace BareMinimum.UI
             _at = _counters.Nearest(me.Position);
             if (_at == Counter.None) return;
 
-            Hud.Help(_at == Counter.Till
-                ? "Press ~INPUT_CONTEXT~ to buy something."
-                : "Press ~INPUT_CONTEXT~ to use the machine.");
+            NameTheScripts();
+            Hush();
+
+            Hud.Help("Press ~INPUT_CONTEXT~ to buy something.");
 
             if (!Pressed()) return;
 
             Hud.ClearHelp();
             Begin();
+        }
+
+        /// <summary>
+        /// Lists every running game script, once.
+        ///
+        /// THIS IS HOW THE VANILLA SHOP MENU GETS NAMED. Enhanced opens its own convenience
+        /// store UI at an LTD counter -- I was wrong earlier when I said singleplayer had
+        /// none -- and it cannot be switched off without knowing which .ysc owns it.
+        /// Terminating shop_controller on a guess is not on: that one also runs Ammu-Nation,
+        /// the clothing shops and the barbers, all of which are staying.
+        ///
+        /// So the list goes in the log the first time a counter is used, and the name comes
+        /// out of it. SCRIPT_THREAD_ITERATOR walks the running threads; GET_NAME_OF_SCRIPT
+        /// turns an id into something readable.
+        /// </summary>
+        private void NameTheScripts()
+        {
+            if (_listedScripts) return;
+            _listedScripts = true;
+
+            try
+            {
+                Function.Call(Hash.SCRIPT_THREAD_ITERATOR_RESET);
+
+                var names = new System.Collections.Generic.List<string>();
+
+                // Bounded. An iterator that never returns 0 would otherwise spin the frame,
+                // and a spinning frame is the freeze this codebase has already had once.
+                for (var i = 0; i < 400; i++)
+                {
+                    var id = Function.Call<int>(Hash.SCRIPT_THREAD_ITERATOR_GET_NEXT_THREAD_ID);
+                    if (id == 0) break;
+
+                    var name = Function.Call<string>(Hash.GET_NAME_OF_SCRIPT_WITH_THIS_ID, id);
+                    if (!string.IsNullOrEmpty(name)) names.Add(name);
+                }
+
+                names.Sort();
+
+                Log.Info("Scripts running at this counter (" + names.Count + "): " +
+                         string.Join(", ", names.ToArray()));
+            }
+            catch (Exception ex)
+            {
+                Log.Once("shop-scripts", "Could not list the running scripts: " + ex.Message);
+            }
+        }
+
+        private bool _listedScripts;
+
+        /// <summary>
+        /// Terminates whatever the ini names, while a counter is in reach.
+        ///
+        /// BY NAME FROM THE INI, and empty by default. The one script anybody would guess --
+        /// shop_controller -- also runs Ammu-Nation and the clothing shops, so guessing costs
+        /// the player three shops to fix one menu. Once the log above has named the right one,
+        /// putting it in the ini is a one-line change and no rebuild.
+        /// </summary>
+        private void Hush()
+        {
+            if (_cfg.SuppressScripts.Length == 0) return;
+
+            foreach (var name in _cfg.SuppressScripts)
+            {
+                try
+                {
+                    // No existence check first. Both of the natives that would do one take a
+                    // HASH, and the only in-date way to make one here is StringHash, which is
+                    // a lot of surface to add for a guard that buys nothing: terminating a
+                    // script that is not running is a no-op.
+                    Function.Call(Hash.TERMINATE_ALL_SCRIPTS_WITH_THIS_NAME, name);
+                    Log.Once("hush-" + name, "Terminated '" + name + "' at a counter, as configured.");
+                }
+                catch (Exception ex)
+                {
+                    Log.Once("hush-fail-" + name, "Could not terminate '" + name + "': " + ex.Message);
+                }
+            }
         }
 
         private void Begin()
@@ -168,16 +248,8 @@ namespace BareMinimum.UI
         /// </summary>
         private void Subtitle()
         {
-            var money = Money();
-
-            _ui.Subtitle = "$" + money.ToString("N0", CultureInfo.InvariantCulture) +
-                           "     Fed " + Pct(_needs.Hunger.Value) +
-                           "     Rested " + Pct(_needs.Sleep.Value);
-        }
-
-        private static string Pct(float v)
-        {
-            return ((int)Math.Round(v * 100f)).ToString(CultureInfo.InvariantCulture) + "%";
+            _ui.Subtitle = Stock.Header(Money(), _needs.Hunger.Value,
+                                        _needs.Sleep.Value, _needs.Drunk);
         }
 
         /// <summary>Rebuilds the row list for the current tab.</summary>
@@ -200,41 +272,8 @@ namespace BareMinimum.UI
                 // Vendor-only items never reach a shelf.
                 if (!item.InShop) continue;
 
-                var afford = money >= item.Price;
-
-                _ui.Rows.Add(new Row
-                {
-                    Left = item.Name,
-                    Right = "$" + item.Price.ToString(CultureInfo.InvariantCulture),
-                    Note = Describe(item, afford),
-                    Enabled = afford,
-                    Tag = item
-                });
+                _ui.Rows.Add(Stock.RowFor(item, money, item.Price, null));
             }
-        }
-
-        /// <summary>
-        /// What a row says about itself.
-        ///
-        /// In PLAIN WORDS rather than numbers. "+0.42 hunger" is the internal figure and it
-        /// means nothing to somebody standing at a till; "a proper meal" is the same
-        /// information in the units the player actually thinks in.
-        /// </summary>
-        private static string Describe(Item item, bool afford)
-        {
-            if (!afford) return "~r~You cannot afford this.";
-
-            string size;
-
-            if (item.Hunger >= 0.40f) size = "A proper meal.";
-            else if (item.Hunger >= 0.25f) size = "A decent feed.";
-            else if (item.Hunger >= 0.12f) size = "Takes the edge off.";
-            else size = "Barely a mouthful.";
-
-            if (item.Wake >= 0.10f) return size + " Will wake you up a bit.";
-            if (item.Wake > 0f) return size + " A slight lift.";
-
-            return size;
         }
 
         // ======================================================================

@@ -290,6 +290,12 @@ namespace BareMinimum.UI
                   2f, 4f, 200f, "0",
                   "44 is just under two game days awake.");
 
+            Float("Sleep: hours to full", "Sleep", "HoursToFull",
+                  () => _cfg.SleepHoursToFull, v => _cfg.SleepHoursToFull = v,
+                  1f, 1f, 200f, "0",
+                  "Hours of sleep that take you from empty to fully rested. 12 makes a " +
+                  "six-hour night worth half a meter.");
+
             Float("Slow down below", "Effects", "HungerSlowAt",
                   () => _cfg.HungerSlowAt, v => _cfg.HungerSlowAt = v,
                   0.02f, 0f, 1f, "P0",
