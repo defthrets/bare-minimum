@@ -579,6 +579,28 @@
     },
 
     {
+      "_note": "Attack-A-Taco, Kill That Hunger. Coordinate is the DOOR from the first",
+      "_note2": "screenshot, not the pavement the big signs were legible from.",
+
+      "id": "attack_a_taco",
+      "name": "Attack-A-Taco",
+      "label": "plate of heavy shells",
+      "item": "heavy_shells",
+
+      "x": 445.963,
+      "y": -1241.779,
+      "z": 30.280,
+      "heading": 13.822,
+
+      "spawnRange": 90.0,
+      "reach": 2.4,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+
+    {
       "_note": "Bishop's Chicken. The doors are part of the map; nothing is spawned.",
 
       "id": "bishops_chicken",

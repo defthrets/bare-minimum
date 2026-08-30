@@ -330,6 +330,23 @@
     },
 
     {
+      "_note": "Attack-A-Taco. Its own wall says HEAVY SHELLS and CHOOSE SIDES, so that is",
+      "_note2": "what it sells -- a loaded plate, distinct from Hearty Taco's and from the",
+      "_note3": "street taco at the Vespucci hatch.",
+      "id": "heavy_shells",
+      "name": "Heavy Shells",
+      "category": "Food",
+      "price": 11,
+      "hunger": 0.59,
+      "shop": false,
+      "prop": ["prop_taco_01", "prop_taco_02", "prop_food_bs_bowl", "prop_sandwich_01"],
+      "drinkProp": ["prop_cs_bs_cup", "prop_food_bs_cup", "prop_ld_can_01"],
+      "combo": true,
+      "seconds": 5.5,
+      "vehicleSeconds": 55
+    },
+
+    {
       "id": "crisps",
       "name": "Bag of Crisps",
       "category": "Snacks",
