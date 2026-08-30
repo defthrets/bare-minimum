@@ -159,6 +159,21 @@
     },
 
     {
+      "_note": "Ring of Fire Chilli House. Filling, and the soda is not optional.",
+      "id": "chilli",
+      "name": "Ring of Fire Chilli",
+      "category": "Food",
+      "price": 10,
+      "hunger": 0.52,
+      "shop": false,
+      "prop": ["prop_cs_bowl_01", "prop_food_bs_bowl", "prop_bowl_01", "v_res_mbowl", "prop_food_bs_chips"],
+      "drinkProp": ["prop_ld_can_01", "prop_ecola_can", "prop_ld_flow_bottle"],
+      "combo": true,
+      "seconds": 5.5,
+      "vehicleSeconds": 45
+    },
+
+    {
       "id": "crisps",
       "name": "Bag of Crisps",
       "category": "Snacks",

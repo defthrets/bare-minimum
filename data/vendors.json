@@ -175,6 +175,27 @@
     },
 
     {
+      "_note": "Ring of Fire Chilli House. Shopfront is part of the map; nothing is spawned.",
+
+      "id": "ring_of_fire",
+      "name": "Ring of Fire",
+      "label": "bowl of chilli",
+      "item": "chilli",
+
+      "x": 166.049,
+      "y": -1451.697,
+      "z": 29.242,
+      "heading": 317.860,
+
+      "spawnRange": 90.0,
+      "reach": 2.2,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+
+    {
       "_note": "Bishop's Chicken. The doors are part of the map; nothing is spawned.",
 
       "id": "bishops_chicken",
