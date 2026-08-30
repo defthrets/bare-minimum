@@ -314,6 +314,22 @@
     },
 
     {
+      "_note": "Hearty Taco, 'Eat Your Heart Out'. A sit-down plate, not the street taco",
+      "_note2": "from the hatch -- bigger, dearer, and it comes with a drink.",
+      "id": "hearty_plate",
+      "name": "Hearty Taco Plate",
+      "category": "Food",
+      "price": 12,
+      "hunger": 0.60,
+      "shop": false,
+      "prop": ["prop_taco_01", "prop_taco_02", "prop_food_bs_bowl", "prop_sandwich_01"],
+      "drinkProp": ["prop_cs_bs_cup", "prop_food_bs_cup", "prop_ld_can_01"],
+      "combo": true,
+      "seconds": 5.5,
+      "vehicleSeconds": 55
+    },
+
+    {
       "id": "crisps",
       "name": "Bag of Crisps",
       "category": "Snacks",
