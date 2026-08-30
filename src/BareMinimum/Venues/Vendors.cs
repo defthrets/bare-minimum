@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using GTA;
+using GTA.Chrono;
 using GTA.Math;
 using GTA.Native;
 using BareMinimum.Core;
@@ -15,6 +16,16 @@ namespace BareMinimum.Venues
     {
         public string Id = "";
         public string Name = "Stand";
+        /// <summary>
+        /// Everything this vendor might sell. One of them is on offer at a time.
+        ///
+        /// A market stall with three things on the board is a menu, and menus were ruled out
+        /// for street vendors. A stall that has ONE thing today is a different idea: you take
+        /// what they have got, and coming back later is how you get something else.
+        /// </summary>
+        public string[] ItemIds = new string[0];
+
+        /// <summary>Which one is on offer, chosen when the player walks up. Empty until then.</summary>
         public string ItemId = "";
 
         public Vector3 Position;
@@ -53,6 +64,55 @@ namespace BareMinimum.Venues
         /// <summary>Whether the stand and the vendor have been dropped onto the real ground.</summary>
         public bool Settled;
 
+        // ---- trading hours ----------------------------------------------------
+
+        /// <summary>
+        /// When he opens up and when he goes home, as hours of the day. 0 and 24 = always.
+        ///
+        /// The whole pitch goes, not just the man: a cart standing in the street all night
+        /// that cannot be bought from is worse than an empty patch of pavement, because it
+        /// looks like the mod is broken rather than like the man has gone home.
+        /// </summary>
+        public int OpenHour;
+        public int CloseHour = 24;
+
+        // ---- the smoke break --------------------------------------------------
+
+        /// <summary>GAME hours between smokes. 0 means he never stops.</summary>
+        public float SmokeEveryHours;
+
+        /// <summary>
+        /// How long a smoke lasts, in REAL seconds.
+        ///
+        /// Real rather than game, deliberately, and the two units in these four fields are
+        /// each measuring what they should. How OFTEN he goes is a fact about his working day,
+        /// so it belongs on the game clock. How LONG the player watches him stand there is a
+        /// fact about watching, so it belongs on the real one -- five game minutes would be
+        /// ten real seconds, which is not a cigarette, it is a twitch.
+        /// </summary>
+        public float SmokeSeconds = 45f;
+
+        /// <summary>How far behind his post he wanders to smoke, in metres.</summary>
+        public float SmokeBack = 4f;
+
+        public string SmokeScenario = "WORLD_HUMAN_SMOKING";
+
+        /// <summary>Where he stands to serve, and where he stands to smoke. Set when he spawns.</summary>
+        public Vector3 PostAt;
+        public Vector3 SmokeAt;
+
+        public Duty Doing = Duty.Working;
+
+        /// <summary>When the next smoke is due, on the game clock.</summary>
+        public GameClockDateTime NextSmoke;
+        public bool SmokeScheduled;
+
+        /// <summary>When the current smoke ends, or a walk gives up. Real milliseconds.</summary>
+        public int PhaseUntil;
+
+        /// <summary>True when he is at his post and able to serve.</summary>
+        public bool AtPost => Seller == null || Doing == Duty.Working;
+
         /// <summary>What the prompt calls it. Falls back to the item's own name.</summary>
         public string Label = "";
 
@@ -85,6 +145,15 @@ namespace BareMinimum.Venues
         public bool HasEntities => PropModels.Length > 0 || PedModels.Length > 0;
     }
 
+    /// <summary>What the vendor is currently up to.</summary>
+    internal enum Duty
+    {
+        Working,
+        WalkingOff,
+        Smoking,
+        WalkingBack
+    }
+
     /// <summary>
     /// Street food stands: a prop, somebody behind it, and one thing to buy.
     ///
@@ -108,6 +177,15 @@ namespace BareMinimum.Venues
 
         /// <summary>The vendor currently within reach, if any.</summary>
         private Vendor _at;
+
+        /// <summary>
+        /// One shared Random for the whole class.
+        ///
+        /// Not a fresh one per roll: System.Random seeds from the clock, and two created
+        /// inside the same millisecond produce identical sequences -- which is precisely what
+        /// happens when a sweep touches several vendors at once.
+        /// </summary>
+        private static readonly Random Roll = new Random();
 
         private bool _keyWasDown;
         private float _sinceScan;
@@ -148,7 +226,7 @@ namespace BareMinimum.Venues
                     {
                         Id = node["id"].AsString(""),
                         Name = node["name"].AsString("Stand"),
-                        ItemId = node["item"].AsString(""),
+                        ItemIds = Strings(node["item"]),
                         Position = new Vector3(node["x"].AsFloat(0f),
                                                node["y"].AsFloat(0f),
                                                node["z"].AsFloat(0f)),
@@ -160,6 +238,12 @@ namespace BareMinimum.Venues
                         Scenario = node["scenario"].AsString("WORLD_HUMAN_STAND_IMPATIENT"),
                         AnimDict = node["anim"]["dict"].AsString(""),
                         AnimClip = node["anim"]["clip"].AsString(""),
+                        OpenHour = node["hours"]["open"].AsInt(0),
+                        CloseHour = node["hours"]["close"].AsInt(24),
+                        SmokeEveryHours = node["smoke"]["everyHours"].AsFloat(0f),
+                        SmokeSeconds = node["smoke"]["seconds"].AsFloat(45f),
+                        SmokeBack = node["smoke"]["back"].AsFloat(4f),
+                        SmokeScenario = node["smoke"]["scenario"].AsString("WORLD_HUMAN_SMOKING"),
                         PropModels = Strings(node["prop"]),
                         PedModels = Strings(node["ped"]),
                         Label = node["label"].AsString(""),
@@ -168,7 +252,7 @@ namespace BareMinimum.Venues
                         BlipColour = node["blipColour"].AsInt(47)
                     };
 
-                    if (string.IsNullOrEmpty(v.ItemId)) continue;
+                    if (v.ItemIds.Length == 0) continue;
 
                     _vendors.Add(v);
                 }
@@ -187,6 +271,11 @@ namespace BareMinimum.Venues
 
             if (node != null && !node.IsNull)
             {
+                // A single bare name is allowed as well as a list, so the common case --
+                // one vendor, one thing -- does not have to be written as an array.
+                var single = node.AsString("");
+                if (!string.IsNullOrEmpty(single)) return new[] { single };
+
                 foreach (var item in node.Items)
                 {
                     var s = item.AsString("");
@@ -279,7 +368,9 @@ namespace BareMinimum.Venues
             {
                 Marker(v);
 
-                var near = v.Position.DistanceTo(from) <= v.SpawnRange;
+                // CLOSED IS THE SAME AS FAR AWAY as far as everything downstream is
+                // concerned: nothing spawns, nothing is offered, the pitch is empty.
+                var near = v.Position.DistanceTo(from) <= v.SpawnRange && Trading(v);
 
                 // IN RANGE IS SEPARATE FROM SPAWNED. A taco window has nothing to spawn -- the
                 // hatch is already part of the building -- so it would never count as live if
@@ -291,8 +382,20 @@ namespace BareMinimum.Venues
                 // the item id is a typo. Set LogLevel = Debug to see them come and go.
                 if (near != v.InRange)
                 {
+                    // CHOSEN ON ARRIVAL, not per frame. Rolling every tick would have the
+                    // prompt flickering between bagels and fruit sixty times a second; rolling
+                    // once as you walk up means what is on the board stays on the board for as
+                    // long as you are stood at it, and is something else next time.
+                    if (near && v.ItemIds.Length > 0)
+                    {
+                        v.ItemId = v.ItemIds.Length == 1
+                            ? v.ItemIds[0]
+                            : v.ItemIds[Roll.Next(v.ItemIds.Length)];
+                    }
+
                     Log.Debug(v.Name + (near ? " in range at " : " out of range at ") +
-                              v.Position.DistanceTo(from).ToString("0.0") + "m.");
+                              v.Position.DistanceTo(from).ToString("0.0") + "m" +
+                              (near && v.ItemIds.Length > 1 ? ", selling " + v.ItemId : "") + ".");
                 }
 
                 v.InRange = near;
@@ -398,6 +501,9 @@ namespace BareMinimum.Venues
 
             var where = v.Position + forward * v.PedBack;
 
+            v.PostAt = where;
+            v.SmokeAt = v.Position + forward * (v.PedBack + v.SmokeBack);
+
             var ped = World.CreatePed(model, where, v.Heading + 180f);
             if (ped == null || !ped.Exists()) return null;
 
@@ -468,7 +574,135 @@ namespace BareMinimum.Venues
             }
 
             Settle(v);
-            Work(v);
+            Break(v);
+
+            // Only tend the grill while actually at the grill. Re-applying the cooking loop to
+            // a man walking away from it is how you get somebody moonwalking to a cigarette.
+            if (v.Doing == Duty.Working) Work(v);
+        }
+
+        /// <summary>
+        /// Whether he is open for business right now.
+        ///
+        /// Handles a window that wraps past midnight as well as one that does not. A stall
+        /// open 18:00 to 02:00 is an ordinary thing to want, and the naive
+        /// hour >= open && hour < close quietly means "never" for it.
+        /// </summary>
+        private static bool Trading(Vendor v)
+        {
+            if (v.OpenHour == v.CloseHour) return true;
+
+            int hour;
+            try { hour = GameClock.Hour; }
+            catch { return true; }
+
+            if (v.OpenHour < v.CloseHour) return hour >= v.OpenHour && hour < v.CloseHour;
+
+            return hour >= v.OpenHour || hour < v.CloseHour;
+        }
+
+        /// <summary>
+        /// The smoke break: off he goes, stands there a while, comes back.
+        ///
+        /// EVERY TRANSITION HAS A TIMEOUT as well as an arrival test. A walk task can fail to
+        /// finish for reasons that have nothing to do with this mod -- somebody parks on the
+        /// spot, the pathfinder gives up, a passer-by is in the way -- and without a timeout he
+        /// would stand halfway to his cigarette for the rest of the session with no way back.
+        /// </summary>
+        private static void Break(Vendor v)
+        {
+            if (v.Seller == null || !v.Seller.Exists()) return;
+            if (v.SmokeEveryHours <= 0f) return;
+
+            GameClockDateTime now;
+            try { now = GameClock.Now; }
+            catch { return; }
+
+            if (!v.SmokeScheduled)
+            {
+                v.NextSmoke = now + GameClockDuration.FromMinutes((long)(v.SmokeEveryHours * 60f));
+                v.SmokeScheduled = true;
+                return;
+            }
+
+            var ms = Game.GameTime;
+
+            switch (v.Doing)
+            {
+                case Duty.Working:
+                    if (now < v.NextSmoke) return;
+
+                    Walk(v, v.SmokeAt);
+                    v.Doing = Duty.WalkingOff;
+                    v.PhaseUntil = ms + 12000;
+                    v.AnimStarted = false;
+                    return;
+
+                case Duty.WalkingOff:
+                    if (ms < v.PhaseUntil && v.Seller.Position.DistanceTo(v.SmokeAt) > 1.3f) return;
+
+                    try
+                    {
+                        Function.Call(Hash.CLEAR_PED_TASKS, v.Seller.Handle);
+                        Function.Call(Hash.TASK_START_SCENARIO_IN_PLACE, v.Seller.Handle,
+                                      v.SmokeScenario, 0, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Once("vendor-smoke-" + v.Id, "Could not start the smoke: " + ex.Message);
+                    }
+
+                    v.Doing = Duty.Smoking;
+                    v.PhaseUntil = ms + (int)(Math.Max(2f, v.SmokeSeconds) * 1000f);
+                    return;
+
+                case Duty.Smoking:
+                    if (ms < v.PhaseUntil) return;
+
+                    Walk(v, v.PostAt);
+                    v.Doing = Duty.WalkingBack;
+                    v.PhaseUntil = ms + 12000;
+                    return;
+
+                case Duty.WalkingBack:
+                    if (ms < v.PhaseUntil && v.Seller.Position.DistanceTo(v.PostAt) > 1.0f) return;
+
+                    try
+                    {
+                        Function.Call(Hash.CLEAR_PED_TASKS, v.Seller.Handle);
+                        v.Seller.Heading = v.Heading + 180f;
+                    }
+                    catch
+                    {
+                        // He faces wherever he ended up; the work loop still plays.
+                    }
+
+                    v.Doing = Duty.Working;
+
+                    // False so Work() puts him back on the grill on the next sweep.
+                    v.AnimStarted = false;
+
+                    v.NextSmoke = now + GameClockDuration.FromMinutes((long)(v.SmokeEveryHours * 60f));
+                    return;
+            }
+        }
+
+        private static void Walk(Vendor v, Vector3 to)
+        {
+            try
+            {
+                Function.Call(Hash.CLEAR_PED_TASKS, v.Seller.Handle);
+
+                // Speed 1.0 is a walk. Jogging to a cigarette and jogging back would be funny
+                // exactly once.
+                Function.Call(Hash.TASK_GO_STRAIGHT_TO_COORD, v.Seller.Handle,
+                              to.X, to.Y, to.Z, 1.0f, 10000, v.Heading, 0.2f);
+            }
+            catch (Exception ex)
+            {
+                Log.Once("vendor-walk-" + v.Id, "Could not send him for a smoke: " + ex.Message);
+                v.Doing = Duty.Working;
+            }
         }
 
         /// <summary>
@@ -611,6 +845,8 @@ namespace BareMinimum.Venues
             v.Seller = null;
             v.AnimStarted = false;
             v.Settled = false;
+            v.Doing = Duty.Working;
+            v.SmokeScheduled = false;
         }
 
         // ======================================================================
@@ -689,6 +925,10 @@ namespace BareMinimum.Venues
                 // On foot you may use any of them, including the drive-through window.
                 // From a car, only the ones that say so.
                 if (driving && !v.FromVehicle) continue;
+
+                // Nobody behind the stand, nobody to serve you. He is a few metres away
+                // with a cigarette and will be back.
+                if (!v.AtPost) continue;
 
                 // Measured to the STAND rather than to the written coordinate, because the
                 // stand is what the player can see and it has been dropped onto the ground,

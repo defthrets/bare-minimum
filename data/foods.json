@@ -115,6 +115,50 @@
     },
 
     {
+      "_note": "Gabrielle's Market. One of these is on the board at a time.",
+      "id": "bagel",
+      "name": "Bagel",
+      "category": "Food",
+      "price": 4,
+      "hunger": 0.26,
+      "shop": false,
+      "prop": ["prop_bakery_bagel", "ng_proc_food_bagel", "prop_sandwich_01"],
+      "seconds": 4.0
+    },
+    {
+      "id": "fruit",
+      "name": "Fresh Fruit",
+      "category": "Food",
+      "price": 3,
+      "hunger": 0.18,
+      "shop": false,
+      "prop": ["prop_food_bs_apple", "ng_proc_food_apple01a", "prop_orange_01", "prop_sandwich_01"],
+      "seconds": 3.5
+    },
+    {
+      "id": "deli_sandwich",
+      "name": "Deli Sandwich",
+      "category": "Food",
+      "price": 9,
+      "hunger": 0.48,
+      "shop": false,
+      "prop": ["prop_sandwich_01", "prop_cs_sandwich_01"],
+      "seconds": 5.0
+    },
+    {
+      "_note": "Aguila Burrito. Plain spelling: the accented A is not worth risking in the",
+      "_note2": "game font, and the sign says it anyway.",
+      "id": "burrito",
+      "name": "Aguila Burrito",
+      "category": "Food",
+      "price": 8,
+      "hunger": 0.44,
+      "shop": false,
+      "prop": ["prop_burrito_01", "ng_proc_food_burrito", "prop_taco_01", "prop_sandwich_01"],
+      "seconds": 4.5
+    },
+
+    {
       "id": "crisps",
       "name": "Bag of Crisps",
       "category": "Snacks",
