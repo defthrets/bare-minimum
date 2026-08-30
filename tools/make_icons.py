@@ -36,9 +36,22 @@ def canvas():
     return img, ImageDraw.Draw(img)
 
 
-# How thick the outline is, in design units. About 1.3 px once the icon is drawn at its
-# HUD size of ~46, which is a hairline that reads as a drawn edge rather than as a border.
-OUTLINE = 7
+# How thick the outline is, in design units. About 1.8 px once the icon is drawn at its HUD
+# size of ~46 -- heavy enough to read as a deliberate edge at a glance.
+#
+# THIS NUMBER IS CAPPED BY THE SMALLEST HOLE IN THE ART, because the rim closes in on holes
+# from every side as well as growing outward. The core's pips are the tightest thing here, and
+# they had to be ENLARGED to go with this: at 14 units across they were exactly 2x the old
+# radius of 7, so any increase at all would have sealed them shut and left the core blank.
+OUTLINE = 10
+
+# How solid the rim is, 0 to 1.
+#
+# Not pure black. At full strength a 10-unit rim on a 46 px icon is a hard band that competes
+# with the shape it is meant to define -- it stops being an outline and becomes half the
+# drawing. At 65% it still reads as a definite edge while letting the game show through, which
+# is what keeps the icon sitting ON the scene rather than punched out of it.
+OUTLINE_ALPHA = 0.65
 
 
 def outlined(img, radius=OUTLINE):
@@ -63,8 +76,7 @@ def outlined(img, radius=OUTLINE):
     reading as gaps in a flat colour and makes the whole thing read as drawn.
 
     The radius therefore cannot exceed half the smallest hole, or that hole fills in
-    completely. The tightest are the core's pips at 14 units across, which is why 7 is the
-    practical ceiling here.
+    completely -- which is why the core's pips are sized off OUTLINE rather than fixed.
     """
     alpha = img.getchannel("A")
     grown = alpha.copy()
@@ -84,8 +96,12 @@ def outlined(img, radius=OUTLINE):
             # transparent. Anything drawn to the canvas edge would smear across.
             grown = ImageChops.lighter(grown, ImageChops.offset(alpha, dx, dy))
 
+    # Black, at OUTLINE_ALPHA. The body is composited over it at full strength afterwards,
+    # so only the part of the rim that sticks out past the shape is ever seen at this alpha.
+    faded = grown.point(lambda v: int(v * OUTLINE_ALPHA))
+
     rim = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    rim.putalpha(grown)
+    rim.putalpha(faded)
 
     # The body goes ON TOP of the rim, so its antialiased edge blends into black and the
     # transition reads as one drawn line rather than two stacked shapes.
@@ -152,18 +168,28 @@ APPLE_PROFILE = [
 
 # Bites, per stage: (centre x, centre y, radius).
 #
-# The first three eat the right-hand side from the top DOWN, so each stage takes a visibly
+# The bites eat the right-hand side from the top DOWN, so each stage takes a visibly
 # different piece. When two bites both landed on the upper right, 75% and 50% came out as
 # nearly the same silhouette.
 #
-# THE LAST STAGE ALSO TAKES ONE FROM THE LEFT, at waist height. That starts the hourglass, so
-# 25% reads as "almost a core" rather than as a slightly smaller apple, and the step to the
-# core at 0% is not a jump to a shape nobody saw coming.
+# STAGE 1 MUST STILL HAVE MORE APPLE LEFT THAN THE CORE DOES, and that is not obvious by
+# eye. It used to take a fourth bite from the LEFT at waist height, on the theory that
+# starting the hourglass would make 25% read as "almost a core" -- but between that and the
+# three on the right it ate down to 16,600 opaque pixels against the core's 20,200. The 25%
+# apple was visibly MORE eaten than the finished core, so the sequence ran backwards at the
+# very end.
+#
+# The left bite is gone and the right ones are pulled back. The whole left profile now
+# survives, full height, which is plainly more fruit than a narrow-waisted core.
+#
+# Checked by COUNTING PIXELS, not by looking: tools/check_stages.py asserts the opaque area
+# falls at every step. Five shapes that each look plausible alone can still be out of order
+# as a set, and that is exactly the mistake this comment exists to stop being repeated.
 APPLE_BITES = {
     4: (),
     3: ((214, 108, 48),),
     2: ((204, 96, 52), (210, 180, 48)),
-    1: ((182, 92, 56), (188, 188, 54), (196, 138, 52), (44, 150, 42)),
+    1: ((193, 94, 50), (199, 186, 48), (205, 140, 46)),
 }
 
 
@@ -260,12 +286,19 @@ def apple(stage):
         # THE CORE, made by taking one big bite out of each side of a whole apple. The
         # flared top, narrow waist and flared bottom are a consequence of eating it, not a
         # separate drawing of a core -- which is exactly why it reads as the same fruit.
-        for cx in (26, 230):
-            bd.ellipse([s(cx - 70), s(152 - 70), s(cx + 70), s(152 + 70)], fill=CLEAR)
+        for cx in (24, 232):
+            bd.ellipse([s(cx - 73), s(152 - 73), s(cx + 73), s(152 + 73)], fill=CLEAR)
 
         # Two pips in the waist, punched out so they read against the flat tint.
-        for px, py in ((120, 138), (136, 166)):
-            bd.ellipse([s(px - 7), s(py - 10), s(px + 7), s(py + 10)], fill=CLEAR)
+        #
+        # SIZED AGAINST THE OUTLINE, not chosen freely. The rim eats OUTLINE units into a hole
+        # from each side, so a pip narrower than twice that is not a small pip -- it is no pip
+        # at all, filled in solid with nothing to show it was ever there.
+        pw = OUTLINE + 4
+        ph = OUTLINE + 8
+
+        for px, py in ((119, 136), (137, 168)):
+            bd.ellipse([s(px - pw), s(py - ph), s(px + pw), s(py + ph)], fill=CLEAR)
     else:
         for bx, by, br in APPLE_BITES.get(stage, ()):
             bd.ellipse([s(bx - br), s(by - br), s(bx + br), s(by + br)], fill=CLEAR)
