@@ -237,6 +237,16 @@ namespace BareMinimum.UI
                   0.02f, 0f, 1f, "0.00",
                   "How hard the camera moves when exhausted. 0 turns it off.");
 
+            Float("Well-fed speed bonus", "Effects", "WellFedBonus",
+                  () => _cfg.WellFedBonus, v => _cfg.WellFedBonus = v,
+                  0.01f, 1f, 1.5f, "0.00",
+                  "How much quicker you move on foot with BOTH needs up. 1.00 turns it off.");
+
+            Float("Bonus starts above", "Effects", "WellFedAbove",
+                  () => _cfg.WellFedAbove, v => _cfg.WellFedAbove = v,
+                  0.05f, 0.1f, 1f, "P0",
+                  "Both needs must be above this. It ramps in from here to full.");
+
             Bool("Starving costs health", "Effects", "StarvingCostsHealth",
                  () => _cfg.StarvingCostsHealth, v => _cfg.StarvingCostsHealth = v,
                  "Slowly, and it stops at a sixth of your health. It will not kill you.");

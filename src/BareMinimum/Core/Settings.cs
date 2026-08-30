@@ -95,6 +95,28 @@ namespace BareMinimum.Core
         /// <summary>How hard the camera sways when exhausted. 0 turns it off entirely.</summary>
         public float SleepCameraShake = 0.14f;
 
+        /// <summary>
+        /// How much faster you move on foot when BOTH needs are full. 1.0 turns it off.
+        ///
+        /// Deliberately tiny. The move-rate override scales the animations as well as the
+        /// speed, so a big number does not read as "well fed", it reads as the game running
+        /// fast -- the legs visibly cycle quicker than the ground moves. Five per cent is felt
+        /// rather than seen, which is the right register for a reward you get for housekeeping.
+        ///
+        /// It also has to stay small because it stacks with nothing: there is no penalty in
+        /// force when this applies, so whatever is here is the whole effect.
+        /// </summary>
+        public float WellFedBonus = 1.05f;
+
+        /// <summary>
+        /// Both needs must be above this before the bonus starts coming in.
+        ///
+        /// It RAMPS from here to full rather than switching on, for the same reason the
+        /// penalties ramp: a step change at a number the player cannot see reads as the game
+        /// stuttering, not as a state they have earned.
+        /// </summary>
+        public float WellFedAbove = 0.85f;
+
         /// <summary>Whether an empty stomach slowly costs health.</summary>
         public bool StarvingCostsHealth = true;
 
@@ -246,6 +268,11 @@ namespace BareMinimum.Core
                 cfg.SleepClipset = ini.GetString("Effects", "SleepClipset", cfg.SleepClipset);
                 cfg.SleepCameraShake = ini.GetFloat("Effects", "SleepCameraShake",
                                                     cfg.SleepCameraShake, 0f, 1f);
+
+                cfg.WellFedBonus = ini.GetFloat("Effects", "WellFedBonus",
+                                                cfg.WellFedBonus, 1f, 1.5f);
+                cfg.WellFedAbove = ini.GetFloat("Effects", "WellFedAbove",
+                                                cfg.WellFedAbove, 0.1f, 1f);
 
                 cfg.StarvingCostsHealth = ini.GetBool("Effects", "StarvingCostsHealth",
                                                       cfg.StarvingCostsHealth);

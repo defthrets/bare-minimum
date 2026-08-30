@@ -99,11 +99,50 @@ namespace BareMinimum.Needs
                 rate *= Ramp(sleep, _cfg.SleepTiredAt, _cfg.SleepMinMoveRate);
             }
 
-            if (rate >= 0.999f) return;
+            rate *= WellFed(hunger, sleep);
+
+            // Only when there is actually something to say. A fed and rested player with the
+            // bonus turned off never has this native called at all, so nothing else that wants
+            // to set their move rate has to fight us for it every frame.
+            if (Math.Abs(rate - 1f) < 0.001f) return;
 
             if (rate < 0.4f) rate = 0.4f;
 
             Function.Call(Hash.SET_PED_MOVE_RATE_OVERRIDE, me.Handle, rate);
+        }
+
+        /// <summary>
+        /// The reward for keeping both needs up: a little quicker on foot.
+        ///
+        /// BOTH, AND THE WORSE ONE DECIDES. Taking the better of the two would let somebody
+        /// eat well and never sleep and still collect the bonus, which is exactly backwards --
+        /// it is meant to be paid for keeping BOTH up, so the one you have neglected is the
+        /// one that sets it.
+        ///
+        /// It can never overlap a penalty: the threshold it starts from is far above either
+        /// slowdown threshold, so by the time this returns anything above 1 both of those have
+        /// already returned nothing.
+        /// </summary>
+        private float WellFed(float hunger, float sleep)
+        {
+            if (_cfg.WellFedBonus <= 1.0001f) return 1f;
+
+            // A need that is switched off should not be able to hold the bonus back -- with
+            // hunger disabled its value never moves and would otherwise pin this at zero.
+            var worst = 1f;
+
+            if (_cfg.HungerEnabled) worst = Math.Min(worst, hunger);
+            if (_cfg.SleepEnabled) worst = Math.Min(worst, sleep);
+
+            var from = _cfg.WellFedAbove;
+            if (worst <= from) return 1f;
+            if (from >= 0.9999f) return _cfg.WellFedBonus;
+
+            // Ramps from nothing at the threshold to the full bonus at completely full.
+            var t = (worst - from) / (1f - from);
+            if (t > 1f) t = 1f;
+
+            return 1f + (_cfg.WellFedBonus - 1f) * t;
         }
 
         /// <summary>
