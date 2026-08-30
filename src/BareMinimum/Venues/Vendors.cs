@@ -284,6 +284,17 @@ namespace BareMinimum.Venues
                 // IN RANGE IS SEPARATE FROM SPAWNED. A taco window has nothing to spawn -- the
                 // hatch is already part of the building -- so it would never count as live if
                 // being live meant holding an entity, and it could never be bought from.
+                //
+                // The transition is logged at Debug. A vendor placed at the wrong coordinate
+                // is completely silent otherwise -- it simply never offers, and there is
+                // nothing to tell you whether the position is wrong, the reach is too small or
+                // the item id is a typo. Set LogLevel = Debug to see them come and go.
+                if (near != v.InRange)
+                {
+                    Log.Debug(v.Name + (near ? " in range at " : " out of range at ") +
+                              v.Position.DistanceTo(from).ToString("0.0") + "m.");
+                }
+
                 v.InRange = near;
 
                 if (!v.HasEntities) continue;

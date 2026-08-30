@@ -43,7 +43,7 @@
       "z": 29.479,
       "heading": 64.172,
 
-      "pedBack": 1.1,
+      "pedBack": 0.7,
       "spawnRange": 90.0,
       "reach": 2.6,
 
@@ -105,10 +105,10 @@
       "label": "pastrami combo",
       "item": "pastrami_combo",
 
-      "x": -142.750,
-      "y": -1541.896,
-      "z": 28.642,
-      "heading": 141.086,
+      "x": 143.477,
+      "y": -1540.561,
+      "z": 28.628,
+      "heading": 150.258,
 
       "fromVehicle": true,
       "spawnRange": 90.0,
