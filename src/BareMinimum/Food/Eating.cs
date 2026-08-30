@@ -57,6 +57,53 @@ namespace BareMinimum.Food
         /// <summary>True while something is being eaten. Stops a second one being started.</summary>
         public bool Busy => _item != null;
 
+        /// <summary>
+        /// Asks for everything an item needs, ahead of time.
+        ///
+        /// Called while a vendor is offering or a shop row is highlighted, so by the moment
+        /// the key is pressed the prop and the animation are already resident and Begin never
+        /// has to fall back to empty-handed. Requesting something already loaded is free, so
+        /// this can be called every frame without thought.
+        ///
+        /// This is the OTHER half of removing the spin-waits: without it, the first purchase
+        /// of anything would reliably have no prop.
+        /// </summary>
+        public void Preload(Item item)
+        {
+            if (item == null) return;
+
+            try
+            {
+                Ask(item.Prop);
+                Ask(item.DrinkProp);
+
+                AskAnim(_menu.Eat);
+                AskAnim(_menu.Sip);
+            }
+            catch (Exception ex)
+            {
+                Log.Once("preload", "Could not pre-load an item: " + ex.Message);
+            }
+        }
+
+        private static void Ask(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return;
+
+            var model = new Model(name);
+            if (!model.IsLoaded) model.Request();
+        }
+
+        private static void AskAnim(AnimRef anim)
+        {
+            if (anim == null || !anim.Valid) return;
+
+            if (!Function.Call<bool>(Hash.HAS_ANIM_DICT_LOADED, anim.Dict))
+            {
+                Function.Call(Hash.REQUEST_ANIM_DICT, anim.Dict);
+            }
+        }
+
         // ======================================================================
 
         /// <summary>Starts consuming an item that has already been paid for.</summary>
@@ -193,20 +240,24 @@ namespace BareMinimum.Food
 
                 if (!model.IsLoaded)
                 {
+                    // ASK, AND DO NOT WAIT.
+                    //
+                    // This used to spin on `while (!model.IsLoaded && Game.GameTime < until)`,
+                    // which reads like a bounded wait and is in fact an INFINITE LOOP that
+                    // hard-freezes the game. Game.GameTime is GET_GAME_TIMER, and that only
+                    // advances when the game renders a frame -- but this code runs inside a
+                    // script tick, which IS part of the frame. Spinning here stops the frame,
+                    // so the timer never moves, so the loop never ends. It froze the game the
+                    // first time somebody bought an item whose prop was not already resident.
+                    //
+                    // Nothing in this mod is worth blocking a frame for. The request is made
+                    // and the food is eaten empty-handed this once; Preload below means that
+                    // in practice it is already there by the time anybody presses the key.
                     model.Request();
 
-                    // Bounded, and deliberately short. This runs inside the tick, so a real
-                    // wait would stall every other subsystem; a prop that has not arrived in
-                    // a few milliseconds is simply skipped and the food is eaten by hand.
-                    var until = Game.GameTime + 120;
-                    while (!model.IsLoaded && Game.GameTime < until) { }
-
-                    if (!model.IsLoaded)
-                    {
-                        Log.Once("prop-slow-" + name,
-                                 name + " did not stream in time - eaten empty-handed.");
-                        return;
-                    }
+                    Log.Once("prop-slow-" + name,
+                             name + " was not loaded yet - eaten empty-handed this time.");
+                    return;
                 }
 
                 _held = World.CreateProp(model, me.Position, false, false);
@@ -256,19 +307,15 @@ namespace BareMinimum.Food
 
             try
             {
+                // Asked for, never waited on. Same reasoning as the prop above: a spin here
+                // stops the frame that would have loaded it.
                 if (!Function.Call<bool>(Hash.HAS_ANIM_DICT_LOADED, anim.Dict))
                 {
                     Function.Call(Hash.REQUEST_ANIM_DICT, anim.Dict);
 
-                    var until = Game.GameTime + 120;
-                    while (!Function.Call<bool>(Hash.HAS_ANIM_DICT_LOADED, anim.Dict) &&
-                           Game.GameTime < until) { }
-                }
-
-                if (!Function.Call<bool>(Hash.HAS_ANIM_DICT_LOADED, anim.Dict))
-                {
                     Log.Once("anim-" + anim.Dict,
-                             "Animation " + anim.Dict + " would not stream - eating without it.");
+                             "Animation " + anim.Dict + " was not loaded yet - eating without it " +
+                             "this time.");
                     return;
                 }
 

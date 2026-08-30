@@ -409,12 +409,13 @@ namespace BareMinimum.Venues
             {
                 if (model.IsLoaded) return true;
 
+                // ASKED FOR, NOT WAITED ON. A spin on Game.GameTime here is an infinite
+                // loop: the timer only moves when the game renders a frame, and this runs
+                // inside one. Nothing is lost by returning false -- the sweep that calls this
+                // runs again in three quarters of a second, by which time it will have
+                // arrived, and the stand appears a moment later than it might have.
                 model.Request();
-
-                var until = Game.GameTime + 150;
-                while (!model.IsLoaded && Game.GameTime < until) { }
-
-                return model.IsLoaded;
+                return false;
             }
             catch
             {
@@ -469,6 +470,11 @@ namespace BareMinimum.Venues
             if (item == null) return;
 
             _at = here;
+
+            // Ask for the prop and the animation NOW, while the prompt is up. By the time
+            // the key is pressed they are resident, so nothing has to be waited for -- which
+            // is what makes the non-blocking loader above good enough.
+            _eating.Preload(item);
 
             var money = Money();
             var afford = money >= item.Price;

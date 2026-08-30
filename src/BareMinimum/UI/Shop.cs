@@ -131,6 +131,14 @@ namespace BareMinimum.UI
 
             Subtitle();
 
+            // The highlighted row, asked for ahead of the keypress. Scrolling a list is
+            // exactly the moment to be streaming what is about to be bought.
+            if (_ui.Rows.Count > 0)
+            {
+                var at = _ui.Index;
+                if (at >= 0 && at < _ui.Rows.Count) _eating.Preload(_ui.Rows[at].Tag as Item);
+            }
+
             if (_ui.Activated != null) Buy(_ui.Activated.Tag as Item);
 
             _ui.Draw();
