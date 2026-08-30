@@ -85,8 +85,16 @@ namespace BareMinimum.UI
 
             _ui.Title = "BARE MINIMUM";
             _ui.LeftRightAdjusts = true;
-            _ui.TitleLeft = new Icon("apple2.png");
-            _ui.TitleRight = new Icon("eye2.png");
+            // THE EYE BLINKS UP HERE. It is the one place in the mod with room for it: a
+            // menu is looked AT, so a mark that moves every few seconds is noticed and read
+            // as character. The same movement beside the minimap is in peripheral vision all
+            // the time, which is a different thing entirely and is why the HUD does not do it.
+            _ui.TitleLeft = new Flipbook("apple2.png");
+            _ui.TitleRight = new Flipbook("eye2.png", "eye2_1.png", "eye2_2.png")
+            {
+                EveryMs = 5400,
+                SpanMs = 300
+            };
 
             Build();
         }
@@ -384,7 +392,7 @@ namespace BareMinimum.UI
 
             Bool("Animate the icons", "HUD", "Animate",
                  () => _cfg.HudAnimate, v => _cfg.HudAnimate = v,
-                 "The eye blinks and the apple twitches, harder as each one gets worse.");
+                 "A faint shimmer, and a slow sway once a meter is nearly empty.");
 
             Bool("HUD auto position", "HUD", "AutoPosition",
                  () => _cfg.HudAutoPosition, v => _cfg.HudAutoPosition = v,

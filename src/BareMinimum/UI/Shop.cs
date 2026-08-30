@@ -31,8 +31,8 @@ namespace BareMinimum.UI
         private readonly Menu _ui = new Menu
         {
             // The same two marks as the settings panel, so both menus read as this mod's.
-            TitleLeft = new Icon("p_burger.png"),
-            TitleRight = new Icon("p_cup.png")
+            TitleLeft = new Flipbook("p_burger.png"),
+            TitleRight = new Flipbook("p_cup.png")
         };
 
         private Counter _at = Counter.None;

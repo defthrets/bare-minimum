@@ -304,8 +304,8 @@ namespace BareMinimum.Venues
         /// </summary>
         private readonly UI.Menu _ui = new UI.Menu
         {
-            TitleLeft = new UI.Icon("p_burger.png"),
-            TitleRight = new UI.Icon("p_cup.png")
+            TitleLeft = new UI.Flipbook("p_burger.png"),
+            TitleRight = new UI.Flipbook("p_cup.png")
         };
 
         /// <summary>The vendor whose shelf is currently on screen.</summary>

@@ -32,14 +32,16 @@ namespace BareMinimum.UI
         private readonly Icon[] _apple = new Icon[5];
 
         /// <summary>
-        /// Five stages of eye, three animation frames each. [stage][frame].
+        /// Five stages of eye. THE RESTING FRAME ONLY.
         ///
-        /// Frame 0 is the resting state and is what is on screen for all but a fraction of a
-        /// second; the other two are the movement. They are held open for the same reason the
-        /// stages are -- a CustomSprite owns a texture handle, and fifteen of them is still
-        /// nothing next to the thirty the shop already keeps.
+        /// The blink frames exist and are used -- by the settings panel's title mark, which is
+        /// a thing you look at. Beside the minimap they were wrong: that icon lives in
+        /// peripheral vision for the whole session, and something that shuts and reopens there
+        /// reads as movement in the corner of your eye, over and over, forever.
+        ///
+        /// What is left is quieter by design. See Shimmer and Bob.
         /// </summary>
-        private readonly Icon[][] _eye = new Icon[5][];
+        private readonly Icon[] _eye = new Icon[5];
 
         private bool _measured;
 
@@ -50,11 +52,7 @@ namespace BareMinimum.UI
             for (var i = 0; i < 5; i++)
             {
                 _apple[i] = new Icon("apple" + i + ".png");
-
-                _eye[i] = new Icon[3];
-                _eye[i][0] = new Icon("eye" + i + ".png");
-                _eye[i][1] = new Icon("eye" + i + "_1.png");
-                _eye[i][2] = new Icon("eye" + i + "_2.png");
+                _eye[i] = new Icon("eye" + i + ".png");
             }
         }
 
@@ -235,8 +233,10 @@ namespace BareMinimum.UI
 
                 Measure(x, top, side);
 
-                Apple(needs.Hunger, x, top + side / 2f, wide, side);
-                Eye(needs.Sleep, x, top + side + gap + side / 2f, wide, side);
+                // Offset phases so the two never move together. In step they read as one
+                // object with two halves; a little apart they read as two things.
+                Mark(_apple, needs.Hunger, x, top + side / 2f, wide, side, 0f);
+                Mark(_eye, needs.Sleep, x, top + side + gap + side / 2f, wide, side, 0.37f);
             }
             catch (Exception ex)
             {
@@ -245,102 +245,79 @@ namespace BareMinimum.UI
         }
 
         /// <summary>
-        /// The apple: a hunger pang.
+        /// One need's icon: the picture, the colour, and whatever small movement it has.
         ///
-        /// A SQUASH AND A ROCK, not a new drawing. The apple's silhouette is already carrying
-        /// how much is left of it, and a second set of shapes to carry movement as well would
-        /// be twenty files to say something two numbers can say. Scale and rotation are free:
-        /// the sprite has both, and neither costs a texture.
+        /// TWO ANIMATIONS, AND THEY DO DIFFERENT JOBS.
         ///
-        /// It grows harder and more often as the meter empties, so the corner of the screen
-        /// is readable out of the corner of an eye -- a still apple is a fed one.
+        /// The SHIMMER runs the whole time and is meant to be almost invisible -- a slow lift
+        /// and fall in brightness, four seconds a cycle, a few per cent either way. It is not
+        /// there to tell you anything. It is there so the icon looks lit rather than printed,
+        /// because a completely static sprite next to the game's own animated HUD reads as an
+        /// overlay that has got stuck.
+        ///
+        /// The BOB is the opposite: it only exists on the LAST stage, and there it is meant to
+        /// be caught out of the corner of your eye. By then the icon has run out of silhouette
+        /// to spend -- the apple is a core and the eye is shut, and neither can get any worse
+        /// looking -- so movement is the only channel left to say it is still getting worse.
+        ///
+        /// <paramref name="offset"/> shifts a mark's phase so the two never move in step. In
+        /// step they read as one object with two halves rather than two separate things.
         /// </summary>
-        private void Apple(Need need, float centreX, float centreY, float wide, float tall)
+        private void Mark(Icon[] set, Need need, float centreX, float centreY,
+                          float wide, float tall, float offset)
         {
             if (_cfg.HudHideWhenFine && need.Value > _cfg.HudFineAbove) return;
 
-            var icon = _apple[Stage(need)];
+            var stage = Stage(need);
+
+            var icon = set[stage];
             if (icon == null || icon.Missing) return;
 
-            var grow = 1f;
+            var colour = Colour(need);
+
+            var y = centreY;
             var turn = 0f;
 
             if (_cfg.HudAnimate)
             {
-                // Empty beats about every 1.4s, full about every 7. Linear between, off the
-                // need itself rather than the stage, so it tightens smoothly instead of
-                // lurching each time the picture changes.
-                var every = 1400f + 5600f * Clamp01(need.Value);
-                var beat = Beat(every, 420f);
+                colour = Shimmer(colour, need, offset);
 
-                if (beat >= 0f)
+                if (stage == 0)
                 {
-                    // One half-sine: up and back down, with no discontinuity at either end.
-                    // A saw or a triangle jerks at the top, which reads as a dropped frame.
-                    var swell = (float)Math.Sin(Math.PI * beat);
+                    // A slow drift up and down, and a lean that lags a third of a cycle
+                    // behind it. The lag is what makes it a sway rather than a rocking
+                    // horse: the two moving together is a rigid thing being waggled.
+                    var bob = Wave(2400f, offset);
+                    var lean = Wave(2400f, offset + 0.33f);
 
-                    // 6% when fed, 16% when empty. A HUD icon that grows a quarter of its
-                    // own size again is a bouncing button; this has to read as a twinge in
-                    // the corner of the eye and no more.
-                    var strength = 0.06f + 0.10f * (1f - Clamp01(need.Value));
-
-                    grow = 1f + strength * swell;
-
-                    // Three degrees to eight. Enough to see, not enough to look broken.
-                    turn = 50f * strength * swell * (Alternate(every) ? 1f : -1f);
+                    y += tall * 0.045f * bob;
+                    turn = 4.5f * lean;
                 }
             }
 
-            icon.DrawSized(centreX + wide / 2f, centreY, wide * grow, tall * grow,
-                           Colour(need), turn);
+            icon.DrawSized(centreX + wide / 2f, y, wide, tall, colour, turn);
         }
 
         /// <summary>
-        /// The eye: a blink, which turns into a struggle once it is shut.
+        /// The lit look: a few per cent of brightness, breathing.
         ///
-        /// The frames do the work, so this only has to decide WHICH and WHEN. Tired blinks
-        /// come more often and are HELD -- a long blink is what being exhausted looks like,
-        /// and it is the difference between an icon that animates and one that acts.
+        /// DELIBERATELY UNDER THE THRESHOLD OF NOTICE. Anything you can consciously watch
+        /// happening in the corner of the screen is a distraction for the rest of the session,
+        /// and this icon is on screen the entire time.
         ///
-        /// At stage 0 the same three frames run the other way (see make_icons.py), so the
-        /// shut eye cracks open now and then instead of blinking, which a shut eye cannot do.
+        /// It stands aside for the critical flash. That flash is a real signal and is already
+        /// swinging the colour hard; a second, slower modulation underneath it just makes the
+        /// beat wander.
         /// </summary>
-        private void Eye(Need need, float centreX, float centreY, float wide, float tall)
+        private Color Shimmer(Color c, Need need, float offset)
         {
-            if (_cfg.HudHideWhenFine && need.Value > _cfg.HudFineAbove) return;
+            if (_cfg.HudFlashWhenCritical && need.Stage == 0) return c;
 
-            var set = _eye[Stage(need)];
-            if (set == null) return;
+            // 0 to 1 rather than -1 to 1: brightness only ever goes UP from the ramp colour,
+            // so the icon never dips darker than the state it is reporting.
+            var lift = 0.5f + 0.5f * Wave(4000f, offset);
 
-            var frame = 0;
-
-            if (_cfg.HudAnimate)
-            {
-                var rested = Clamp01(need.Value);
-
-                // Every 1.8s when exhausted, every 6s when fresh.
-                var every = 1800f + 4200f * rested;
-
-                // And the blink itself drags: 180ms fresh, 620ms when the lids are heavy.
-                var span = 180f + 440f * (1f - rested);
-
-                var beat = Beat(every, span);
-
-                if (beat >= 0f)
-                {
-                    // Down, hold, up. The hold is the middle HALF of the blink, so a slow
-                    // blink spends most of itself shut rather than merely travelling slowly.
-                    if (beat < 0.25f) frame = 1;
-                    else if (beat < 0.75f) frame = 2;
-                    else frame = 1;
-                }
-            }
-
-            var icon = set[frame];
-            if (icon == null || icon.Missing) icon = set[0];
-            if (icon == null || icon.Missing) return;
-
-            icon.DrawSized(centreX + wide / 2f, centreY, wide, tall, Colour(need));
+            return Mix(c, Color.FromArgb(c.A, 255, 252, 244), 0.05f * lift);
         }
 
         private static int Stage(Need need)
@@ -352,30 +329,21 @@ namespace BareMinimum.UI
         }
 
         /// <summary>
-        /// How far through the current movement we are, 0 to 1, or -1 while resting.
+        /// A sine from -1 to 1 over <paramref name="periodMs"/>, shifted by a fraction.
         ///
-        /// ON THE WALL CLOCK, like the colour pulse above it and for the same reason: a frame
-        /// counter makes the whole thing race on a fast machine and crawl on a slow one, and
-        /// this has to beat at a human rate or it is not a blink.
+        /// ON THE WALL CLOCK, like the colour pulse, so it runs at the same rate whatever the
+        /// framerate is doing -- a frame counter races on a fast machine and crawls on a slow
+        /// one. TickCount is masked positive because it wraps to negative after about
+        /// twenty-five days of uptime.
         /// </summary>
-        private static float Beat(float everyMs, float spanMs)
+        private static float Wave(float periodMs, float offset)
         {
-            if (everyMs <= 1f || spanMs <= 1f) return -1f;
+            if (periodMs <= 1f) return 0f;
 
-            // Masked positive. TickCount wraps to negative after about 25 days of uptime,
-            // and a negative remainder would quietly switch the animation off for the rest
-            // of the session with nothing to say why.
-            var into = (Environment.TickCount & int.MaxValue) % (int)everyMs;
-            if (into >= spanMs) return -1f;
+            var now = (Environment.TickCount & int.MaxValue) % (int)periodMs;
+            var t = now / periodMs + offset;
 
-            return into / spanMs;
-        }
-
-        /// <summary>Which way this beat leans, so the rock alternates instead of ticking.</summary>
-        private static bool Alternate(float everyMs)
-        {
-            if (everyMs <= 1f) return true;
-            return ((Environment.TickCount & int.MaxValue) / (int)everyMs) % 2 == 0;
+            return (float)Math.Sin(t * 2.0 * Math.PI);
         }
 
         private static float Clamp01(float v)

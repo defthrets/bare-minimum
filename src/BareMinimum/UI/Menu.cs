@@ -86,8 +86,8 @@ namespace BareMinimum.UI
         /// Set by whoever builds the menu rather than created here, because this class is
         /// deliberately ignorant of what the mod is about -- it draws rows.
         /// </summary>
-        public Icon TitleLeft;
-        public Icon TitleRight;
+        public Flipbook TitleLeft;
+        public Flipbook TitleRight;
 
         /// <summary>
         /// A picture to use INSTEAD of the title text: a shop's own sign over its counter.
@@ -492,12 +492,14 @@ namespace BareMinimum.UI
 
             if (TitleLeft != null)
             {
-                TitleLeft.DrawSized(PanelX - offset, centreY, wide, tall, Accent);
+                var left = TitleLeft.Current;
+                if (left != null) left.DrawSized(PanelX - offset, centreY, wide, tall, Accent);
             }
 
             if (TitleRight != null)
             {
-                TitleRight.DrawSized(PanelX + offset, centreY, wide, tall, Accent);
+                var right = TitleRight.Current;
+                if (right != null) right.DrawSized(PanelX + offset, centreY, wide, tall, Accent);
             }
         }
 

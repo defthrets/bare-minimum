@@ -336,10 +336,11 @@ namespace BareMinimum.Core
         /// <summary>
         /// Whether the two HUD icons move.
         ///
-        /// THE MOVEMENT IS THE READING, not decoration: the eye blinks more often and holds
-        /// the blink longer as you tire, and the apple twitches harder as you get hungry. So
-        /// somebody watching the corner of their screen learns the state from the rhythm
-        /// before they have looked directly at it.
+        /// TWO THINGS, AND THEY ARE NOT THE SAME SORT OF THING. A shimmer runs the whole
+        /// time and is meant to sit under the threshold of notice -- it exists so the icons
+        /// look lit rather than printed, not to tell anybody anything. A sway is added on the
+        /// LAST stage only, and that one IS meant to be caught: by then the silhouette has
+        /// run out of room to get worse, so movement is the only channel left.
         ///
         /// A switch because motion near the minimap is exactly the sort of thing that some
         /// people cannot stand and some people cannot see past.
