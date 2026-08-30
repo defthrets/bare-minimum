@@ -285,6 +285,19 @@
     },
 
     {
+      "id": "wine",
+      "name": "Bottle of Wine",
+      "category": "Drinks",
+      "price": 9,
+      "hunger": 0.06,
+      "booze": 0.34,
+      "drink": true,
+      "shop": false,
+      "prop": ["prop_wine_bot_01", "prop_bottle_wine", "prop_cs_wine_bot", "prop_ld_flow_bottle"],
+      "seconds": 4.5
+    },
+
+    {
       "id": "crisps",
       "name": "Bag of Crisps",
       "category": "Snacks",

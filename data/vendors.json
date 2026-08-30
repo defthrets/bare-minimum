@@ -445,6 +445,48 @@
     },
 
     {
+      "_note": "Long Pig Mini Market and Fast Foods. Its own awning lists ATM, TACOS,",
+      "_note2": "BEER & WINE, FOOD and ICE -- so the shelf is a mix rather than one thing.",
+      "_note3": "Coordinate is the DOOR, not the vantage point the sign was read from.",
+
+      "id": "long_pig",
+      "name": "Long Pig Mini Market",
+      "item": ["taco", "beer", "wine", "crisps", "jerky", "candybox", "sardines"],
+
+      "x": 409.760,
+      "y": -1910.927,
+      "z": 25.458,
+      "heading": 269.457,
+
+      "spawnRange": 90.0,
+      "reach": 2.2,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+
+    {
+      "_note": "Liquor store 4, Rancho. BEER & WINE over the door, Mount Whiskey on it.",
+
+      "id": "liquor_4",
+      "name": "Beer and Wine",
+      "item": ["beer", "beer_logger", "wine", "whiskey", "crisps", "jerky"],
+
+      "x": 464.058,
+      "y": -1850.959,
+      "z": 27.831,
+      "heading": 174.674,
+
+      "spawnRange": 90.0,
+      "reach": 2.2,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+
+    {
       "_note": "Bishop's Chicken. The doors are part of the map; nothing is spawned.",
 
       "id": "bishops_chicken",
