@@ -9,12 +9,20 @@ namespace BareMinimum.UI
     /// <summary>
     /// The settings menu, on F7.
     ///
-    /// CHANGES APPLY LIVE BUT SAVE ONLY WHEN ASKED. The live half is the point of having it
-    /// in-game at all -- you nudge the HUD size and watch it change, rather than alt-tabbing to
-    /// an ini and reloading scripts to see three pixels. The explicit save is because
-    /// BareMinimum.ini is the file the player hand-edits, with their own comments and their own
-    /// tuning in it, and silently rewriting that because somebody scrolled past a row would
-    /// undo the one guarantee the deploy makes about it.
+    /// CHANGES APPLY LIVE AND SAVE THEMSELVES. You nudge the HUD size, watch it change, and
+    /// it stays that way -- no alt-tabbing to an ini, and nothing to remember to press.
+    ///
+    /// The write is careful about the file rather than casual with it, because
+    /// BareMinimum.ini is the one the player hand-edits and it ships with a page of comments
+    /// explaining every setting:
+    ///
+    ///  - ONLY THE KEYS THAT ACTUALLY CHANGED are written, tracked per option. The file is
+    ///    never serialised over wholesale, so the comments, the ordering and any hand-made
+    ///    edits survive untouched.
+    ///  - The write waits for the player to STOP. Holding a direction fires a nudge every few
+    ///    frames, and IniFile.SetValue re-reads and rewrites the whole file per key.
+    ///  - A failed write disables further attempts rather than retrying forever, because the
+    ///    likeliest cause is the game folder being read-only and that will not fix itself.
     /// </summary>
     internal sealed class SettingsPanel
     {
@@ -49,6 +57,16 @@ namespace BareMinimum.UI
 
             /// <summary>Shown instead of Note while Available is false.</summary>
             public string Unavailable = "";
+
+            /// <summary>
+            /// Changed since the last write.
+            ///
+            /// PER OPTION, not one flag for the whole panel, because the auto-save writes only
+            /// what actually moved. IniFile.SetValue re-reads and rewrites the entire file per
+            /// key, so saving all twenty-eight every time somebody nudges one would be
+            /// twenty-eight passes over the file to record a single number.
+            /// </summary>
+            public bool Dirty;
         }
 
         private readonly Core.Settings _cfg;
@@ -83,19 +101,27 @@ namespace BareMinimum.UI
             {
                 if (suspended)
                 {
-                    if (_ui.IsOpen) _ui.Close();
+                    if (_ui.IsOpen) { _ui.Close(); Flush(); }
                     return;
                 }
 
                 if (Toggled())
                 {
-                    if (_ui.IsOpen) _ui.Close();
+                    if (_ui.IsOpen) { _ui.Close(); Flush(); }
                     else { _ui.Open(); Refill(); }
                 }
 
-                if (!_ui.IsOpen) return;
+                if (!_ui.IsOpen)
+                {
+                    // A save can still be owed after the menu has gone -- closing flushes,
+                    // but a settle timer left running by anything else must not be stranded.
+                    if (Due()) Flush();
+                    return;
+                }
 
                 _ui.Update();
+
+                if (_ui.JustClosed) { Flush(); return; }
 
                 if (_ui.Adjusted != null)
                 {
@@ -103,7 +129,7 @@ namespace BareMinimum.UI
                     if (option != null && option.Nudge != null)
                     {
                         option.Nudge(_ui.AdjustBy);
-                        _dirty = true;
+                        Touch(option);
                         Refill();
                     }
                 }
@@ -122,10 +148,12 @@ namespace BareMinimum.UI
                         // Enter on a value row nudges it forward, so a toggle can be flipped
                         // without anybody having to discover that left and right do anything.
                         option.Nudge(1);
-                        _dirty = true;
+                        Touch(option);
                         Refill();
                     }
                 }
+
+                if (Due()) Flush();
 
                 Subtitle();
                 _ui.Draw();
@@ -137,11 +165,61 @@ namespace BareMinimum.UI
             }
         }
 
+        // ======================================================================
+        // Saving itself
+        // ======================================================================
+
+        /// <summary>
+        /// How long after the last keypress the settings are written, in milliseconds.
+        ///
+        /// A SETTLE TIME, not a delay for its own sake. Holding right on the HUD size fires a
+        /// nudge every few frames, and writing the ini on each one is a read-and-rewrite of
+        /// the whole file dozens of times a second. Waiting for the player to stop turns a
+        /// drag from end to end into a single write.
+        /// </summary>
+        private const int SettleMs = 900;
+
+        /// <summary>When the pending write comes due. Zero when nothing is owed.</summary>
+        private int _saveAt;
+
+        /// <summary>
+        /// Set once a write has failed, so a read-only game folder is not retried forever.
+        ///
+        /// Without it, an unwritable ini means a failed save every time the player nudges
+        /// anything, for the rest of the session -- and a log line each time saying so.
+        /// </summary>
+        private bool _saveBroken;
+
+        /// <summary>Marks one option as needing writing, and restarts the settle timer.</summary>
+        private void Touch(Option option)
+        {
+            if (option == null) return;
+
+            option.Dirty = true;
+            _dirty = true;
+
+            if (_saveBroken) return;
+
+            var now = Game.GameTime;
+            _saveAt = now + SettleMs;
+        }
+
+        private bool Due()
+        {
+            return _saveAt != 0 && Game.GameTime >= _saveAt;
+        }
+
         private void Subtitle()
         {
+            if (_saveBroken)
+            {
+                _ui.Subtitle = "~r~Cannot save~s~ - see the log.  left/right to change";
+                return;
+            }
+
             _ui.Subtitle = _dirty
-                ? "~y~Unsaved~s~   left/right to change, enter to toggle"
-                : "left/right to change, enter to toggle";
+                ? "~y~Saving...~s~   left/right to change, enter to toggle"
+                : "Saved.  left/right to change, enter to toggle";
         }
 
         /// <summary>
@@ -321,10 +399,11 @@ namespace BareMinimum.UI
 
             _options.Add(new Option
             {
-                Name = "Save to BareMinimum.ini",
-                Note = "Writes these values to the ini, keeping your comments and layout.",
-                Show = () => _dirty ? "unsaved" : "saved",
-                Activate = Save
+                Name = "Settings",
+                Note = "Saved automatically to BareMinimum.ini, keeping your comments and " +
+                       "layout. Press to write them now.",
+                Show = () => _saveBroken ? "FAILED" : _dirty ? "saving" : "saved",
+                Activate = () => { _saveAt = 0; _saveBroken = false; Flush(); }
             });
 
             _options.Add(new Option
@@ -415,28 +494,38 @@ namespace BareMinimum.UI
         // ======================================================================
 
         /// <summary>
-        /// Writes every value back to the ini, one key at a time.
+        /// Writes the changed settings to the ini, and only the changed ones.
         ///
-        /// KEY BY KEY, THROUGH IniFile.SetValue, rather than serialising the whole settings
-        /// object over the file. The ini ships with a page of comments explaining what each
-        /// setting does and why the defaults are what they are, and rewriting it wholesale
-        /// would throw all of that away the first time anybody pressed save.
+        /// KEY BY KEY, THROUGH IniFile.SetValue, never by serialising the settings object
+        /// over the file. The ini ships with a page of comments explaining what each setting
+        /// does and why the defaults are what they are, and rewriting it wholesale would throw
+        /// all of that away the first time anybody moved a slider.
         /// </summary>
-        private void Save()
+        private void Flush()
         {
+            _saveAt = 0;
+
+            if (!_dirty || _saveBroken) return;
+
             var written = 0;
             var failed = 0;
 
             foreach (var option in _options)
             {
+                if (!option.Dirty) continue;
                 if (option.Persist == null || string.IsNullOrEmpty(option.Section)) continue;
 
                 try
                 {
                     if (IniFile.SetValue(Paths.Ini, option.Section, option.Key, option.Persist()))
+                    {
+                        option.Dirty = false;
                         written++;
+                    }
                     else
+                    {
                         failed++;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -449,17 +538,21 @@ namespace BareMinimum.UI
             if (failed == 0)
             {
                 _dirty = false;
-                Log.Info("Settings: wrote " + written + " value(s) to " + Paths.Ini + ".");
-                Notify("~g~Saved~s~ " + written + " setting(s).");
+                if (written > 0) Log.Info("Settings: saved " + written + " change(s) to " + Paths.Ini + ".");
                 return;
             }
 
-            // Left dirty on purpose. The most likely cause is the game folder being unwritable
-            // -- GTA5.exe is unelevated and the game usually lives under Program Files -- and
-            // saying "saved" over that would be a lie the player only finds out about later.
+            // STOPS TRYING. The likeliest cause is the game folder being read-only -- GTA5.exe
+            // is unelevated and the game usually lives under Program Files -- and that will
+            // not fix itself, so retrying on every keypress would only produce a stream of
+            // failures. Said once, loudly, and the menu shows FAILED from here on.
+            _saveBroken = true;
+
             Log.Warn("Settings: " + failed + " value(s) could not be written to " + Paths.Ini +
-                     ". Is the game folder read-only?");
-            Notify("~r~Could not save~s~ - see the log.");
+                     ". Is the game folder read-only? Automatic saving is now off for this " +
+                     "session; changes still apply until you reload.");
+
+            Notify("~r~Could not save settings~s~ - see the log.");
         }
 
         private static void Notify(string message)

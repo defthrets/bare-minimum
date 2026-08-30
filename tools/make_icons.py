@@ -18,7 +18,7 @@ out at the start. An apple is eaten down to a core; an eye closes.
 import math
 import os
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(os.path.dirname(HERE), "data", "icons")
@@ -36,9 +36,69 @@ def canvas():
     return img, ImageDraw.Draw(img)
 
 
-def save(img, name):
+# How thick the outline is, in design units. About 1.3 px once the icon is drawn at its
+# HUD size of ~46, which is a hairline that reads as a drawn edge rather than as a border.
+OUTLINE = 7
+
+
+def outlined(img, radius=OUTLINE):
+    """
+    Wraps the shape in a black rim, baked into the PNG.
+
+    THE OUTLINE SURVIVES THE RUNTIME TINT, and that is the whole reason this can be baked in
+    at all. CustomSprite.Color MULTIPLIES with the texture rather than replacing it, so a
+    white pixel takes the tint (white x amber = amber) and a BLACK pixel stays black
+    whatever the tint is (black x anything = black). One file therefore carries both the
+    tintable body and a fixed black edge, with no second sprite and no second draw call.
+
+    The rim is built by stamping the shape's own alpha around a circle rather than with a
+    box filter: PIL's MaxFilter dilates with a SQUARE kernel, and on an apple that comes out
+    visibly boxy at the shoulders. Twenty-four stamps at the full radius plus a ring at half
+    it fills the corners smoothly.
+
+    THE INTERNAL HOLES GET RIMMED TOO, and that is a happy consequence rather than extra
+    work: stamping the alpha outward in every direction also closes in on a hole from every
+    direction, so the apple's bites, the eye's iris and the core's pips each end up with the
+    same black edge as the silhouette, shrunk by the radius. It is what stops the bites
+    reading as gaps in a flat colour and makes the whole thing read as drawn.
+
+    The radius therefore cannot exceed half the smallest hole, or that hole fills in
+    completely. The tightest are the core's pips at 14 units across, which is why 7 is the
+    practical ceiling here.
+    """
+    alpha = img.getchannel("A")
+    grown = alpha.copy()
+
+    for scale in (1.0, 0.5):
+        r = radius * SS * scale
+        if r < 1:
+            continue
+
+        for i in range(24):
+            a = 2.0 * math.pi * i / 24.0
+            dx = int(round(math.cos(a) * r))
+            dy = int(round(math.sin(a) * r))
+
+            # offset() wraps around the edges, which is harmless here only because every
+            # icon is drawn with a margin far wider than the radius, so what wraps in is
+            # transparent. Anything drawn to the canvas edge would smear across.
+            grown = ImageChops.lighter(grown, ImageChops.offset(alpha, dx, dy))
+
+    rim = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    rim.putalpha(grown)
+
+    # The body goes ON TOP of the rim, so its antialiased edge blends into black and the
+    # transition reads as one drawn line rather than two stacked shapes.
+    rim.alpha_composite(img)
+    return rim
+
+
+def save(img, name, outline=True):
     if not os.path.isdir(OUT):
         os.makedirs(OUT)
+
+    if outline:
+        img = outlined(img)
 
     img = img.resize((SIZE, SIZE), Image.LANCZOS)
     path = os.path.join(OUT, name)
