@@ -36,6 +36,19 @@ namespace BareMinimum.UI
 
             /// <summary>For a row that DOES something rather than holds a value.</summary>
             public Action Activate;
+
+            /// <summary>
+            /// Whether this row can currently be changed at all. Null means always.
+            ///
+            /// This exists because HUD X and HUD Y are ignored while auto position is on, and
+            /// a row that accepts a keypress, plays a sound and moves a number while having no
+            /// effect whatsoever is worse than no row at all -- it reads as the mod being
+            /// broken. Greyed out, the menu says so instead.
+            /// </summary>
+            public Func<bool> Available;
+
+            /// <summary>Shown instead of Note while Available is false.</summary>
+            public string Unavailable = "";
         }
 
         private readonly Core.Settings _cfg;
@@ -54,6 +67,8 @@ namespace BareMinimum.UI
 
             _ui.Title = "BARE MINIMUM";
             _ui.LeftRightAdjusts = true;
+            _ui.TitleLeft = new Icon("apple2.png");
+            _ui.TitleRight = new Icon("eye2.png");
 
             Build();
         }
@@ -154,11 +169,16 @@ namespace BareMinimum.UI
 
             foreach (var option in _options)
             {
+                var usable = option.Available == null || option.Available();
+
                 _ui.Rows.Add(new Row
                 {
                     Left = option.Name,
                     Right = option.Show == null ? "" : option.Show(),
-                    Note = option.Note,
+                    Note = usable || string.IsNullOrEmpty(option.Unavailable)
+                        ? option.Note
+                        : option.Unavailable,
+                    Enabled = usable,
                     Tag = option
                 });
             }
@@ -268,12 +288,16 @@ namespace BareMinimum.UI
             Float("HUD X", "HUD", "X",
                   () => _cfg.HudX, v => _cfg.HudX = v,
                   0.004f, -0.2f, 1.2f, "0.000",
-                  "Only used when auto position is off.");
+                  "Across the screen. 0 is the far left, 1 the far right.",
+                  () => !_cfg.HudAutoPosition,
+                  "~y~Turn HUD auto position OFF first~s~ - this does nothing while it is on.");
 
             Float("HUD Y", "HUD", "Y",
                   () => _cfg.HudY, v => _cfg.HudY = v,
                   0.004f, -0.2f, 1.2f, "0.000",
-                  "Only used when auto position is off.");
+                  "Down the screen. 0 is the top, 1 the bottom. The icons sit ABOVE this line.",
+                  () => !_cfg.HudAutoPosition,
+                  "~y~Turn HUD auto position OFF first~s~ - this does nothing while it is on.");
 
             Bool("Hide when fine", "HUD", "HideWhenFine",
                  () => _cfg.HudHideWhenFine, v => _cfg.HudHideWhenFine = v,
@@ -351,7 +375,8 @@ namespace BareMinimum.UI
         /// </summary>
         private void Float(string name, string section, string key,
                            Func<float> get, Action<float> set,
-                           float step, float min, float max, string format, string note)
+                           float step, float min, float max, string format, string note,
+                           Func<bool> available = null, string unavailable = "")
         {
             _options.Add(new Option
             {
@@ -359,6 +384,8 @@ namespace BareMinimum.UI
                 Note = note,
                 Section = section,
                 Key = key,
+                Available = available,
+                Unavailable = unavailable,
                 Show = () => get().ToString(format, CultureInfo.InvariantCulture),
                 Nudge = dir =>
                 {

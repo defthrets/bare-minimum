@@ -61,6 +61,18 @@ namespace BareMinimum.UI
         public string Title = "";
         public string Subtitle = "";
 
+        /// <summary>
+        /// Optional marks either side of the title. Both menus carry the mod's own two icons.
+        ///
+        /// Set by whoever builds the menu rather than created here, because this class is
+        /// deliberately ignorant of what the mod is about -- it draws rows.
+        /// </summary>
+        public Icon TitleLeft;
+        public Icon TitleRight;
+
+        /// <summary>Tint for those marks. The header's accent colour.</summary>
+        private static readonly Color Accent = Color.FromArgb(255, 240, 170, 56);
+
         public readonly List<string> Tabs = new List<string>();
         public readonly List<Row> Rows = new List<Row>();
 
@@ -296,8 +308,10 @@ namespace BareMinimum.UI
                 var left = PanelX - PanelW / 2f;
                 var y = Top;
 
-                Header(left, y);
-                y += HeaderH;
+                // The header reports how tall it actually came out rather than being assumed
+                // to be HeaderH. Its height depends on the MEASURED height of the title text,
+                // and a fixed constant is what let the title and the subtitle overlap.
+                y += Header(left, y);
 
                 if (Tabs.Count > 0)
                 {
@@ -315,22 +329,93 @@ namespace BareMinimum.UI
             }
         }
 
-        private void Header(float left, float y)
+        /// <summary>
+        /// The header, and how tall it came out.
+        ///
+        /// THE SUBTITLE IS PLACED BELOW THE MEASURED HEIGHT OF THE TITLE, not at a constant
+        /// offset. It used to be drawn at a fixed y + 0.032 under a title at y + 0.008, and a
+        /// title at scale 0.58 is taller than the 0.024 that leaves it -- so the two lines
+        /// touched. GET_RENDERED_CHARACTER_HEIGHT knows the real figure, so it gets asked
+        /// rather than guessed at; the same argument as Draw.Height carries.
+        /// </summary>
+        private float Header(float left, float y)
         {
-            Hud.Bar(left, y, PanelW, HeaderH, Color.FromArgb(238, 12, 12, 15));
+            const float titleScale = 0.58f;
+            const float subScale = 0.28f;
+            const float padTop = 0.007f;
+            const float gap = 0.005f;          // clear air between the two lines
+            const float padBottom = 0.008f;
 
-            // A thin accent along the bottom of the header, which is what separates it from
-            // the tab strip without spending a whole row of height on a gap.
-            Hud.Bar(left, y + HeaderH - 0.0022f, PanelW, 0.0022f,
-                    Color.FromArgb(255, 240, 170, 56));
+            var titleH = Hud.Height(titleScale, Plain);
+            var subH = string.IsNullOrEmpty(Subtitle) ? 0f : Hud.Height(subScale, Plain);
 
-            Hud.Text(Title, PanelX, y + 0.008f, 0.58f,
+            var height = padTop + titleH + (subH > 0f ? gap + subH : 0f) + padBottom;
+
+            Hud.Bar(left, y, PanelW, height, Color.FromArgb(238, 12, 12, 15));
+
+            // A thin accent along the bottom, which separates the header from the tab strip
+            // without spending a whole row of height on a gap.
+            Hud.Bar(left, y + height - 0.0022f, PanelW, 0.0022f, Accent);
+
+            Hud.Text(Title, PanelX, y + padTop, titleScale,
                      Color.FromArgb(245, 245, 245, 248), Plain, true);
 
-            if (string.IsNullOrEmpty(Subtitle)) return;
+            Marks(y + padTop, titleH, titleScale);
 
-            Hud.Text(Subtitle, PanelX, y + 0.032f, 0.28f,
-                     Color.FromArgb(210, 190, 190, 198), Plain, true);
+            if (subH > 0f)
+            {
+                Hud.Text(Subtitle, PanelX, y + padTop + titleH + gap, subScale,
+                         Color.FromArgb(210, 190, 190, 198), Plain, true);
+            }
+
+            return height;
+        }
+
+        /// <summary>
+        /// The two icons flanking the title.
+        ///
+        /// Placed off the MEASURED width of the title so they sit against the text rather than
+        /// at fixed positions -- "COUNTER" and "BARE MINIMUM" are very different widths, and a
+        /// constant offset would leave one pair crowding the letters and the other adrift.
+        /// </summary>
+        private void Marks(float titleTop, float titleH, float titleScale)
+        {
+            if (TitleLeft == null && TitleRight == null) return;
+
+            var half = Hud.Width(Title, titleScale, Plain) / 2f;
+
+            // Square ON SCREEN: a sprite given equal width and height fractions comes out as
+            // much wider than it is tall as the screen is, which on a 21:9 is half again.
+            var tall = titleH * 0.92f;
+            var wide = tall / Aspect();
+
+            var centreY = titleTop + titleH / 2f;
+            var offset = half + wide * 0.85f;
+
+            if (TitleLeft != null)
+            {
+                TitleLeft.DrawSized(PanelX - offset, centreY, wide, tall, Accent);
+            }
+
+            if (TitleRight != null)
+            {
+                TitleRight.DrawSized(PanelX + offset, centreY, wide, tall, Accent);
+            }
+        }
+
+        private static float Aspect()
+        {
+            try
+            {
+                var a = GTA.UI.Screen.AspectRatio;
+                if (a > 0.5f && a < 6f) return a;
+            }
+            catch
+            {
+                // Fall through to the safe default.
+            }
+
+            return 16f / 9f;
         }
 
         /// <summary>

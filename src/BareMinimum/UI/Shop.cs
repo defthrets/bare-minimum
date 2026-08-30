@@ -27,7 +27,12 @@ namespace BareMinimum.UI
         private readonly Eating _eating;
         private readonly Needs.Needs _needs;
 
-        private readonly Menu _ui = new Menu();
+        private readonly Menu _ui = new Menu
+        {
+            // The same two marks as the settings panel, so both menus read as this mod's.
+            TitleLeft = new Icon("apple2.png"),
+            TitleRight = new Icon("eye2.png")
+        };
 
         private Counter _at = Counter.None;
 

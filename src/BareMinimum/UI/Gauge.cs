@@ -50,27 +50,83 @@ namespace BareMinimum.UI
         // ======================================================================
 
         /// <summary>
-        /// The right-hand edge of the minimap, as a fraction of screen WIDTH.
+        /// How wide the minimap is, as a fraction of screen WIDTH.
         ///
-        /// THIS IS NOT A CONSTANT, and that is the entire reason this method exists. GTA
-        /// anchors the minimap to screen HEIGHT: it is the same number of pixels wide on any
-        /// monitor of the same height, and therefore a SHRINKING fraction of the width as the
-        /// screen gets wider. On 16:9 its right edge sits at about 0.157 of the width; on a
-        /// 21:9 ultrawide the same map ends at about 0.117.
-        ///
-        /// A default written for one is visibly wrong on the other -- floating out in the
-        /// middle of the screen, or sitting on top of the map. Scaling the 16:9 figure by the
-        /// aspect ratio puts it against the map on both.
+        /// GTA sizes the minimap off screen HEIGHT, so it is a constant number of pixels wide
+        /// on any monitor of the same height and therefore a shrinking fraction of the width
+        /// as the screen gets wider. 0.2785 of the height is the measured figure: 401 px on a
+        /// 1440-tall screen, which is also the familiar ~0.157 of the width at 16:9.
         /// </summary>
-        private static float MinimapRight()
+        private static float MinimapWidth()
         {
-            const float rightAt169 = 0.157f;
-            const float reference = 16f / 9f;
-
             var aspect = Aspect();
-            if (aspect < 1.1f) aspect = reference;
+            if (aspect < 1.1f) aspect = 16f / 9f;
 
-            return rightAt169 * reference / aspect;
+            return 0.2785f / aspect;
+        }
+
+        /// <summary>
+        /// Where the minimap's LEFT edge is, asked of the game rather than worked out.
+        ///
+        /// THE PREVIOUS VERSION MODELLED THIS AND WAS WRONG. It assumed the map starts at the
+        /// left edge of the screen and scaled a 16:9 right-edge figure by the aspect ratio,
+        /// which put the icons at 0.117 -- and on a 3440x1440 screen 0.117 is where the map
+        /// BEGINS, not where it ends. The icons landed on the far side of the minimap from the
+        /// one they were asked for, over the health bar.
+        ///
+        /// The map does not start at zero: the HUD sits inside the safe zone, and how far in
+        /// depends on the player's own safe-zone slider, which no formula here can know.
+        /// GET_HUD_COMPONENT_POSITION reports the real anchor of component 13, HUD_MINIMAP,
+        /// whatever the screen and whatever that slider says.
+        ///
+        /// Falls back to the safe-zone size if the native gives something implausible, and the
+        /// whole thing is overridable from the ini and the F7 menu.
+        /// </summary>
+        private static float MinimapLeft()
+        {
+            try
+            {
+                var at = Function.Call<GTA.Math.Vector3>(Hash.GET_HUD_COMPONENT_POSITION, 13);
+
+                // A minimap in the left half of the screen is the only sane answer. Anything
+                // else means the native reported something this code should not build on.
+                if (at.X > 0.0001f && at.X < 0.5f) return at.X;
+            }
+            catch
+            {
+                // Fall through to the safe-zone estimate.
+            }
+
+            return SafeZoneInset();
+        }
+
+        /// <summary>
+        /// How far in from the screen edge the HUD sits, from the safe-zone size.
+        ///
+        /// GET_SAFE_ZONE_SIZE runs about 0.85 to 1.0. The inset is half of what is missing,
+        /// measured in HEIGHT and converted to a fraction of width, because the safe zone is
+        /// square in screen terms rather than proportional to the width.
+        /// </summary>
+        private static float SafeZoneInset()
+        {
+            try
+            {
+                var safe = Function.Call<float>(Hash.GET_SAFE_ZONE_SIZE);
+
+                if (safe > 0.5f && safe <= 1f)
+                {
+                    var aspect = Aspect();
+                    if (aspect < 1.1f) aspect = 16f / 9f;
+
+                    return ((1f - safe) * 0.5f) * (1f / aspect) * 2f;
+                }
+            }
+            catch
+            {
+                // Fall through.
+            }
+
+            return 0.0f;
         }
 
         private static float Aspect()
@@ -105,11 +161,18 @@ namespace BareMinimum.UI
             {
                 var res = GTA.UI.Screen.Resolution;
 
+                var mapL = MinimapLeft();
+                var mapW = MinimapWidth();
+
+                // The minimap's measured bounds go in the log alongside the icons' position.
+                // This is the line that would have caught the icons landing on the wrong side
+                // of the map in one reading, instead of needing a screenshot to notice.
                 Log.Info("HUD: icons " + (side * res.Height).ToString("0") + " px square at " +
                          (x * res.Width).ToString("0") + "," + (y * res.Height).ToString("0") +
                          "  (screen " + res.Width + "x" + res.Height +
                          ", aspect " + Aspect().ToString("0.00") +
-                         ", minimap ends at " + (MinimapRight() * res.Width).ToString("0") + " px" +
+                         ", minimap " + (mapL * res.Width).ToString("0") + ".." +
+                         ((mapL + mapW) * res.Width).ToString("0") + " px" +
                          ", auto=" + _cfg.HudAutoPosition + ")");
             }
             catch (Exception ex)
@@ -142,8 +205,14 @@ namespace BareMinimum.UI
 
                 var gap = side * _cfg.HudGap;
 
+                // Just clear of the minimap's RIGHT-hand edge: its left, plus its width.
+                //
+                // The width has to be added. The previous version used a single figure it
+                // believed was the right edge and which was actually about where the map
+                // BEGINS on a 21:9, so the icons sat on the far side of the minimap from the
+                // one they were meant to be on.
                 var x = _cfg.HudAutoPosition
-                    ? MinimapRight() + wide * 0.55f
+                    ? MinimapLeft() + MinimapWidth() + wide * 0.45f
                     : _cfg.HudX;
 
                 // Sat so the PAIR ends level with the foot of the minimap, which is where the
