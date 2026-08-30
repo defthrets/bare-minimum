@@ -36,6 +36,23 @@ namespace BareMinimum.Venues
         public string[] PedModels = new string[0];
         public string Scenario = "WORLD_HUMAN_STAND_IMPATIENT";
 
+        /// <summary>
+        /// A looping animation for the vendor, preferred over the scenario when it will load.
+        ///
+        /// An animation rather than a scenario for one reason: it can be CHECKED. There is no
+        /// native that asks whether a scenario name is real, so a typo in one is a ped standing
+        /// perfectly still with nothing in the log; an animation dictionary answers
+        /// HAS_ANIM_DICT_LOADED, so a bad name says so and the scenario is used instead.
+        /// </summary>
+        public string AnimDict = "";
+        public string AnimClip = "";
+
+        /// <summary>Whether the looping animation is running, so it is started once.</summary>
+        public bool AnimStarted;
+
+        /// <summary>Whether the stand and the vendor have been dropped onto the real ground.</summary>
+        public bool Settled;
+
         /// <summary>What the prompt calls it. Falls back to the item's own name.</summary>
         public string Label = "";
 
@@ -141,6 +158,8 @@ namespace BareMinimum.Venues
                         Reach = node["reach"].AsFloat(2.4f),
                         FromVehicle = node["fromVehicle"].AsBool(false),
                         Scenario = node["scenario"].AsString("WORLD_HUMAN_STAND_IMPATIENT"),
+                        AnimDict = node["anim"]["dict"].AsString(""),
+                        AnimClip = node["anim"]["clip"].AsString(""),
                         PropModels = Strings(node["prop"]),
                         PedModels = Strings(node["ped"]),
                         Label = node["label"].AsString(""),
@@ -382,10 +401,13 @@ namespace BareMinimum.Venues
                 Function.Call(Hash.SET_BLOCKING_OF_NON_TEMPORARY_EVENTS, ped.Handle, true);
                 Function.Call(Hash.SET_PED_DIES_WHEN_INJURED, ped.Handle, false);
 
-                // A scenario rather than an idle animation: it comes with its own looping
-                // behaviour, transitions and prop handling, and it survives the ped being
-                // streamed around in a way a hand-played clip does not.
-                Function.Call(Hash.TASK_START_SCENARIO_IN_PLACE, ped.Handle, v.Scenario, 0, true);
+                // The scenario is the FALLBACK, started immediately so the vendor is never
+                // just standing there while the animation streams. Work() replaces it the
+                // moment the real one is ready.
+                if (string.IsNullOrEmpty(v.AnimDict))
+                {
+                    Function.Call(Hash.TASK_START_SCENARIO_IN_PLACE, ped.Handle, v.Scenario, 0, true);
+                }
             }
             catch (Exception ex)
             {
@@ -423,11 +445,143 @@ namespace BareMinimum.Venues
             }
         }
 
-        /// <summary>Puts back anything the game has quietly taken away.</summary>
+        /// <summary>Puts back anything the game has quietly taken away, and keeps him working.</summary>
         private static void Keep(Vendor v)
         {
             if (v.Stand != null && !v.Stand.Exists()) v.Stand = null;
-            if (v.Seller != null && !v.Seller.Exists()) v.Seller = null;
+
+            if (v.Seller != null && !v.Seller.Exists())
+            {
+                v.Seller = null;
+                v.AnimStarted = false;
+            }
+
+            Settle(v);
+            Work(v);
+        }
+
+        /// <summary>
+        /// Drops the stand and the vendor onto the actual ground, once.
+        ///
+        /// NOT AT SPAWN, and that is the point. A coordinate read off a coord HUD is the
+        /// PLAYER's z -- their feet, on whatever they were standing on -- and the ground a
+        /// metre behind the stand is rarely the same height. Worse, at the instant an entity
+        /// is created the collision around it may not be streamed in yet, so
+        /// PLACE_OBJECT_ON_GROUND_PROPERLY has nothing to place it against and leaves it
+        /// hanging. That is the stand hovering and the chef falling a metre.
+        ///
+        /// So it is done on a later sweep, by which time the map is there, and only once it
+        /// gets a sensible answer.
+        /// </summary>
+        private static void Settle(Vendor v)
+        {
+            if (v.Settled) return;
+
+            try
+            {
+                var done = true;
+
+                if (v.Stand != null && v.Stand.Exists())
+                {
+                    done &= Ground(v.Stand, true);
+                }
+
+                if (v.Seller != null && v.Seller.Exists())
+                {
+                    done &= Ground(v.Seller, false);
+                }
+
+                if (done) v.Settled = true;
+            }
+            catch (Exception ex)
+            {
+                Log.Once("vendor-settle-" + v.Id, "Could not settle " + v.Name + ": " + ex.Message);
+                v.Settled = true;
+            }
+        }
+
+        /// <summary>Puts one entity on the ground beneath it. False if the ground is not known yet.</summary>
+        private static bool Ground(Entity what, bool frozen)
+        {
+            var at = what.Position;
+
+            // OutputArgument, not a pointer. GET_GROUND_Z_FOR_3D_COORD writes its answer
+            // through a float*, and taking &z in C# would need the whole assembly compiled
+            // unsafe; SHVDN provides this wrapper for exactly that case.
+            var slot = new OutputArgument();
+
+            // Probed from a metre ABOVE where it currently is: starting at or below the
+            // surface can find the floor of whatever is underneath instead.
+            var found = Function.Call<bool>(Hash.GET_GROUND_Z_FOR_3D_COORD,
+                                            at.X, at.Y, at.Z + 1.0f, slot, false);
+
+            if (!found) return false;
+
+            var z = slot.GetResult<float>();
+            if (z <= 0f) return false;
+
+            // Unfrozen to move it, then frozen again. A frozen entity ignores a position set
+            // in some cases, and the whole reason it is frozen is so nothing can shove it.
+            if (frozen) what.IsPositionFrozen = false;
+
+            Function.Call(Hash.SET_ENTITY_COORDS_NO_OFFSET, what.Handle, at.X, at.Y, z, false, false, false);
+
+            if (frozen) what.IsPositionFrozen = true;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Starts the vendor's looping work animation, once it has streamed.
+        ///
+        /// REQUESTED WITHOUT WAITING, and retried on the next sweep. Spinning on a stream
+        /// inside a tick is an infinite loop, not a wait -- Game.GameTime only advances when
+        /// the game renders a frame, and this runs inside one. That mistake froze the game
+        /// once already; it is not being made again for an idle animation.
+        /// </summary>
+        private static void Work(Vendor v)
+        {
+            if (v.AnimStarted) return;
+            if (string.IsNullOrEmpty(v.AnimDict) || string.IsNullOrEmpty(v.AnimClip)) return;
+            if (v.Seller == null || !v.Seller.Exists()) return;
+
+            try
+            {
+                if (!Function.Call<bool>(Hash.HAS_ANIM_DICT_LOADED, v.AnimDict))
+                {
+                    Function.Call(Hash.REQUEST_ANIM_DICT, v.AnimDict);
+                    return;
+                }
+
+                // The scenario has to go first, or it keeps re-asserting its own idle over
+                // the top of this one and the vendor twitches between the two.
+                Function.Call(Hash.CLEAR_PED_TASKS, v.Seller.Handle);
+
+                // Flag 1 = LOOPING. Not upper-body and not secondary: this IS what he is
+                // doing, unlike the player's eating clip which has to sit over walking.
+                Function.Call(Hash.TASK_PLAY_ANIM, v.Seller.Handle, v.AnimDict, v.AnimClip,
+                              4f, -4f, -1, 1, 0f, false, false, false);
+
+                v.AnimStarted = true;
+                Log.Debug(v.Name + ": working animation " + v.AnimDict + " / " + v.AnimClip + ".");
+            }
+            catch (Exception ex)
+            {
+                Log.Once("vendor-work-" + v.Id,
+                         v.Name + ": could not play " + v.AnimDict + " - " + ex.Message +
+                         ". Falling back to the scenario.");
+
+                v.AnimDict = "";
+
+                try
+                {
+                    Function.Call(Hash.TASK_START_SCENARIO_IN_PLACE, v.Seller.Handle, v.Scenario, 0, true);
+                }
+                catch
+                {
+                    // He will simply stand there.
+                }
+            }
         }
 
         private static void Despawn(Vendor v)
@@ -444,6 +598,8 @@ namespace BareMinimum.Venues
 
             v.Stand = null;
             v.Seller = null;
+            v.AnimStarted = false;
+            v.Settled = false;
         }
 
         // ======================================================================

@@ -22,14 +22,23 @@ namespace BareMinimum.Food
     internal sealed class Eating
     {
         /// <summary>
-        /// PH_R_Hand: the non-deforming prop helper bone on the right hand.
+        /// PH_L_Hand: the non-deforming prop helper bone on the LEFT hand.
         ///
-        /// 28422, and NOT 57005 -- that is SKEL_R_Hand, the wrist joint, which is wrong for
-        /// props and puts the item through the palm. Zero offset and zero rotation, which is
-        /// the whole point of a prop helper: it is already where a held object should be.
-        /// Learned in Overspray and paid for again in Fumes.
+        /// THE LEFT ONE, and that is the whole point of this constant. The MP eating
+        /// interaction brings the LEFT hand to the mouth; the food was originally attached to
+        /// PH_R_Hand (28422) and so rode along at the player's side while he mimed eating out
+        /// of an empty left hand. Which is also why the hot dog looked like it had not spawned
+        /// at all -- it had, it was just down by his hip.
+        ///
+        /// 60309 is PH_L_Hand and NOT 18905, which is SKEL_L_Hand, the wrist joint. A wrist is
+        /// the wrong place for a prop and puts it through the palm; the PH_ bones are prop
+        /// helpers, already sitting where a held object should be, which is why the offset and
+        /// rotation are all zero. Learned in Overspray and paid for again in Fumes.
         /// </summary>
-        private const int PropBone = 28422;
+        private const int LeftHandBone = 60309;
+
+        /// <summary>PH_R_Hand, for anything the animations turn out to hold on the other side.</summary>
+        private const int RightHandBone = 28422;
 
         private readonly Catalogue _menu;
         private readonly Needs.Needs _needs;
@@ -263,10 +272,17 @@ namespace BareMinimum.Food
                 _held = World.CreateProp(model, me.Position, false, false);
                 if (_held == null || !_held.Exists()) { _held = null; return; }
 
-                var bone = Function.Call<int>(Hash.GET_PED_BONE_INDEX, me.Handle, PropBone);
+                var anim = (item.Drink || drinking) ? _menu.Sip : _menu.Eat;
 
+                var bone = Function.Call<int>(Hash.GET_PED_BONE_INDEX, me.Handle,
+                                              anim.LeftHanded ? LeftHandBone : RightHandBone);
+
+                // The last six arguments are Fumes' proven set for a prop in a hand:
+                // no soft pinning, no collision, not treated as a ped, vertex 2, fixed
+                // rotation. The version here used to pass a different combination copied from
+                // a general-purpose example, which is not what a held object wants.
                 Function.Call(Hash.ATTACH_ENTITY_TO_ENTITY, _held.Handle, me.Handle, bone,
-                              0f, 0f, 0f, 0f, 0f, 0f, true, true, false, true, 1, true);
+                              0f, 0f, 0f, 0f, 0f, 0f, false, false, false, false, 2, true);
 
                 // The model is released as soon as the object exists; holding the request open
                 // pins it in memory for the rest of the session for no reason.

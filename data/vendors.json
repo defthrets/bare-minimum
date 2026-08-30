@@ -41,7 +41,7 @@
       "x": -3.925,
       "y": -1539.631,
       "z": 29.479,
-      "heading": 244.172,
+      "heading": 64.172,
 
       "pedBack": 1.1,
       "spawnRange": 90.0,
@@ -70,7 +70,8 @@
         "a_m_y_business_01"
       ],
 
-      "scenario": "WORLD_HUMAN_STAND_IMPATIENT"
+      "scenario": "WORLD_HUMAN_STAND_IMPATIENT",
+      "anim": { "dict": "amb@prop_human_bbq@male@base", "clip": "base" }
     },
 
     {

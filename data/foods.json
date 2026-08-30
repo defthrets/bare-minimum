@@ -165,7 +165,7 @@
       "category": "Snacks",
       "price": 2,
       "hunger": 0.15,
-      "prop": "prop_apple_01",
+      "prop": ["prop_apple_01", "ng_proc_food_apple01a", "prop_food_bs_apple", "v_res_tt_apple"],
       "seconds": 3.5
     },
 
@@ -209,7 +209,7 @@
       "hunger": 0.05,
       "wake": 0.10,
       "drink": true,
-      "prop": "prop_amb_coffeecup_01",
+      "prop": ["p_amb_coffeecup_01", "prop_amb_coffeecup_01", "prop_coffee_cup_01", "ng_proc_coffee_cup_01", "prop_plastic_cup_02"],
       "seconds": 4.0
     },
     {
@@ -242,7 +242,7 @@
   ],
 
   "animations": {
-    "eat": { "dict": "mp_player_inteat@burger", "clip": "mp_player_int_eat_burger" },
-    "drink": { "dict": "mp_player_intdrink", "clip": "loop_bottle" }
+    "eat": { "dict": "mp_player_inteat@burger", "clip": "mp_player_int_eat_burger", "hand": "left" },
+    "drink": { "dict": "mp_player_intdrink", "clip": "loop_bottle", "hand": "left" }
   }
 }

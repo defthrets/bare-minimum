@@ -84,6 +84,16 @@ namespace BareMinimum.Food
         public string Dict = "";
         public string Clip = "";
 
+        /// <summary>
+        /// Which hand this animation brings to the mouth. Left for the MP eat and drink sets.
+        ///
+        /// In the file rather than in code because it is a thing you can only learn by
+        /// watching, and getting it wrong is not an error -- it is food riding along at hip
+        /// height while the other hand mimes eating. Changing an animation here should not
+        /// need a rebuild to put the prop back in the right hand.
+        /// </summary>
+        public bool LeftHanded = true;
+
         public bool Valid => !string.IsNullOrEmpty(Dict) && !string.IsNullOrEmpty(Clip);
     }
 
@@ -244,6 +254,12 @@ namespace BareMinimum.Food
 
             if (!string.IsNullOrEmpty(dict)) into.Dict = dict;
             if (!string.IsNullOrEmpty(clip)) into.Clip = clip;
+
+            var hand = node["hand"].AsString("");
+            if (!string.IsNullOrEmpty(hand))
+            {
+                into.LeftHanded = !hand.Trim().StartsWith("r", StringComparison.OrdinalIgnoreCase);
+            }
         }
 
         /// <summary>
