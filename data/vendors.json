@@ -601,6 +601,30 @@
     },
 
     {
+      "_note": "Xero 24, the garage shop. Open all hours, and the widest shelf on the map:",
+      "_note2": "a petrol station carries hot food, snacks AND the whole drinks fridge, which",
+      "_note3": "is exactly what it is for at 3am when nothing else is open.",
+
+      "id": "xero_24",
+      "name": "Xero 24",
+      "item": ["sandwich", "hotdog", "pie", "noodles",
+               "crisps", "jerky", "choc_meteorite", "candybox",
+               "ecola", "sprunk", "energy", "water", "coffee"],
+
+      "x": 289.276,
+      "y": -1266.858,
+      "z": 29.441,
+      "heading": 274.213,
+
+      "spawnRange": 90.0,
+      "reach": 2.4,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+
+    {
       "_note": "Bishop's Chicken. The doors are part of the map; nothing is spawned.",
 
       "id": "bishops_chicken",
