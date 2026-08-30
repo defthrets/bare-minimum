@@ -337,6 +337,11 @@ namespace BareMinimum.UI
                  () => _cfg.SleepInCars, v => _cfg.SleepInCars = v,
                  "Stopped, engine off, no wanted level.");
 
+            Bool("Count other mods' sleep", "Sleeping", "CreditOutsideSleep",
+                 () => _cfg.CreditOutsideSleep, v => _cfg.CreditOutsideSleep = v,
+                 "Credits rest when anything else skips the clock a few hours -- another " +
+                 "mod's bed, or a mission that skips a night.");
+
             Float("Bed hours", "Sleeping", "BedHours",
                   () => _cfg.BedHours, v => _cfg.BedHours = v,
                   1f, 1f, 24f, "0", "How long a proper night lasts.");

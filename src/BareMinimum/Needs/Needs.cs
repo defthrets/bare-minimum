@@ -85,14 +85,21 @@ namespace BareMinimum.Needs
         // The tick
         // ======================================================================
 
-        public void Update(float realSeconds)
+        public void Update(float realSeconds, bool suspended)
         {
             try
             {
                 SwitchCharacterIfNeeded();
 
-                var hours = Step();
-                if (hours > 0f) Drain(hours);
+                bool jumped;
+                var hours = Step(out jumped);
+
+                // A JUMP IS NOT A TICK, AND IT IS USUALLY A NIGHT. Anything past MaxStepHours
+                // did not happen frame by frame, so it must not be drained frame by frame --
+                // but throwing it away entirely means another mod's bed leaves the player just
+                // as tired as they lay down. Outside() decides which it was.
+                if (jumped) Outside(hours, suspended);
+                else if (hours > 0f) Drain(hours);
 
                 Save(realSeconds);
             }
@@ -108,8 +115,10 @@ namespace BareMinimum.Needs
         /// Returns 0 rather than a negative number when the clock goes backwards, which it
         /// does whenever anything sets the time -- a mission, a trainer, or the player.
         /// </summary>
-        private float Step()
+        private float Step(out bool jumped)
         {
+            jumped = false;
+
             GameClockDateTime now;
 
             try
@@ -139,12 +148,59 @@ namespace BareMinimum.Needs
 
             if (hours > MaxStepHours)
             {
-                Log.Debug("Ignoring a " + hours.ToString("0.0") +
-                          " game-hour jump in the clock - not a frame.");
-                return 0f;
+                jumped = true;
+                return hours;
             }
 
             return hours;
+        }
+
+        /// <summary>
+        /// A jump in the clock that this mod did not cause. Usually somebody else's bed.
+        ///
+        /// THIS IS HOW ANOTHER MOD'S SLEEP COUNTS. Posted Up and Hoodrich both put Franklin to
+        /// bed and neither shares an API with this one -- but both move the clock, and so does
+        /// a mission that skips a night. Reading the CLOCK rather than the mod means it works
+        /// for all of them at once, including ones not written yet, with no dependency on
+        /// anybody's dll.
+        ///
+        /// Bounded at both ends: under the floor it is a cutscene nudging the time along,
+        /// over the ceiling it is a fast travel or a trainer, and crediting those would make
+        /// the sleep half of this mod free to anybody with a time-of-day slider.
+        /// </summary>
+        private void Outside(float hours, bool suspended)
+        {
+            // Our own sleep never reaches here -- Sleeping calls Slept() and re-primes the
+            // clock inside the same tick -- but a fade we are staging is not the moment to be
+            // interpreting the clock either.
+            if (suspended || !_cfg.CreditOutsideSleep)
+            {
+                Log.Debug("Ignoring a " + hours.ToString("0.0") + " game-hour jump.");
+                return;
+            }
+
+            if (hours < _cfg.OutsideSleepMinHours || hours > _cfg.OutsideSleepMaxHours)
+            {
+                Log.Debug("Ignoring a " + hours.ToString("0.0") +
+                          " game-hour jump - outside the sleep window.");
+                return;
+            }
+
+            Log.Info("Something else advanced the clock " + hours.ToString("0.#") +
+                     "h - counting it as sleep.");
+
+            Slept(hours, _cfg.OutsideSleepQuality);
+
+            try
+            {
+                GTA.UI.Notification.PostTicker(
+                    "~b~Slept~s~ " + hours.ToString("0.#") + "h.  Rested " +
+                    ((int)Math.Round(Sleep.Value * 100f)) + "%.", false, false);
+            }
+            catch
+            {
+                // Nothing to do about it.
+            }
         }
 
         private void Drain(float hours)

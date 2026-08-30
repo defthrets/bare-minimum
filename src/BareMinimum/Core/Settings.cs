@@ -178,6 +178,39 @@ namespace BareMinimum.Core
         /// <summary>How close to a bed you have to stand before it offers.</summary>
         public float BedReach = 1.6f;
 
+        /// <summary>
+        /// Credit sleep when SOMETHING ELSE puts the player to bed.
+        ///
+        /// Posted Up and Hoodrich both have their own sleep at Franklin's, and there is no
+        /// way for this mod to hook either of them -- they share no API and this one is not
+        /// going to grow a dependency on somebody else's dll.
+        ///
+        /// What it CAN see is the game clock. A jump of several hours that this mod did not
+        /// cause is, near enough always, somebody sleeping: another mod's bed, or a mission
+        /// that skips a night. Reading the clock instead of the mod means it works for all of
+        /// them, including ones that do not exist yet.
+        /// </summary>
+        public bool CreditOutsideSleep = true;
+
+        /// <summary>
+        /// The window a jump has to fall in to count as sleep, in game hours.
+        ///
+        /// Bounded at BOTH ends on purpose. Below the floor it is a mission cutscene nudging
+        /// the clock along, not a night; above the ceiling it is a fast travel or a trainer,
+        /// and crediting a full meter for those would make the whole sleep half of the mod
+        /// free to anybody with a time-of-day slider.
+        /// </summary>
+        public float OutsideSleepMinHours = 2f;
+        public float OutsideSleepMaxHours = 14f;
+
+        /// <summary>
+        /// How good a night somebody else's bed counts as, against our own.
+        ///
+        /// Full marks. We have no idea whether they put you in a bed or a chair, and being
+        /// stingy about a night this mod did not stage would just read as the rest not working.
+        /// </summary>
+        public float OutsideSleepQuality = 1f;
+
         // ---- Map -------------------------------------------------------------
 
         /// <summary>Whether shops get map markers at all.</summary>
@@ -355,6 +388,15 @@ namespace BareMinimum.Core
                 cfg.CarRestoreFraction = ini.GetFloat("Sleeping", "CarRestoreFraction",
                                                       cfg.CarRestoreFraction, 0.05f, 1f);
                 cfg.BedReach = ini.GetFloat("Sleeping", "BedReach", cfg.BedReach, 0.5f, 6f);
+
+                cfg.CreditOutsideSleep = ini.GetBool("Sleeping", "CreditOutsideSleep",
+                                                     cfg.CreditOutsideSleep);
+                cfg.OutsideSleepMinHours = ini.GetFloat("Sleeping", "OutsideSleepMinHours",
+                                                        cfg.OutsideSleepMinHours, 0.5f, 24f);
+                cfg.OutsideSleepMaxHours = ini.GetFloat("Sleeping", "OutsideSleepMaxHours",
+                                                        cfg.OutsideSleepMaxHours, 1f, 48f);
+                cfg.OutsideSleepQuality = ini.GetFloat("Sleeping", "OutsideSleepQuality",
+                                                       cfg.OutsideSleepQuality, 0f, 1f);
 
                 cfg.PriceMultiplier = ini.GetFloat("Money", "PriceMultiplier",
                                                    cfg.PriceMultiplier, 0f, 50f);

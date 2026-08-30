@@ -129,9 +129,11 @@ namespace BareMinimum
                 // While the sleep sequence owns the screen, the effects and the HUD stand
                 // down -- a limp applied through a fade is still applied when you wake up,
                 // and an icon drawn over black is an icon floating on a black screen.
+                //
+                // It is also what stops Needs reading OUR OWN clock jump as somebody else's.
                 var suspended = _sleeping.Busy;
 
-                _needs.Update(dt);
+                _needs.Update(dt, suspended);
                 _effects.Update(_needs, suspended);
                 _gauge.Draw(_needs, suspended);
 
