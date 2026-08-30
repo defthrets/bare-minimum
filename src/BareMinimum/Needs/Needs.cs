@@ -65,6 +65,16 @@ namespace BareMinimum.Needs
         /// <summary>Health carried over between ticks, so a fractional loss is not rounded away.</summary>
         private float _healthDebt;
 
+        /// <summary>
+        /// How drunk, 0 to 1. NOT a Need, and deliberately not modelled as one.
+        ///
+        /// Every Need in this mod runs 1 = good, 0 = trouble, and the whole HUD, colour ramp
+        /// and threshold vocabulary is built on that. Drunkenness runs the other way -- 0 is
+        /// fine and 1 is trouble -- so making it a Need would have put a sign inversion inside
+        /// a class whose entire job is that the sign never varies.
+        /// </summary>
+        public float Drunk { get; private set; }
+
         public Needs(Settings cfg)
         {
             _cfg = cfg;
@@ -146,12 +156,52 @@ namespace BareMinimum.Needs
 
             if (_cfg.SleepEnabled)
             {
-                Sleep.Drain(hours, _cfg.SleepHoursToEmpty);
+                // DRINK MAKES YOU TIRED FASTER. Not a separate timer -- it scales the sleep
+                // drain itself, so one beer barely registers and a session of them costs most
+                // of a day's rest without any new meter to read.
+                Sleep.Drain(hours, _cfg.SleepHoursToEmpty, Sober());
             }
+
+            Sober(hours);
 
             if (_cfg.StarvingCostsHealth && Hunger.Empty) Starve(hours);
 
             _dirty = true;
+        }
+
+        /// <summary>How much faster tiredness comes on, given how drunk they are.</summary>
+        private float Sober()
+        {
+            if (!_cfg.BoozeEnabled || Drunk <= 0f) return 1f;
+
+            return 1f + Drunk * (_cfg.BoozeSleepMultiplier - 1f);
+        }
+
+        /// <summary>
+        /// Wearing off, over game hours.
+        ///
+        /// On the game clock like everything else here, which means SLEEPING IT OFF WORKS for
+        /// free: a night in a bed advances the clock eight hours and Slept() runs this for
+        /// those hours, so you wake up sober without a line of code saying so.
+        /// </summary>
+        private void Sober(float hours)
+        {
+            if (Drunk <= 0f || _cfg.BoozeHoursToSober <= 0.0001f) return;
+
+            Drunk = Clamp01(Drunk - hours / _cfg.BoozeHoursToSober);
+            _dirty = true;
+        }
+
+        /// <summary>Another drink. Returns how drunk it left them.</summary>
+        public float Booze(float amount)
+        {
+            if (amount <= 0f || !_cfg.BoozeEnabled) return Drunk;
+
+            Drunk = Clamp01(Drunk + amount);
+            _dirty = true;
+            SaveNow();
+
+            return Drunk;
         }
 
         /// <summary>
@@ -243,6 +293,9 @@ namespace BareMinimum.Needs
                 var gained = (gameHours / _cfg.SleepHoursToEmpty) * restoreFraction;
                 Sleep.Restore(gained);
             }
+
+            // Slept off, at the same rate it would have worn off awake.
+            Sober(gameHours);
 
             // The jump has already happened by the time this is called, so the clock has to be
             // re-primed or the NEXT tick sees the whole night as its own step and ignores it --
@@ -341,7 +394,7 @@ namespace BareMinimum.Needs
 
             if (_who != null)
             {
-                _saved[_who] = new[] { Hunger.Value, Sleep.Value };
+                _saved[_who] = new[] { Hunger.Value, Sleep.Value, Drunk };
                 SaveNow();
             }
 
@@ -351,11 +404,16 @@ namespace BareMinimum.Needs
             {
                 Hunger.Value = v[0];
                 Sleep.Value = v[1];
+
+                // Length-checked separately: a needs.json written before drink existed has
+                // two entries, and reading a third would throw on every old save.
+                Drunk = v.Length >= 3 ? v[2] : 0f;
             }
             else
             {
                 Hunger.Value = 1f;
                 Sleep.Value = 1f;
+                Drunk = 0f;
             }
 
             // A switch is also a teleport in time as far as the clock is concerned.
@@ -388,7 +446,8 @@ namespace BareMinimum.Needs
                     _saved[key] = new[]
                     {
                         Clamp01(node["hunger"].AsFloat(1f)),
-                        Clamp01(node["sleep"].AsFloat(1f))
+                        Clamp01(node["sleep"].AsFloat(1f)),
+                        Clamp01(node["drunk"].AsFloat(0f))
                     };
                 }
 
@@ -420,14 +479,15 @@ namespace BareMinimum.Needs
 
             try
             {
-                if (_who != null) _saved[_who] = new[] { Hunger.Value, Sleep.Value };
+                if (_who != null) _saved[_who] = new[] { Hunger.Value, Sleep.Value, Drunk };
 
                 var people = Json.Object();
                 foreach (var pair in _saved)
                 {
                     people.Set(pair.Key, Json.Object()
                         .Set("hunger", Math.Round(pair.Value[0], 4))
-                        .Set("sleep", Math.Round(pair.Value[1], 4)));
+                        .Set("sleep", Math.Round(pair.Value[1], 4))
+                        .Set("drunk", Math.Round(pair.Value.Length >= 3 ? pair.Value[2] : 0f, 4)));
                 }
 
                 var doc = Json.Object()

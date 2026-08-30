@@ -9,6 +9,10 @@
     "              ground properly, so being a little out is harmless.",
     "  heading     which way a spawned stand faces, 0-360.",
     "  reach       how close you have to be to buy, in metres.",
+    "  item        one id, a list of ids, or a list of { id, from, to } with hours.",
+    "              An entry with no hours is on the board all day and is what a shop",
+    "              falls back to. That is how the diner serves breakfast 5-11 and a",
+    "              plate the rest of the time. Several available at once = random.",
     "  fromVehicle true lets you order without getting out -- a drive-through. The",
     "              car has to be nearly stopped, and reach wants to be bigger,",
     "              because you are measured from the driver seat.",
@@ -40,23 +44,10 @@
   "version": 1,
 
   "_pending": [
-    "Places noted but NOT built yet. The loader only reads \"vendors\", so anything here is",
-    "inert -- it is a parking space, not a disabled entry.",
+    "Places noted but NOT built yet. The loader only reads \"vendors\", so anything here",
+    "is inert -- a parking space, not a disabled entry.",
     "",
-    "  Liquor store 1  x 98.832  y -1308.740  z 29.274  heading 296.627",
-    "",
-    "  Liquor store 2  x 170.355  y -1336.946  z 29.293  heading 95.355",
-    "                  Mount Whiskey on the door, Debonaire in the window.",
-    "",
-    "  Del-Hi Liquor   x 226.046  y -1746.749  z 29.250  heading 218.520",
-    "                  Its DELI half is already live as the delhi_deli vendor;",
-    "                  only the spirits are waiting on the question below.",
-    "",
-    "  All noted 2026-08-30. Needs deciding what they sell: beer and spirits are",
-    "  drinks, but this mod has no drunk mechanic, and the sleep effects already use",
-    "  the drunk walk and camera -- so alcohol here would either do nothing or",
-    "  collide with being exhausted. Worth settling that before writing any items.",
-    ""
+    "  (nothing pending -- the three liquor stores went live 2026-08-30)"
   ],
 
   "vendors": [
@@ -311,12 +302,139 @@
 
       "id": "delhi_deli",
       "name": "Del-Hi Delicatessen",
-      "item": ["deli_sandwich", "bagel", "sardines", "jerky"],
+      "item": ["deli_sandwich", "bagel", "sardines", "jerky", "beer", "whiskey"],
 
       "x": 226.046,
       "y": -1746.749,
       "z": 29.250,
       "heading": 218.520,
+
+      "spawnRange": 90.0,
+      "reach": 2.2,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+
+    {
+      "_note": "The 24-hour Mexican and American diner. Breakfast 5-11, plate otherwise.",
+      "_note2": "Item hours are what make that work: the breakfast offer carries a window,",
+      "_note3": "the plate has none, so it is the fallback at every other hour.",
+
+      "id": "diner_247",
+      "name": "Mexican and American Diner",
+      "item": [
+        { "id": "diner_breakfast", "from": 5, "to": 11 },
+        { "id": "diner_plate" }
+      ],
+
+      "x": 174.303,
+      "y": -2025.857,
+      "z": 18.332,
+      "heading": 305.151,
+
+      "spawnRange": 90.0,
+      "reach": 2.4,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+
+    {
+      "_note": "Del Perro corner store: liquor and junk, whatever is on the shelf.",
+
+      "id": "corner_store_1",
+      "name": "Corner Store",
+      "item": ["beer", "beer_logger", "whiskey", "crisps", "jerky",
+               "choc_meteorite", "candybox", "ecola"],
+
+      "x": 234.141,
+      "y": -1946.618,
+      "z": 22.950,
+      "heading": 193.826,
+
+      "spawnRange": 90.0,
+      "reach": 2.2,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+
+    {
+      "_note": "Rancho corner store: same idea, different shelf.",
+
+      "id": "corner_store_2",
+      "name": "Corner Store",
+      "item": ["beer", "whiskey", "crisps", "choc_ego", "choc_pq",
+               "sardines", "sprunk"],
+
+      "x": 379.285,
+      "y": -1781.293,
+      "z": 29.434,
+      "heading": 240.034,
+
+      "spawnRange": 90.0,
+      "reach": 2.2,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+
+    {
+      "_note": "Liquor store 1, now live. Spirits and beer, plus something to eat.",
+
+      "id": "liquor_1",
+      "name": "Liquor Store",
+      "item": ["beer", "beer_logger", "whiskey", "crisps", "jerky"],
+
+      "x": 98.832,
+      "y": -1308.740,
+      "z": 29.274,
+      "heading": 296.627,
+
+      "spawnRange": 90.0,
+      "reach": 2.2,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+
+    {
+      "_note": "Liquor store 2. Mount Whiskey is on its own door, so it always has it.",
+
+      "id": "liquor_2",
+      "name": "Liquor Store",
+      "item": ["whiskey", "beer", "beer_logger", "candybox", "jerky"],
+
+      "x": 170.355,
+      "y": -1336.946,
+      "z": 29.293,
+      "heading": 95.355,
+
+      "spawnRange": 90.0,
+      "reach": 2.2,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+
+    {
+      "_note": "Liquor store 3. Mount Whiskey on the door again.",
+
+      "id": "liquor_3",
+      "name": "Liquor Store",
+      "item": ["whiskey", "beer", "beer_logger", "crisps", "jerky", "candybox"],
+
+      "x": 457.318,
+      "y": -2059.676,
+      "z": 23.983,
+      "heading": 70.482,
 
       "spawnRange": 90.0,
       "reach": 2.2,

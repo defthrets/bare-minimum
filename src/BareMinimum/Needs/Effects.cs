@@ -17,10 +17,12 @@ namespace BareMinimum.Needs
     ///  - NO SLEEP makes you unsteady: a loose walk, a swaying camera and some motion blur.
     ///    Deliberately mild -- the brief was a slight drunk effect, and the game's own
     ///    verydrunk set is a stagger that makes doorways impossible.
+    ///  - DRINK does the same thing harder, and escalates from merry to properly gone.
     ///
-    /// ONE CLIPSET AT A TIME. Both needs can be low at once and there is only one movement
-    /// clipset slot on a ped, so the worse of the two wins; hunger takes priority because a
-    /// stomach injury is the more specific signal and the one the player asked for.
+    /// ONE CLIPSET AT A TIME. All three can apply at once and there is only one movement
+    /// clipset slot on a ped, so they are a PRIORITY LIST: drink, then hunger, then sleep.
+    /// Drink outranks the rest because it is the one the player chose to do a minute ago --
+    /// being shown a hungry limp after four beers reads as the beer having done nothing.
     /// </summary>
     internal sealed class Effects
     {
@@ -60,10 +62,11 @@ namespace BareMinimum.Needs
 
                 var hunger = needs.Hunger.Value;
                 var sleep = needs.Sleep.Value;
+                var drunk = _cfg.BoozeEnabled ? needs.Drunk : 0f;
 
                 MoveRate(me, hunger, sleep);
-                Clipset(me, hunger, sleep);
-                Unsteady(me, sleep);
+                Clipset(me, hunger, sleep, drunk);
+                Unsteady(me, sleep, drunk);
             }
             catch (Exception ex)
             {
@@ -145,6 +148,25 @@ namespace BareMinimum.Needs
             return 1f + (_cfg.WellFedBonus - 1f) * t;
         }
 
+        /// <summary>How far BELOW a threshold a falling value has got, 0 at it and 1 at zero.</summary>
+        private static float Depth(float value, float threshold)
+        {
+            if (threshold <= 0.0001f) return 0f;
+
+            var d = 1f - (value / threshold);
+            return d < 0f ? 0f : d > 1f ? 1f : d;
+        }
+
+        /// <summary>How far ABOVE a threshold a rising value has got, 0 at it and 1 at one.</summary>
+        private static float Rise(float value, float threshold)
+        {
+            var span = 1f - threshold;
+            if (span <= 0.0001f) return 1f;
+
+            var r = (value - threshold) / span;
+            return r < 0f ? 0f : r > 1f ? 1f : r;
+        }
+
         /// <summary>
         /// Slides from 1 down to floor as the value falls from threshold to zero.
         ///
@@ -175,12 +197,22 @@ namespace BareMinimum.Needs
         /// takes a few frames, so this returns and tries again next tick rather than applying
         /// something that will be ignored.
         /// </summary>
-        private void Clipset(Ped me, float hunger, float sleep)
+        private void Clipset(Ped me, float hunger, float sleep, float drunk)
         {
             string want = null;
 
-            // Hunger first: it is the more specific signal, and both cannot be shown at once.
-            if (_cfg.HungerEnabled && hunger < _cfg.HungerHurtAt)
+            // DRINK FIRST. There is one movement clipset slot on a ped, so these are a
+            // priority list rather than a set -- and drink outranks the other two because it
+            // is the one the player chose to do a minute ago. Being told you are drunk when
+            // you have just had four beers is the game agreeing with you; being shown a
+            // hungry limp instead reads as the beer having done nothing.
+            //
+            // It also escalates: merry, then properly gone.
+            if (drunk >= _cfg.BoozeDrunkAt)
+            {
+                want = drunk >= _cfg.BoozeHeavyAt ? _cfg.BoozeClipsetHeavy : _cfg.BoozeClipset;
+            }
+            else if (_cfg.HungerEnabled && hunger < _cfg.HungerHurtAt)
             {
                 want = _cfg.HungerClipset;
             }
@@ -245,24 +277,28 @@ namespace BareMinimum.Needs
         /// again restarts the shake from the beginning of its curve, so a per-frame call is a
         /// shake that never actually gets anywhere and reads as a judder.
         /// </summary>
-        private void Unsteady(Ped me, float sleep)
+        private void Unsteady(Ped me, float sleep, float drunk)
         {
-            var want = _cfg.SleepEnabled && _cfg.SleepCameraShake > 0.001f && sleep < _cfg.SleepDrunkAt;
+            // THE WORSE OF THE TWO CAUSES WINS, rather than the two adding up. Exhaustion and
+            // drink produce the same sway, and summing them would double a camera that is
+            // already at the edge of playable -- a player who is both is not twice as unsteady
+            // as one who is very drunk, they are just unsteady.
+            var tired = _cfg.SleepEnabled && sleep < _cfg.SleepDrunkAt
+                ? _cfg.SleepCameraShake * Depth(sleep, _cfg.SleepDrunkAt)
+                : 0f;
 
-            if (!want)
+            var sozzled = _cfg.BoozeEnabled && drunk >= _cfg.BoozeDrunkAt
+                ? _cfg.BoozeCameraShake * Rise(drunk, _cfg.BoozeDrunkAt)
+                : 0f;
+
+            var amplitude = Math.Max(tired, sozzled);
+
+            if (amplitude <= 0.001f)
             {
                 StopShaking();
                 SetDrunk(me, false);
                 return;
             }
-
-            // Deeper as it gets worse, from nothing at the threshold to the full setting at
-            // empty -- so it arrives as a wobble rather than switching on at full strength.
-            var depth = 1f - (sleep / Math.Max(0.0001f, _cfg.SleepDrunkAt));
-            if (depth < 0f) depth = 0f;
-            if (depth > 1f) depth = 1f;
-
-            var amplitude = _cfg.SleepCameraShake * depth;
 
             try
             {

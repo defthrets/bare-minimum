@@ -23,7 +23,7 @@ namespace BareMinimum.Venues
         /// for street vendors. A stall that has ONE thing today is a different idea: you take
         /// what they have got, and coming back later is how you get something else.
         /// </summary>
-        public string[] ItemIds = new string[0];
+        public Offer[] Offers = new Offer[0];
 
         /// <summary>Which one is on offer, chosen when the player walks up. Empty until then.</summary>
         public string ItemId = "";
@@ -145,6 +145,34 @@ namespace BareMinimum.Venues
         public bool HasEntities => PropModels.Length > 0 || PedModels.Length > 0;
     }
 
+    /// <summary>
+    /// One thing a vendor might sell, and when.
+    ///
+    /// The hours are what let a diner serve breakfast until eleven and something else after.
+    /// An offer with no hours is available all day, which is every vendor that has never
+    /// needed to care -- so the plain "item": "taco" form still means exactly what it did.
+    /// </summary>
+    internal sealed class Offer
+    {
+        public string Id = "";
+
+        /// <summary>Hours of the day this is on the board. Both -1 means always.</summary>
+        public int From = -1;
+        public int To = -1;
+
+        public bool Always => From < 0 || To < 0;
+
+        /// <summary>Whether it is on the board at this hour. Wraps past midnight.</summary>
+        public bool AtHour(int hour)
+        {
+            if (Always) return true;
+            if (From == To) return true;
+
+            return From < To ? hour >= From && hour < To
+                             : hour >= From || hour < To;
+        }
+    }
+
     /// <summary>What the vendor is currently up to.</summary>
     internal enum Duty
     {
@@ -226,7 +254,7 @@ namespace BareMinimum.Venues
                     {
                         Id = node["id"].AsString(""),
                         Name = node["name"].AsString("Stand"),
-                        ItemIds = Strings(node["item"]),
+                        Offers = ReadOffers(node["item"]),
                         Position = new Vector3(node["x"].AsFloat(0f),
                                                node["y"].AsFloat(0f),
                                                node["z"].AsFloat(0f)),
@@ -252,7 +280,7 @@ namespace BareMinimum.Venues
                         BlipColour = node["blipColour"].AsInt(47)
                     };
 
-                    if (v.ItemIds.Length == 0) continue;
+                    if (v.Offers.Length == 0) continue;
 
                     _vendors.Add(v);
                 }
@@ -263,6 +291,51 @@ namespace BareMinimum.Venues
             {
                 Log.Error("Could not read " + Paths.VendorsFile + " - no street stands.", ex);
             }
+        }
+
+        /// <summary>
+        /// Reads "item" in any of its shapes: one name, a list of names, or a list of
+        /// objects carrying hours -- and any mixture of the last two.
+        ///
+        /// Three spellings rather than one because most vendors sell one thing and should not
+        /// have to be written as an array of objects to say so. The diner needs the long form;
+        /// the taco window should not pay for it.
+        /// </summary>
+        private static Offer[] ReadOffers(Json node)
+        {
+            var list = new List<Offer>();
+
+            if (node == null || node.IsNull) return list.ToArray();
+
+            var single = node.AsString("");
+            if (!string.IsNullOrEmpty(single))
+            {
+                list.Add(new Offer { Id = single });
+                return list.ToArray();
+            }
+
+            foreach (var entry in node.Items)
+            {
+                var name = entry.AsString("");
+
+                if (!string.IsNullOrEmpty(name))
+                {
+                    list.Add(new Offer { Id = name });
+                    continue;
+                }
+
+                var id = entry["id"].AsString("");
+                if (string.IsNullOrEmpty(id)) continue;
+
+                list.Add(new Offer
+                {
+                    Id = id,
+                    From = entry["from"].AsInt(-1),
+                    To = entry["to"].AsInt(-1)
+                });
+            }
+
+            return list.ToArray();
         }
 
         private static string[] Strings(Json node)
@@ -386,16 +459,11 @@ namespace BareMinimum.Venues
                     // prompt flickering between bagels and fruit sixty times a second; rolling
                     // once as you walk up means what is on the board stays on the board for as
                     // long as you are stood at it, and is something else next time.
-                    if (near && v.ItemIds.Length > 0)
-                    {
-                        v.ItemId = v.ItemIds.Length == 1
-                            ? v.ItemIds[0]
-                            : v.ItemIds[Roll.Next(v.ItemIds.Length)];
-                    }
+                    if (near) v.ItemId = Today(v);
 
                     Log.Debug(v.Name + (near ? " in range at " : " out of range at ") +
                               v.Position.DistanceTo(from).ToString("0.0") + "m" +
-                              (near && v.ItemIds.Length > 1 ? ", selling " + v.ItemId : "") + ".");
+                              (near && v.Offers.Length > 1 ? ", selling " + v.ItemId : "") + ".");
                 }
 
                 v.InRange = near;
@@ -588,6 +656,41 @@ namespace BareMinimum.Venues
         /// open 18:00 to 02:00 is an ordinary thing to want, and the naive
         /// hour >= open && hour < close quietly means "never" for it.
         /// </summary>
+        /// <summary>
+        /// What is on the board right now: whatever the hour allows, picked at random.
+        ///
+        /// FALLS BACK TO EVERYTHING if nothing matches the hour. A vendor whose windows have a
+        /// gap in them would otherwise be silently unbuyable at 3am with no way to tell that
+        /// from a wrong coordinate -- and a shop with nothing to sell is a bug either way, so
+        /// it is better to sell something and have the hours be slightly wrong.
+        /// </summary>
+        private static string Today(Vendor v)
+        {
+            if (v.Offers.Length == 0) return "";
+            if (v.Offers.Length == 1) return v.Offers[0].Id;
+
+            int hour;
+            try { hour = GameClock.Hour; }
+            catch { hour = 12; }
+
+            var open = new List<Offer>();
+            foreach (var o in v.Offers)
+            {
+                if (o.AtHour(hour)) open.Add(o);
+            }
+
+            if (open.Count == 0)
+            {
+                Log.Once("vendor-hours-" + v.Id,
+                         v.Name + ": nothing on the board at " + hour +
+                         ":00 - selling from the whole list instead. Check its item hours.");
+
+                return v.Offers[Roll.Next(v.Offers.Length)].Id;
+            }
+
+            return open.Count == 1 ? open[0].Id : open[Roll.Next(open.Count)].Id;
+        }
+
         private static bool Trading(Vendor v)
         {
             if (v.OpenHour == v.CloseHour) return true;

@@ -22,6 +22,15 @@ namespace BareMinimum.Food
         public bool Drink;
 
         /// <summary>
+        /// How drunk one of these makes you, 0 to 1.
+        ///
+        /// Cumulative: the meter it feeds is capped at 1, so a fourth beer does less than the
+        /// first. That is the intended shape -- keep buying and you get there, but you cannot
+        /// leap straight to hammered on one bottle.
+        /// </summary>
+        public float Booze;
+
+        /// <summary>
         /// Whether shop counters and vending machines stock it.
         ///
         /// False for anything a single named vendor sells. A branded burger belongs at that
@@ -167,6 +176,7 @@ namespace BareMinimum.Food
                         Hunger = node["hunger"].AsFloat(0f),
                         Wake = node["wake"].AsFloat(0f),
                         Drink = node["drink"].AsBool(false),
+                        Booze = node["booze"].AsFloat(0f),
                         InShop = node["shop"].AsBool(true),
                         Props = PropNames(node["prop"]),
                         Seconds = node["seconds"].AsFloat(4f),

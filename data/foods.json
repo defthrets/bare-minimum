@@ -8,6 +8,9 @@
     "          it can carry you to just above the tired threshold and no further, so a",
     "          pocketful of energy drinks can never replace sleeping.",
     "  drink   true for anything you drink. Drinks give a SMALL hunger increase by design.",
+    "  booze   how drunk one makes you, 0 to 1. The meter is capped at 1, so the fourth",
+    "          beer does less than the first. Drink also makes tiredness come on faster",
+    "          -- see [Drink] SleepMultiplier in the ini.",
     "  shop    false keeps it OFF shop counters and vending machines. For things only",
     "          one particular vendor sells -- a branded burger belongs at that door,",
     "          not on the shelf of every 24/7 in the state.",
@@ -210,6 +213,75 @@
       "shop": false,
       "prop": ["prop_choc_meto", "prop_choc_ego", "prop_choc_pq"],
       "seconds": 3.0
+    },
+
+    {
+      "_note": "Drink. booze is how drunk one makes you; the meter caps at 1, so the",
+      "_note2": "fourth beer does less than the first. Keep buying and you get there.",
+      "id": "beer",
+      "name": "Pisswasser",
+      "category": "Drinks",
+      "price": 4,
+      "hunger": 0.08,
+      "booze": 0.20,
+      "drink": true,
+      "shop": false,
+      "prop": ["prop_beer_pissh", "prop_cs_beer_bot_01", "prop_ld_can_01", "prop_ecola_can"],
+      "seconds": 4.0
+    },
+    {
+      "id": "beer_logger",
+      "name": "Logger Lager",
+      "category": "Drinks",
+      "price": 5,
+      "hunger": 0.08,
+      "booze": 0.24,
+      "drink": true,
+      "shop": false,
+      "prop": ["prop_beer_logger", "prop_cs_beer_bot_40oz", "prop_ld_can_01", "prop_ecola_can"],
+      "seconds": 4.0
+    },
+    {
+      "id": "whiskey",
+      "name": "Mount Whiskey",
+      "category": "Drinks",
+      "price": 16,
+      "hunger": 0.04,
+      "booze": 0.45,
+      "drink": true,
+      "shop": false,
+      "prop": ["prop_whiskey_bottle", "prop_cs_whiskey_bottle", "prop_ld_flow_bottle"],
+      "seconds": 4.5
+    },
+
+    {
+      "_note": "The 24-hour Mexican and American diner. Breakfast is on 5 to 11 only;",
+      "_note2": "the plate is what you get the rest of the day and night.",
+      "id": "diner_breakfast",
+      "name": "Huevos Rancheros",
+      "category": "Food",
+      "price": 11,
+      "hunger": 0.58,
+      "wake": 0.06,
+      "shop": false,
+      "prop": ["prop_food_bs_bowl", "prop_cs_bowl_01", "prop_sandwich_01"],
+      "drinkProp": ["prop_amb_coffeecup_01", "p_amb_coffeecup_01", "prop_cs_bs_cup", "prop_ld_can_01"],
+      "combo": true,
+      "seconds": 5.5,
+      "vehicleSeconds": 50
+    },
+    {
+      "id": "diner_plate",
+      "name": "Diner Plate",
+      "category": "Food",
+      "price": 13,
+      "hunger": 0.62,
+      "shop": false,
+      "prop": ["prop_food_bs_bowl", "prop_cs_bowl_01", "prop_sandwich_01"],
+      "drinkProp": ["prop_cs_bs_cup", "prop_food_bs_cup", "prop_ld_can_01"],
+      "combo": true,
+      "seconds": 5.5,
+      "vehicleSeconds": 50
     },
 
     {

@@ -117,6 +117,39 @@ namespace BareMinimum.Core
         /// </summary>
         public float WellFedAbove = 0.85f;
 
+        // ---- Drink -----------------------------------------------------------
+
+        public bool BoozeEnabled = true;
+
+        /// <summary>
+        /// GAME hours to sober up from completely hammered.
+        ///
+        /// Eight, so a heavy night is still with you in the morning unless you sleep it off
+        /// -- and sleeping advances the clock, which is exactly how it should clear.
+        /// </summary>
+        public float BoozeHoursToSober = 8f;
+
+        /// <summary>Above this you start to show it.</summary>
+        public float BoozeDrunkAt = 0.22f;
+
+        /// <summary>Above this it stops being merry and starts being a stagger.</summary>
+        public float BoozeHeavyAt = 0.65f;
+
+        /// <summary>
+        /// How much faster tiredness comes on when completely drunk.
+        ///
+        /// THE WHOLE POINT OF THE MECHANIC. Drink does not simply look like being tired; it
+        /// MAKES you tired, and quickly. Scaled by how drunk you are, so one beer barely
+        /// registers and a night of them costs you most of a day's rest.
+        /// </summary>
+        public float BoozeSleepMultiplier = 2.4f;
+
+        public float BoozeCameraShake = 0.28f;
+
+        /// <summary>Merry, and properly gone. Two clipsets so it escalates.</summary>
+        public string BoozeClipset = "move_m@drunk@moderatedrunk";
+        public string BoozeClipsetHeavy = "move_m@drunk@verydrunk";
+
         /// <summary>Whether an empty stomach slowly costs health.</summary>
         public bool StarvingCostsHealth = true;
 
@@ -274,6 +307,18 @@ namespace BareMinimum.Core
                 cfg.WellFedAbove = ini.GetFloat("Effects", "WellFedAbove",
                                                 cfg.WellFedAbove, 0.1f, 1f);
 
+                cfg.BoozeEnabled = ini.GetBool("Drink", "Enabled", cfg.BoozeEnabled);
+                cfg.BoozeHoursToSober = ini.GetFloat("Drink", "HoursToSober",
+                                                     cfg.BoozeHoursToSober, 0.5f, 100f);
+                cfg.BoozeDrunkAt = ini.GetFloat("Drink", "DrunkAt", cfg.BoozeDrunkAt, 0f, 1f);
+                cfg.BoozeHeavyAt = ini.GetFloat("Drink", "HeavyAt", cfg.BoozeHeavyAt, 0f, 1f);
+                cfg.BoozeSleepMultiplier = ini.GetFloat("Drink", "SleepMultiplier",
+                                                        cfg.BoozeSleepMultiplier, 1f, 10f);
+                cfg.BoozeCameraShake = ini.GetFloat("Drink", "CameraShake",
+                                                    cfg.BoozeCameraShake, 0f, 1f);
+                cfg.BoozeClipset = ini.GetString("Drink", "Clipset", cfg.BoozeClipset);
+                cfg.BoozeClipsetHeavy = ini.GetString("Drink", "ClipsetHeavy", cfg.BoozeClipsetHeavy);
+
                 cfg.StarvingCostsHealth = ini.GetBool("Effects", "StarvingCostsHealth",
                                                       cfg.StarvingCostsHealth);
                 cfg.StarvingHealthPerHour = ini.GetFloat("Effects", "StarvingHealthPerHour",
@@ -335,6 +380,16 @@ namespace BareMinimum.Core
                 var t = HungerHurtAt;
                 HungerHurtAt = HungerSlowAt;
                 HungerSlowAt = t;
+            }
+
+            if (BoozeHeavyAt < BoozeDrunkAt)
+            {
+                Log.Warn("[Drink] HeavyAt is below DrunkAt. Swapping them - the stagger has to " +
+                         "start higher than the sway.");
+
+                var b = BoozeHeavyAt;
+                BoozeHeavyAt = BoozeDrunkAt;
+                BoozeDrunkAt = b;
             }
 
             if (SleepDrunkAt > SleepTiredAt)

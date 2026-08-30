@@ -183,6 +183,8 @@ namespace BareMinimum.Food
             if (item.Drink) _needs.Drink(item.Hunger, item.Wake);
             else _needs.Eat(item.Hunger);
 
+            if (item.Booze > 0f) _needs.Booze(item.Booze);
+
             Cleanup();
             Report(item);
         }
@@ -198,6 +200,13 @@ namespace BareMinimum.Food
                 if (item.Wake > 0f)
                 {
                     msg += ", rested " + (int)Math.Round(_needs.Sleep.Value * 100f) + "%";
+                }
+
+                // Only says so once it is actually showing. A number for a single beer would
+                // be a stat readout; a word once you are visibly drunk is a comment.
+                if (item.Booze > 0f && _needs.Drunk >= 0.22f)
+                {
+                    msg += _needs.Drunk >= 0.65f ? ".  ~o~You are hammered" : ".  ~y~Feeling it";
                 }
 
                 GTA.UI.Notification.PostTicker(msg + ".", false, false);
