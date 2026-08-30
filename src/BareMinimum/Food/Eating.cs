@@ -34,10 +34,19 @@ namespace BareMinimum.Food
         private readonly Catalogue _menu;
         private readonly Needs.Needs _needs;
 
+        /// <summary>How long one eat or drink stretch of a combo lasts, in milliseconds.</summary>
+        private const int PhaseMs = 7000;
+
         private Item _item;
         private Prop _held;
         private int _finishAt;
         private bool _animStarted;
+
+        /// <summary>Which half of a combo is in hand. Meaningless for anything else.</summary>
+        private bool _drinking;
+
+        /// <summary>When to swap hands between the food and the cup. Zero when not a combo.</summary>
+        private int _swapAt;
 
         public Eating(Catalogue menu, Needs.Needs needs)
         {
@@ -58,14 +67,27 @@ namespace BareMinimum.Food
             var me = Game.Player.Character;
             if (me == null || !me.Exists() || me.IsDead) return false;
 
+            var driving = InVehicle(me);
+
+            // A meal at the wheel runs on its own clock: you pick at it between junctions
+            // rather than putting it away in four seconds at a serving window.
+            var seconds = driving && item.VehicleSeconds > 0f ? item.VehicleSeconds : item.Seconds;
+
             _item = item;
             _animStarted = false;
-            _finishAt = Game.GameTime + (int)(Math.Max(0.5f, item.Seconds) * 1000f);
+            _drinking = false;
+            _finishAt = Game.GameTime + (int)(Math.Max(0.5f, seconds) * 1000f);
 
-            Give(me, item);
-            Animate(me, item);
+            // Only a combo swaps hands, and only when there is actually a cup to swap to.
+            _swapAt = item.Combo && !string.IsNullOrEmpty(item.DrinkProp)
+                ? Game.GameTime + PhaseMs
+                : 0;
 
-            Log.Debug("Eating " + item.Name + " (+" + item.Hunger.ToString("0.00") + " hunger).");
+            Give(me, item, false);
+            Animate(me, item, false);
+
+            Log.Debug("Eating " + item.Name + " over " + seconds.ToString("0.#") + "s" +
+                      (driving ? " at the wheel" : "") + (_swapAt != 0 ? ", combo" : "") + ".");
             return true;
         }
 
@@ -75,9 +97,13 @@ namespace BareMinimum.Food
 
             try
             {
-                if (Game.GameTime < _finishAt) return;
+                var now = Game.GameTime;
 
-                Finish();
+                if (now >= _finishAt) { Finish(); return; }
+
+                // Halfway through a stretch, put down the sandwich and pick up the cup, or
+                // the other way about. The need is untouched until the whole thing is done.
+                if (_swapAt != 0 && now >= _swapAt) Swap();
             }
             catch (Exception ex)
             {
@@ -96,6 +122,7 @@ namespace BareMinimum.Food
         {
             var item = _item;
             _item = null;
+            _swapAt = 0;
 
             if (item.Drink) _needs.Drink(item.Hunger, item.Wake);
             else _needs.Eat(item.Hunger);
@@ -136,13 +163,33 @@ namespace BareMinimum.Food
         /// resident: CREATE_OBJECT on a model that is not in memory returns nothing, so
         /// without the request the item silently never appears.
         /// </summary>
-        private void Give(Ped me, Item item)
+        /// <summary>Swaps the hand between the food and the drink, animation and all.</summary>
+        private void Swap()
         {
-            if (!item.PropUsable || string.IsNullOrEmpty(item.Prop)) return;
+            var me = Game.Player.Character;
+            if (me == null || !me.Exists()) { _swapAt = 0; return; }
+
+            _drinking = !_drinking;
+            _swapAt = Game.GameTime + PhaseMs;
+
+            // The old one goes before the new one arrives, or there are two things in the
+            // hand and the second is attached inside the first.
+            DropProp();
+
+            Give(me, _item, _drinking);
+            Animate(me, _item, _drinking);
+        }
+
+        private void Give(Ped me, Item item, bool drinking)
+        {
+            var name = drinking ? item.DrinkProp : item.Prop;
+
+            if (string.IsNullOrEmpty(name)) return;
+            if (!drinking && !item.PropUsable) return;
 
             try
             {
-                var model = new Model(item.Prop);
+                var model = new Model(name);
 
                 if (!model.IsLoaded)
                 {
@@ -156,8 +203,8 @@ namespace BareMinimum.Food
 
                     if (!model.IsLoaded)
                     {
-                        Log.Once("prop-slow-" + item.Prop,
-                                 item.Prop + " did not stream in time - eaten empty-handed.");
+                        Log.Once("prop-slow-" + name,
+                                 name + " did not stream in time - eaten empty-handed.");
                         return;
                     }
                 }
@@ -176,8 +223,8 @@ namespace BareMinimum.Food
             }
             catch (Exception ex)
             {
-                Log.Once("prop-" + item.Prop, "Could not put " + item.Prop + " in hand: " +
-                                              ex.Message + " - eaten empty-handed.");
+                Log.Once("prop-" + name, "Could not put " + name + " in hand: " +
+                                         ex.Message + " - eaten empty-handed.");
                 _held = null;
             }
         }
@@ -189,13 +236,22 @@ namespace BareMinimum.Food
         /// <summary>
         /// Plays the eat or drink loop, if the dictionary will stream.
         ///
-        /// FLAG 49 = looping + upper body only + allow player control. Upper-body is what lets
-        /// somebody keep walking while they eat, which is what makes this feel like an action
-        /// rather than a cutscene; without it the player is rooted for four seconds.
+        /// FLAG 49 = LOOPING (1) + UPPERBODY (16) + SECONDARY (32).
+        ///
+        /// SECONDARY is the part that matters and the part that is easy to miss. It makes the
+        /// clip a second task running ALONGSIDE whatever the ped is already doing rather than
+        /// replacing it -- which is what lets somebody keep walking while they eat, and, more
+        /// to the point, keep DRIVING. An earlier version of this method refused to play
+        /// anything in a vehicle on the assumption that it would fight the driving pose; with
+        /// the secondary flag it does not, and refusing was throwing away the whole point of
+        /// buying food at a drive-through.
+        ///
+        /// UPPERBODY keeps it off the legs and the steering.
         /// </summary>
-        private void Animate(Ped me, Item item)
+        private void Animate(Ped me, Item item, bool drinking)
         {
-            var anim = item.Drink ? _menu.Sip : _menu.Eat;
+            // A combo drinks from a cup on its drink stretch; a plain drink always drinks.
+            var anim = (item.Drink || drinking) ? _menu.Sip : _menu.Eat;
             if (!anim.Valid) return;
 
             try
@@ -227,6 +283,12 @@ namespace BareMinimum.Food
             }
         }
 
+        private static bool InVehicle(Ped me)
+        {
+            try { return me.IsInVehicle(); }
+            catch { return false; }
+        }
+
         // ======================================================================
 
         private void Cleanup()
@@ -255,6 +317,12 @@ namespace BareMinimum.Food
                 _animStarted = false;
             }
 
+            DropProp();
+        }
+
+        /// <summary>Removes whatever is in the hand. Used mid-meal by Swap as well as at the end.</summary>
+        private void DropProp()
+        {
             if (_held == null) return;
 
             try
@@ -273,6 +341,7 @@ namespace BareMinimum.Food
         private void Abandon()
         {
             _item = null;
+            _swapAt = 0;
             Cleanup();
         }
 

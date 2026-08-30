@@ -24,6 +24,14 @@ namespace BareMinimum.Venues
         public float SpawnRange = 90f;
         public float Reach = 2.4f;
 
+        /// <summary>
+        /// Whether you can order without getting out. A drive-through.
+        ///
+        /// Off everywhere else on purpose: a serving hatch you can buy from while sitting in
+        /// a car parked vaguely near it is a hatch that stops meaning anything.
+        /// </summary>
+        public bool FromVehicle;
+
         public string[] PropModels = new string[0];
         public string[] PedModels = new string[0];
         public string Scenario = "WORLD_HUMAN_STAND_IMPATIENT";
@@ -131,6 +139,7 @@ namespace BareMinimum.Venues
                         PedBack = node["pedBack"].AsFloat(1.1f),
                         SpawnRange = node["spawnRange"].AsFloat(90f),
                         Reach = node["reach"].AsFloat(2.4f),
+                        FromVehicle = node["fromVehicle"].AsBool(false),
                         Scenario = node["scenario"].AsString("WORLD_HUMAN_STAND_IMPATIENT"),
                         PropModels = Strings(node["prop"]),
                         PedModels = Strings(node["ped"]),
@@ -445,10 +454,16 @@ namespace BareMinimum.Venues
         {
             _at = null;
 
-            if (me.IsInVehicle() || _eating.Busy) return;
+            if (_eating.Busy) return;
 
-            var here = Nearest(me.Position);
+            var driving = me.IsInVehicle();
+
+            var here = Nearest(me.Position, driving);
             if (here == null) return;
+
+            // A drive-through you can use at speed is a drive-BY. The car has to have
+            // essentially stopped at the window, which is what the real thing asks of you.
+            if (driving && !Stopped(me)) return;
 
             var item = Find(here.ItemId);
             if (item == null) return;
@@ -473,13 +488,23 @@ namespace BareMinimum.Venues
                 ? "Press ~INPUT_CONTEXT~ to buy a " + what + ".  ~c~$" + item.Price
                 : "~r~You cannot afford a " + what + ".~s~  ~c~$" + item.Price);
 
+            // THE HORN. In a vehicle the interact key is also the horn, so ordering at a
+            // drive-through would blare at the window every time -- and holding the key would
+            // hold the horn down. Suppressed only while an offer is actually on screen, so
+            // the horn works normally everywhere else, including parked one car length away.
+            if (driving)
+            {
+                try { Game.DisableControlThisFrame(GTA.Control.VehicleHorn); }
+                catch { /* nothing to do about it */ }
+            }
+
             if (!afford || !Pressed()) return;
 
             Hud.ClearHelp();
             Buy(here, item);
         }
 
-        private Vendor Nearest(Vector3 from)
+        private Vendor Nearest(Vector3 from, bool driving)
         {
             Vendor best = null;
             var bestD = float.MaxValue;
@@ -487,6 +512,10 @@ namespace BareMinimum.Venues
             foreach (var v in _vendors)
             {
                 if (!v.InRange) continue;
+
+                // On foot you may use any of them, including the drive-through window.
+                // From a car, only the ones that say so.
+                if (driving && !v.FromVehicle) continue;
 
                 // Measured to the STAND rather than to the written coordinate, because the
                 // stand is what the player can see and it has been dropped onto the ground,
@@ -557,6 +586,28 @@ namespace BareMinimum.Venues
             catch (Exception ex) { Log.Error("Could not refund " + item.Price, ex); }
 
             Notify("~r~Could not eat that - refunded.");
+        }
+
+        /// <summary>
+        /// Whether the car has actually stopped rolling.
+        ///
+        /// A speed test rather than IS_VEHICLE_STOPPED, which is strict enough that creeping
+        /// forward at walking pace fails it -- and creeping forward is exactly what somebody
+        /// does at a drive-through window. Half a metre a second is a car that has arrived.
+        /// </summary>
+        private static bool Stopped(Ped me)
+        {
+            try
+            {
+                var v = me.CurrentVehicle;
+                if (v == null || !v.Exists()) return false;
+
+                return v.Speed <= 0.5f;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private static int Money()

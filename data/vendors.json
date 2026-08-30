@@ -9,6 +9,9 @@
     "              ground properly, so being a little out is harmless.",
     "  heading     which way a spawned stand faces, 0-360.",
     "  reach       how close you have to be to buy, in metres.",
+    "  fromVehicle true lets you order without getting out -- a drive-through. The",
+    "              car has to be nearly stopped, and reach wants to be bigger,",
+    "              because you are measured from the driver seat.",
     "  spawnRange  how close before anything is created at all.",
     "",
     "  prop / ped  OPTIONAL candidate lists. Leave them out entirely for a place that",
@@ -86,6 +89,29 @@
 
       "spawnRange": 90.0,
       "reach": 2.2,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+
+    {
+      "_note": "La Vaca Loca Burger Shack DRIVE-THROUGH. Order without getting out.",
+      "_note2": "fromVehicle is what allows that; every other vendor refuses from a car.",
+
+      "id": "lavacaloca_drivethru",
+      "name": "La Vaca Loca",
+      "label": "pastrami combo",
+      "item": "pastrami_combo",
+
+      "x": -142.750,
+      "y": -1541.896,
+      "z": 28.642,
+      "heading": 141.086,
+
+      "fromVehicle": true,
+      "spawnRange": 90.0,
+      "reach": 5.5,
 
       "blip": true,
       "blipSprite": 52,

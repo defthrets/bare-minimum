@@ -11,9 +11,16 @@
     "  shop    false keeps it OFF shop counters and vending machines. For things only",
     "          one particular vendor sells -- a branded burger belongs at that door,",
     "          not on the shelf of every 24/7 in the state.",
-    "  prop    what appears in your hand. A model this build lacks is reported once in the",
-    "          log and the item still works -- you just eat it empty-handed.",
+    "  prop    what appears in your hand. EITHER one name or a LIST of candidates -- the",
+    "          first that exists in your build wins, and the misses are named in the log.",
+    "          A prop name is the easiest thing here to get slightly wrong and the failure",
+    "          is invisible: the food still works, it just never appears in your hand.",
     "  seconds how long the eating animation runs.",
+    "  vehicleSeconds  how long it runs IN A CAR. A drive-through combo is set to a",
+    "          minute: you pick at it between junctions rather than gulping it.",
+    "  combo   alternates the hand between the food and drinkProp every few seconds,",
+    "          for anything that comes with a drink.",
+    "  drinkProp  the cup, for a combo. Same single-or-list rule as prop.",
     "",
     "Categories are the tabs across the top of the counter menu, in this order."
   ],
@@ -38,7 +45,7 @@
       "category": "Food",
       "price": 10,
       "hunger": 0.50,
-      "prop": "prop_cs_burger_01",
+      "prop": ["prop_cs_burger_01", "prop_food_bs_burger1", "ng_proc_food_burg01a"],
       "seconds": 5.0
     },
     {
@@ -47,7 +54,7 @@
       "category": "Food",
       "price": 6,
       "hunger": 0.34,
-      "prop": "prop_cs_hotdog_01",
+      "prop": ["prop_cs_hotdog_01", "prop_hotdog_01", "prop_food_bs_hotdog", "prop_cs_burger_01"],
       "seconds": 4.0
     },
     {
@@ -74,7 +81,7 @@
       "category": "Food",
       "price": 7,
       "hunger": 0.33,
-      "prop": "prop_taco_01",
+      "prop": ["prop_taco_01", "prop_taco_02", "ng_proc_food_taco1", "prop_food_bs_taco", "prop_cs_burger_01"],
       "seconds": 4.0
     },
 
@@ -86,8 +93,25 @@
       "price": 9,
       "hunger": 0.46,
       "shop": false,
-      "prop": "prop_cs_burger_01",
+      "prop": ["prop_cs_burger_01", "prop_food_bs_burger1", "ng_proc_food_burg01a", "prop_burger_01"],
       "seconds": 5.0
+    },
+
+    {
+      "_note": "La Vaca Loca's drive-through board: pastrami sandwich, fries and a med soda.",
+      "_note2": "One combo, so the soda's small caffeine lift comes with it.",
+      "id": "pastrami_combo",
+      "name": "Pastrami Combo",
+      "category": "Food",
+      "price": 12,
+      "hunger": 0.60,
+      "wake": 0.04,
+      "shop": false,
+      "prop": ["prop_sandwich_01", "prop_cs_sandwich_01", "prop_food_bs_burger1", "prop_cs_burger_01"],
+      "drinkProp": ["prop_cs_bs_cup", "prop_food_bs_cup", "prop_plastic_cup_02", "prop_ecola_can", "prop_ld_flow_bottle"],
+      "combo": true,
+      "seconds": 5.5,
+      "vehicleSeconds": 60
     },
 
     {

@@ -31,10 +31,48 @@ namespace BareMinimum.Food
         /// </summary>
         public bool InShop = true;
 
-        /// <summary>The model held while consuming it. May be absent or invalid; see Eating.</summary>
+        /// <summary>
+        /// The model held while consuming it: the one that was found to exist.
+        ///
+        /// Chosen from Props by CheckProps once the game is running. Empty means this build
+        /// has none of them and the item is eaten empty-handed.
+        /// </summary>
         public string Prop = "";
 
+        /// <summary>
+        /// Candidate models, in order of preference.
+        ///
+        /// A LIST rather than one name, because a prop name is the single easiest thing in
+        /// this mod to get slightly wrong and the failure is invisible -- the food works, it
+        /// just never appears in your hand, and nothing on screen says why. Listing the
+        /// plausible spellings costs nothing: a name this build lacks simply never matches.
+        /// </summary>
+        public string[] Props = new string[0];
+
         public float Seconds = 4f;
+
+        /// <summary>
+        /// How long it takes IN A CAR. Zero means use Seconds.
+        ///
+        /// A meal eaten at the wheel is a different thing from one eaten standing at a window:
+        /// you pick at it between junctions. A drive-through combo is set to about a minute,
+        /// which is a drive across a few blocks rather than a four-second gulp.
+        /// </summary>
+        public float VehicleSeconds;
+
+        /// <summary>
+        /// Alternate eating and drinking, for anything that comes with a drink.
+        ///
+        /// A combo is a sandwich AND a soda, so playing one four-second eat loop for it says
+        /// the wrong thing. With this the hand swaps between the food and the cup.
+        /// </summary>
+        public bool Combo;
+
+        /// <summary>Candidate models for the drink half of a combo. See Props.</summary>
+        public string[] DrinkProps = new string[0];
+
+        /// <summary>The drink model that was found to exist, or empty.</summary>
+        public string DrinkProp = "";
 
         /// <summary>False once the prop is known not to exist in this build, so it is tried once.</summary>
         public bool PropUsable = true;
@@ -120,8 +158,11 @@ namespace BareMinimum.Food
                         Wake = node["wake"].AsFloat(0f),
                         Drink = node["drink"].AsBool(false),
                         InShop = node["shop"].AsBool(true),
-                        Prop = node["prop"].AsString(""),
-                        Seconds = node["seconds"].AsFloat(4f)
+                        Props = PropNames(node["prop"]),
+                        Seconds = node["seconds"].AsFloat(4f),
+                        VehicleSeconds = node["vehicleSeconds"].AsFloat(0f),
+                        Combo = node["combo"].AsBool(false),
+                        DrinkProps = PropNames(node["drinkProp"])
                     };
 
                     if (string.IsNullOrEmpty(item.Name)) continue;
@@ -170,6 +211,30 @@ namespace BareMinimum.Food
             }
         }
 
+        /// <summary>
+        /// Reads "prop" as EITHER a single name or a list of them.
+        ///
+        /// Both spellings are allowed so the file stays readable: most items want one name and
+        /// should not have to be written as a one-element array to say so.
+        /// </summary>
+        private static string[] PropNames(Json node)
+        {
+            if (node == null || node.IsNull) return new string[0];
+
+            var single = node.AsString("");
+            if (!string.IsNullOrEmpty(single)) return new[] { single };
+
+            var list = new List<string>();
+
+            foreach (var item in node.Items)
+            {
+                var s = item.AsString("");
+                if (!string.IsNullOrEmpty(s)) list.Add(s);
+            }
+
+            return list.ToArray();
+        }
+
         private static void ReadAnim(Json node, AnimRef into)
         {
             if (node == null || node.IsNull) return;
@@ -191,15 +256,15 @@ namespace BareMinimum.Food
         private void Fallback()
         {
             _items.Add(new Item { Id = "sandwich", Name = "Sandwich", Category = "Food",
-                                  Price = 8, Hunger = 0.42f, Prop = "prop_sandwich_01" });
+                                  Price = 8, Hunger = 0.42f, Props = new[] { "prop_sandwich_01" } });
             _items.Add(new Item { Id = "crisps", Name = "Crisps", Category = "Snacks",
-                                  Price = 3, Hunger = 0.14f, Prop = "prop_food_bs_chips" });
+                                  Price = 3, Hunger = 0.14f, Props = new[] { "prop_food_bs_chips" } });
             _items.Add(new Item { Id = "ecola", Name = "eCola", Category = "Drinks",
                                   Price = 2, Hunger = 0.06f, Wake = 0.04f, Drink = true,
-                                  Prop = "prop_ecola_can" });
+                                  Props = new[] { "prop_ecola_can" } });
             _items.Add(new Item { Id = "coffee", Name = "Coffee", Category = "Drinks",
                                   Price = 4, Hunger = 0.05f, Wake = 0.10f, Drink = true,
-                                  Prop = "prop_amb_coffeecup_01" });
+                                  Props = new[] { "prop_amb_coffeecup_01" } });
 
             _categories.Add("Food");
             _categories.Add("Snacks");
@@ -222,37 +287,75 @@ namespace BareMinimum.Food
             _checked = true;
 
             var missing = new List<string>();
+            var blank = new List<string>();
 
             foreach (var item in _items)
             {
-                if (string.IsNullOrEmpty(item.Prop)) { item.PropUsable = false; continue; }
+                item.Prop = "";
 
-                try
+                foreach (var name in item.Props)
                 {
-                    var model = new Model(item.Prop);
+                    try
+                    {
+                        var model = new Model(name);
 
-                    if (Function.Call<bool>(Hash.IS_MODEL_VALID, model.Hash)) continue;
+                        if (Function.Call<bool>(Hash.IS_MODEL_VALID, model.Hash))
+                        {
+                            item.Prop = name;
+                            break;
+                        }
 
-                    item.PropUsable = false;
-                    missing.Add(item.Prop);
+                        missing.Add(name);
+                    }
+                    catch
+                    {
+                        missing.Add(name);
+                    }
                 }
-                catch
+
+                item.PropUsable = !string.IsNullOrEmpty(item.Prop);
+
+                item.DrinkProp = "";
+
+                foreach (var name in item.DrinkProps)
                 {
-                    item.PropUsable = false;
-                    missing.Add(item.Prop);
+                    try
+                    {
+                        var model = new Model(name);
+
+                        if (Function.Call<bool>(Hash.IS_MODEL_VALID, model.Hash))
+                        {
+                            item.DrinkProp = name;
+                            break;
+                        }
+
+                        missing.Add(name);
+                    }
+                    catch
+                    {
+                        missing.Add(name);
+                    }
                 }
+
+                if (!item.PropUsable) blank.Add(item.Id);
             }
 
-            if (missing.Count == 0)
+            if (missing.Count > 0)
             {
-                Log.Info("Catalogue: every item prop exists in this build.");
+                // NAMED, not counted. These are the guesses most likely to be wrong, and a
+                // name in somebody's log is the whole repair path.
+                Log.Info("Catalogue: prop name(s) not in this build, skipped - " +
+                         string.Join(", ", missing.ToArray()));
+            }
+
+            if (blank.Count == 0)
+            {
+                Log.Info("Catalogue: every item has a prop that exists in this build.");
                 return;
             }
 
-            // NAMED, not counted. These are the guesses most likely to be wrong, and a name in
-            // somebody's log is the whole repair path -- the item still works without it.
-            Log.Info("Catalogue: prop(s) not in this build, those items are eaten empty-handed - " +
-                     string.Join(", ", missing.ToArray()));
+            Log.Warn("Catalogue: NO usable prop for - " + string.Join(", ", blank.ToArray()) +
+                     ". Those are eaten empty-handed; add a model name that exists to foods.json.");
         }
     }
 }
