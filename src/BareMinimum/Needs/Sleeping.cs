@@ -96,7 +96,20 @@ namespace BareMinimum.Needs
                 if (me == null || !me.Exists() || me.IsDead) return;
 
                 var where = Offer(me);
-                if (where == Bunk.None) return;
+
+                if (where == Bunk.None)
+                {
+                    // Walked away or drove off: forget the offer so it shows again next time.
+                    if (_offering) { _offering = false; Hud.ClearHelp(); }
+                    return;
+                }
+
+                if (!_offering)
+                {
+                    _offering = true;
+                    _offeredAt = Game.GameTime;
+                    _promptDone = false;
+                }
 
                 Prompt(where);
 
@@ -152,19 +165,42 @@ namespace BareMinimum.Needs
         /// meter needs a reason not to bother, and one looking at an empty one needs to know a
         /// car is worth less than a bed before they settle for the car.
         /// </summary>
+        /// <summary>How long the offer stays on screen before it gets out of the way.</summary>
+        private const int PromptMs = 2000;
+
+        private bool _offering;
+        private int _offeredAt;
+        private bool _promptDone;
+
+        /// <summary>
+        /// The offer: the button, the verb, and nothing else.
+        ///
+        /// It used to append the hours and a line about a car being a poor night. That is
+        /// true, and it is also a paragraph pinned to the corner of the screen for as long as
+        /// you stand near a bed -- read once on the first night and in the way every night
+        /// after. The hours are in the ini and the F7 menu for anybody who wants the number.
+        ///
+        /// AND IT LEAVES AFTER TWO SECONDS. The key keeps working the whole time you are in
+        /// range; only the words go. A prompt that never leaves stops being a prompt and
+        /// becomes furniture.
+        ///
+        /// CLEAR_ALL_HELP_MESSAGES is what actually removes it. Simply not redrawing is not
+        /// enough -- the game's help box has its own several-second lifetime once fed, so it
+        /// would sit there long past its welcome and fade on a schedule of its own.
+        /// </summary>
         private void Prompt(Bunk where)
         {
-            var rested = _needs.Sleep.Value >= 0.995f;
+            if (_promptDone) return;
 
-            var hours = where == Bunk.Bed ? _cfg.BedHours : _cfg.CarHours;
+            if (Game.GameTime - _offeredAt >= PromptMs)
+            {
+                _promptDone = true;
+                Hud.ClearHelp();
+                return;
+            }
 
-            var what = where == Bunk.Bed ? "Sleep" : "Doze off";
-            var note = rested
-                ? "  ~c~You are not tired."
-                : "  ~c~" + hours.ToString("0") + "h" +
-                  (where == Bunk.Car ? ", and a car is a poor night." : ".");
-
-            Hud.Help("Press ~INPUT_CONTEXT~ to " + what + "." + note);
+            Hud.Help("Press ~INPUT_CONTEXT~ to " +
+                     (where == Bunk.Bed ? "Sleep" : "Doze off") + ".");
         }
 
         /// <summary>
