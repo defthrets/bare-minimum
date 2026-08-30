@@ -44,10 +44,15 @@
     "inert -- it is a parking space, not a disabled entry.",
     "",
     "  Liquor store 1  x 98.832  y -1308.740  z 29.274  heading 296.627",
+    "",
     "  Liquor store 2  x 170.355  y -1336.946  z 29.293  heading 95.355",
     "                  Mount Whiskey on the door, Debonaire in the window.",
     "",
-    "  Both noted 2026-08-30. Needs deciding what they sell: beer and spirits are",
+    "  Del-Hi Liquor   x 226.046  y -1746.749  z 29.250  heading 218.520",
+    "                  Its DELI half is already live as the delhi_deli vendor;",
+    "                  only the spirits are waiting on the question below.",
+    "",
+    "  All noted 2026-08-30. Needs deciding what they sell: beer and spirits are",
     "  drinks, but this mod has no drunk mechanic, and the sleep effects already use",
     "  the drunk walk and camera -- so alcohol here would either do nothing or",
     "  collide with being exhausted. Worth settling that before writing any items.",
@@ -267,6 +272,51 @@
       "y": -1690.383,
       "z": 29.280,
       "heading": 321.225,
+
+      "spawnRange": 90.0,
+      "reach": 2.2,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+
+    {
+      "_note": "Save-a-Cent. The other dollar store. Same idea as Cosas Baratas: whatever",
+      "_note2": "is on the shelf today, one thing at a time. Cheap drinks in the mix here,",
+      "_note3": "since 99c stores sell them and it gives the two shops different shelves.",
+
+      "id": "save_a_cent",
+      "name": "Save-a-Cent",
+      "item": ["crisps", "jerky", "choc_ego", "choc_meteorite", "choc_pq",
+               "candybox", "ecola", "sprunk"],
+
+      "x": 195.333,
+      "y": -1764.094,
+      "z": 29.356,
+      "heading": 278.529,
+
+      "spawnRange": 90.0,
+      "reach": 2.2,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+
+    {
+      "_note": "Del-Hi Liquor. The sign says LIQUOR, DELICATESSEN and SUNDRIES, so the",
+      "_note2": "deli half is live now -- sandwiches and tinned odds. The LIQUOR half is",
+      "_note3": "still parked in _pending with the other two, pending what booze should do.",
+
+      "id": "delhi_deli",
+      "name": "Del-Hi Delicatessen",
+      "item": ["deli_sandwich", "bagel", "sardines", "jerky"],
+
+      "x": 226.046,
+      "y": -1746.749,
+      "z": 29.250,
+      "heading": 218.520,
 
       "spawnRange": 90.0,
       "reach": 2.2,
