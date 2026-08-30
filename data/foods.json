@@ -1928,6 +1928,81 @@
         "prop_food_bs_cup"
       ],
       "seconds": 4.5
+    },
+    {
+      "_note": "Crucial Fix Coffee House. THE FIFTH PLACE THAT SELLS COFFEE and it still does not overlap: Bean Machine is hot and serious, Rusty Brown's is filter with a ring, Ground & Pound pours a pot of tea, Cool Beans is cold, and this one is a Jamaican roast with patties and ginger beer.",
+      "id": "cf_roast",
+      "name": "Jamaican Roast",
+      "category": "Drinks",
+      "price": 7,
+      "hunger": 0.05,
+      "wake": 0.21,
+      "drink": true,
+      "shop": false,
+      "icon": "cup",
+      "tint": "#6b4326",
+      "desc": "Roasted since 1983 and they will tell you so while it pours.",
+      "prop": [
+        "prop_cs_coffee_cup",
+        "p_ing_coffeecup_02",
+        "prop_coffee_cup_01",
+        "prop_food_bs_coffee"
+      ],
+      "seconds": 4.5
+    },
+    {
+      "id": "cf_patty",
+      "name": "Beef Patty",
+      "category": "Food",
+      "price": 6,
+      "hunger": 0.36,
+      "shop": false,
+      "icon": "taco",
+      "tint": "#e0a640",
+      "desc": "Yellow pastry, serious filling. Hold it in the paper bag or lose a shirt.",
+      "prop": [
+        "prop_cs_sandwich_01",
+        "prop_food_bs_burger1",
+        "prop_cs_burger_01"
+      ],
+      "seconds": 5.0
+    },
+    {
+      "id": "cf_gingerbeer",
+      "name": "Ginger Beer",
+      "category": "Drinks",
+      "price": 4,
+      "hunger": 0.06,
+      "wake": 0.12,
+      "drink": true,
+      "shop": false,
+      "icon": "bottle",
+      "tint": "#c98a3a",
+      "desc": "The proper cloudy kind. Takes the roof of your mouth off.",
+      "prop": [
+        "prop_ld_flow_bottle",
+        "prop_cs_beer_bot_01",
+        "prop_plastic_cup_02"
+      ],
+      "seconds": 4.0
+    },
+    {
+      "id": "cf_rumcake",
+      "name": "Rum Cake",
+      "category": "Snacks",
+      "price": 6,
+      "hunger": 0.24,
+      "booze": 0.04,
+      "shop": false,
+      "icon": "slice",
+      "tint": "#a86e3c",
+      "desc": "There is more rum in this than anybody admits at eleven in the morning.",
+      "prop": [
+        "prop_cs_slice_cake",
+        "prop_choc_ego",
+        "prop_food_bs_bagel"
+      ],
+      "seconds": 4.5
     }
   ],
   "_animations": [

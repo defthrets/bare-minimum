@@ -414,7 +414,27 @@ namespace BareMinimum.UI
             var titleH = Hud.Height(titleScale, Plain);
             var subH = string.IsNullOrEmpty(Subtitle) ? 0f : Hud.Height(subScale, Plain);
 
-            var height = padTop + titleH + (subH > 0f ? gap + subH : 0f) + padBottom;
+            // THE LOGO IS SIZED OFF THE PANEL, NOT OFF THE TEXT. A brand mark should take
+            // up the same share of the header whatever the title scale happens to be, and
+            // sizing it off a line of type it is replacing made it a small sticker in a wide
+            // empty bar. Forty per cent of the panel reads as a sign over a counter.
+            //
+            // Height comes back out of the width through the artwork's own ratio and the
+            // screen's, so the mark is never stretched: a sprite given equal width and height
+            // fractions comes out as wide as the screen is, which on a 21:9 is half again.
+            var logoW = 0f;
+            var logoH = 0f;
+
+            if (TitleImage != null)
+            {
+                logoW = PanelW * 0.40f;
+                logoH = logoW * Aspect() / Math.Max(0.1f, TitleImageRatio);
+            }
+
+            // The taller of the two, so a logo cannot spill out of its own header.
+            var headLine = Math.Max(titleH, logoH);
+
+            var height = padTop + headLine + (subH > 0f ? gap + subH : 0f) + padBottom;
 
             Hud.Bar(left, y, PanelW, height, Color.FromArgb(238, 12, 12, 15));
 
@@ -429,10 +449,7 @@ namespace BareMinimum.UI
                 // exactly as they were painted. Every other icon in this mod relies on the
                 // opposite -- white art taking a tint -- so this is the one deliberate
                 // exception and it is worth the sentence.
-                var logoH = titleH * 1.35f;
-
-                TitleImage.DrawSized(PanelX, y + padTop + titleH / 2f,
-                                     logoH * TitleImageRatio / Aspect(), logoH,
+                TitleImage.DrawSized(PanelX, y + padTop + headLine / 2f, logoW, logoH,
                                      Color.FromArgb(255, 255, 255, 255));
             }
             else
@@ -445,7 +462,7 @@ namespace BareMinimum.UI
 
             if (subH > 0f)
             {
-                Hud.Text(Subtitle, PanelX, y + padTop + titleH + gap, subScale,
+                Hud.Text(Subtitle, PanelX, y + padTop + headLine + gap, subScale,
                          Color.FromArgb(210, 190, 190, 198), Plain, true);
             }
 

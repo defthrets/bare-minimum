@@ -327,6 +327,13 @@
       "vendor": "market_kiosk",
       "gender": "male",
       "verified": false
+    },
+    {
+      "handle": "crucialfix",
+      "name": "Crucial Fix",
+      "vendor": "crucial_fix",
+      "gender": "none",
+      "verified": false
     }
   ],
   "posts": {

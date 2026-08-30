@@ -1302,6 +1302,28 @@
       "blip": true,
       "blipSprite": 52,
       "blipColour": 5
+    },
+    {
+      "_note": "Crucial Fix Coffee House -- Jamaican Roast since 1983, corner unit",
+      "_note2": "with pavement tables. The rum cake carries a little booze, which is",
+      "_note3": "the only food in the catalogue that does. Door coordinate.",
+      "id": "crucial_fix",
+      "name": "Crucial Fix",
+      "item": [
+        "cf_roast",
+        "cf_patty",
+        "cf_gingerbeer",
+        "cf_rumcake"
+      ],
+      "x": 274.207,
+      "y": -833.764,
+      "z": 29.255,
+      "heading": 23.524,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
     }
   ]
 }
