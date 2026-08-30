@@ -392,21 +392,42 @@ def eye(stage, phase=0):
         # collapses is a letterbox; the corners have to come in as the lids meet.
         w = half * (0.72 + 0.28 * (opening / 62.0))
 
+        # THE LID IS THE SHAPE OF THE EYE, not something drawn on top of it.
+        #
+        # There used to be an arch stroked over the lens to say "lid". It read as an
+        # eyebrow, and an eyebrow is a face rather than an eye. Cutting the lens flat
+        # instead left a D. Cutting it with a second ellipse left a visible facet where
+        # the two curves crossed at an angle.
+        #
+        # So the lens is built as two half-ellipses sharing one width: the lower half
+        # keeps the full opening, the upper half is shortened by the lid fraction. They
+        # meet at the widest point with the same vertical tangent, so the join is
+        # invisible, and a tired eye is simply an eye whose top arc has come down. One
+        # shape, no second feature, and the droop is in the silhouette where the rest of
+        # this icon set keeps its meaning.
+        top = opening * (1.0 - lid_frac)
+
         lens = Image.new("RGBA", img.size, CLEAR)
         ld = ImageDraw.Draw(lens)
+
         ld.ellipse([s(cx - w), s(cy - opening), s(cx + w), s(cy + opening)], fill=WHITE)
+        ld.rectangle([0, 0, img.size[0], s(cy)], fill=CLEAR)
+        ld.ellipse([s(cx - w), s(cy - top), s(cx + w), s(cy + top)], fill=WHITE)
 
         # The iris is a HOLE and the catchlight is a small disc OFF CENTRE inside it.
         # Concentric, the pair is a donut, and at 100% the icon read as a target.
-        # Scaled to the ANIMATED opening, not the stage's resting one. A full-size hole
-        # in a collapsing slit swallows the white and the mid-blink frame reads as an
-        # outline rather than an eye halfway shut.
+        #
+        # Scaled to the ANIMATED opening, and then held under the top arc: a hole as tall
+        # as the lid is low swallows what little white is left and the eye reads as an
+        # outline. Anything punched outside the lens does nothing anyway, which is what
+        # clips the iris on a droopy eye for free.
         rest = LIDS[stage][0]
         pr = IRIS[stage] if rest <= 0 else IRIS[stage] * (opening / float(rest))
-        if stage == 0:
-            pr = opening * 0.42
+        if pr > top * 0.86:
+            pr = top * 0.86
         if pr < 6:
             pr = 0
+
         if pr > 0:
             ld.ellipse([s(cx - pr), s(cy - pr), s(cx + pr), s(cy + pr)], fill=CLEAR)
 
@@ -414,26 +435,7 @@ def eye(stage, phase=0):
             gx, gy = cx - pr * 0.34, cy - pr * 0.34
             ld.ellipse([s(gx - gr), s(gy - gr), s(gx + gr), s(gy + gr)], fill=WHITE)
 
-        # The lid comes down over the TOP of the lens by its own stated fraction, so the
-        # visible slit is always a real proportion of the opening. Masked rather than drawn
-        # over, so the iris is CUT by the eyelid instead of sitting under it -- that is the
-        # difference between looking sleepy and looking like a squint.
-        lid_y = cy - opening + 2.0 * opening * lid_frac
-
-        keep = Image.new("L", img.size, 255)
-        ImageDraw.Draw(keep).rectangle([0, 0, img.size[0], s(lid_y)], fill=0)
-        lens.putalpha(Image.composite(lens.getchannel("A"),
-                                      Image.new("L", img.size, 0), keep))
         img.alpha_composite(lens)
-
-        # The lid's own edge, drawn wider than the lens so it overhangs the corners -- that
-        # is what makes it read as a lid lying over the eye rather than as its outline.
-        #
-        # ITS HEIGHT SCALES WITH THE OPENING. Fixed at 46 the dome towered over a nearly-shut
-        # eye, so 25% came out as CLOSED with a line under it.
-        arch = 28 + opening * 0.30
-        d.arc([s(cx - w - 6), s(lid_y - arch), s(cx + w + 6), s(lid_y + arch)],
-              182, 358, fill=WHITE, width=s(10))
 
         # NO LOWER LASHES ON AN OPEN EYE. Two strokes under the outer corners were meant to
         # say "drooping"; across a slit twenty units tall they read as bars over the eye and
