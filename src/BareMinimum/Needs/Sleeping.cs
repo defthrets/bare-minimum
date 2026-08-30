@@ -139,6 +139,13 @@ namespace BareMinimum.Needs
                 var v = me.CurrentVehicle;
                 if (v == null || !v.Exists()) return Bunk.None;
 
+                // NOT ON A BIKE. You cannot doze off sitting astride a motorcycle, and being
+                // offered it there is the mod not knowing what it is looking at. The test is
+                // for a thing you can SIT BACK in -- a car, a van, a bus, a truck -- rather
+                // than a list of what to exclude, because a list of exclusions misses the
+                // next odd vehicle and a whitelist just declines it.
+                if (!Enclosed(v)) return Bunk.None;
+
                 // Stopped AND switched off. Dozing off at the lights is not a nap, and an
                 // idling engine is the difference between parking up and pausing.
                 if (v.IsEngineRunning) return Bunk.None;
@@ -156,6 +163,33 @@ namespace BareMinimum.Needs
 
             var bed = _beds.Nearest(me.Position, _cfg.BedReach);
             return bed != null ? Bunk.Bed : Bunk.None;
+        }
+
+        /// <summary>
+        /// Whether this is something you could actually sleep in.
+        ///
+        /// A WHITELIST, not a list of exclusions. Bikes, bicycles and quads are the obvious
+        /// ones to rule out, but so are jet skis, and asking "is it a car or a van" answers
+        /// all of them at once -- including the next odd vehicle nobody thought of, which a
+        /// blacklist would silently allow.
+        /// </summary>
+        private static bool Enclosed(Vehicle v)
+        {
+            try
+            {
+                var m = v.Model;
+
+                if (m.IsBike || m.IsBicycle || m.IsQuadBike || m.IsJetSki) return false;
+
+                // IsBigVehicle, not IsTruck -- SHVDN 3.9 has no IsTruck, and a lorry cab
+                // is exactly the sort of thing somebody would expect to sleep in.
+                return m.IsCar || m.IsVan || m.IsBus || m.IsBigVehicle;
+            }
+            catch
+            {
+                // Unreadable model: decline rather than offer a nap on something odd.
+                return false;
+            }
         }
 
         /// <summary>

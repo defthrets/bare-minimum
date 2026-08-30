@@ -178,6 +178,30 @@ namespace BareMinimum.Core
         /// <summary>How close to a bed you have to stand before it offers.</summary>
         public float BedReach = 1.6f;
 
+        // ---- Map -------------------------------------------------------------
+
+        /// <summary>Whether shops get map markers at all.</summary>
+        public bool ShowShopBlips = true;
+
+        /// <summary>
+        /// How close before a shop's marker exists, in metres. 0 means always.
+        ///
+        /// A marker is CREATED and DESTROYED by distance rather than merely hidden, because
+        /// twenty-five permanent blips is twenty-five icons competing with the ones the game
+        /// put there -- and the point of a food marker is "there is one near you", not a
+        /// permanent directory of every taco in the county.
+        /// </summary>
+        public float ShopBlipRange = 220f;
+
+        /// <summary>
+        /// Whether they also appear on the PAUSE map. Off.
+        ///
+        /// The pause map is where somebody goes to plan a journey, and a screen full of
+        /// identical shop icons is exactly the clutter that makes people turn a mod off. On
+        /// the minimap, near you, it is useful; on the big map it is noise.
+        /// </summary>
+        public bool ShopBlipsOnMainMap = false;
+
         // ---- Money -----------------------------------------------------------
 
         /// <summary>Scales every price in foods.json at once, for anybody who finds them wrong.</summary>
@@ -334,6 +358,12 @@ namespace BareMinimum.Core
 
                 cfg.PriceMultiplier = ini.GetFloat("Money", "PriceMultiplier",
                                                    cfg.PriceMultiplier, 0f, 50f);
+
+                cfg.ShowShopBlips = ini.GetBool("Map", "ShowShopBlips", cfg.ShowShopBlips);
+                cfg.ShopBlipRange = ini.GetFloat("Map", "ShopBlipRange",
+                                                 cfg.ShopBlipRange, 0f, 5000f);
+                cfg.ShopBlipsOnMainMap = ini.GetBool("Map", "ShopBlipsOnMainMap",
+                                                     cfg.ShopBlipsOnMainMap);
 
                 cfg.ShowHud = ini.GetBool("HUD", "Show", cfg.ShowHud);
                 cfg.HudAutoPosition = ini.GetBool("HUD", "AutoPosition", cfg.HudAutoPosition);

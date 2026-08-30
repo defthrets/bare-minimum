@@ -189,32 +189,56 @@ namespace BareMinimum.Food
             Report(item);
         }
 
+        /// <summary>
+        /// What the ticker says afterwards.
+        ///
+        /// A BEER DOES NOT REPORT A STOMACH PERCENTAGE. Booze carries a token amount of
+        /// hunger -- a Logger Lager is 0.08 -- and leading with "Fed 50%" after one made the
+        /// mod look like it thought a lager was a meal. What you want to know after a drink
+        /// is how drunk you are, so that is what it says; the couple of per cent of hunger it
+        /// happens to add is not news.
+        /// </summary>
         private void Report(Item item)
         {
             try
             {
-                var pct = (int)Math.Round(_needs.Hunger.Value * 100f);
+                var msg = "~g~" + item.Name + "~s~.  ";
 
-                var msg = "~g~" + item.Name + "~s~.  Fed " + pct + "%";
-
-                if (item.Wake > 0f)
+                if (item.Booze > 0f)
                 {
-                    msg += ", rested " + (int)Math.Round(_needs.Sleep.Value * 100f) + "%";
+                    msg += Tipsy();
+                }
+                else
+                {
+                    msg += "Fed " + (int)Math.Round(_needs.Hunger.Value * 100f) + "%";
+
+                    if (item.Wake > 0f)
+                    {
+                        msg += ", rested " + (int)Math.Round(_needs.Sleep.Value * 100f) + "%";
+                    }
+
+                    msg += ".";
                 }
 
-                // Only says so once it is actually showing. A number for a single beer would
-                // be a stat readout; a word once you are visibly drunk is a comment.
-                if (item.Booze > 0f && _needs.Drunk >= 0.22f)
-                {
-                    msg += _needs.Drunk >= 0.65f ? ".  ~o~You are hammered" : ".  ~y~Feeling it";
-                }
-
-                GTA.UI.Notification.PostTicker(msg + ".", false, false);
+                GTA.UI.Notification.PostTicker(msg, false, false);
             }
             catch
             {
                 // Not worth failing a meal over.
             }
+        }
+
+        /// <summary>How drunk, in words rather than a number.</summary>
+        private string Tipsy()
+        {
+            var d = _needs.Drunk;
+
+            if (d >= 0.85f) return "~o~You are wrecked.";
+            if (d >= 0.65f) return "~o~You are hammered.";
+            if (d >= 0.40f) return "~y~Properly merry.";
+            if (d >= 0.22f) return "~y~Feeling it.";
+
+            return "Barely touched the sides.";
         }
 
         // ======================================================================

@@ -350,6 +350,23 @@ namespace BareMinimum.UI
                   0.1f, 0f, 10f, "0.0",
                   "Scales every price at once. Takes effect on the next script reload.");
 
+            Bool("Shop map markers", "Map", "ShowShopBlips",
+                 () => _cfg.ShowShopBlips, v => _cfg.ShowShopBlips = v,
+                 "Markers for food shops. They only appear when you are near one.");
+
+            Float("Marker range", "Map", "ShopBlipRange",
+                  () => _cfg.ShopBlipRange, v => _cfg.ShopBlipRange = v,
+                  20f, 0f, 2000f, "0",
+                  "How close before a shop's marker appears, in metres. 0 shows them all, always.",
+                  () => _cfg.ShowShopBlips,
+                  "~y~Turn shop map markers ON first.");
+
+            Bool("Markers on pause map", "Map", "ShopBlipsOnMainMap",
+                 () => _cfg.ShopBlipsOnMainMap, v => _cfg.ShopBlipsOnMainMap = v,
+                 "Off keeps the big map clear and leaves them on the minimap only.",
+                 () => _cfg.ShowShopBlips,
+                 "~y~Turn shop map markers ON first.");
+
             Bool("Show HUD", "HUD", "Show",
                  () => _cfg.ShowHud, v => _cfg.ShowHud = v,
                  "The apple and the eye beside the minimap.");
@@ -440,7 +457,8 @@ namespace BareMinimum.UI
         // ======================================================================
 
         private void Bool(string name, string section, string key,
-                          Func<bool> get, Action<bool> set, string note)
+                          Func<bool> get, Action<bool> set, string note,
+                          Func<bool> available = null, string unavailable = "")
         {
             _options.Add(new Option
             {
@@ -448,6 +466,8 @@ namespace BareMinimum.UI
                 Note = note,
                 Section = section,
                 Key = key,
+                Available = available,
+                Unavailable = unavailable,
                 Show = () => get() ? "ON" : "OFF",
                 Nudge = dir => set(!get()),
                 Persist = () => get() ? "true" : "false"

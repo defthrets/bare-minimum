@@ -439,7 +439,7 @@ namespace BareMinimum.Venues
         {
             foreach (var v in _vendors)
             {
-                Marker(v);
+                Marker(v, from);
 
                 // CLOSED IS THE SAME AS FAR AWAY as far as everything downstream is
                 // concerned: nothing spawns, nothing is offered, the pitch is empty.
@@ -477,15 +477,36 @@ namespace BareMinimum.Venues
         }
 
         /// <summary>
-        /// The map marker, created once and left alone.
+        /// The map marker: created when you are near, destroyed when you are not.
         ///
-        /// Not streamed with the rest: the whole point of a blip is to be visible from across
-        /// the map, so tying it to a ninety-metre spawn range would mean it only appeared once
-        /// you had already found the place.
+        /// CREATED AND DESTROYED BY DISTANCE rather than merely hidden. Twenty-five permanent
+        /// blips is twenty-five icons competing with the ones the game already puts there,
+        /// and the useful message is "there is food near you" -- not a permanent directory of
+        /// every taco in the county.
+        ///
+        /// It also stays OFF THE PAUSE MAP by default. That map is where somebody plans a
+        /// journey, and a screenful of identical shop icons is the sort of clutter that makes
+        /// people turn a mod off.
         /// </summary>
-        private static void Marker(Vendor v)
+        private void Marker(Vendor v, Vector3 from)
         {
-            if (!v.Blip) return;
+            var wanted = v.Blip && _cfg.ShowShopBlips &&
+                         (_cfg.ShopBlipRange <= 0f ||
+                          v.Position.DistanceTo(from) <= _cfg.ShopBlipRange);
+
+            if (!wanted)
+            {
+                if (v.Marker != null)
+                {
+                    try { if (v.Marker.Exists()) v.Marker.Delete(); }
+                    catch { /* nothing to do about it */ }
+
+                    v.Marker = null;
+                }
+
+                return;
+            }
+
             if (v.Marker != null && v.Marker.Exists()) return;
 
             try
@@ -496,7 +517,16 @@ namespace BareMinimum.Venues
                 Function.Call(Hash.SET_BLIP_SPRITE, blip.Handle, v.BlipSprite);
                 Function.Call(Hash.SET_BLIP_COLOUR, blip.Handle, v.BlipColour);
                 Function.Call(Hash.SET_BLIP_SCALE, blip.Handle, 0.75f);
+
+                // Short range keeps it off the edge of the minimap when you are far from it.
                 Function.Call(Hash.SET_BLIP_AS_SHORT_RANGE, blip.Handle, true);
+
+                // DISPLAY 5 is minimap only; 2 is both maps. This is the switch that keeps
+                // the pause map clear, and it is a documented enum rather than a guess --
+                // but the distance gate above is what actually does the work, because a blip
+                // that does not exist cannot appear on any map whatever its display is.
+                Function.Call(Hash.SET_BLIP_DISPLAY, blip.Handle,
+                              _cfg.ShopBlipsOnMainMap ? 2 : 5);
 
                 Function.Call(Hash.BEGIN_TEXT_COMMAND_SET_BLIP_NAME, "STRING");
                 Function.Call(Hash.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME, v.Name);
