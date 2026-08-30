@@ -254,6 +254,29 @@
     },
 
     {
+      "_note": "Cosas Baratas. A dollar store: whatever is on the shelf today, one thing",
+      "_note2": "at a time. Reuses the junk the 24/7 counters already stock, plus two off",
+      "_note3": "its own wall -- junk food IS sold in both places, so it is not duplicated.",
+
+      "id": "cosas_baratas",
+      "name": "Cosas Baratas",
+      "item": ["crisps", "jerky", "choc_ego", "choc_meteorite", "choc_pq",
+               "sardines", "candybox"],
+
+      "x": 104.783,
+      "y": -1690.383,
+      "z": 29.280,
+      "heading": 321.225,
+
+      "spawnRange": 90.0,
+      "reach": 2.2,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+
+    {
       "_note": "Bishop's Chicken. The doors are part of the map; nothing is spawned.",
 
       "id": "bishops_chicken",

@@ -191,6 +191,28 @@
     },
 
     {
+      "_note": "Cosas Baratas. Both of these are painted on the shop wall.",
+      "id": "sardines",
+      "name": "Tin of Sardines",
+      "category": "Snacks",
+      "price": 3,
+      "hunger": 0.24,
+      "shop": false,
+      "prop": ["prop_food_bs_sardines", "prop_cs_tin_can", "prop_food_bs_chips"],
+      "seconds": 4.0
+    },
+    {
+      "id": "candybox",
+      "name": "CandyBox Bar",
+      "category": "Snacks",
+      "price": 2,
+      "hunger": 0.11,
+      "shop": false,
+      "prop": ["prop_choc_meto", "prop_choc_ego", "prop_choc_pq"],
+      "seconds": 3.0
+    },
+
+    {
       "id": "crisps",
       "name": "Bag of Crisps",
       "category": "Snacks",
