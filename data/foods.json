@@ -298,6 +298,22 @@
     },
 
     {
+      "_note": "Fowl Mouthed Fried Chicken. Distinct from Lucky Plucker: a bucket to share",
+      "_note2": "rather than a box, so it is bigger, dearer and takes longer to get through.",
+      "id": "fowl_bucket",
+      "name": "Fowl Mouthed Bucket",
+      "category": "Food",
+      "price": 14,
+      "hunger": 0.66,
+      "shop": false,
+      "prop": ["prop_food_bs_chicken", "prop_cs_bs_chicken", "prop_food_bs_burger1", "prop_cs_burger_01"],
+      "drinkProp": ["prop_cs_bs_cup", "prop_food_bs_cup", "prop_ld_can_01"],
+      "combo": true,
+      "seconds": 6.5,
+      "vehicleSeconds": 70
+    },
+
+    {
       "id": "crisps",
       "name": "Bag of Crisps",
       "category": "Snacks",

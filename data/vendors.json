@@ -487,6 +487,27 @@
     },
 
     {
+      "_note": "Fowl Mouthed Fried Chicken. Shopfront is part of the map; nothing spawned.",
+
+      "id": "fowl_mouthed",
+      "name": "Fowl Mouthed",
+      "label": "bucket",
+      "item": "fowl_bucket",
+
+      "x": 224.730,
+      "y": -1511.094,
+      "z": 29.292,
+      "heading": 43.580,
+
+      "spawnRange": 90.0,
+      "reach": 2.2,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+
+    {
       "_note": "Bishop's Chicken. The doors are part of the map; nothing is spawned.",
 
       "id": "bishops_chicken",
