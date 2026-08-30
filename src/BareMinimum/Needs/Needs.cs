@@ -1,0 +1,456 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using GTA;
+using GTA.Chrono;
+using GTA.Native;
+using BareMinimum.Core;
+
+namespace BareMinimum.Needs
+{
+    /// <summary>
+    /// The two needs, the game clock they run on, and the save file they live in.
+    ///
+    /// EVERYTHING HERE IS MEASURED IN GAME HOURS, not real seconds. That is the single
+    /// decision the rest of the mod hangs off, and it is worth the paragraph:
+    ///
+    ///  - It is the clock the player is already living on. They sleep by it and shops open by
+    ///    it; a hunger meter running on real minutes drifts out of step with all of it.
+    ///  - It PAUSES WHEN THE GAME DOES, for free. A real-time meter drains through the pause
+    ///    menu, through a loading screen and through an alt-tab, and the player comes back to
+    ///    a starving character having done nothing.
+    ///  - It follows the timescale. Anybody running a mod that slows or speeds the clock gets
+    ///    needs that still match their world, with nothing to reconfigure.
+    /// </summary>
+    internal sealed class Needs
+    {
+        /// <summary>
+        /// The most game time one tick is allowed to be worth.
+        ///
+        /// A frame is a fraction of a game minute; anything past half an hour is not a frame,
+        /// it is a JUMP -- a loading screen, a mission cutscene, a fast travel, or this mod's
+        /// own sleep. Draining across it would empty the meter in a single frame for reasons
+        /// that have nothing to do with the player.
+        ///
+        /// Sleep is not lost by this: Sleeping calls Slept() explicitly, which applies the
+        /// drain for those hours deliberately, at the sleeping rate.
+        /// </summary>
+        private const float MaxStepHours = 0.5f;
+
+        private readonly Settings _cfg;
+
+        public readonly Need Hunger = new Need(Kind.Hunger);
+        public readonly Need Sleep = new Need(Kind.Sleep);
+
+        /// <summary>Every character's saved state, keyed by the model name below.</summary>
+        private readonly Dictionary<string, float[]> _saved =
+            new Dictionary<string, float[]>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>Whose needs are currently in Hunger and Sleep.</summary>
+        private string _who;
+
+        /// <summary>
+        /// The game clock as of the previous tick, for working out the step.
+        ///
+        /// GameClockDateTime rather than DateTime: World.CurrentDate is obsolete in SHVDN 3.9
+        /// because DateTime cannot represent the year range the game supports, and building on
+        /// a deprecation that already warns at compile time is borrowing a problem.
+        /// </summary>
+        private GameClockDateTime _lastClock;
+        private bool _clockPrimed;
+
+        private bool _dirty;
+        private float _sinceSave;
+
+        /// <summary>Health carried over between ticks, so a fractional loss is not rounded away.</summary>
+        private float _healthDebt;
+
+        public Needs(Settings cfg)
+        {
+            _cfg = cfg;
+            Load();
+        }
+
+        // ======================================================================
+        // The tick
+        // ======================================================================
+
+        public void Update(float realSeconds)
+        {
+            try
+            {
+                SwitchCharacterIfNeeded();
+
+                var hours = Step();
+                if (hours > 0f) Drain(hours);
+
+                Save(realSeconds);
+            }
+            catch (Exception ex)
+            {
+                Log.Once("needs-update", "The needs could not be updated: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// How many GAME hours have passed since the last tick, ignoring jumps.
+        ///
+        /// Returns 0 rather than a negative number when the clock goes backwards, which it
+        /// does whenever anything sets the time -- a mission, a trainer, or the player.
+        /// </summary>
+        private float Step()
+        {
+            GameClockDateTime now;
+
+            try
+            {
+                now = GameClock.Now;
+            }
+            catch (Exception ex)
+            {
+                Log.Once("needs-clock", "Could not read the game clock: " + ex.Message +
+                                        " - the needs will not move.");
+                return 0f;
+            }
+
+            if (!_clockPrimed)
+            {
+                _lastClock = now;
+                _clockPrimed = true;
+                return 0f;
+            }
+
+            var span = now - _lastClock;
+            _lastClock = now;
+
+            var hours = (float)span.TotalHours;
+
+            if (hours <= 0f) return 0f;
+
+            if (hours > MaxStepHours)
+            {
+                Log.Debug("Ignoring a " + hours.ToString("0.0") +
+                          " game-hour jump in the clock - not a frame.");
+                return 0f;
+            }
+
+            return hours;
+        }
+
+        private void Drain(float hours)
+        {
+            if (_cfg.HungerEnabled)
+            {
+                Hunger.Drain(hours, _cfg.HungerHoursToEmpty, Exertion());
+            }
+
+            if (_cfg.SleepEnabled)
+            {
+                Sleep.Drain(hours, _cfg.SleepHoursToEmpty);
+            }
+
+            if (_cfg.StarvingCostsHealth && Hunger.Empty) Starve(hours);
+
+            _dirty = true;
+        }
+
+        /// <summary>
+        /// How much harder than standing about the player is currently working.
+        ///
+        /// Sitting in a car is NOT exertion and is not treated as rest either -- a long drive
+        /// should still make you hungry, just no faster than walking would.
+        /// </summary>
+        private float Exertion()
+        {
+            try
+            {
+                var me = Game.Player.Character;
+                if (me == null || !me.Exists()) return 1f;
+
+                if (me.IsSprinting || me.IsSwimming || me.IsClimbing)
+                    return _cfg.HungerExertionMultiplier;
+
+                if (me.IsRunning) return 1f + (_cfg.HungerExertionMultiplier - 1f) * 0.45f;
+            }
+            catch
+            {
+                // Treat an unreadable ped as standing still.
+            }
+
+            return 1f;
+        }
+
+        /// <summary>
+        /// An empty stomach costing health, slowly.
+        ///
+        /// ACCUMULATED RATHER THAN APPLIED PER TICK. A frame is worth a few thousandths of a
+        /// health point, and Ped.Health is an integer -- so rounding every frame either loses
+        /// the lot to truncation or costs a whole point sixty times a second. The debt is kept
+        /// as a float and spent only once it is worth a point.
+        ///
+        /// It will never kill: the floor is deliberately above zero, because dying of a meter
+        /// the player may not have noticed is the fastest way for a mod like this to be
+        /// uninstalled. It takes you to the edge and leaves you there.
+        /// </summary>
+        private void Starve(float hours)
+        {
+            _healthDebt += _cfg.StarvingHealthPerHour * hours;
+            if (_healthDebt < 1f) return;
+
+            try
+            {
+                var me = Game.Player.Character;
+                if (me == null || !me.Exists()) return;
+
+                var floor = Math.Max(20, me.MaxHealth / 6);
+                if (me.Health <= floor) { _healthDebt = 0f; return; }
+
+                var take = (int)_healthDebt;
+                _healthDebt -= take;
+
+                me.Health = Math.Max(floor, me.Health - take);
+            }
+            catch (Exception ex)
+            {
+                _healthDebt = 0f;
+                Log.Once("needs-starve", "Could not apply starvation damage: " + ex.Message);
+            }
+        }
+
+        // ======================================================================
+        // Sleeping
+        // ======================================================================
+
+        /// <summary>
+        /// Applied when the player has actually slept, after the clock has been moved on.
+        ///
+        /// The tick deliberately ignores the jump this makes, so the hunger those hours cost
+        /// has to be charged here or a night's sleep would be free.
+        /// </summary>
+        public void Slept(float gameHours, float restoreFraction)
+        {
+            if (gameHours <= 0f) return;
+
+            if (_cfg.HungerEnabled)
+            {
+                Hunger.Drain(gameHours, _cfg.HungerHoursToEmpty, _cfg.HungerSleepMultiplier);
+            }
+
+            if (_cfg.SleepEnabled)
+            {
+                // Proportional to the hours, then scaled by how good a bed it was. A car
+                // sleep is both shorter AND worse, which is what stops it being a free bed.
+                var gained = (gameHours / _cfg.SleepHoursToEmpty) * restoreFraction;
+                Sleep.Restore(gained);
+            }
+
+            // The jump has already happened by the time this is called, so the clock has to be
+            // re-primed or the NEXT tick sees the whole night as its own step and ignores it --
+            // which is harmless, but it also would not re-prime, and the step after that would
+            // be wrong too.
+            try { _lastClock = GameClock.Now; } catch { _clockPrimed = false; }
+
+            _dirty = true;
+            SaveNow();
+
+            Log.Info("Slept " + gameHours.ToString("0.#") + "h (quality " +
+                     restoreFraction.ToString("0.00") + "). " + Hunger + ", " + Sleep + ".");
+        }
+
+        // ======================================================================
+        // Eating
+        // ======================================================================
+
+        /// <summary>Puts food in. Returns what actually landed, so the caller can say so.</summary>
+        public float Eat(float amount)
+        {
+            var got = Hunger.Restore(amount);
+            if (got > 0f) { _dirty = true; SaveNow(); }
+            return got;
+        }
+
+        /// <summary>
+        /// A drink, which tops up hunger a little and takes the edge off tiredness.
+        ///
+        /// Caffeine is the reason sleep gets anything at all: a coffee or an energy drink that
+        /// did nothing for tiredness would be a strictly worse sandwich. It is deliberately
+        /// small and it is NOT a substitute for sleeping -- see the cap in Wake().
+        /// </summary>
+        public void Drink(float food, float wake)
+        {
+            if (food > 0f) Hunger.Restore(food);
+            if (wake > 0f) Wake(wake);
+
+            _dirty = true;
+            SaveNow();
+        }
+
+        /// <summary>
+        /// Caffeine, with a ceiling.
+        ///
+        /// It will carry you up to the point where the effects stop, and no further. Without
+        /// the cap a pocketful of energy drinks is a permanent replacement for sleep, and the
+        /// entire sleep half of the mod becomes a shopping list.
+        /// </summary>
+        private void Wake(float amount)
+        {
+            var ceiling = Math.Min(1f, _cfg.SleepTiredAt + 0.12f);
+            if (Sleep.Value >= ceiling) return;
+
+            Sleep.Value = Math.Min(ceiling, Sleep.Value + amount);
+        }
+
+        // ======================================================================
+        // Whose needs these are
+        // ======================================================================
+
+        /// <summary>
+        /// The player's model name, which is how the three protagonists are told apart.
+        ///
+        /// Kept PER CHARACTER because they are three different people. Switching from Franklin
+        /// to Trevor and inheriting Franklin's empty stomach is the kind of detail that reads
+        /// as a bug even to somebody who could not say why.
+        /// </summary>
+        private static string Who()
+        {
+            try
+            {
+                var me = Game.Player.Character;
+                if (me == null || !me.Exists()) return "unknown";
+
+                switch ((uint)me.Model.Hash)
+                {
+                    case 0x9B22DBAFu: return "michael";    // player_zero
+                    case 0x9B810FA2u: return "franklin";   // player_one
+                    case 0x9B0083C0u: return "trevor";     // player_two
+                }
+
+                return "ped_" + ((uint)me.Model.Hash).ToString("x8", CultureInfo.InvariantCulture);
+            }
+            catch
+            {
+                return "unknown";
+            }
+        }
+
+        /// <summary>Parks the current character's numbers and picks up the new one's.</summary>
+        private void SwitchCharacterIfNeeded()
+        {
+            var now = Who();
+            if (now == _who) return;
+
+            if (_who != null)
+            {
+                _saved[_who] = new[] { Hunger.Value, Sleep.Value };
+                SaveNow();
+            }
+
+            _who = now;
+
+            if (_saved.TryGetValue(now, out var v) && v.Length >= 2)
+            {
+                Hunger.Value = v[0];
+                Sleep.Value = v[1];
+            }
+            else
+            {
+                Hunger.Value = 1f;
+                Sleep.Value = 1f;
+            }
+
+            // A switch is also a teleport in time as far as the clock is concerned.
+            _clockPrimed = false;
+
+            Log.Info("Now playing as " + now + ": " + Hunger + ", " + Sleep + ".");
+        }
+
+        // ======================================================================
+        // Disk
+        // ======================================================================
+
+        private void Load()
+        {
+            try
+            {
+                var doc = JsonFile.Read(Paths.StateFile, out var how);
+
+                if (how != ReadResult.Ok || doc == null || doc.IsNull)
+                {
+                    Log.Info("No saved needs yet - starting fed and rested.");
+                    return;
+                }
+
+                var people = doc["characters"];
+
+                foreach (var key in people.Keys)
+                {
+                    var node = people[key];
+                    _saved[key] = new[]
+                    {
+                        Clamp01(node["hunger"].AsFloat(1f)),
+                        Clamp01(node["sleep"].AsFloat(1f))
+                    };
+                }
+
+                Log.Info("Loaded needs for " + _saved.Count + " character(s).");
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Could not read " + Paths.StateFile + " - starting fresh.", ex);
+            }
+        }
+
+        /// <summary>Writes at most once every few seconds, and only when something moved.</summary>
+        private void Save(float realSeconds)
+        {
+            if (!_dirty) return;
+
+            _sinceSave += realSeconds;
+            if (_sinceSave < 10f) return;
+
+            SaveNow();
+        }
+
+        public void SaveNow()
+        {
+            _sinceSave = 0f;
+
+            if (!_dirty) return;
+            _dirty = false;
+
+            try
+            {
+                if (_who != null) _saved[_who] = new[] { Hunger.Value, Sleep.Value };
+
+                var people = Json.Object();
+                foreach (var pair in _saved)
+                {
+                    people.Set(pair.Key, Json.Object()
+                        .Set("hunger", Math.Round(pair.Value[0], 4))
+                        .Set("sleep", Math.Round(pair.Value[1], 4)));
+                }
+
+                var doc = Json.Object()
+                    .Set("version", 1)
+                    .Set("characters", people);
+
+                if (!JsonFile.Write(Paths.StateFile, doc))
+                {
+                    Log.Once("needs-save", "Could not write " + Paths.StateFile +
+                                           " - needs will not survive this session.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Once("needs-save-ex", "Saving the needs failed: " + ex.Message);
+            }
+        }
+
+        private static float Clamp01(float v)
+        {
+            if (v < 0f) return 0f;
+            if (v > 1f) return 1f;
+            return float.IsNaN(v) ? 1f : v;
+        }
+    }
+}
