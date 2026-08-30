@@ -203,6 +203,9 @@ namespace BareMinimum.Core
         /// <summary>Shop chains and their marks, for the counter header.</summary>
         public static string BrandsFile => Path.Combine(Data, "brands.json");
 
+        /// <summary>What the shops say on Hoodrich's timeline, if Hoodrich is there.</summary>
+        public static string SocialsFile => Path.Combine(Data, "socials.json");
+
         /// <summary>
         /// Shipped artwork, beside the data rather than in the writable folder.
         ///

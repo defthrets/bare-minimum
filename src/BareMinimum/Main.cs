@@ -38,6 +38,9 @@ namespace BareMinimum
         private readonly Eating _eating;
         private readonly Counters _counters;
         private readonly Vendors _vendors;
+
+        /// <summary>The shops' voice on Hoodrich's feed. Dormant when Hoodrich is absent.</summary>
+        private readonly Social.Socials _socials;
         private readonly Shop _shop;
         private readonly SettingsPanel _settings;
         private readonly Gauge _gauge;
@@ -58,7 +61,10 @@ namespace BareMinimum
             _catalogue = new Catalogue(_cfg);
             _eating = new Eating(_catalogue, _needs);
             _counters = new Counters();
-            _vendors = new Vendors(_cfg, _catalogue, _eating, _needs);
+            _socials = new Social.Socials(_cfg);
+            _socials.Load();
+
+            _vendors = new Vendors(_cfg, _catalogue, _eating, _needs, _socials);
             _shop = new Shop(_cfg, _catalogue, _counters, _eating, _needs);
 
             _settings = new SettingsPanel(_cfg, _needs);

@@ -139,8 +139,41 @@ namespace BareMinimum.Venues
         /// <summary>When the current smoke ends, or a walk gives up. Real milliseconds.</summary>
         public int PhaseUntil;
 
+        /// <summary>
+        /// Whether this vendor is supposed to have somebody behind it at all.
+        ///
+        /// A hot dog stand is: no man, no hot dog. A taco window is not -- the hatch is part
+        /// of the building and there has never been anybody modelled at it.
+        ///
+        /// Read off the CONFIGURED list until the models have been checked, and off the
+        /// resolved model afterwards. Before resolution the intent in vendors.json is the only
+        /// thing to go on; after it, a vendor whose every candidate ped turned out not to
+        /// exist in this build correctly needs nobody, and sells the way it always did rather
+        /// than going quiet with only a log line to say why.
+        /// </summary>
+        public bool NeedsSeller => Resolved ? PedModel.HasValue : PedModels.Length > 0;
+
+        /// <summary>
+        /// Whether there is actually somebody there, alive, to take the money.
+        ///
+        /// THIS IS THE ONE THAT WAS WRONG. AtPost used to read "Seller == null || working",
+        /// so a stand whose man had been culled by the engine, or whose ped model failed to
+        /// stream, counted as open -- and you could buy a hot dog from an empty cart.
+        /// The null was there to let the taco window trade with nobody at it; NeedsSeller now
+        /// carries that case, so absence can mean absence again.
+        /// </summary>
+        public bool Manned
+        {
+            get
+            {
+                if (!NeedsSeller) return true;
+
+                return Seller != null && Seller.Exists() && !Seller.IsDead;
+            }
+        }
+
         /// <summary>True when he is at his post and able to serve.</summary>
-        public bool AtPost => Seller == null || Doing == Duty.Working;
+        public bool AtPost => Manned && Doing == Duty.Working;
 
         /// <summary>What the prompt calls it. Falls back to the item's own name.</summary>
         public string Label = "";
@@ -155,6 +188,16 @@ namespace BareMinimum.Venues
         public Ped Seller;
         public Blip Marker;
 
+        /// <summary>
+        /// The display mode currently ON the blip, or 0 if it has never been set.
+        ///
+        /// Kept because SET_BLIP_DISPLAY used to be called once, at creation, and never
+        /// again -- so turning the pause-map setting on did nothing to a blip that already
+        /// existed. Remembering what was applied is what lets the next sweep notice the
+        /// setting has changed underneath it.
+        /// </summary>
+        public int Display;
+
         /// <summary>Resolved once the candidate lists have been checked against this build.</summary>
         public Model? PropModel;
         public Model? PedModel;
@@ -162,6 +205,16 @@ namespace BareMinimum.Venues
 
         /// <summary>Whether the player is close enough for this to be live at all.</summary>
         public bool InRange;
+
+        /// <summary>
+        /// Whether the shutters were up last time anybody looked, or null before the first.
+        ///
+        /// Only so that opening and closing can be POSTS. InRange folds distance and hours
+        /// together on purpose -- closed is the same as far away to everything downstream --
+        /// which means it cannot tell "he has gone home" from "you have walked off", and those
+        /// are very different things to say on a timeline.
+        /// </summary>
+        public bool? WasOpen;
 
         /// <summary>
         /// Whether this vendor has anything to CREATE.
@@ -231,6 +284,15 @@ namespace BareMinimum.Venues
         private readonly Eating _eating;
         private readonly Needs.Needs _needs;
 
+        /// <summary>
+        /// The shops' voice on Hoodrich's timeline. Never null; dormant without Hoodrich.
+        ///
+        /// Passed in rather than made here so that the counter and the stalls share one rate
+        /// limit. Two instances would each think they were the only one posting, and the feed
+        /// would get twice what the ini asked for.
+        /// </summary>
+        private readonly Social.Socials _socials;
+
         private readonly List<Vendor> _vendors = new List<Vendor>();
 
         /// <summary>
@@ -264,12 +326,14 @@ namespace BareMinimum.Venues
         private bool _keyWasDown;
         private float _sinceScan;
 
-        public Vendors(Core.Settings cfg, Catalogue menu, Eating eating, Needs.Needs needs)
+        public Vendors(Core.Settings cfg, Catalogue menu, Eating eating, Needs.Needs needs,
+                       Social.Socials socials)
         {
             _cfg = cfg;
             _menu = menu;
             _eating = eating;
             _needs = needs;
+            _socials = socials;
 
             Load();
         }
@@ -496,8 +560,20 @@ namespace BareMinimum.Venues
                 Marker(v, from);
 
                 // CLOSED IS THE SAME AS FAR AWAY as far as everything downstream is
-                // concerned: nothing spawns, nothing is offered, the pitch is empty.
-                var near = v.Position.DistanceTo(from) <= v.SpawnRange && Trading(v);
+                // concerned: nothing spawns, nothing is offered, the pitch is empty. The two
+                // are still worked out separately, because only one of them is worth a post.
+                var within = v.Position.DistanceTo(from) <= v.SpawnRange;
+                var open = Trading(v);
+
+                if (within && v.WasOpen.HasValue && v.WasOpen.Value != open)
+                {
+                    _socials.About(v.Id, open ? Social.Chirp.Opening : Social.Chirp.Closing,
+                                   "", v.Name);
+                }
+
+                if (within) v.WasOpen = open;
+
+                var near = within && open;
 
                 // IN RANGE IS SEPARATE FROM SPAWNED. A taco window has nothing to spawn -- the
                 // hatch is already part of the building -- so it would never count as live if
@@ -513,7 +589,22 @@ namespace BareMinimum.Venues
                     // prompt flickering between bagels and fruit sixty times a second; rolling
                     // once as you walk up means what is on the board stays on the board for as
                     // long as you are stood at it, and is something else next time.
-                    if (near) v.ItemId = Today(v);
+                    if (near)
+                    {
+                        v.ItemId = Today(v);
+
+                        // ON ARRIVAL, not on a timer. A post about a shop you are nowhere near
+                        // is a notification for nothing; one that lands as you walk up reads
+                        // like the place is alive.
+                        //
+                        // ALWAYS Ambient here, never Away. Nothing has spawned yet on the
+                        // frame a vendor comes into range -- Keep runs later in this same
+                        // sweep -- so asking whether anybody is behind the counter would get
+                        // "no" every single time and every arrival would read as a shop that
+                        // had just stepped out. Away is posted from the smoke break, which is
+                        // the only place that actually knows he has gone.
+                        _socials.About(v.Id, Social.Chirp.Ambient, "", v.Name);
+                    }
 
                     Log.Debug(v.Name + (near ? " in range at " : " out of range at ") +
                               v.Position.DistanceTo(from).ToString("0.0") + "m" +
@@ -524,9 +615,12 @@ namespace BareMinimum.Venues
 
                 if (!v.HasEntities) continue;
 
-                if (near && v.Stand == null && v.Seller == null) Spawn(v);
-                else if (!near) Despawn(v);
-                else Keep(v);
+                // WHATEVER IS MISSING, not only an entirely empty pitch. The old test was
+                // "both null", so a stand that survived while its man did not would keep the
+                // cart on the pavement for the rest of the session with nobody behind it --
+                // and, before AtPost was fixed, still sell from it.
+                if (near) Keep(v);
+                else Despawn(v);
             }
         }
 
@@ -544,9 +638,19 @@ namespace BareMinimum.Venues
         /// </summary>
         private void Marker(Vendor v, Vector3 from)
         {
-            var wanted = v.Blip && _cfg.ShowShopBlips &&
-                         (_cfg.ShopBlipRange <= 0f ||
-                          v.Position.DistanceTo(from) <= _cfg.ShopBlipRange);
+            var near = _cfg.ShopBlipRange <= 0f ||
+                       v.Position.DistanceTo(from) <= _cfg.ShopBlipRange;
+
+            // A BLIP THAT DOES NOT EXIST CANNOT BE ON THE PAUSE MAP. This is what was wrong:
+            // the range gate destroyed every blip further than ShopBlipRange away, so turning
+            // "markers on pause map" on could only ever reveal the two or three shops already
+            // within a couple of hundred metres -- which from a full-map view looks like the
+            // setting does nothing at all.
+            //
+            // So the range gate now decides which MAP a blip appears on, not whether it is
+            // allowed to exist. With the setting off it is exactly as before: near shops only,
+            // minimap only, pause map clear.
+            var wanted = v.Blip && _cfg.ShowShopBlips && (near || _cfg.ShopBlipsOnMainMap);
 
             if (!wanted)
             {
@@ -556,12 +660,41 @@ namespace BareMinimum.Venues
                     catch { /* nothing to do about it */ }
 
                     v.Marker = null;
+                    v.Display = 0;
                 }
 
                 return;
             }
 
-            if (v.Marker != null && v.Marker.Exists()) return;
+            // 5  minimap only -- the default, and what keeps the pause map uncluttered.
+            // 2  both maps, for a shop close enough to be worth steering towards.
+            // 3  pause map only, for the rest of the city once the setting is on: they belong
+            //    on the map somebody plans a journey with, not crowding the minimap from a
+            //    kilometre away.
+            var display = near ? (_cfg.ShopBlipsOnMainMap ? 2 : 5) : 3;
+
+            if (v.Marker != null && v.Marker.Exists())
+            {
+                // RE-APPLIED WHEN IT CHANGES, which is the second half of the same bug: the
+                // display used to be set once at creation, so toggling the setting left every
+                // existing blip on whatever it was made with until it happened to be destroyed
+                // and rebuilt by walking away and back.
+                if (v.Display != display)
+                {
+                    try
+                    {
+                        Function.Call(Hash.SET_BLIP_DISPLAY, v.Marker.Handle, display);
+                        v.Display = display;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Once("vendor-blip-display-" + v.Id,
+                                 "Could not restyle the blip for " + v.Name + ": " + ex.Message);
+                    }
+                }
+
+                return;
+            }
 
             try
             {
@@ -575,12 +708,8 @@ namespace BareMinimum.Venues
                 // Short range keeps it off the edge of the minimap when you are far from it.
                 Function.Call(Hash.SET_BLIP_AS_SHORT_RANGE, blip.Handle, true);
 
-                // DISPLAY 5 is minimap only; 2 is both maps. This is the switch that keeps
-                // the pause map clear, and it is a documented enum rather than a guess --
-                // but the distance gate above is what actually does the work, because a blip
-                // that does not exist cannot appear on any map whatever its display is.
-                Function.Call(Hash.SET_BLIP_DISPLAY, blip.Handle,
-                              _cfg.ShopBlipsOnMainMap ? 2 : 5);
+                Function.Call(Hash.SET_BLIP_DISPLAY, blip.Handle, display);
+                v.Display = display;
 
                 Function.Call(Hash.BEGIN_TEXT_COMMAND_SET_BLIP_NAME, "STRING");
                 Function.Call(Hash.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME, v.Name);
@@ -592,6 +721,103 @@ namespace BareMinimum.Venues
             {
                 Log.Once("vendor-blip-" + v.Id, "Could not blip " + v.Name + ": " + ex.Message);
                 v.Blip = false;
+            }
+        }
+
+        /// <summary>
+        /// Rebuilds whichever half of the pitch is not there.
+        ///
+        /// The engine culls entities this mod did not expect it to, models occasionally fail
+        /// to stream on the first sweep, and another script can delete anything at all. All
+        /// three end the same way: something that should be on the pavement is not, and the
+        /// next sweep quietly puts it back.
+        ///
+        /// SETTLED IS CLEARED whenever anything is made, because a fresh entity is at the
+        /// coordinate from the file rather than on the ground, and Settle only ever runs once.
+        /// Without this the replacement hangs in the air exactly the way the first one did
+        /// before it was grounded.
+        /// </summary>
+        private void Restore(Vendor v)
+        {
+            if (!v.Resolved)
+            {
+                v.PropModel = Pick(v.PropModels, "stand prop", v.Name);
+                v.PedModel = Pick(v.PedModels, "vendor ped", v.Name);
+                v.Resolved = true;
+            }
+
+            try
+            {
+                if (v.Stand == null && v.PropModel.HasValue)
+                {
+                    v.Stand = MakeStand(v);
+                    if (v.Stand != null) v.Settled = false;
+                }
+
+                if (v.Seller == null && v.PedModel.HasValue)
+                {
+                    v.Seller = MakeSeller(v);
+
+                    if (v.Seller != null)
+                    {
+                        v.Settled = false;
+                        v.AnimStarted = false;
+
+                        // Back on duty and back on the clock. A man who was rebuilt part way
+                        // through a cigarette would otherwise stay in Duty.Smoking forever,
+                        // stood at his post and refusing to serve anybody.
+                        v.Doing = Duty.Working;
+                        v.SmokeScheduled = false;
+
+                        Log.Debug(v.Name + ": put somebody back behind the counter.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Once("vendor-restore-" + v.Id, "Could not rebuild " + v.Name + ": " + ex.Message);
+            }
+        }
+
+        /// <summary>How far he can drift from his post before he is fetched back. Metres.</summary>
+        private const float StrayedAt = 2.5f;
+
+        /// <summary>
+        /// Walks him back if he has ended up somewhere he should not be.
+        ///
+        /// SEPARATE FROM Break, and it has to be: Break returns immediately for any vendor
+        /// with no smoke break configured, so recovery living in there would only ever apply
+        /// to the one man who smokes.
+        ///
+        /// ONLY WHILE HE IS WORKING. The whole point of the other three states is that he is
+        /// legitimately away from the counter, and dragging him back mid-cigarette would undo
+        /// the break rather than fix anything.
+        ///
+        /// It reuses Duty.WalkingBack instead of teleporting him, so he walks to the cart like
+        /// somebody who wandered off -- and so AtPost stays false the whole way, which keeps
+        /// the stand shut until he is actually stood at it again.
+        /// </summary>
+        private static void Stray(Vendor v)
+        {
+            if (v.Seller == null || !v.Seller.Exists()) return;
+            if (v.Doing != Duty.Working) return;
+            if (v.PostAt == Vector3.Zero) return;
+
+            try
+            {
+                if (v.Seller.Position.DistanceTo(v.PostAt) <= StrayedAt) return;
+
+                Walk(v, v.PostAt);
+
+                v.Doing = Duty.WalkingBack;
+                v.PhaseUntil = Game.GameTime + 12000;
+                v.AnimStarted = false;
+
+                Log.Debug(v.Name + ": drifted off his post, walking back.");
+            }
+            catch (Exception ex)
+            {
+                Log.Once("vendor-stray-" + v.Id, "Could not send him back: " + ex.Message);
             }
         }
 
@@ -715,7 +941,7 @@ namespace BareMinimum.Venues
         }
 
         /// <summary>Puts back anything the game has quietly taken away, and keeps him working.</summary>
-        private static void Keep(Vendor v)
+        private void Keep(Vendor v)
         {
             if (v.Stand != null && !v.Stand.Exists()) v.Stand = null;
 
@@ -725,8 +951,27 @@ namespace BareMinimum.Venues
                 v.AnimStarted = false;
             }
 
+            // A CORPSE IS NOT A SELLER. He is spawned invincible and with events blocked, so
+            // this is rare -- but a script that ignores IsInvincible, or a mission that kills
+            // everything in a radius, will do it. He is left where he fell rather than
+            // vanishing under the player's nose; Despawn clears the body when you walk away,
+            // and a new man is on the cart when you come back.
+            if (v.Seller != null && v.Seller.IsDead) return;
+
+            Restore(v);
+
             Settle(v);
+            Stray(v);
+
+            // Watched across the call rather than posted from inside it, so that Break stays
+            // a state machine that knows nothing about social feeds.
+            var before = v.Doing;
             Break(v);
+
+            if (before == Duty.Working && v.Doing == Duty.WalkingOff)
+            {
+                _socials.About(v.Id, Social.Chirp.Away, "", v.Name);
+            }
 
             // Only tend the grill while actually at the grill. Re-applying the cooking loop to
             // a man walking away from it is how you get somebody moonwalking to a cigarette.
@@ -1311,6 +1556,8 @@ namespace BareMinimum.Venues
             {
                 // Cosmetic.
             }
+
+            _socials.About(v.Id, Social.Chirp.Bought, item.Name, v.Name);
 
             if (_eating.Begin(item)) return;
 

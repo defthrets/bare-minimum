@@ -1,0 +1,212 @@
+{
+  "_comment": [
+    "What the food trade says on the timeline.",
+    "",
+    "THESE ARE BARE MINIMUM'S OWN VOICES, not Hoodrich's. Hoodrich's feed is the block",
+    "talking about itself -- sets, corners, who did what to who. This is the people who",
+    "sell you lunch: a hot dog man with opinions about the weather, a buffet that has",
+    "never once undersold itself, and a corner store that has been closing down for",
+    "three weeks. Different register on purpose. A shop that posted like a gang member",
+    "would read as the same system wearing a hat.",
+    "",
+    "NOTHING HERE HAPPENS UNLESS HOODRICH IS INSTALLED. Bare Minimum has no feed of its",
+    "own and is not growing one; it hands a finished post to Hoodrich's and stays out of",
+    "the way. With Hoodrich absent the whole file is never even read.",
+    "",
+    "  authors   who posts. handle and name are what the timeline shows.",
+    "            'vendor' ties an author to a vendor id in vendors.json, so the hot dog",
+    "            man's account only ever posts about the hot dog stand.",
+    "            'gang' is left empty: none of these people are in one.",
+    "  posts     sets of lines, keyed by what just happened.",
+    "              ambient    nothing in particular, they just posted.",
+    "              bought     you have just bought something from them.",
+    "              closing    they are shutting for the night.",
+    "              opening    they are back on.",
+    "              away       they have stepped off the pitch for a minute.",
+    "  slots     {word} substitutions, picked at random. Same idea as Hoodrich's.",
+    "",
+    "{shop} is always the vendor's own name, so one line serves every stall without",
+    "any of them sounding like the others."
+  ],
+  "version": 1,
+
+  "slots": {
+    "timeofday": ["this heat", "this morning", "this weather", "a Tuesday", "lunch rush", "the afternoon"],
+    "complaint": [
+      "the price of onions",
+      "people asking for the wifi password",
+      "a man who wanted it well done",
+      "somebody paying in coins",
+      "the seagulls",
+      "the guy who parks across my pitch"
+    ],
+    "praise": ["the best in Los Santos", "criminally underrated", "an institution", "worth the walk"],
+    "excuse": [
+      "supplier problems",
+      "the health inspector",
+      "a small fire",
+      "personal reasons",
+      "a family thing"
+    ]
+  },
+
+  "authors": [
+    {
+      "handle": "dogsondavis",
+      "name": "Hot Dog Guy",
+      "vendor": "hotdog_davis",
+      "gender": "male",
+      "verified": false
+    },
+    {
+      "handle": "vespucci_dogs",
+      "name": "Hot Dog Guy (Vespucci)",
+      "vendor": "hotdog_vespucci",
+      "gender": "male",
+      "verified": false
+    },
+    {
+      "handle": "wokitoff_official",
+      "name": "Wok It Off",
+      "vendor": "wok_it_off",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "thecoop_ls",
+      "name": "The Coop",
+      "vendor": "the_coop",
+      "gender": "none",
+      "verified": true
+    },
+    {
+      "handle": "bargainsgalore",
+      "name": "Bargains Galore",
+      "vendor": "bargains_galore",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "bishops_chicken",
+      "name": "Bishop's Chicken",
+      "vendor": "bishops_chicken",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "lavacaloca_ls",
+      "name": "La Vaca Loca",
+      "vendor": "lavacaloca_drivethru",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "ringoffirechilli",
+      "name": "Ring of Fire",
+      "vendor": "ring_of_fire",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "luckyplucker",
+      "name": "Lucky Plucker",
+      "vendor": "lucky_plucker",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "fowlmouthed_ls",
+      "name": "Fowl Mouthed",
+      "vendor": "fowl_mouthed",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "longpigmarket",
+      "name": "Long Pig Mini Market",
+      "vendor": "long_pig",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "gabriellesmkt",
+      "name": "Gabrielle's Market",
+      "vendor": "gabrielles_market",
+      "gender": "female",
+      "verified": false
+    },
+    {
+      "handle": "attackataco",
+      "name": "Attack-A-Taco",
+      "vendor": "attack_a_taco",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "heartytaco_ls",
+      "name": "Hearty Taco",
+      "vendor": "hearty_taco",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "aguilaburrito",
+      "name": "Aguila Burrito",
+      "vendor": "aguila_burrito",
+      "gender": "none",
+      "verified": false
+    }
+  ],
+
+  "posts": {
+    "ambient": [
+      "Cart is out. Come get one before I eat the stock myself.",
+      "Nobody warned me about {complaint}.",
+      "{shop}. Open. Same corner. Same me.",
+      "Somebody asked me today if the hot dogs are vegan. They are hot dogs.",
+      "Third person {timeofday} has asked if I take card. I do not.",
+      "{shop} is {praise} and I will not be taking questions.",
+      "If you are reading this you are already too far from {shop}.",
+      "Standing here in {timeofday} thinking about {complaint}.",
+      "We do not do small portions. We did once. It went badly.",
+      "Fresh today. Fresher than yesterday, anyway.",
+      "New sign went up. Same food. Same prices. Same guy.",
+      "Everything is going. Everything must go. Some of it should have gone last week.",
+      "All you can eat means all YOU can eat. Not all your cousin can eat.",
+      "Reminder that we have a menu and you are allowed to read it before you get to the front.",
+      "Whoever left a scooter across my pitch: I know what you look like."
+    ],
+
+    "bought": [
+      "Another satisfied customer at {shop}. Probably.",
+      "Big order just went out. Somebody out there is having a day.",
+      "Somebody just bought the {item}. Brave.",
+      "Sold a {item}. Balance restored.",
+      "The {item} is moving today. Get in while it is still warm.",
+      "Just served a guy who did not say a word. Respect.",
+      "That is the last of the {item} for now. Come back later.",
+      "Somebody paid full price and did not complain. Framing the receipt."
+    ],
+
+    "closing": [
+      "That is me done. Back in the morning.",
+      "Shutting up. {excuse}. Back tomorrow.",
+      "Grill is off. Go home.",
+      "Closed. Yes, even for you.",
+      "Packing up. If you are running down the street right now, you are too late."
+    ],
+
+    "opening": [
+      "Open. Early, even.",
+      "Back on the corner. Missed you.",
+      "Grill is on. Give it ten minutes.",
+      "We are open and I have already had an argument. Good start."
+    ],
+
+    "away": [
+      "Stepped away for two minutes. Two. Minutes.",
+      "Having a cigarette. The cart is not going anywhere and neither am I.",
+      "Back in five. Do not touch anything."
+    ]
+  }
+}

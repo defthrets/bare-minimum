@@ -238,6 +238,29 @@ namespace BareMinimum.Core
         /// </summary>
         public string[] SuppressScripts = new string[0];
 
+        // ---- Social ----------------------------------------------------------
+
+        /// <summary>
+        /// Whether the shops post on Hoodrich's timeline.
+        ///
+        /// ON, but it costs nothing when Hoodrich is not installed: without its data folder
+        /// there is nowhere to post, the socials file is never even read, and one line in the
+        /// log says so. Here so that somebody who has both mods and wants the feed to stay
+        /// about the block can have that.
+        /// </summary>
+        public bool SocialEnabled = true;
+
+        /// <summary>Percent chance a given occasion actually produces a post.</summary>
+        public int SocialChance = 22;
+
+        /// <summary>
+        /// Shortest gap between two posts from this mod, in real seconds.
+        ///
+        /// Long on purpose. Hoodrich's feed is somebody else's system and it is already busy;
+        /// a hot dog stand chattering over the top of a gang war is this mod being a bad guest.
+        /// </summary>
+        public int SocialGapSeconds = 240;
+
         // ---- Map -------------------------------------------------------------
 
         /// <summary>Whether shops get map markers at all.</summary>
@@ -431,6 +454,10 @@ namespace BareMinimum.Core
                                                    cfg.PriceMultiplier, 0f, 50f);
 
                 cfg.SuppressScripts = Split(ini.GetString("Counters", "SuppressScripts", ""));
+
+                cfg.SocialEnabled = ini.GetBool("Social", "Enabled", cfg.SocialEnabled);
+                cfg.SocialChance = ini.GetInt("Social", "ChancePercent", cfg.SocialChance);
+                cfg.SocialGapSeconds = ini.GetInt("Social", "GapSeconds", cfg.SocialGapSeconds);
 
                 cfg.ShowShopBlips = ini.GetBool("Map", "ShowShopBlips", cfg.ShowShopBlips);
                 cfg.ShopBlipRange = ini.GetFloat("Map", "ShopBlipRange",
