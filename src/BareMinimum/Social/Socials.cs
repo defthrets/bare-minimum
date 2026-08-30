@@ -14,8 +14,17 @@ namespace BareMinimum.Social
         public string Handle = "";
         public string Name = "";
 
-        /// <summary>Which vendor in vendors.json this account belongs to.</summary>
-        public string Vendor = "";
+        /// <summary>
+        /// Which vendors in vendors.json this account speaks for.
+        ///
+        /// A LIST, because a chain is one account and several shops. Bean Machine has two
+        /// branches and they do not each get their own handle -- a timeline where the same
+        /// coffee shop posts under two names reads as two coffee shops.
+        ///
+        /// Accepts a single string as well as an array in the json, the same way the food
+        /// catalogue accepts one prop name or a list of them.
+        /// </summary>
+        public string[] Vendors = new string[0];
 
         public string Gender = "none";
         public bool Verified;
@@ -164,12 +173,13 @@ namespace BareMinimum.Social
                     {
                         Handle = node["handle"].AsString(""),
                         Name = node["name"].AsString(""),
-                        Vendor = node["vendor"].AsString(""),
+                        Vendors = Names(node["vendor"]),
                         Gender = node["gender"].AsString("none"),
                         Verified = node["verified"].AsBool(false)
                     };
 
-                    if (string.IsNullOrEmpty(poster.Handle) || string.IsNullOrEmpty(poster.Name))
+                    if (string.IsNullOrEmpty(poster.Handle) || string.IsNullOrEmpty(poster.Name) ||
+                        poster.Vendors.Length == 0)
                     {
                         continue;
                     }
@@ -188,6 +198,25 @@ namespace BareMinimum.Social
                 Log.Error("Could not read " + Paths.SocialsFile, ex);
                 return false;
             }
+        }
+
+        /// <summary>One name or a list of them, the way the food catalogue reads props.</summary>
+        private static string[] Names(Json node)
+        {
+            if (node == null || node.IsNull) return new string[0];
+
+            var single = node.AsString("");
+            if (!string.IsNullOrEmpty(single)) return new[] { single };
+
+            var list = new List<string>();
+
+            for (var i = 0; i < node.Count; i++)
+            {
+                var name = node[i].AsString("");
+                if (name.Length > 0) list.Add(name);
+            }
+
+            return list.ToArray();
         }
 
         private static void ReadSets(Json parent, Dictionary<string, string[]> into)
@@ -257,7 +286,10 @@ namespace BareMinimum.Social
 
             foreach (var p in _posters)
             {
-                if (string.Equals(p.Vendor, vendorId, StringComparison.OrdinalIgnoreCase)) return p;
+                foreach (var mine in p.Vendors)
+                {
+                    if (string.Equals(mine, vendorId, StringComparison.OrdinalIgnoreCase)) return p;
+                }
             }
 
             // No account for this stall. Silence is right: inventing a handle on the spot

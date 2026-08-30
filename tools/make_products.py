@@ -470,6 +470,152 @@ def noodles():
     return img
 
 
+def loaf():
+    """A tin loaf: domed top, straight sides, three slashes across the crust."""
+    img, d = canvas()
+
+    rr(d, (40, 108, 216, 226), 20)
+    el(d, (40, 62, 216, 158))
+
+    for i, x in enumerate((84, 128, 172)):
+        d.line([(s(x - 20), s(112)), (s(x + 8), s(76))], fill=CLEAR, width=s(9))
+
+    return img
+
+
+def carton():
+    """
+    A milk carton: gabled top, straight body, a band across the front.
+
+    The gable is the whole silhouette. Square it off and this is the takeaway box,
+    which is already in the set and already means something else.
+    """
+    img, d = canvas()
+
+    rr(d, (74, 94, 182, 238), 8)
+    d.polygon([(s(74), s(102)), (s(128), s(34)), (s(182), s(102))], fill=WHITE)
+
+    # The fold line down the gable, and the label band, cut out so the tint reads.
+    d.line([(s(128), s(38)), (s(128), s(98))], fill=CLEAR, width=s(6))
+    rr(d, (92, 140, 164, 196), 6, CLEAR)
+
+    return img
+
+
+def croissant():
+    """
+    A croissant: fat middle, horns tapering down and in, nicked between the segments.
+
+    Built along an arc rather than as one crescent, because a plain crescent at row size
+    is a moon. The taper is what does the work -- equal-sized lumps read as a cloud, and
+    the first attempt at this did exactly that.
+    """
+    img, d = canvas()
+
+    def at(t):
+        a = math.radians(202 + t * 136)
+        return 128 + math.cos(a) * 76, 182 + math.sin(a) * 76
+
+    for t, r in ((0.00, 13), (0.12, 24), (0.28, 36), (0.50, 43),
+                 (0.72, 36), (0.88, 24), (1.00, 13)):
+        cx, cy = at(t)
+        el(d, (cx - r, cy - r * 0.95, cx + r, cy + r * 0.95))
+
+    # Nicks between the segments, cut deep enough to survive the downsample.
+    for t in (0.30, 0.70):
+        cx, cy = at(t)
+        d.line([(s(cx), s(cy - 40)), (s(cx), s(cy + 40))], fill=CLEAR, width=s(8))
+
+    return img
+
+
+def muffin():
+    """A muffin: fluted case, domed top spilling over it."""
+    img, d = canvas()
+
+    el(d, (52, 58, 204, 168))                                    # the top, wider than the case
+    d.polygon([(s(74), s(130)), (s(182), s(130)), (s(158), s(238)), (s(98), s(238))], fill=WHITE)
+
+    # Flutes cut out of the case.
+    for x in (98, 128, 158):
+        d.line([(s(x), s(140)), (s(x), s(232))], fill=CLEAR, width=s(6))
+
+    return img
+
+
+def cigar():
+    """
+    A cigar: fat, tapered at the lit end, with a band near the foot.
+
+    Deliberately not the cigarette pack, which is already in the set and means the
+    cheap thing. This is the one you get handed at a tobacconist.
+    """
+    img, d = canvas()
+
+    d.polygon([(s(28), s(150)), (s(48), s(120)), (s(228), s(102)), (s(228), s(150))], fill=WHITE)
+    el(d, (206, 100, 246, 152))                                  # rounded head
+    rr(d, (150, 106, 186, 150), 4, CLEAR)                        # the band
+
+    # A wisp off the lit end, so it reads as lit rather than as a peg.
+    for i, (x, y) in enumerate(((44, 92), (58, 66), (44, 42))):
+        el(d, (x - 9, y - 9, x + 9, y + 9))
+
+    return img
+
+
+def sweetjar():
+    """A confectioner's jar: wide belly, screw lid, sweets showing through."""
+    img, d = canvas()
+
+    rr(d, (56, 84, 200, 240), 26)
+    rr(d, (72, 46, 184, 88), 12)                                 # lid
+    rr(d, (86, 34, 170, 54), 8)                                  # knob
+
+    # The sweets, cut out so they read at any tint.
+    for cx, cy in ((92, 140), (128, 128), (164, 142), (106, 180), (150, 182), (128, 214)):
+        el(d, (cx - 15, cy - 15, cx + 15, cy + 15), CLEAR)
+
+    return img
+
+
+def wrap():
+    """
+    A wrap, cut on the diagonal and standing up: cylinder, angled face, filling showing.
+
+    Not the taco shape, which is already spoken for by three taco places and a burrito.
+    A wrap stands on its cut end and a taco lies on its side, and at row size that
+    difference is the entire way you tell the two shops apart.
+    """
+    img, d = canvas()
+
+    # The barrel, leaning very slightly, with the diagonal cut across the top.
+    d.polygon([(s(84), s(96)), (s(176), s(56)), (s(190), s(230)), (s(96), s(238))], fill=WHITE)
+    el(d, (82, 62, 180, 118))                                    # the cut face
+
+    # Filling: a couple of bites cut out of the face so it is not a blank disc.
+    el(d, (104, 78, 132, 98), CLEAR)
+    el(d, (136, 70, 160, 88), CLEAR)
+
+    # The seam down the side, which is what makes it rolled rather than turned.
+    d.line([(s(120), s(122)), (s(132), s(228))], fill=CLEAR, width=s(6))
+
+    return img
+
+
+def cookie():
+    """A cookie: filled disc with a bitten edge and chips punched through it."""
+    img, d = canvas()
+
+    el(d, (36, 36, 220, 220))
+    el(d, (188, 44, 258, 114), CLEAR)                            # the bite
+
+    for cx, cy, r in ((88, 92, 15), (140, 80, 13), (76, 150, 14),
+                      (132, 146, 16), (170, 168, 12), (108, 194, 13)):
+        el(d, (cx - r, cy - r, cx + r, cy + r), CLEAR)
+
+    return img
+
+
 def fruit():
     """An apple. The HUD already draws one; this is the whole, unbitten shape."""
     return base.apple(4)
@@ -501,6 +647,14 @@ SHAPES = {
     "donut": donut,
     "slice": slice,
     "noodles": noodles,
+    "loaf": loaf,
+    "carton": carton,
+    "croissant": croissant,
+    "muffin": muffin,
+    "cigar": cigar,
+    "sweetjar": sweetjar,
+    "wrap": wrap,
+    "cookie": cookie,
 }
 
 

@@ -16,6 +16,7 @@
     "  authors   who posts. handle and name are what the timeline shows.",
     "            'vendor' ties an author to a vendor id in vendors.json, so the hot dog",
     "            man's account only ever posts about the hot dog stand.",
+    "            'vendor' takes one id or a LIST of them, so a chain with two branches is one account.",
     "            'gang' is left empty: none of these people are in one.",
     "  posts     sets of lines, keyed by what just happened.",
     "              ambient    nothing in particular, they just posted.",
@@ -29,9 +30,15 @@
     "any of them sounding like the others."
   ],
   "version": 1,
-
   "slots": {
-    "timeofday": ["this heat", "this morning", "this weather", "a Tuesday", "lunch rush", "the afternoon"],
+    "timeofday": [
+      "this heat",
+      "this morning",
+      "this weather",
+      "a Tuesday",
+      "lunch rush",
+      "the afternoon"
+    ],
     "complaint": [
       "the price of onions",
       "people asking for the wifi password",
@@ -40,7 +47,12 @@
       "the seagulls",
       "the guy who parks across my pitch"
     ],
-    "praise": ["the best in Los Santos", "criminally underrated", "an institution", "worth the walk"],
+    "praise": [
+      "the best in Los Santos",
+      "criminally underrated",
+      "an institution",
+      "worth the walk"
+    ],
     "excuse": [
       "supplier problems",
       "the health inspector",
@@ -49,7 +61,6 @@
       "a family thing"
     ]
   },
-
   "authors": [
     {
       "handle": "dogsondavis",
@@ -110,7 +121,10 @@
     {
       "handle": "luckyplucker",
       "name": "Lucky Plucker",
-      "vendor": "lucky_plucker",
+      "vendor": [
+        "lucky_plucker",
+        "lucky_plucker_drivethru"
+      ],
       "gender": "none",
       "verified": false
     },
@@ -155,9 +169,166 @@
       "vendor": "aguila_burrito",
       "gender": "none",
       "verified": false
+    },
+    {
+      "handle": "beansmarket",
+      "name": "Bean's Market",
+      "vendor": "beans_market",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "beanmachine",
+      "name": "Bean Machine",
+      "vendor": [
+        "bean_machine_alta",
+        "bean_machine_downtown",
+        "bean_machine_east",
+        "bean_machine_market"
+      ],
+      "gender": "none",
+      "verified": true
+    },
+    {
+      "handle": "downtownliquordeli",
+      "name": "Downtown Liquor & Deli",
+      "vendor": [
+        "downtown_liquor_deli",
+        "downtown_liquor_deli_east"
+      ],
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "chihuahuadogs",
+      "name": "Chihuahua Hot Dogs",
+      "vendor": "chihuahua_hotdogs",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "delhideli",
+      "name": "Del-Hi Delicatessen",
+      "vendor": "delhi_deli",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "cosasbaratas",
+      "name": "Cosas Baratas",
+      "vendor": "cosas_baratas",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "saveacent",
+      "name": "Save-a-Cent",
+      "vendor": "save_a_cent",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "the247diner",
+      "name": "Mexican and American Diner",
+      "vendor": "diner_247",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "vespuccitacos",
+      "name": "Taco Window",
+      "vendor": "tacos_vespucci",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "xero24",
+      "name": "Xero 24",
+      "vendor": "xero_24",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "pipedown_ls",
+      "name": "Pipe Down",
+      "vendor": "pipe_down",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "groundandpound",
+      "name": "Ground & Pound",
+      "vendor": "ground_and_pound",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "rustybrowns",
+      "name": "Rusty Brown's Ring Donuts",
+      "vendor": "rusty_browns",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "bite_itsbig",
+      "name": "BITE!",
+      "vendor": "bite_wraps",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "pizzathis",
+      "name": "Pizza This...",
+      "vendor": "pizza_this",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "noodleexchange",
+      "name": "Noodle Exchange",
+      "vendor": [
+        "noodle_exchange",
+        "noodle_exchange_side"
+      ],
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "coolbeans_ls",
+      "name": "Cool Beans",
+      "vendor": "cool_beans",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "limeys_ls",
+      "name": "Limey's",
+      "vendor": "limeys",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "foodmarket_ls",
+      "name": "Food Market",
+      "vendor": "food_market",
+      "gender": "none",
+      "verified": false
+    },
+    {
+      "handle": "mamasgrocery",
+      "name": "Mama's Grocery",
+      "vendor": "mamas_grocery",
+      "gender": "female",
+      "verified": false
+    },
+    {
+      "handle": "marketkiosk",
+      "name": "The Market Kiosk",
+      "vendor": "market_kiosk",
+      "gender": "male",
+      "verified": false
     }
   ],
-
   "posts": {
     "ambient": [
       "Cart is out. Come get one before I eat the stock myself.",
@@ -176,7 +347,6 @@
       "Reminder that we have a menu and you are allowed to read it before you get to the front.",
       "Whoever left a scooter across my pitch: I know what you look like."
     ],
-
     "bought": [
       "Another satisfied customer at {shop}. Probably.",
       "Big order just went out. Somebody out there is having a day.",
@@ -187,7 +357,6 @@
       "That is the last of the {item} for now. Come back later.",
       "Somebody paid full price and did not complain. Framing the receipt."
     ],
-
     "closing": [
       "That is me done. Back in the morning.",
       "Shutting up. {excuse}. Back tomorrow.",
@@ -195,14 +364,12 @@
       "Closed. Yes, even for you.",
       "Packing up. If you are running down the street right now, you are too late."
     ],
-
     "opening": [
       "Open. Early, even.",
       "Back on the corner. Missed you.",
       "Grill is on. Give it ten minutes.",
       "We are open and I have already had an argument. Good start."
     ],
-
     "away": [
       "Stepped away for two minutes. Two. Minutes.",
       "Having a cigarette. The cart is not going anywhere and neither am I.",

@@ -782,6 +782,526 @@
       "blip": true,
       "blipSprite": 52,
       "blipColour": 5
+    },
+    {
+      "_note": "Bean's Market, 10112. The awning says GROCERIES and SUPPLIES and there",
+      "_note2": "is an apple on the sign, so it sells groceries rather than the crisps",
+      "_note3": "and beer every other door on this list sells. Coordinate is the DOOR.",
+      "id": "beans_market",
+      "name": "Bean's Market",
+      "item": [
+        "beans_tin",
+        "beans_bread",
+        "beans_milk",
+        "fruit",
+        "sardines",
+        "crisps",
+        "water"
+      ],
+      "x": 542.894,
+      "y": -1579.472,
+      "z": 29.278,
+      "heading": 231.906,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Bean Machine on Alta. The coffee shop, and the only place on this list",
+      "_note2": "that sells the SLEEP meter rather than the hunger one -- see the wake",
+      "_note3": "values on the bm_ items. Pastries carry hours because a croissant at",
+      "_note4": "eleven at night is not a thing a coffee shop has left. Door coordinate.",
+      "id": "bean_machine_alta",
+      "name": "Bean Machine",
+      "item": [
+        {
+          "id": "bm_croissant",
+          "from": 6,
+          "to": 12
+        },
+        {
+          "id": "bm_muffin",
+          "from": 6,
+          "to": 15
+        },
+        {
+          "id": "bm_espresso"
+        },
+        {
+          "id": "bm_latte"
+        }
+      ],
+      "x": -270.527,
+      "y": -977.024,
+      "z": 31.218,
+      "heading": 358.222,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Downtown liquor.deli. Every window carries REPOSSESSION SALE and GOING",
+      "_note2": "OUT OF BUSINESS, so it is discounted like Bargains Galore -- but not as",
+      "_note3": "hard, and it sells a deli counter and a drinks shelf rather than junk",
+      "_note4": "food, so the two closing-down shops are not one shop twice.",
+      "id": "downtown_liquor_deli",
+      "name": "Downtown Liquor & Deli",
+      "item": [
+        "deli_sub",
+        "deli_sandwich",
+        "wine",
+        "whiskey",
+        "beer",
+        "beer_logger",
+        "jerky",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "discount": 0.55,
+      "x": -43.531,
+      "y": -1042.138,
+      "z": 28.338,
+      "heading": 247.163,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Chihuahua Hot Dogs. A shopfront, not a cart, so it gets its own dogs",
+      "_note2": "rather than selling the same hotdog the two street carts do.",
+      "_note3": "Door coordinate.",
+      "id": "chihuahua_hotdogs",
+      "name": "Chihuahua Hot Dogs",
+      "item": [
+        "chihuahua_dog",
+        "chilli_dog",
+        "corn_dog",
+        "sprunk",
+        "ecola"
+      ],
+      "x": -50.109,
+      "y": -1058.794,
+      "z": 27.805,
+      "heading": 246.49,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Bean Machine, second branch. SAME ITEM LIST AS ALTA on purpose --",
+      "_note2": "the no-two-shops-alike rule is about two different shops, and two",
+      "_note3": "branches of one chain selling different coffee would be the odd",
+      "_note4": "thing. One socials account covers both. Door coordinate.",
+      "id": "bean_machine_downtown",
+      "name": "Bean Machine",
+      "item": [
+        {
+          "id": "bm_croissant",
+          "from": 6,
+          "to": 12
+        },
+        {
+          "id": "bm_muffin",
+          "from": 6,
+          "to": 15
+        },
+        {
+          "id": "bm_espresso"
+        },
+        {
+          "id": "bm_latte"
+        }
+      ],
+      "x": 127.846,
+      "y": -1028.553,
+      "z": 29.357,
+      "heading": 158.407,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Pipe Down. The sign says Tobacconist, Pipe, Confectioners and CIGARS,",
+      "_note2": "so it sells exactly those two trades and nothing to eat properly --",
+      "_note3": "the only shop here that cannot fill the hunger meter at all.",
+      "_note4": "Door coordinate.",
+      "id": "pipe_down",
+      "name": "Pipe Down",
+      "item": [
+        "cigar",
+        "pipe_tobacco",
+        "boiled_sweets",
+        "toffees",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "x": 278.733,
+      "y": -1028.112,
+      "z": 29.211,
+      "heading": 5.737,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Downtown liquor.deli, the eastern branch. SAME STOCK as the other one --",
+      "_note2": "it is the same chain -- but its windows say 20-50% OFF rather than",
+      "_note3": "REPOSSESSION SALE, so it is discounted more gently. One shop shutting",
+      "_note4": "and one shop having a sale is the difference between the two.",
+      "id": "downtown_liquor_deli_east",
+      "name": "Downtown Liquor & Deli",
+      "item": [
+        "deli_sub",
+        "deli_sandwich",
+        "wine",
+        "whiskey",
+        "beer",
+        "beer_logger",
+        "jerky",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "discount": 0.7,
+      "x": 382.512,
+      "y": -1076.264,
+      "z": 29.42,
+      "heading": 160.055,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Ground & Pound. A sandwich bar with hot drinks and nothing else --",
+      "_note2": "its window lists the whole menu, so the shop sells exactly that and",
+      "_note3": "is the only place on the list with no cold drink at all.",
+      "_note4": "Door coordinate.",
+      "id": "ground_and_pound",
+      "name": "Ground & Pound",
+      "item": [
+        "gp_sandwich",
+        "gp_toastie",
+        "gp_tea",
+        "gp_hotchoc"
+      ],
+      "x": 370.21,
+      "y": -1027.845,
+      "z": 29.334,
+      "heading": 357.725,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Rusty Brown's Ring Donuts. Rings singly or by the dozen, and the",
+      "_note2": "coffee that goes with them. The box carries most of a full hunger",
+      "_note3": "meter, which is the correct outcome of eating twelve donuts.",
+      "_note4": "Door coordinate.",
+      "id": "rusty_browns",
+      "name": "Rusty Brown's Ring Donuts",
+      "item": [
+        "rb_glazed",
+        "rb_sprinkle",
+        "rb_dozen",
+        "rb_coffee"
+      ],
+      "x": 354.023,
+      "y": -1028.653,
+      "z": 29.331,
+      "heading": 357.664,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "BITE! it's big. A wrap shop, and the only one -- the taco places and",
+      "_note2": "the burrito window all use the taco shape, so wraps got their own so",
+      "_note3": "that four different rolled things are four different pictures.",
+      "_note4": "Door coordinate.",
+      "id": "bite_wraps",
+      "name": "BITE!",
+      "item": [
+        "bite_wrap",
+        "bite_fresh_wrap",
+        "bite_smoothie"
+      ],
+      "x": 386.954,
+      "y": -1010.893,
+      "z": 29.418,
+      "heading": 81.643,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Pizza This... the pizzeria. Its window promises HAVE IT YOUR WAY,",
+      "_note2": "which is what the four sizes of the same thing are for. Door",
+      "_note3": "coordinate. There is a Bean Machine two doors down that is not this.",
+      "id": "pizza_this",
+      "name": "Pizza This...",
+      "item": [
+        "pt_pizza",
+        "pt_slice",
+        "pt_calzone",
+        "pt_garlic_bread"
+      ],
+      "x": 287.287,
+      "y": -963.999,
+      "z": 29.419,
+      "heading": 199.122,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Bean Machine, third branch -- the one next door to Pizza This. Same",
+      "_note2": "stock and the same account as the other two; branches of a chain are",
+      "_note3": "the one case where two shops SHOULD be alike. Door coordinate.",
+      "id": "bean_machine_east",
+      "name": "Bean Machine",
+      "item": [
+        {
+          "id": "bm_croissant",
+          "from": 6,
+          "to": 12
+        },
+        {
+          "id": "bm_muffin",
+          "from": 6,
+          "to": 15
+        },
+        {
+          "id": "bm_espresso"
+        },
+        {
+          "id": "bm_latte"
+        }
+      ],
+      "x": 280.526,
+      "y": -963.978,
+      "z": 29.419,
+      "heading": 169.008,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Noodle Exchange, the corner door. THE SHOP HAS TWO -- see",
+      "_note2": "noodle_exchange_side. Two entries rather than one with a bigger",
+      "_note3": "reach, because a radius wide enough to cover both would also cover",
+      "id": "noodle_exchange",
+      "name": "Noodle Exchange",
+      "item": [
+        "nx_ramen",
+        "nx_padthai",
+        "nx_dumplings",
+        "nx_bubbletea"
+      ],
+      "x": 272.802,
+      "y": -965.419,
+      "z": 29.315,
+      "heading": 214.274,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5,
+      "_note4": "the pavement between them and half of Cool Beans next door."
+    },
+    {
+      "_note": "Cool Beans, next door to Noodle Exchange. Pavement tables, pink",
+      "_note2": "awning, everything cold. Door coordinate.",
+      "id": "cool_beans",
+      "name": "Cool Beans",
+      "item": [
+        "cb_coldbrew",
+        "cb_icedlatte",
+        "cb_frappe",
+        "cb_cookie"
+      ],
+      "x": 265.314,
+      "y": -981.815,
+      "z": 29.363,
+      "heading": 251.698,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Noodle Exchange, the side door on the same unit. Same stock, same",
+      "_note2": "account -- it is one shop that happens to have two ways in.",
+      "id": "noodle_exchange_side",
+      "name": "Noodle Exchange",
+      "item": [
+        "nx_ramen",
+        "nx_padthai",
+        "nx_dumplings",
+        "nx_bubbletea"
+      ],
+      "x": 268.453,
+      "y": -973.399,
+      "z": 29.328,
+      "heading": 254.13,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": false
+    },
+    {
+      "_note": "Limey's Juice & Smoothies. The wheatgrass shot is the strongest single",
+      "_note2": "wake value in the catalogue and costs four dollars, which is the joke.",
+      "_note3": "Door coordinate.",
+      "id": "limeys",
+      "name": "Limey's",
+      "item": [
+        "lm_orange",
+        "lm_green",
+        "lm_smoothie",
+        "lm_shot"
+      ],
+      "x": 250.118,
+      "y": -1026.885,
+      "z": 29.263,
+      "heading": 302.907,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Food Market. The supermarket -- the bag of groceries is the single",
+      "_note2": "most filling thing anywhere on this list, which is what a weekly shop",
+      "_note3": "should be. Door coordinate.",
+      "id": "food_market",
+      "name": "Food Market",
+      "item": [
+        "fm_shop",
+        "fm_rotisserie",
+        "fm_readymeal",
+        "fm_produce"
+      ],
+      "x": 394.645,
+      "y": -804.51,
+      "z": 29.29,
+      "heading": 256.576,
+      "spawnRange": 90.0,
+      "reach": 2.4,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Mama's Grocery. A family grocer with a hot counter, which is what",
+      "_note2": "keeps it from being a third version of Bean's. Door coordinate.",
+      "id": "mamas_grocery",
+      "name": "Mama's Grocery",
+      "item": [
+        "mg_meatloaf",
+        "mg_soup",
+        "mg_pie",
+        "mg_pantry"
+      ],
+      "x": 387.4,
+      "y": -773.122,
+      "z": 29.292,
+      "heading": 160.717,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "The market kiosk on the corner -- juice, sludgies, ice cream and a",
+      "_note2": "board listing half a shop. THE FIRST VENDOR WITH ui: true, and it",
+      "_note3": "earns it: there is a man stood behind that counter in the vanilla",
+      "_note4": "map, so there is somebody to order from. No ped list, because we do",
+      "_note5": "not spawn him -- he is already there, and NeedsSeller is false for a",
+      "_note6": "vendor with no ped of its own, so the shelf opens.",
+      "id": "market_kiosk",
+      "name": "Market Kiosk",
+      "item": [
+        "kiosk_sundae",
+        "kiosk_shake",
+        "sludgie",
+        "ice_cream",
+        "hotdog",
+        "pizza_slice",
+        "burger",
+        "crisps",
+        "candybox",
+        "sprunk",
+        "ecola"
+      ],
+      "ui": true,
+      "x": 462.744,
+      "y": -699.341,
+      "z": 27.526,
+      "heading": 267.823,
+      "spawnRange": 90.0,
+      "reach": 2.6,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Bean Machine, fourth branch -- the one twenty metres from the market",
+      "_note2": "kiosk, which is why its id says so. Same stock and same account as the",
+      "_note3": "other three. Door coordinate.",
+      "id": "bean_machine_market",
+      "name": "Bean Machine",
+      "item": [
+        {
+          "id": "bm_croissant",
+          "from": 6,
+          "to": 12
+        },
+        {
+          "id": "bm_muffin",
+          "from": 6,
+          "to": 15
+        },
+        {
+          "id": "bm_espresso"
+        },
+        {
+          "id": "bm_latte"
+        }
+      ],
+      "x": 462.083,
+      "y": -717.684,
+      "z": 27.358,
+      "heading": 277.471,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
     }
   ]
 }

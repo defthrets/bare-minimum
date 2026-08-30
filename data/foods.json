@@ -950,6 +950,984 @@
         "prop_cs_beer_bot_01"
       ],
       "seconds": 4.0
+    },
+    {
+      "_note": "Bean's Market. Groceries and supplies, so it sells the things a corner grocer sells and nobody else in this file does.",
+      "id": "beans_tin",
+      "name": "Tin of Beans",
+      "category": "Snacks",
+      "price": 3,
+      "hunger": 0.24,
+      "shop": false,
+      "icon": "tin",
+      "tint": "#d9843c",
+      "desc": "From Bean's. It would have been rude not to.",
+      "prop": [
+        "prop_food_bs_tins",
+        "prop_food_cb_can",
+        "prop_cs_beer_bot_01"
+      ],
+      "seconds": 4.5
+    },
+    {
+      "id": "beans_bread",
+      "name": "Loaf of Bread",
+      "category": "Snacks",
+      "price": 4,
+      "hunger": 0.28,
+      "shop": false,
+      "icon": "loaf",
+      "tint": "#dcb877",
+      "desc": "Yesterday's, at today's price.",
+      "prop": [
+        "prop_food_bs_bagel",
+        "v_res_tt_bread",
+        "prop_cs_sandwich_01"
+      ],
+      "seconds": 5.0
+    },
+    {
+      "id": "beans_milk",
+      "name": "Carton of Milk",
+      "category": "Drinks",
+      "price": 3,
+      "hunger": 0.1,
+      "drink": true,
+      "shop": false,
+      "icon": "carton",
+      "tint": "#dfe4ea",
+      "desc": "Check the date. Go on. Check it.",
+      "prop": [
+        "prop_food_bs_juice01",
+        "prop_ld_flow_bottle",
+        "prop_plastic_cup_02"
+      ],
+      "seconds": 3.5
+    },
+    {
+      "_note": "Bean Machine. THE WAKE VALUES ARE THE POINT: this is the one shop on the list that sells the sleep meter rather than the hunger one, and an espresso is worth more of it than a night in a parked car is worth of nothing. It is not a substitute for sleeping -- the meter still falls from wherever the coffee left it -- it is an hour bought back.",
+      "id": "bm_espresso",
+      "name": "Espresso",
+      "category": "Drinks",
+      "price": 4,
+      "hunger": 0.03,
+      "wake": 0.22,
+      "drink": true,
+      "shop": false,
+      "icon": "cup",
+      "tint": "#7a4a2c",
+      "desc": "Small, black, and rude about it. You will feel it in the teeth.",
+      "prop": [
+        "prop_cs_coffee_cup",
+        "p_ing_coffeecup_02",
+        "prop_coffee_cup_01",
+        "prop_food_bs_coffee",
+        "prop_plastic_cup_02"
+      ],
+      "seconds": 3.0
+    },
+    {
+      "id": "bm_latte",
+      "name": "Latte",
+      "category": "Drinks",
+      "price": 6,
+      "hunger": 0.1,
+      "wake": 0.15,
+      "drink": true,
+      "shop": false,
+      "icon": "cup",
+      "tint": "#c9a074",
+      "desc": "Mostly milk, entirely expensive. There is a leaf drawn in it.",
+      "prop": [
+        "prop_cs_coffee_cup",
+        "p_ing_coffeecup_02",
+        "prop_coffee_cup_01",
+        "prop_food_bs_coffee",
+        "prop_plastic_cup_02"
+      ],
+      "seconds": 4.5
+    },
+    {
+      "id": "bm_croissant",
+      "name": "Almond Croissant",
+      "category": "Snacks",
+      "price": 5,
+      "hunger": 0.22,
+      "wake": 0.03,
+      "shop": false,
+      "icon": "croissant",
+      "tint": "#e0b169",
+      "desc": "Flakes everywhere. On you, on the table, on the man behind you.",
+      "prop": [
+        "prop_food_bs_bagel",
+        "prop_cs_sandwich_01",
+        "prop_food_bs_chips"
+      ],
+      "seconds": 4.0
+    },
+    {
+      "id": "bm_muffin",
+      "name": "Blueberry Muffin",
+      "category": "Snacks",
+      "price": 4,
+      "hunger": 0.26,
+      "wake": 0.04,
+      "shop": false,
+      "icon": "muffin",
+      "tint": "#b98fc4",
+      "desc": "Cake, before midday, with a job title that makes it breakfast.",
+      "prop": [
+        "prop_food_bs_bagel",
+        "prop_amb_donut",
+        "prop_cs_sandwich_01"
+      ],
+      "seconds": 4.0
+    },
+    {
+      "_note": "Downtown liquor.deli. The counter item, so the shop is not only booze -- its own sign says deli first and liquor second.",
+      "id": "deli_sub",
+      "name": "Foot-Long Sub",
+      "category": "Food",
+      "price": 10,
+      "hunger": 0.58,
+      "shop": false,
+      "icon": "sandwich",
+      "tint": "#e0cb96",
+      "desc": "A foot of it. Measured generously, by them, in their favour.",
+      "prop": [
+        "prop_sandwich_01",
+        "prop_cs_sandwich_01",
+        "prop_food_bs_burger1"
+      ],
+      "seconds": 6.5
+    },
+    {
+      "_note": "Chihuahua Hot Dogs. A shop rather than a cart, so it sells things the two street carts do not -- otherwise it is a third hot dog stand with a roof.",
+      "id": "chihuahua_dog",
+      "name": "Chihuahua Dog",
+      "category": "Food",
+      "price": 7,
+      "hunger": 0.4,
+      "shop": false,
+      "icon": "hotdog",
+      "tint": "#dfa94f",
+      "desc": "The house dog. Small name, large object.",
+      "prop": [
+        "prop_cs_hotdog_01",
+        "prop_food_bs_hotdog",
+        "prop_hotdog_01",
+        "prop_cs_burger_01"
+      ],
+      "seconds": 5.0
+    },
+    {
+      "id": "chilli_dog",
+      "name": "Chilli Cheese Dog",
+      "category": "Food",
+      "price": 8,
+      "hunger": 0.46,
+      "shop": false,
+      "icon": "hotdog",
+      "tint": "#d4713c",
+      "desc": "Eaten leaning forward, always, by everyone.",
+      "prop": [
+        "prop_cs_hotdog_01",
+        "prop_food_bs_hotdog",
+        "prop_hotdog_01",
+        "prop_cs_burger_01"
+      ],
+      "seconds": 5.5
+    },
+    {
+      "id": "corn_dog",
+      "name": "Corn Dog",
+      "category": "Snacks",
+      "price": 5,
+      "hunger": 0.26,
+      "shop": false,
+      "icon": "hotdog",
+      "tint": "#e3bd63",
+      "desc": "On a stick, which makes it street food and therefore fine.",
+      "prop": [
+        "prop_cs_hotdog_01",
+        "prop_food_bs_hotdog",
+        "prop_hotdog_01",
+        "prop_cs_burger_01"
+      ],
+      "seconds": 4.0
+    },
+    {
+      "_note": "Pipe Down. THE PRICES ARE THE CHARACTER: this is the only shop on the list where one item costs more than a whole meal anywhere else, which is what a tobacconist on a good street is. Smoke items report in words rather than a hunger percentage -- see Eating.Report.",
+      "id": "cigar",
+      "name": "Cigar",
+      "category": "Snacks",
+      "price": 32,
+      "hunger": 0.0,
+      "wake": 0.06,
+      "shop": false,
+      "smoke": true,
+      "icon": "cigar",
+      "tint": "#8a5a33",
+      "desc": "Hand rolled by somebody, somewhere, allegedly.",
+      "prop": [
+        "prop_cigar_01",
+        "prop_cigar_02",
+        "prop_cigar_03",
+        "prop_cs_ciggy_01",
+        "prop_amb_ciggy_01",
+        "p_cs_ciggy_01"
+      ],
+      "seconds": 8.0
+    },
+    {
+      "id": "pipe_tobacco",
+      "name": "Pipe and Tobacco",
+      "category": "Snacks",
+      "price": 48,
+      "hunger": 0.0,
+      "wake": 0.07,
+      "shop": false,
+      "smoke": true,
+      "icon": "cigar",
+      "tint": "#6f4a2e",
+      "desc": "Buying this is a personality decision and you have made it.",
+      "prop": [
+        "prop_cigar_01",
+        "prop_cigar_02",
+        "prop_cigar_03",
+        "prop_cs_ciggy_01",
+        "prop_amb_ciggy_01",
+        "p_cs_ciggy_01"
+      ],
+      "seconds": 9.0
+    },
+    {
+      "id": "boiled_sweets",
+      "name": "Boiled Sweets",
+      "category": "Snacks",
+      "price": 5,
+      "hunger": 0.13,
+      "wake": 0.05,
+      "shop": false,
+      "icon": "sweetjar",
+      "tint": "#d9557f",
+      "desc": "Weighed out of a jar with a little brass scoop. Worth it for that alone.",
+      "prop": [
+        "prop_choc_pq",
+        "prop_candy_pqs",
+        "prop_choc_ego"
+      ],
+      "seconds": 4.0
+    },
+    {
+      "id": "toffees",
+      "name": "Bag of Toffees",
+      "category": "Snacks",
+      "price": 6,
+      "hunger": 0.18,
+      "shop": false,
+      "icon": "sweetjar",
+      "tint": "#c58a45",
+      "desc": "One of these will pull a filling out. That is the deal you are making.",
+      "prop": [
+        "prop_choc_ego",
+        "prop_candy_pqs",
+        "prop_choc_meto"
+      ],
+      "seconds": 4.5
+    },
+    {
+      "_note": "Ground & Pound. Its own window says FRESHLY MADE SANDWICHES and HOT DRINKS, so that is the entire range -- no snacks, no cans, nothing cold. The name is a boxing joke about coffee and the descriptions know it.",
+      "id": "gp_sandwich",
+      "name": "Freshly Made Sandwich",
+      "category": "Food",
+      "price": 9,
+      "hunger": 0.5,
+      "shop": false,
+      "icon": "sandwich",
+      "tint": "#e6d4a4",
+      "desc": "Made in front of you, at the speed of somebody being watched.",
+      "prop": [
+        "prop_sandwich_01",
+        "prop_cs_sandwich_01",
+        "prop_food_bs_burger1"
+      ],
+      "seconds": 6.0
+    },
+    {
+      "id": "gp_toastie",
+      "name": "Toasted Sandwich",
+      "category": "Food",
+      "price": 10,
+      "hunger": 0.54,
+      "wake": 0.03,
+      "shop": false,
+      "icon": "sandwich",
+      "tint": "#d9a862",
+      "desc": "Pressed flat under something heavy. Ground, and then pounded.",
+      "prop": [
+        "prop_sandwich_01",
+        "prop_cs_sandwich_01",
+        "prop_food_bs_burger1"
+      ],
+      "seconds": 6.5
+    },
+    {
+      "id": "gp_tea",
+      "name": "Pot of Tea",
+      "category": "Drinks",
+      "price": 4,
+      "hunger": 0.04,
+      "wake": 0.11,
+      "drink": true,
+      "shop": false,
+      "icon": "cup",
+      "tint": "#c08a4e",
+      "desc": "A whole pot, for one person, with a little strainer. Very civil.",
+      "prop": [
+        "prop_cs_coffee_cup",
+        "p_ing_coffeecup_02",
+        "prop_coffee_cup_01",
+        "prop_food_bs_coffee",
+        "prop_plastic_cup_02"
+      ],
+      "seconds": 4.0
+    },
+    {
+      "id": "gp_hotchoc",
+      "name": "Hot Chocolate",
+      "category": "Drinks",
+      "price": 5,
+      "hunger": 0.14,
+      "wake": 0.06,
+      "drink": true,
+      "shop": false,
+      "icon": "cup",
+      "tint": "#8a5433",
+      "desc": "More of a dessert than a drink, and nobody here is pretending otherwise.",
+      "prop": [
+        "prop_cs_coffee_cup",
+        "p_ing_coffeecup_02",
+        "prop_coffee_cup_01",
+        "prop_food_bs_coffee",
+        "prop_plastic_cup_02"
+      ],
+      "seconds": 4.5
+    },
+    {
+      "_note": "Rusty Brown's Ring Donuts. PICK YOUR RING is on the window, so the shop sells rings by the ring and by the box. The Coop sells a donut too, but one is a kiosk afterthought and this is the whole business.",
+      "id": "rb_glazed",
+      "name": "Glazed Ring",
+      "category": "Snacks",
+      "price": 3,
+      "hunger": 0.14,
+      "wake": 0.05,
+      "shop": false,
+      "icon": "donut",
+      "tint": "#e0b45c",
+      "desc": "Pick your ring. That is genuinely their slogan.",
+      "prop": [
+        "prop_amb_donut",
+        "prop_donut_01",
+        "v_res_donut",
+        "prop_food_bs_bagel"
+      ],
+      "seconds": 3.0
+    },
+    {
+      "id": "rb_sprinkle",
+      "name": "Sprinkle Ring",
+      "category": "Snacks",
+      "price": 4,
+      "hunger": 0.15,
+      "wake": 0.06,
+      "shop": false,
+      "icon": "donut",
+      "tint": "#e08ab4",
+      "desc": "The sprinkles do nothing for the flavour and everything for the decision.",
+      "prop": [
+        "prop_amb_donut",
+        "prop_donut_01",
+        "v_res_donut",
+        "prop_food_bs_bagel"
+      ],
+      "seconds": 3.0
+    },
+    {
+      "id": "rb_dozen",
+      "name": "Box of a Dozen",
+      "category": "Snacks",
+      "price": 20,
+      "hunger": 0.85,
+      "wake": 0.12,
+      "shop": false,
+      "icon": "box",
+      "tint": "#e5a04a",
+      "desc": "For the office, obviously. Obviously for the office.",
+      "prop": [
+        "prop_pizza_box_01",
+        "prop_food_bag1",
+        "prop_amb_donut"
+      ],
+      "seconds": 9.0
+    },
+    {
+      "id": "rb_coffee",
+      "name": "Cup of Coffee",
+      "category": "Drinks",
+      "price": 3,
+      "hunger": 0.03,
+      "wake": 0.13,
+      "drink": true,
+      "shop": false,
+      "icon": "cup",
+      "tint": "#8a5a38",
+      "desc": "Filter, stewed, bottomless in spirit. It goes with the ring.",
+      "prop": [
+        "prop_cs_coffee_cup",
+        "p_ing_coffeecup_02",
+        "prop_coffee_cup_01",
+        "prop_food_bs_coffee"
+      ],
+      "seconds": 3.5
+    },
+    {
+      "_note": "BITE! -- the window says WRAPS Fresh and the sign says it's big, so the shop sells big wraps and things that agree with them.",
+      "id": "bite_wrap",
+      "name": "The Big One",
+      "category": "Food",
+      "price": 10,
+      "hunger": 0.6,
+      "shop": false,
+      "icon": "wrap",
+      "tint": "#8fc45c",
+      "desc": "It's big. That is the entire brand and they are not wrong.",
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_sandwich_01",
+        "prop_cs_sandwich_01",
+        "prop_food_bs_burger1"
+      ],
+      "seconds": 6.5
+    },
+    {
+      "id": "bite_fresh_wrap",
+      "name": "Fresh Wrap",
+      "category": "Food",
+      "price": 8,
+      "hunger": 0.42,
+      "wake": 0.04,
+      "shop": false,
+      "icon": "wrap",
+      "tint": "#c8d98a",
+      "desc": "Salad, chicken, and a word about how fresh it is on every surface.",
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_sandwich_01",
+        "prop_cs_sandwich_01",
+        "prop_food_bs_burger1"
+      ],
+      "seconds": 5.5
+    },
+    {
+      "id": "bite_smoothie",
+      "name": "Smoothie",
+      "category": "Drinks",
+      "price": 7,
+      "hunger": 0.18,
+      "wake": 0.08,
+      "drink": true,
+      "shop": false,
+      "icon": "shake",
+      "tint": "#d4738f",
+      "desc": "Fruit, blended, priced as though that were difficult.",
+      "prop": [
+        "prop_plastic_cup_02",
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup"
+      ],
+      "seconds": 4.5
+    },
+    {
+      "_note": "Pizza This... The Coop sells a slice off a kiosk board; this is the pizzeria, so it sells the things a pizzeria sells and the whole pizza is the largest single item in the catalogue.",
+      "id": "pt_pizza",
+      "name": "Whole Pizza",
+      "category": "Food",
+      "price": 24,
+      "hunger": 0.95,
+      "shop": false,
+      "icon": "box",
+      "tint": "#d4552f",
+      "desc": "A whole one. To yourself. Nobody is here to judge, and yet.",
+      "prop": [
+        "prop_pizza_box_01",
+        "v_res_tt_pizzaplate",
+        "prop_food_bs_burger1",
+        "prop_cs_burger_01"
+      ],
+      "seconds": 10.0
+    },
+    {
+      "id": "pt_slice",
+      "name": "New York Slice",
+      "category": "Food",
+      "price": 6,
+      "hunger": 0.34,
+      "shop": false,
+      "icon": "slice",
+      "tint": "#dd8f3e",
+      "desc": "Folded lengthways, because that is how it is done and you know it.",
+      "prop": [
+        "prop_pizza_box_01",
+        "v_res_tt_pizzaplate",
+        "prop_food_bs_burger1",
+        "prop_cs_burger_01"
+      ],
+      "seconds": 4.5
+    },
+    {
+      "id": "pt_calzone",
+      "name": "Calzone",
+      "category": "Food",
+      "price": 12,
+      "hunger": 0.58,
+      "shop": false,
+      "icon": "taco",
+      "tint": "#dcb478",
+      "desc": "A pizza that has folded in on itself. Relatable.",
+      "prop": [
+        "prop_pizza_box_01",
+        "v_res_tt_pizzaplate",
+        "prop_food_bs_burger1",
+        "prop_cs_burger_01"
+      ],
+      "seconds": 6.5
+    },
+    {
+      "id": "pt_garlic_bread",
+      "name": "Garlic Bread",
+      "category": "Snacks",
+      "price": 5,
+      "hunger": 0.24,
+      "shop": false,
+      "icon": "loaf",
+      "tint": "#e2c069",
+      "desc": "Comes with the meal. Ordered separately anyway.",
+      "prop": [
+        "prop_food_bs_bagel",
+        "prop_cs_sandwich_01",
+        "prop_pizza_box_01"
+      ],
+      "seconds": 4.5
+    },
+    {
+      "_note": "Noodle Exchange. Wok It Off is a buffet that sells volume; this is a noodle bar that sells dishes, so they share a cuisine and not one item.",
+      "id": "nx_ramen",
+      "name": "Bowl of Ramen",
+      "category": "Food",
+      "price": 13,
+      "hunger": 0.62,
+      "wake": 0.05,
+      "shop": false,
+      "icon": "bowl",
+      "tint": "#dcb069",
+      "desc": "Egg, pork, and a broth somebody has clearly been simmering since Tuesday.",
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burger1",
+        "v_res_tt_pizzaplate"
+      ],
+      "seconds": 7.5
+    },
+    {
+      "id": "nx_padthai",
+      "name": "Pad Thai",
+      "category": "Food",
+      "price": 12,
+      "hunger": 0.56,
+      "shop": false,
+      "icon": "noodles",
+      "tint": "#e0a552",
+      "desc": "Peanuts on top, lime on the side, no notes.",
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burger1",
+        "v_res_tt_pizzaplate"
+      ],
+      "seconds": 6.5
+    },
+    {
+      "id": "nx_dumplings",
+      "name": "Steamed Dumplings",
+      "category": "Food",
+      "price": 9,
+      "hunger": 0.38,
+      "shop": false,
+      "icon": "plate",
+      "tint": "#e8ddbe",
+      "desc": "Eight of them. You will want twelve. Everybody wants twelve.",
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burger1",
+        "v_res_tt_pizzaplate"
+      ],
+      "seconds": 5.5
+    },
+    {
+      "id": "nx_bubbletea",
+      "name": "Bubble Tea",
+      "category": "Drinks",
+      "price": 7,
+      "hunger": 0.12,
+      "wake": 0.09,
+      "drink": true,
+      "shop": false,
+      "icon": "shake",
+      "tint": "#c98fa8",
+      "desc": "Comes with a straw wide enough to be a weapon.",
+      "prop": [
+        "prop_plastic_cup_02",
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup"
+      ],
+      "seconds": 4.5
+    },
+    {
+      "_note": "Cool Beans. The fourth place on this list that sells coffee, so it sells it COLD -- the name did the deciding. Bean Machine is hot and serious, Rusty Brown's is filter with a donut, Ground & Pound is a pot of tea, and this one has pavement tables and a frappe.",
+      "id": "cb_coldbrew",
+      "name": "Cold Brew",
+      "category": "Drinks",
+      "price": 6,
+      "hunger": 0.04,
+      "wake": 0.2,
+      "drink": true,
+      "shop": false,
+      "icon": "cup",
+      "tint": "#5e3d2a",
+      "desc": "Steeped for a day and a night. Hits like a bag of hammers.",
+      "prop": [
+        "prop_plastic_cup_02",
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup",
+        "prop_cs_coffee_cup"
+      ],
+      "seconds": 4.0
+    },
+    {
+      "id": "cb_icedlatte",
+      "name": "Iced Latte",
+      "category": "Drinks",
+      "price": 6,
+      "hunger": 0.09,
+      "wake": 0.13,
+      "drink": true,
+      "shop": false,
+      "icon": "shake",
+      "tint": "#d8bb96",
+      "desc": "Ice, milk, and a rumour of espresso.",
+      "prop": [
+        "prop_plastic_cup_02",
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup",
+        "prop_cs_coffee_cup"
+      ],
+      "seconds": 4.0
+    },
+    {
+      "id": "cb_frappe",
+      "name": "Frappe",
+      "category": "Drinks",
+      "price": 8,
+      "hunger": 0.2,
+      "wake": 0.1,
+      "drink": true,
+      "shop": false,
+      "icon": "shake",
+      "tint": "#c7a07e",
+      "desc": "Coffee that has given up and become a milkshake. No shame in it.",
+      "prop": [
+        "prop_plastic_cup_02",
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup",
+        "prop_cs_coffee_cup"
+      ],
+      "seconds": 5.0
+    },
+    {
+      "id": "cb_cookie",
+      "name": "Big Cookie",
+      "category": "Snacks",
+      "price": 4,
+      "hunger": 0.2,
+      "wake": 0.04,
+      "shop": false,
+      "icon": "cookie",
+      "tint": "#c98f52",
+      "desc": "The size of a coaster and still warm in the middle.",
+      "prop": [
+        "prop_choc_ego",
+        "prop_amb_donut",
+        "prop_food_bs_bagel"
+      ],
+      "seconds": 4.0
+    },
+    {
+      "_note": "Limey's Juice & Smoothies. BITE! sells a smoothie as a side; this is a juice bar, so it sells juice and the smoothie is the indulgent end of the menu rather than the whole of it.",
+      "id": "lm_orange",
+      "name": "Fresh Orange Juice",
+      "category": "Drinks",
+      "price": 5,
+      "hunger": 0.12,
+      "wake": 0.09,
+      "drink": true,
+      "shop": false,
+      "icon": "cup",
+      "tint": "#e8963a",
+      "desc": "Squeezed in front of you, loudly, by a machine that has seen things.",
+      "prop": [
+        "prop_plastic_cup_02",
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup",
+        "prop_ld_flow_bottle"
+      ],
+      "seconds": 4.0
+    },
+    {
+      "id": "lm_green",
+      "name": "Green Juice",
+      "category": "Drinks",
+      "price": 8,
+      "hunger": 0.1,
+      "wake": 0.14,
+      "drink": true,
+      "shop": false,
+      "icon": "cup",
+      "tint": "#7fbe4a",
+      "desc": "Kale, celery, and the distinct feeling of being told off.",
+      "prop": [
+        "prop_plastic_cup_02",
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup",
+        "prop_ld_flow_bottle"
+      ],
+      "seconds": 4.5
+    },
+    {
+      "id": "lm_smoothie",
+      "name": "Berry Smoothie",
+      "category": "Drinks",
+      "price": 7,
+      "hunger": 0.22,
+      "wake": 0.07,
+      "drink": true,
+      "shop": false,
+      "icon": "shake",
+      "tint": "#c05a86",
+      "desc": "Squeeze one out. Their slogan. On the window. Twice.",
+      "prop": [
+        "prop_plastic_cup_02",
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup",
+        "prop_ld_flow_bottle"
+      ],
+      "seconds": 5.0
+    },
+    {
+      "id": "lm_shot",
+      "name": "Wheatgrass Shot",
+      "category": "Drinks",
+      "price": 4,
+      "hunger": 0.02,
+      "wake": 0.24,
+      "drink": true,
+      "shop": false,
+      "icon": "flask",
+      "tint": "#6fb03a",
+      "desc": "Tastes like a lawn. Works like a slap.",
+      "prop": [
+        "prop_plastic_cup_02",
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup",
+        "prop_ld_flow_bottle"
+      ],
+      "seconds": 2.5
+    },
+    {
+      "_note": "Food Market. A SUPERMARKET, not a corner grocer -- so it sells the shop rather than the snack. Bean's does a tin of beans; this does the whole trolley, and the prices and hunger values say which is which.",
+      "id": "fm_shop",
+      "name": "Bag of Groceries",
+      "category": "Food",
+      "price": 28,
+      "hunger": 0.98,
+      "shop": false,
+      "icon": "box",
+      "tint": "#c9a267",
+      "desc": "A proper shop. You will be eating out of this bag for a while.",
+      "prop": [
+        "prop_food_bag1",
+        "prop_cs_shopping_bag",
+        "prop_pizza_box_01",
+        "prop_cs_burger_01"
+      ],
+      "seconds": 10.0
+    },
+    {
+      "id": "fm_rotisserie",
+      "name": "Rotisserie Chicken",
+      "category": "Food",
+      "price": 13,
+      "hunger": 0.72,
+      "shop": false,
+      "icon": "bucket",
+      "tint": "#d9994a",
+      "desc": "Off the hot spinner by the door. The best thing in any supermarket.",
+      "prop": [
+        "prop_food_bs_chick",
+        "prop_cs_burger_01",
+        "prop_food_bs_burger1"
+      ],
+      "seconds": 8.0
+    },
+    {
+      "id": "fm_readymeal",
+      "name": "Ready Meal",
+      "category": "Food",
+      "price": 7,
+      "hunger": 0.4,
+      "shop": false,
+      "icon": "plate",
+      "tint": "#c4b48f",
+      "desc": "Pierce film. Do not pierce film. Nobody has ever known which.",
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_pizza_box_01",
+        "prop_cs_burger_01"
+      ],
+      "seconds": 5.5
+    },
+    {
+      "id": "fm_produce",
+      "name": "Bag of Produce",
+      "category": "Snacks",
+      "price": 9,
+      "hunger": 0.36,
+      "shop": false,
+      "icon": "fruit",
+      "tint": "#8ec96f",
+      "desc": "Bought with the best intentions. Half of it will go off.",
+      "prop": [
+        "prop_food_bag1",
+        "prop_cs_shopping_bag",
+        "prop_pizza_box_01",
+        "prop_cs_burger_01"
+      ],
+      "seconds": 5.0
+    },
+    {
+      "_note": "Mama's Grocery. THREE GROCERS NOW, and each sells a different thing: Bean's does tins and bread, Food Market does the weekly shop, and this one has a hot counter at the back with somebody's actual cooking on it.",
+      "id": "mg_meatloaf",
+      "name": "Mama's Meatloaf",
+      "category": "Food",
+      "price": 11,
+      "hunger": 0.58,
+      "shop": false,
+      "icon": "plate",
+      "tint": "#c98552",
+      "desc": "Cut off the tray, weighed, wrapped in foil. Ask for the end piece.",
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_cs_burger_01",
+        "prop_food_bs_burger1"
+      ],
+      "seconds": 7.0
+    },
+    {
+      "id": "mg_soup",
+      "name": "Homemade Soup",
+      "category": "Food",
+      "price": 5,
+      "hunger": 0.3,
+      "wake": 0.05,
+      "shop": false,
+      "icon": "bowl",
+      "tint": "#dba85c",
+      "desc": "Ladled out of a pot that has never once been empty.",
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_cs_burger_01",
+        "prop_food_bs_burger1"
+      ],
+      "seconds": 5.5
+    },
+    {
+      "id": "mg_pie",
+      "name": "Slice of Apple Pie",
+      "category": "Snacks",
+      "price": 5,
+      "hunger": 0.26,
+      "shop": false,
+      "icon": "slice",
+      "tint": "#e0b25e",
+      "desc": "There is a whole one behind the counter and she will notice if you stare.",
+      "prop": [
+        "prop_cs_slice_cake",
+        "v_res_tt_pizzaplate",
+        "prop_food_bs_bagel"
+      ],
+      "seconds": 4.5
+    },
+    {
+      "id": "mg_pantry",
+      "name": "Pantry Basics",
+      "category": "Food",
+      "price": 13,
+      "hunger": 0.52,
+      "shop": false,
+      "icon": "box",
+      "tint": "#b89a6a",
+      "desc": "Rice, oil, tinned tomatoes. The things you only notice when they run out.",
+      "prop": [
+        "prop_food_bag1",
+        "prop_cs_shopping_bag",
+        "prop_pizza_box_01"
+      ],
+      "seconds": 7.0
+    },
+    {
+      "_note": "The market kiosk. Its boards list burgers, pizza, hot dogs, ice cream, sundaes, soda, sludgies, coffee, candy, batteries and film -- so a broad shelf IS this shop's character rather than a failure to give it one.",
+      "id": "kiosk_sundae",
+      "name": "Ice Cream Sundae",
+      "category": "Snacks",
+      "price": 6,
+      "hunger": 0.24,
+      "shop": false,
+      "icon": "bowl",
+      "tint": "#e8d2b0",
+      "desc": "Three scoops, sauce, a wafer stuck in at an angle. Correct.",
+      "prop": [
+        "prop_choc_ego",
+        "prop_cs_ice_cream",
+        "prop_amb_donut"
+      ],
+      "seconds": 5.0
+    },
+    {
+      "id": "kiosk_shake",
+      "name": "Thick Shake",
+      "category": "Drinks",
+      "price": 5,
+      "hunger": 0.16,
+      "drink": true,
+      "shop": false,
+      "icon": "shake",
+      "tint": "#e4c9a8",
+      "desc": "From the machine with MILK SHAKES painted on it in two colours.",
+      "prop": [
+        "prop_plastic_cup_02",
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup"
+      ],
+      "seconds": 4.5
     }
   ],
   "_animations": [
