@@ -382,6 +382,10 @@ namespace BareMinimum.UI
                  () => _cfg.ShowHud, v => _cfg.ShowHud = v,
                  "The apple and the eye beside the minimap.");
 
+            Bool("Animate the icons", "HUD", "Animate",
+                 () => _cfg.HudAnimate, v => _cfg.HudAnimate = v,
+                 "The eye blinks and the apple twitches, harder as each one gets worse.");
+
             Bool("HUD auto position", "HUD", "AutoPosition",
                  () => _cfg.HudAutoPosition, v => _cfg.HudAutoPosition = v,
                  "Places them against the minimap whatever shape your screen is. " +

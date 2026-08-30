@@ -30,7 +30,16 @@ namespace BareMinimum.UI
         /// icons is the entire cost of the HUD.
         /// </summary>
         private readonly Icon[] _apple = new Icon[5];
-        private readonly Icon[] _eye = new Icon[5];
+
+        /// <summary>
+        /// Five stages of eye, three animation frames each. [stage][frame].
+        ///
+        /// Frame 0 is the resting state and is what is on screen for all but a fraction of a
+        /// second; the other two are the movement. They are held open for the same reason the
+        /// stages are -- a CustomSprite owns a texture handle, and fifteen of them is still
+        /// nothing next to the thirty the shop already keeps.
+        /// </summary>
+        private readonly Icon[][] _eye = new Icon[5][];
 
         private bool _measured;
 
@@ -41,7 +50,11 @@ namespace BareMinimum.UI
             for (var i = 0; i < 5; i++)
             {
                 _apple[i] = new Icon("apple" + i + ".png");
-                _eye[i] = new Icon("eye" + i + ".png");
+
+                _eye[i] = new Icon[3];
+                _eye[i][0] = new Icon("eye" + i + ".png");
+                _eye[i][1] = new Icon("eye" + i + "_1.png");
+                _eye[i][2] = new Icon("eye" + i + "_2.png");
             }
         }
 
@@ -222,8 +235,8 @@ namespace BareMinimum.UI
 
                 Measure(x, top, side);
 
-                Row(_apple, needs.Hunger, x, top + side / 2f, wide, side);
-                Row(_eye, needs.Sleep, x, top + side + gap + side / 2f, wide, side);
+                Apple(needs.Hunger, x, top + side / 2f, wide, side);
+                Eye(needs.Sleep, x, top + side + gap + side / 2f, wide, side);
             }
             catch (Exception ex)
             {
@@ -231,20 +244,143 @@ namespace BareMinimum.UI
             }
         }
 
-        /// <summary>One need: pick the stage, pick the colour, draw it.</summary>
-        private void Row(Icon[] set, Need need, float centreX, float centreY,
-                         float wide, float tall)
+        /// <summary>
+        /// The apple: a hunger pang.
+        ///
+        /// A SQUASH AND A ROCK, not a new drawing. The apple's silhouette is already carrying
+        /// how much is left of it, and a second set of shapes to carry movement as well would
+        /// be twenty files to say something two numbers can say. Scale and rotation are free:
+        /// the sprite has both, and neither costs a texture.
+        ///
+        /// It grows harder and more often as the meter empties, so the corner of the screen
+        /// is readable out of the corner of an eye -- a still apple is a fed one.
+        /// </summary>
+        private void Apple(Need need, float centreX, float centreY, float wide, float tall)
         {
             if (_cfg.HudHideWhenFine && need.Value > _cfg.HudFineAbove) return;
 
-            var stage = need.Stage;
-            if (stage < 0) stage = 0;
-            if (stage > 4) stage = 4;
+            var icon = _apple[Stage(need)];
+            if (icon == null || icon.Missing) return;
 
-            var icon = set[stage];
+            var grow = 1f;
+            var turn = 0f;
+
+            if (_cfg.HudAnimate)
+            {
+                // Empty beats about every 1.4s, full about every 7. Linear between, off the
+                // need itself rather than the stage, so it tightens smoothly instead of
+                // lurching each time the picture changes.
+                var every = 1400f + 5600f * Clamp01(need.Value);
+                var beat = Beat(every, 420f);
+
+                if (beat >= 0f)
+                {
+                    // One half-sine: up and back down, with no discontinuity at either end.
+                    // A saw or a triangle jerks at the top, which reads as a dropped frame.
+                    var swell = (float)Math.Sin(Math.PI * beat);
+
+                    // 6% when fed, 16% when empty. A HUD icon that grows a quarter of its
+                    // own size again is a bouncing button; this has to read as a twinge in
+                    // the corner of the eye and no more.
+                    var strength = 0.06f + 0.10f * (1f - Clamp01(need.Value));
+
+                    grow = 1f + strength * swell;
+
+                    // Three degrees to eight. Enough to see, not enough to look broken.
+                    turn = 50f * strength * swell * (Alternate(every) ? 1f : -1f);
+                }
+            }
+
+            icon.DrawSized(centreX + wide / 2f, centreY, wide * grow, tall * grow,
+                           Colour(need), turn);
+        }
+
+        /// <summary>
+        /// The eye: a blink, which turns into a struggle once it is shut.
+        ///
+        /// The frames do the work, so this only has to decide WHICH and WHEN. Tired blinks
+        /// come more often and are HELD -- a long blink is what being exhausted looks like,
+        /// and it is the difference between an icon that animates and one that acts.
+        ///
+        /// At stage 0 the same three frames run the other way (see make_icons.py), so the
+        /// shut eye cracks open now and then instead of blinking, which a shut eye cannot do.
+        /// </summary>
+        private void Eye(Need need, float centreX, float centreY, float wide, float tall)
+        {
+            if (_cfg.HudHideWhenFine && need.Value > _cfg.HudFineAbove) return;
+
+            var set = _eye[Stage(need)];
+            if (set == null) return;
+
+            var frame = 0;
+
+            if (_cfg.HudAnimate)
+            {
+                var rested = Clamp01(need.Value);
+
+                // Every 1.8s when exhausted, every 6s when fresh.
+                var every = 1800f + 4200f * rested;
+
+                // And the blink itself drags: 180ms fresh, 620ms when the lids are heavy.
+                var span = 180f + 440f * (1f - rested);
+
+                var beat = Beat(every, span);
+
+                if (beat >= 0f)
+                {
+                    // Down, hold, up. The hold is the middle HALF of the blink, so a slow
+                    // blink spends most of itself shut rather than merely travelling slowly.
+                    if (beat < 0.25f) frame = 1;
+                    else if (beat < 0.75f) frame = 2;
+                    else frame = 1;
+                }
+            }
+
+            var icon = set[frame];
+            if (icon == null || icon.Missing) icon = set[0];
             if (icon == null || icon.Missing) return;
 
             icon.DrawSized(centreX + wide / 2f, centreY, wide, tall, Colour(need));
+        }
+
+        private static int Stage(Need need)
+        {
+            var stage = need.Stage;
+            if (stage < 0) stage = 0;
+            if (stage > 4) stage = 4;
+            return stage;
+        }
+
+        /// <summary>
+        /// How far through the current movement we are, 0 to 1, or -1 while resting.
+        ///
+        /// ON THE WALL CLOCK, like the colour pulse above it and for the same reason: a frame
+        /// counter makes the whole thing race on a fast machine and crawl on a slow one, and
+        /// this has to beat at a human rate or it is not a blink.
+        /// </summary>
+        private static float Beat(float everyMs, float spanMs)
+        {
+            if (everyMs <= 1f || spanMs <= 1f) return -1f;
+
+            // Masked positive. TickCount wraps to negative after about 25 days of uptime,
+            // and a negative remainder would quietly switch the animation off for the rest
+            // of the session with nothing to say why.
+            var into = (Environment.TickCount & int.MaxValue) % (int)everyMs;
+            if (into >= spanMs) return -1f;
+
+            return into / spanMs;
+        }
+
+        /// <summary>Which way this beat leans, so the rock alternates instead of ticking.</summary>
+        private static bool Alternate(float everyMs)
+        {
+            if (everyMs <= 1f) return true;
+            return ((Environment.TickCount & int.MaxValue) / (int)everyMs) % 2 == 0;
+        }
+
+        private static float Clamp01(float v)
+        {
+            return v < 0f ? 0f : v > 1f ? 1f : v;
         }
 
         /// <summary>

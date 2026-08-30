@@ -128,6 +128,19 @@ namespace BareMinimum.UI
         /// </summary>
         public void DrawSized(float centreX, float centreY, float width, float height, Color tint)
         {
+            DrawSized(centreX, centreY, width, height, tint, 0f);
+        }
+
+        /// <summary>
+        /// The same, turned by <paramref name="degrees"/> about its own centre.
+        ///
+        /// A separate overload rather than a defaulted parameter, because every existing
+        /// caller draws upright and a default would quietly make rotation look like something
+        /// they had all opted into.
+        /// </summary>
+        public void DrawSized(float centreX, float centreY, float width, float height,
+                              Color tint, float degrees)
+        {
             if (_missing) return;
 
             try
@@ -136,7 +149,7 @@ namespace BareMinimum.UI
 
                 _sprite.Size = new SizeF(width * CanvasW, height * CanvasH);
                 _sprite.Position = new PointF(centreX * CanvasW, centreY * CanvasH);
-                _sprite.Rotation = 0f;
+                _sprite.Rotation = degrees;
                 _sprite.Color = tint;
                 _sprite.Draw();
             }

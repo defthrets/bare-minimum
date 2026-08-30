@@ -333,6 +333,19 @@ namespace BareMinimum.Core
         /// <summary>Pulse an icon once its need is critical.</summary>
         public bool HudFlashWhenCritical = true;
 
+        /// <summary>
+        /// Whether the two HUD icons move.
+        ///
+        /// THE MOVEMENT IS THE READING, not decoration: the eye blinks more often and holds
+        /// the blink longer as you tire, and the apple twitches harder as you get hungry. So
+        /// somebody watching the corner of their screen learns the state from the rhythm
+        /// before they have looked directly at it.
+        ///
+        /// A switch because motion near the minimap is exactly the sort of thing that some
+        /// people cannot stand and some people cannot see past.
+        /// </summary>
+        public bool HudAnimate = true;
+
         // ---- Keys ------------------------------------------------------------
 
         /// <summary>
@@ -472,6 +485,7 @@ namespace BareMinimum.Core
                 cfg.HudSize = ini.GetFloat("HUD", "Size", cfg.HudSize, 0.005f, 0.30f);
                 cfg.HudGap = ini.GetFloat("HUD", "Gap", cfg.HudGap, 0f, 3f);
                 cfg.HudOpacity = ini.GetFloat("HUD", "Opacity", cfg.HudOpacity, 0.05f, 1f);
+                cfg.HudAnimate = ini.GetBool("HUD", "Animate", cfg.HudAnimate);
                 cfg.HudHideWhenFine = ini.GetBool("HUD", "HideWhenFine", cfg.HudHideWhenFine);
                 cfg.HudFineAbove = ini.GetFloat("HUD", "FineAbove", cfg.HudFineAbove, 0f, 1f);
                 cfg.HudFlashWhenCritical = ini.GetBool("HUD", "FlashWhenCritical",

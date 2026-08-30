@@ -343,12 +343,40 @@ LIDS = {
 IRIS = {4: 32, 3: 30, 2: 27, 1: 22, 0: 0}
 
 
-def eye(stage):
-    """stage 4 = wide awake, stage 0 = shut, with a Z."""
+# How far through its own movement each animation frame is. Frame 0 is the resting
+# state and is the file the HUD draws for all but a fraction of a second.
+#
+# THE MOVEMENT REVERSES AT STAGE 0. Every open eye animates by CLOSING -- that is a
+# blink. A shut eye cannot blink, so at stage 0 the same three frames run the other
+# way and it cracks open instead: somebody fighting to stay awake rather than a
+# corpse. Same machinery, same file names, opposite direction.
+PHASES = (0.0, 0.55, 1.0)
+
+
+def eye(stage, phase=0):
+    """stage 4 = wide awake, stage 0 = shut with a Z. phase 0-2 animates the lid."""
     img, d = canvas()
     cx, cy, half = 128, 138, 86
 
     opening, lid_frac = LIDS[stage]
+
+    t = PHASES[phase]
+
+    if stage == 0:
+        # Shut, opening to a crack. Deliberately small: a stage-0 eye that opened as
+        # wide as stage 1 would read as the meter having refilled itself.
+        opening = 17.0 * t
+        lid_frac = 0.62
+    else:
+        # Open, closing. The opening collapses and the lid comes down to meet it, which
+        # is the same pair of numbers the stages already move between -- so a blink
+        # looks like the icon travelling through its own states rather than a new
+        # drawing spliced in.
+        opening = opening * (1.0 - t)
+        lid_frac = lid_frac + (1.0 - lid_frac) * t
+
+    if opening < 6.0:
+        opening = 0
 
     if opening <= 0:
         d.arc([s(cx - half), s(cy - 36), s(cx + half), s(cy + 36)], 15, 165,
@@ -370,12 +398,21 @@ def eye(stage):
 
         # The iris is a HOLE and the catchlight is a small disc OFF CENTRE inside it.
         # Concentric, the pair is a donut, and at 100% the icon read as a target.
-        pr = IRIS[stage]
-        ld.ellipse([s(cx - pr), s(cy - pr), s(cx + pr), s(cy + pr)], fill=CLEAR)
+        # Scaled to the ANIMATED opening, not the stage's resting one. A full-size hole
+        # in a collapsing slit swallows the white and the mid-blink frame reads as an
+        # outline rather than an eye halfway shut.
+        rest = LIDS[stage][0]
+        pr = IRIS[stage] if rest <= 0 else IRIS[stage] * (opening / float(rest))
+        if stage == 0:
+            pr = opening * 0.42
+        if pr < 6:
+            pr = 0
+        if pr > 0:
+            ld.ellipse([s(cx - pr), s(cy - pr), s(cx + pr), s(cy + pr)], fill=CLEAR)
 
-        gr = pr * 0.30
-        gx, gy = cx - pr * 0.34, cy - pr * 0.34
-        ld.ellipse([s(gx - gr), s(gy - gr), s(gx + gr), s(gy + gr)], fill=WHITE)
+            gr = pr * 0.30
+            gx, gy = cx - pr * 0.34, cy - pr * 0.34
+            ld.ellipse([s(gx - gr), s(gy - gr), s(gx + gr), s(gy + gr)], fill=WHITE)
 
         # The lid comes down over the TOP of the lens by its own stated fraction, so the
         # visible slit is always a real proportion of the opening. Masked rather than drawn
@@ -414,8 +451,13 @@ def main():
     for stage in range(5):
         save(apple(stage), "apple%d.png" % stage)
 
+    # Three frames per stage. Frame 0 keeps the plain name because it is the resting
+    # state and everything else in the mod -- the menu title marks, the settings panel --
+    # asks for eyeN.png and wants the eye at rest.
     for stage in range(5):
-        save(eye(stage), "eye%d.png" % stage)
+        for phase in range(3):
+            name = "eye%d.png" % stage if phase == 0 else "eye%d_%d.png" % (stage, phase)
+            save(eye(stage, phase), name)
 
     print("Done. Deploy with:  .\\build.ps1 -Deploy -FreshData")
 
