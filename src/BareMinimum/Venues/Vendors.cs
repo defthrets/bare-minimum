@@ -1437,6 +1437,11 @@ namespace BareMinimum.Venues
                 }
             }
 
+            // SET EVERY FRAME, not once at construction. "Animate the icons" is a row
+            // inside the settings menu, so a value read once would leave the menu you
+            // just changed it in ignoring you until the next reload.
+            _ui.Shimmer = _cfg.HudAnimate ? _cfg.HudShimmer : 0f;
+
             _ui.Draw();
         }
 

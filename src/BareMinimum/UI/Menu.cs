@@ -136,6 +136,14 @@ namespace BareMinimum.UI
         /// </summary>
         public bool LeftRightAdjusts;
 
+        /// <summary>
+        /// How strongly the row pictures and the title marks catch the light. 0 is off.
+        ///
+        /// Set by whoever builds the menu, from the same ini dial the HUD uses, because this
+        /// class is deliberately ignorant of the mod's settings -- it draws rows.
+        /// </summary>
+        public float Shimmer;
+
         /// <summary>The row nudged this frame, or null. Read it after Update.</summary>
         public Row Adjusted { get; private set; }
 
@@ -490,16 +498,26 @@ namespace BareMinimum.UI
             var centreY = titleTop + titleH / 2f;
             var offset = half + wide * 0.85f;
 
+            // A third of a cycle apart, so the pair never brightens together -- in step they
+            // read as one wide ornament rather than as two marks.
             if (TitleLeft != null)
             {
                 var left = TitleLeft.Current;
-                if (left != null) left.DrawSized(PanelX - offset, centreY, wide, tall, Accent);
+                if (left != null)
+                {
+                    left.DrawSized(PanelX - offset, centreY, wide, tall,
+                                   Sheen.On(Accent, 0f, Shimmer));
+                }
             }
 
             if (TitleRight != null)
             {
                 var right = TitleRight.Current;
-                if (right != null) right.DrawSized(PanelX + offset, centreY, wide, tall, Accent);
+                if (right != null)
+                {
+                    right.DrawSized(PanelX + offset, centreY, wide, tall,
+                                    Sheen.On(Accent, 0.33f, Shimmer));
+                }
             }
         }
 
@@ -565,7 +583,7 @@ namespace BareMinimum.UI
                 var at = _scroll + i;
                 if (at >= Rows.Count) break;
 
-                DrawRow(Rows[at], left, y + i * RowH, at == Index);
+                DrawRow(Rows[at], left, y + i * RowH, at == Index, i);
             }
 
             y += shown * RowH;
@@ -583,7 +601,7 @@ namespace BareMinimum.UI
             return y;
         }
 
-        private static void DrawRow(Row row, float left, float y, bool selected)
+        private void DrawRow(Row row, float left, float y, bool selected, int slot)
         {
             Hud.Bar(left, y, PanelW, RowH,
                     selected ? Color.FromArgb(242, 240, 170, 56)
@@ -613,6 +631,20 @@ namespace BareMinimum.UI
                     ? row.IconTint
                     : Color.FromArgb(120, row.IconTint.R / 2 + 60,
                                      row.IconTint.G / 2 + 60, row.IconTint.B / 2 + 60);
+
+                // STAGGERED DOWN THE LIST. A shop shelf of eight pictures all brightening on
+                // the same beat reads as the whole panel throbbing; an eighth of a cycle
+                // between them reads as eight separate things catching the light as you
+                // scroll past. Off the row's place in the list rather than its index in the
+                // data, so the wave stays put while the selection moves.
+                //
+                // The SELECTED row is left alone: it is already sitting on a full-strength
+                // amber bar, and a picture breathing against that is two brightnesses
+                // arguing in the same forty pixels.
+                if (!selected && row.Enabled)
+                {
+                    tint = Sheen.On(tint, slot * 0.125f, Shimmer * 0.7f);
+                }
 
                 icon.DrawSized(textLeft + wide / 2f, y + RowH / 2f, wide, tall, tint);
 

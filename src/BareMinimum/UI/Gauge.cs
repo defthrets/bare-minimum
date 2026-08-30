@@ -287,7 +287,7 @@ namespace BareMinimum.UI
                 // signal on a small sprite over a moving world -- especially on the green
                 // end of the ramp, which is already bright -- and it was reported invisible.
                 // A couple of per cent of scale is what the eye actually picks up.
-                grow = 1f + 0.030f * Clamp01(_cfg.HudShimmer) * Wave(ShimmerMs, offset);
+                grow = 1f + 0.030f * Clamp01(_cfg.HudShimmer) * Sheen.Wave(offset);
 
                 // THE BOTTOM TWO STAGES, not just the last. Waiting for a meter to bottom out
                 // completely means most players never see this at all, and the point of it is
@@ -325,23 +325,11 @@ namespace BareMinimum.UI
         {
             if (_cfg.HudFlashWhenCritical && need.Stage == 0) return c;
 
-            // 0 to 1 rather than -1 to 1: brightness only ever goes UP from the ramp colour,
-            // so the icon never dips darker than the state it is reporting.
-            var lift = 0.5f + 0.5f * Wave(ShimmerMs, offset);
-
-            return Mix(c, Color.FromArgb(c.A, 255, 252, 244),
-                       0.22f * Clamp01(_cfg.HudShimmer) * lift);
+            // SHARED WITH THE MENUS. The shop rows and the title marks breathe on the same
+            // curve at the same rate, and two copies of a sine would come apart the first
+            // time either was tuned.
+            return Sheen.On(c, offset, 0.22f * Clamp01(_cfg.HudShimmer));
         }
-
-        /// <summary>
-        /// How long one breath takes.
-        ///
-        /// Four seconds was too slow to register as movement at all -- the change per frame
-        /// was below what anybody would notice, so it read as a static icon that happened to
-        /// be a slightly different colour each time you looked. Two and a bit is slow enough
-        /// to be calm and fast enough to be a rhythm.
-        /// </summary>
-        private const float ShimmerMs = 2200f;
 
         /// <summary>How long one sway takes. Faster than the shimmer, because it is a warning.</summary>
         private const float SwayMs = 1600f;
