@@ -1,0 +1,116 @@
+{
+  "_comment": [
+    "Places to buy one specific thing. No menu: walk up, the game's own prompt appears",
+    "top left, press the key, eat it.",
+    "",
+    "  item        an id from foods.json. That is where the price and the hunger live.",
+    "  label       what the prompt calls it. Defaults to the item's name.",
+    "  x, y, z     where it is. z is the GROUND; anything spawned is placed on the",
+    "              ground properly, so being a little out is harmless.",
+    "  heading     which way a spawned stand faces, 0-360.",
+    "  reach       how close you have to be to buy, in metres.",
+    "  spawnRange  how close before anything is created at all.",
+    "",
+    "  prop / ped  OPTIONAL candidate lists. Leave them out entirely for a place that",
+    "              already exists in the world -- a serving hatch, a restaurant door --",
+    "              and nothing is spawned; it becomes just a spot with a price.",
+    "              Where they ARE given, the first model that exists in your build wins",
+    "              and every miss is named in BareMinimum.log.",
+    "",
+    "  blipSprite  52 is Store, the shopping bag. CHECK ANY NUMBER YOU PUT HERE: a",
+    "              sprite the game does not have draws the default dot rather than",
+    "              nothing, and a wrong one draws the WRONG icon -- 267 is Property",
+    "              Management and 106 is the FIB, both of which look deliberate.",
+    "",
+    "To add your own: stand where you want it, read the coordinates off a coord HUD,",
+    "and copy a block below."
+  ],
+
+  "version": 1,
+
+  "vendors": [
+    {
+      "id": "hotdog_vespucci",
+      "name": "Hot Dog Stand",
+      "label": "hot dog",
+      "item": "hotdog",
+
+      "x": -3.925,
+      "y": -1539.631,
+      "z": 29.479,
+      "heading": 244.172,
+
+      "pedBack": 1.1,
+      "spawnRange": 90.0,
+      "reach": 2.6,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5,
+
+      "prop": [
+        "prop_hotdogstand_01",
+        "prop_hotdog_01",
+        "prop_food_stall_01",
+        "prop_stall_hotdog_01",
+        "prop_ven_market_stall1",
+        "prop_bbq_5",
+        "prop_bbq_1",
+        "prop_table_04"
+      ],
+
+      "ped": [
+        "s_m_y_chef_01",
+        "s_m_m_linecook",
+        "s_m_m_migrant_01",
+        "a_m_m_eastsa_02",
+        "a_m_y_business_01"
+      ],
+
+      "scenario": "WORLD_HUMAN_STAND_IMPATIENT"
+    },
+
+    {
+      "_note": "The taco window on the yellow building. The hatch and the menu board are",
+      "_note2": "already part of the map, so nothing is spawned here -- it is just a spot.",
+
+      "id": "tacos_vespucci",
+      "name": "Taco Window",
+      "label": "taco",
+      "item": "taco",
+
+      "x": 11.368,
+      "y": -1605.872,
+      "z": 29.394,
+      "heading": 33.019,
+
+      "spawnRange": 90.0,
+      "reach": 2.2,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+
+    {
+      "_note": "Bishop's Chicken. The doors are part of the map; nothing is spawned.",
+
+      "id": "bishops_chicken",
+      "name": "Bishop's Chicken",
+      "label": "Old Yeller",
+      "item": "old_yeller",
+
+      "x": 169.351,
+      "y": -1633.514,
+      "z": 29.292,
+      "heading": 193.009,
+
+      "spawnRange": 90.0,
+      "reach": 2.4,
+
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    }
+  ]
+}

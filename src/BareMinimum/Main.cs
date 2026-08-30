@@ -37,6 +37,7 @@ namespace BareMinimum
         private readonly Catalogue _catalogue;
         private readonly Eating _eating;
         private readonly Counters _counters;
+        private readonly Vendors _vendors;
         private readonly Shop _shop;
         private readonly SettingsPanel _settings;
         private readonly Gauge _gauge;
@@ -57,6 +58,7 @@ namespace BareMinimum
             _catalogue = new Catalogue(_cfg);
             _eating = new Eating(_catalogue, _needs);
             _counters = new Counters();
+            _vendors = new Vendors(_cfg, _catalogue, _eating);
             _shop = new Shop(_cfg, _catalogue, _counters, _eating, _needs);
 
             _settings = new SettingsPanel(_cfg, _needs);
@@ -68,7 +70,7 @@ namespace BareMinimum
 
             Log.Info(Build.Name + " " + Build.Version + " loaded. Interact " +
                      _cfg.InteractKey + ", menu " + _cfg.MenuKey + ", " +
-                     _catalogue.Count + " item(s) on sale.");
+                     _catalogue.Count + " item(s), " + _vendors.Count + " vendor(s).");
 
             if (!_cfg.Enabled)
             {
@@ -115,9 +117,13 @@ namespace BareMinimum
                 // also be pressing E to go to sleep.
                 var menuOpen = _shop.IsOpen || _settings.IsOpen;
 
-                if (!menuOpen) _sleeping.Update();
+                if (!menuOpen && !_vendors.Offering) _sleeping.Update();
 
-                _shop.Update(_sleeping.Busy || _settings.IsOpen);
+                // Street vendors BEFORE the shop, so a stand standing next to a vending
+                // machine wins the interact key rather than both reading it on one frame.
+                _vendors.Update(dt, _sleeping.Busy || menuOpen);
+
+                _shop.Update(_sleeping.Busy || _settings.IsOpen || _vendors.Offering);
                 _eating.Update();
 
                 // While the sleep sequence owns the screen, the effects and the HUD stand
@@ -196,6 +202,7 @@ namespace BareMinimum
         {
             try { _settings.Shutdown(); } catch (Exception ex) { Log.Error("Settings shutdown", ex); }
             try { _shop.Shutdown(); } catch (Exception ex) { Log.Error("Shop shutdown", ex); }
+            try { _vendors.Shutdown(); } catch (Exception ex) { Log.Error("Vendor shutdown", ex); }
             try { _eating.Shutdown(); } catch (Exception ex) { Log.Error("Eating shutdown", ex); }
             try { _sleeping.Shutdown(); } catch (Exception ex) { Log.Error("Sleep shutdown", ex); }
             try { _effects.Clear(); } catch (Exception ex) { Log.Error("Clearing effects", ex); }

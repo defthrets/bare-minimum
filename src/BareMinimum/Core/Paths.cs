@@ -190,6 +190,17 @@ namespace BareMinimum.Core
         public static string FoodsFile => Path.Combine(Data, "foods.json");
 
         /// <summary>
+        /// Street vendors: hot dog stands, taco windows, anywhere with a fixed spot.
+        ///
+        /// This is the file that came BACK. An earlier venues.json was deleted because
+        /// prop-based detection made it dead config -- tills and vending machines are found by
+        /// model, so nothing had to be written down. A hot dog stand is the opposite case:
+        /// there is no prop in the world to find, because the stand does not exist until this
+        /// mod creates it, so its position has to come from somewhere.
+        /// </summary>
+        public static string VendorsFile => Path.Combine(Data, "vendors.json");
+
+        /// <summary>
         /// Shipped artwork, beside the data rather than in the writable folder.
         ///
         /// It is CONTENT: it ships with the mod and nothing writes here. A missing folder

@@ -189,6 +189,9 @@ namespace BareMinimum.UI
 
                 if (_at == Counter.Machine && IsHotFood(item.Category)) continue;
 
+                // Vendor-only items never reach a shelf.
+                if (!item.InShop) continue;
+
                 var afford = money >= item.Price;
 
                 _ui.Rows.Add(new Row

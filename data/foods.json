@@ -8,6 +8,9 @@
     "          it can carry you to just above the tired threshold and no further, so a",
     "          pocketful of energy drinks can never replace sleeping.",
     "  drink   true for anything you drink. Drinks give a SMALL hunger increase by design.",
+    "  shop    false keeps it OFF shop counters and vending machines. For things only",
+    "          one particular vendor sells -- a branded burger belongs at that door,",
+    "          not on the shelf of every 24/7 in the state.",
     "  prop    what appears in your hand. A model this build lacks is reported once in the",
     "          log and the item still works -- you just eat it empty-handed.",
     "  seconds how long the eating animation runs.",
@@ -73,6 +76,18 @@
       "hunger": 0.33,
       "prop": "prop_taco_01",
       "seconds": 4.0
+    },
+
+    {
+      "_note": "Bishop's Chicken. Sold at their door only, never off a shop shelf.",
+      "id": "old_yeller",
+      "name": "Old Yeller",
+      "category": "Food",
+      "price": 9,
+      "hunger": 0.46,
+      "shop": false,
+      "prop": "prop_cs_burger_01",
+      "seconds": 5.0
     },
 
     {

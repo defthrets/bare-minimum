@@ -21,6 +21,16 @@ namespace BareMinimum.Food
 
         public bool Drink;
 
+        /// <summary>
+        /// Whether shop counters and vending machines stock it.
+        ///
+        /// False for anything a single named vendor sells. A branded burger belongs at that
+        /// vendor's door, not on the shelf of every 24/7 in the state -- and without this the
+        /// only way to keep it off them would be a category nobody could buy from, which is
+        /// worse than a flag.
+        /// </summary>
+        public bool InShop = true;
+
         /// <summary>The model held while consuming it. May be absent or invalid; see Eating.</summary>
         public string Prop = "";
 
@@ -109,6 +119,7 @@ namespace BareMinimum.Food
                         Hunger = node["hunger"].AsFloat(0f),
                         Wake = node["wake"].AsFloat(0f),
                         Drink = node["drink"].AsBool(false),
+                        InShop = node["shop"].AsBool(true),
                         Prop = node["prop"].AsString(""),
                         Seconds = node["seconds"].AsFloat(4f)
                     };
