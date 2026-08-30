@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -28,6 +28,20 @@ namespace BareMinimum.Social
 
         public string Gender = "none";
         public bool Verified;
+
+        /// <summary>
+        /// What sort of shop this is -- a cart, a chicken place, a petrol station.
+        ///
+        /// THE POINT OF IT IS THE VOICE. Every account used to draw from one shared pool, so
+        /// the hot dog man's lines came out of a petrol station: a garage shop announcing that
+        /// somebody had left a scooter across its PITCH, which is a thing a market stall has
+        /// and a forecourt does not. One pool cannot serve a cart, a donut shop and a
+        /// tobacconist without saying something wrong about two of them.
+        ///
+        /// Empty is allowed and means "no particular kind", which falls through to the shared
+        /// pool -- so an account added without one still speaks.
+        /// </summary>
+        public string Kind = "";
     }
 
     /// <summary>Why somebody posted.</summary>
@@ -175,7 +189,8 @@ namespace BareMinimum.Social
                         Name = node["name"].AsString(""),
                         Vendors = Names(node["vendor"]),
                         Gender = node["gender"].AsString("none"),
-                        Verified = node["verified"].AsBool(false)
+                        Verified = node["verified"].AsBool(false),
+                        Kind = node["kind"].AsString("")
                     };
 
                     if (string.IsNullOrEmpty(poster.Handle) || string.IsNullOrEmpty(poster.Name) ||
@@ -306,8 +321,22 @@ namespace BareMinimum.Social
         /// </summary>
         private string Compose(Poster poster, Chirp why, string itemName, string shopName)
         {
-            string[] set;
-            if (!_lines.TryGetValue(why.ToString(), out set) || set.Length == 0) return null;
+            // THE KIND FIRST, THE GENERAL POOL AFTER. "ambient:fuel" if this is a petrol
+            // station and anybody has written any, otherwise "ambient" -- which is now written
+            // so that it is true of ANY shop, because it is the thing said by the ones nobody
+            // has got round to yet.
+            string[] set = null;
+
+            if (!string.IsNullOrEmpty(poster.Kind))
+            {
+                _lines.TryGetValue(why + ":" + poster.Kind, out set);
+            }
+
+            if ((set == null || set.Length == 0) &&
+                (!_lines.TryGetValue(why.ToString(), out set) || set.Length == 0))
+            {
+                return null;
+            }
 
             string last;
             _lastSaid.TryGetValue(poster.Handle, out last);

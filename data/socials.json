@@ -67,56 +67,64 @@
       "name": "Hot Dog Guy",
       "vendor": "hotdog_davis",
       "gender": "male",
-      "verified": false
+      "verified": false,
+      "kind": "cart"
     },
     {
       "handle": "vespucci_dogs",
       "name": "Hot Dog Guy (Vespucci)",
       "vendor": "hotdog_vespucci",
       "gender": "male",
-      "verified": false
+      "verified": false,
+      "kind": "cart"
     },
     {
       "handle": "wokitoff_official",
       "name": "Wok It Off",
       "vendor": "wok_it_off",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "noodle"
     },
     {
       "handle": "thecoop_ls",
       "name": "The Coop",
       "vendor": "the_coop",
       "gender": "none",
-      "verified": true
+      "verified": true,
+      "kind": "burger"
     },
     {
       "handle": "bargainsgalore",
       "name": "Bargains Galore",
       "vendor": "bargains_galore",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "market"
     },
     {
       "handle": "bishops_chicken",
       "name": "Bishop's Chicken",
       "vendor": "bishops_chicken",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "chicken"
     },
     {
       "handle": "lavacaloca_ls",
       "name": "La Vaca Loca",
       "vendor": "lavacaloca_drivethru",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "burger"
     },
     {
       "handle": "ringoffirechilli",
       "name": "Ring of Fire",
       "vendor": "ring_of_fire",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "fastfood"
     },
     {
       "handle": "luckyplucker",
@@ -126,56 +134,64 @@
         "lucky_plucker_drivethru"
       ],
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "chicken"
     },
     {
       "handle": "fowlmouthed_ls",
       "name": "Fowl Mouthed",
       "vendor": "fowl_mouthed",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "chicken"
     },
     {
       "handle": "longpigmarket",
       "name": "Long Pig Mini Market",
       "vendor": "long_pig",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "market"
     },
     {
       "handle": "gabriellesmkt",
       "name": "Gabrielle's Market",
       "vendor": "gabrielles_market",
       "gender": "female",
-      "verified": false
+      "verified": false,
+      "kind": "market"
     },
     {
       "handle": "attackataco",
       "name": "Attack-A-Taco",
       "vendor": "attack_a_taco",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "taco"
     },
     {
       "handle": "heartytaco_ls",
       "name": "Hearty Taco",
       "vendor": "hearty_taco",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "taco"
     },
     {
       "handle": "aguilaburrito",
       "name": "Aguila Burrito",
       "vendor": "aguila_burrito",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "taco"
     },
     {
       "handle": "beansmarket",
       "name": "Bean's Market",
       "vendor": "beans_market",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "market"
     },
     {
       "handle": "beanmachine",
@@ -187,7 +203,8 @@
         "bean_machine_market"
       ],
       "gender": "none",
-      "verified": true
+      "verified": true,
+      "kind": "coffee"
     },
     {
       "handle": "downtownliquordeli",
@@ -197,91 +214,104 @@
         "downtown_liquor_deli_east"
       ],
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "liquor"
     },
     {
       "handle": "chihuahuadogs",
       "name": "Chihuahua Hot Dogs",
       "vendor": "chihuahua_hotdogs",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "fastfood"
     },
     {
       "handle": "delhideli",
       "name": "Del-Hi Delicatessen",
       "vendor": "delhi_deli",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "liquor"
     },
     {
       "handle": "cosasbaratas",
       "name": "Cosas Baratas",
       "vendor": "cosas_baratas",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "market"
     },
     {
       "handle": "saveacent",
       "name": "Save-a-Cent",
       "vendor": "save_a_cent",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "market"
     },
     {
       "handle": "the247diner",
       "name": "Mexican and American Diner",
       "vendor": "diner_247",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "diner"
     },
     {
       "handle": "vespuccitacos",
       "name": "Taco Window",
       "vendor": "tacos_vespucci",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "taco"
     },
     {
       "handle": "xero24",
       "name": "Xero 24",
       "vendor": "xero_24",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "fuel"
     },
     {
       "handle": "pipedown_ls",
       "name": "Pipe Down",
       "vendor": "pipe_down",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "tobacco"
     },
     {
       "handle": "groundandpound",
       "name": "Ground & Pound",
       "vendor": "ground_and_pound",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "coffee"
     },
     {
       "handle": "rustybrowns",
       "name": "Rusty Brown's Ring Donuts",
       "vendor": "rusty_browns",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "donut"
     },
     {
       "handle": "bite_itsbig",
       "name": "BITE!",
       "vendor": "bite_wraps",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "burger"
     },
     {
       "handle": "pizzathis",
       "name": "Pizza This...",
       "vendor": "pizza_this",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "pizza"
     },
     {
       "handle": "noodleexchange",
@@ -291,68 +321,76 @@
         "noodle_exchange_side"
       ],
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "noodle"
     },
     {
       "handle": "coolbeans_ls",
       "name": "Cool Beans",
       "vendor": "cool_beans",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "coffee"
     },
     {
       "handle": "limeys_ls",
       "name": "Limey's",
       "vendor": "limeys",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "juice"
     },
     {
       "handle": "foodmarket_ls",
       "name": "Food Market",
       "vendor": "food_market",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "market"
     },
     {
       "handle": "mamasgrocery",
       "name": "Mama's Grocery",
       "vendor": "mamas_grocery",
       "gender": "female",
-      "verified": false
+      "verified": false,
+      "kind": "market"
     },
     {
       "handle": "marketkiosk",
       "name": "The Market Kiosk",
       "vendor": "market_kiosk",
       "gender": "male",
-      "verified": false
+      "verified": false,
+      "kind": "market"
     },
     {
       "handle": "crucialfix",
       "name": "Crucial Fix",
       "vendor": "crucial_fix",
       "gender": "none",
-      "verified": false
+      "verified": false,
+      "kind": "market"
     }
   ],
   "posts": {
     "ambient": [
-      "Cart is out. Come get one before I eat the stock myself.",
+      "{shop}. Open. Same corner.",
       "Nobody warned me about {complaint}.",
-      "{shop}. Open. Same corner. Same me.",
-      "Somebody asked me today if the hot dogs are vegan. They are hot dogs.",
-      "Third person {timeofday} has asked if I take card. I do not.",
       "{shop} is {praise} and I will not be taking questions.",
       "If you are reading this you are already too far from {shop}.",
       "Standing here in {timeofday} thinking about {complaint}.",
-      "We do not do small portions. We did once. It went badly.",
       "Fresh today. Fresher than yesterday, anyway.",
-      "New sign went up. Same food. Same prices. Same guy.",
+      "New sign went up. Same everything else.",
       "Everything is going. Everything must go. Some of it should have gone last week.",
-      "All you can eat means all YOU can eat. Not all your cousin can eat.",
       "Reminder that we have a menu and you are allowed to read it before you get to the front.",
-      "Whoever left a scooter across my pitch: I know what you look like."
+      "Third person {timeofday} has asked if we take card. Nothing has changed since the first one.",
+      "Open. Still open. Will be open after you have decided.",
+      "Prices are on the wall. They have been on the wall the whole time.",
+      "We are here every day and somebody still asks if we are new.",
+      "Somebody asked for the wifi password. There is no wifi. There is {shop}.",
+      "If we are shut it is because we are shut, not because something has happened.",
+      "Come in, buy something, leave. It is not complicated and we like it that way."
     ],
     "bought": [
       "Another satisfied customer at {shop}. Probably.",
@@ -381,6 +419,192 @@
       "Stepped away for two minutes. Two. Minutes.",
       "Having a cigarette. The cart is not going anywhere and neither am I.",
       "Back in five. Do not touch anything."
+    ],
+    "ambient:cart": [
+      "Cart is out. Come get one before I eat the stock myself.",
+      "Somebody asked me today if the hot dogs are vegan. They are hot dogs.",
+      "Whoever left a scooter across my pitch: I know what you look like.",
+      "Rolled the cart out at {timeofday} and my back has opinions.",
+      "No seating. There has never been seating. It is a cart.",
+      "Onions are on unless you say otherwise. That is the system.",
+      "Rain means I go home. That is the whole business plan.",
+      "Man just tried to haggle. On a hot dog. On a CART.",
+      "The umbrella is decorative. Stand where you like.",
+      "Cash. I have said cash for eleven years.",
+      "If the cart is here I am here. If it is not, I am not.",
+      "Somebody stole my mustard. My MUSTARD."
+    ],
+    "ambient:fastfood": [
+      "Fryers are hot and the queue is not long. Both of those change.",
+      "Yes we are open. The sign is old, the shop is open.",
+      "Somebody asked what is in it. Ask a different question.",
+      "Hot and quick. That is the promise and that is the whole promise.",
+      "The bins outside are for the bins outside. Not the doorway.",
+      "We do takeaway, we do eat in, we do not do lingering.",
+      "One till, one of me, {timeofday}. Be patient or be quick.",
+      "The heat lamp is doing its best.",
+      "If it is on the board we have it. If it is not, we do not.",
+      "Napkins are behind the counter now. You know why."
+    ],
+    "ambient:burger": [
+      "Grill is on. Has been since {timeofday}.",
+      "Somebody asked for it well done. On a burger. It is a burger.",
+      "Buns come in fresh. That is not marketing, a man brings them in a van.",
+      "The drive-through speaker works. You do not need to shout.",
+      "Cheese is not extra. It has never been extra. Somebody keeps saying it is.",
+      "Yes there is a vegetarian option. It is the fries.",
+      "Milkshake machine is working today. Do not ask about tomorrow.",
+      "We do not do half portions. You will not need one.",
+      "Every review says the same thing and every review is correct.",
+      "Pickles on the side if you ask. Ask at the counter, not after."
+    ],
+    "ambient:chicken": [
+      "Fresh batch out of the fryer. Come now or come later and be sad.",
+      "Wings, thighs, or the box. That is the decision tree.",
+      "Somebody asked which bird. Sir. It is chicken.",
+      "The queue at {timeofday} tells you everything about the chicken.",
+      "Hot sauce is on the counter and it is free. Do not take the bottle.",
+      "We season before AND after. That is the difference.",
+      "Bones in the bin, not on the table. We are asking nicely.",
+      "Family bucket feeds a family. A real one. Not one guy.",
+      "The fryer does not care what time you turn up. I do, slightly.",
+      "If it is not crispy bring it back. Nobody ever brings it back."
+    ],
+    "ambient:taco": [
+      "Salsa is made this morning. Every morning.",
+      "Three is a snack. Five is lunch. Do not order two.",
+      "Somebody asked for a fork. For a taco.",
+      "Yes it is spicy. That is not a warning, it is a description.",
+      "Lengua is on today. If you know, you know.",
+      "The window is open until it is not.",
+      "Limes are free. One. Not the bowl.",
+      "Everything is fresh because we do not have anywhere to store anything.",
+      "Corn or flour. That is the only argument worth having here.",
+      "We are busy at {timeofday} because we are good at {timeofday}."
+    ],
+    "ambient:noodle": [
+      "All you can eat means all YOU can eat. Not all your cousin can eat.",
+      "Buffet is refilled every twenty minutes and somebody still hovers.",
+      "The wok does not stop. Neither do I.",
+      "Chopsticks are by the door. Forks are also by the door. No judgement.",
+      "Somebody asked if the noodles are gluten free. They are noodles.",
+      "Steam is not smoke. Nobody needs to call anybody.",
+      "One bowl, one price, and the bowl is a proper bowl.",
+      "Takeaway containers cost us money now. That is not a complaint, it is context.",
+      "The lunch rush is {timeofday} and it is not a rumour.",
+      "We do not do small. There is a size and it is the size."
+    ],
+    "ambient:coffee": [
+      "Beans came in {timeofday}. The good ones.",
+      "The pavement tables are first come. That is the entire seating policy.",
+      "Somebody ordered a coffee with eleven words in it. We made it. We are professionals.",
+      "Yes there is a bathroom. It is for customers, as it says on the door.",
+      "Nobody has ever needed a laptop for six hours. Nobody.",
+      "The machine is hissing because that is what the machine does.",
+      "We open before you are awake and we mean that literally.",
+      "Milk of every kind, and one of them costs more, and it is not our fault.",
+      "Loyalty card is real. Ten stamps. We have never not honoured it.",
+      "It is hot. It is coffee. Please do not sue us."
+    ],
+    "ambient:donut": [
+      "Rings are out. Singly or by the dozen, and the dozen is better value.",
+      "Glaze is still setting. Ten minutes. It is worth ten minutes.",
+      "Somebody asked for a healthy one. Sir. Madam. Look around.",
+      "We start at four in the morning so you do not have to.",
+      "Baker's dozen is thirteen. It has always been thirteen.",
+      "The jam ones sell out first. Every day. Adjust accordingly.",
+      "Coffee and a ring is a breakfast. Two rings is a decision.",
+      "Sprinkles are not a flavour but people order them like they are.",
+      "Nothing here was made yesterday. Nothing.",
+      "The box is free. The handle on the box is also free."
+    ],
+    "ambient:pizza": [
+      "Have it your way. That is on the window and we meant it.",
+      "Oven is at temperature. Everything after that is fast.",
+      "Somebody asked for pineapple. We do not comment on that.",
+      "Slices at lunch, whole pies after. That is the rhythm.",
+      "The box is recyclable. The crusts you left in it are not.",
+      "By the slice means by the slice. It does not mean a small one.",
+      "Delivery goes as far as the sensible end of the neighbourhood.",
+      "Somebody rang and asked if we do pizza.",
+      "Extra cheese is a real option and not a personality.",
+      "It is ready when it is ready. Standing closer will not help."
+    ],
+    "ambient:juice": [
+      "Wheatgrass shot is on the counter and it will change your afternoon.",
+      "Everything is pressed here. Nothing arrives in a carton.",
+      "Somebody asked if the juice is healthy. It is fruit and sugar. Do the maths.",
+      "Yes it is expensive. Look at how much fruit is in it.",
+      "Smoothies at {timeofday} are a different drink to smoothies at midday.",
+      "Ginger is not optional in that one. It is the point of that one.",
+      "The blender is loud. That is how you know it is working.",
+      "We do not do a small. The small was not doing anything for anybody.",
+      "Detox is not a medical term but it does move product.",
+      "Straws are paper now and everybody has already made the joke."
+    ],
+    "ambient:tobacco": [
+      "Tobacconist, pipes, confectioners and cigars. It is on the sign and it is all true.",
+      "The humidor is not a fridge and I will not be explaining it again.",
+      "Somebody came in for a lighter and left with a pipe. That is a good day.",
+      "Cigars behind the counter. Sweets in front of it. Both sell.",
+      "We do not sell to anybody who cannot prove it. Do not ask twice.",
+      "There is a right way to cut one and there is your way.",
+      "Pipe tobacco smells better than it tastes and everybody finds out.",
+      "The sweets are for the children of the men buying the cigars.",
+      "Prices went up because the tax went up. Take it up with them.",
+      "Open late. This is a business built on people remembering at nine at night."
+    ],
+    "ambient:fuel": [
+      "Pumps are open, shop is open, and the shop is the better half.",
+      "Card at the pump or pay inside. Either way, pay.",
+      "Air and water round the side. Both free. Both work.",
+      "Widest shelf on this side of town and people still come in for one thing.",
+      "Coffee at the machine is better than it has any right to be.",
+      "Do not smoke on the forecourt. This is not a joke I am making.",
+      "Somebody drove off without their receipt AND without their card.",
+      "Twenty four hours. Every hour. Including the ones nobody wants.",
+      "Pump four has been out since {timeofday}. Somebody is coming.",
+      "The hot food case is stocked. It has been a long night for both of us.",
+      "Wiper fluid is by the door because in this weather you will want it.",
+      "If the tap is running out front, tell me, do not just watch it."
+    ],
+    "ambient:diner": [
+      "Breakfast until eleven. After that it is the plate.",
+      "Coffee is bottomless and I mean that as a warning.",
+      "Booths are for two or more. The counter is right there.",
+      "Somebody asked for breakfast at four in the afternoon. We said yes. We always say yes.",
+      "Open twenty four hours, which means somebody is always having a strange night in here.",
+      "The specials board is the specials board. It has been the same special for a while.",
+      "Refills are free. Ask, do not just hold the cup up.",
+      "You can sit as long as you like. Most people find that out.",
+      "Two eggs, any way, and we can genuinely do any way.",
+      "The night shift sees things. The night shift says nothing."
+    ],
+    "ambient:liquor": [
+      "Spirits, beer, and something to eat. That is the whole shop and it is enough.",
+      "We check every time. Every single time. Do not make it a thing.",
+      "Cold ones are in the back fridge and the back fridge is working today.",
+      "Somebody asked what pairs with it. Sir, this is a liquor store.",
+      "Repossession sale is still on because the repossession is still happening.",
+      "Cash after midnight. That is for everybody's safety, mine included.",
+      "The deli counter is a real deli counter. People do not believe it.",
+      "Do not drink it outside the door. I am asking as a neighbour.",
+      "Everything on the shelf is on the shelf. If it is not there, we are out.",
+      "Open late because that is when this shop makes sense."
+    ],
+    "ambient:market": [
+      "Shelves are stocked, which is not something we can say every week.",
+      "Whatever is on the shelf today is what there is. That is the format.",
+      "Somebody asked for a substitution. It is a corner store.",
+      "The ATM is working. That is news, so I am reporting it.",
+      "Prices are going up on Monday. Not our idea and not our margin.",
+      "One thing at a time. That is not a rule, it is a description of the stock.",
+      "Somebody left a trolley in the road again.",
+      "We are still here, which given the windows is a genuine achievement.",
+      "Bread comes in at {timeofday} and it goes by nine.",
+      "The freezer is fixed. Everything in it is fine. Mostly fine.",
+      "Yes we sell that. Ask, do not stand there looking.",
+      "Closing time is closing time. The door will be locked and I will be inside."
     ]
   }
 }
