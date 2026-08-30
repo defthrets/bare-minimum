@@ -43,7 +43,7 @@ def canvas():
 # from every side as well as growing outward. The core's pips are the tightest thing here, and
 # they had to be ENLARGED to go with this: at 14 units across they were exactly 2x the old
 # radius of 7, so any increase at all would have sealed them shut and left the core blank.
-OUTLINE = 10
+OUTLINE = 13
 
 # How solid the rim is, 0 to 1.
 #
@@ -322,17 +322,25 @@ def apple(stage):
 # (lid = cy - opening + (62 - opening) * 0.55), which is fine while the eye is wide and
 # inverts as it closes: at stage 1 that put the lid BELOW the middle of a lens only 30 units
 # tall and left a four-unit sliver. The icon rendered as a downturned mouth with a Z over it.
+# WIDENED TO SURVIVE THE OUTLINE. The rim eats OUTLINE units into the open slit from the
+# top AND the bottom, so a 13-unit rim costs 26 units of daylight -- and the old stage 1 slit
+# was only 26 units tall to begin with. It would have sealed shut and left the "nearly
+# asleep" eye identical to the closed one, which is the pair that has to be distinguishable.
+#
+# Slit height is 2 * opening * (1 - lid), so these give 107, 78, 52 and 32 before the rim
+# takes its 26. Stage 1 keeps a sliver, which is exactly what it should be.
 LIDS = {
     4: (62, 0.14),
-    3: (52, 0.30),
-    2: (38, 0.46),
-    1: (30, 0.56),
+    3: (54, 0.28),
+    2: (46, 0.44),
+    1: (38, 0.58),
     0: (0, 0.0),
 }
 
-# The iris shrinks with the opening too. A 32-unit hole inside a 30-unit slit swallows the
-# whole gap, so the eye loses its white and reads as an outline.
-IRIS = {4: 32, 3: 30, 2: 26, 1: 20, 0: 0}
+# The iris shrinks with the opening too -- a hole as tall as the slit swallows the white
+# entirely and the eye reads as an outline. It also has to clear the rim from both sides,
+# which is why the smallest is kept comfortably above OUTLINE.
+IRIS = {4: 32, 3: 30, 2: 27, 1: 22, 0: 0}
 
 
 def eye(stage):
