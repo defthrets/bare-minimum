@@ -189,9 +189,6 @@ namespace BareMinimum.Core
         /// <summary>Everything edible: what it costs, and what it does to hunger.</summary>
         public static string FoodsFile => Path.Combine(Data, "foods.json");
 
-        /// <summary>Counters, beds and anywhere else the mod has business being.</summary>
-        public static string VenuesFile => Path.Combine(Data, "venues.json");
-
         /// <summary>
         /// Shipped artwork, beside the data rather than in the writable folder.
         ///

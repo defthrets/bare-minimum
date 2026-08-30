@@ -1,5 +1,209 @@
 {
-  "_comment": "Placeholder. The real catalogue lands with the counter menu.",
+  "_comment": [
+    "Everything you can buy and eat. Edit freely -- this file is not overwritten by an update",
+    "unless you deploy with -FreshData.",
+    "",
+    "  hunger  how much of the stomach it fills, 0 to 1. A full meal is about 0.45.",
+    "  wake    how much tiredness it takes off, 0 to 1. Caffeine only, and CAPPED in code:",
+    "          it can carry you to just above the tired threshold and no further, so a",
+    "          pocketful of energy drinks can never replace sleeping.",
+    "  drink   true for anything you drink. Drinks give a SMALL hunger increase by design.",
+    "  prop    what appears in your hand. A model this build lacks is reported once in the",
+    "          log and the item still works -- you just eat it empty-handed.",
+    "  seconds how long the eating animation runs.",
+    "",
+    "Categories are the tabs across the top of the counter menu, in this order."
+  ],
+
   "version": 1,
-  "items": []
+
+  "categories": ["Food", "Snacks", "Drinks"],
+
+  "items": [
+    {
+      "id": "sandwich",
+      "name": "Club Sandwich",
+      "category": "Food",
+      "price": 8,
+      "hunger": 0.42,
+      "prop": "prop_sandwich_01",
+      "seconds": 4.5
+    },
+    {
+      "id": "burger",
+      "name": "Bleeder Burger",
+      "category": "Food",
+      "price": 10,
+      "hunger": 0.50,
+      "prop": "prop_cs_burger_01",
+      "seconds": 5.0
+    },
+    {
+      "id": "hotdog",
+      "name": "Hot Dog",
+      "category": "Food",
+      "price": 6,
+      "hunger": 0.34,
+      "prop": "prop_cs_hotdog_01",
+      "seconds": 4.0
+    },
+    {
+      "id": "pie",
+      "name": "Meat Pie",
+      "category": "Food",
+      "price": 7,
+      "hunger": 0.36,
+      "prop": "prop_cs_burger_01",
+      "seconds": 4.0
+    },
+    {
+      "id": "noodles",
+      "name": "Instant Noodles",
+      "category": "Food",
+      "price": 4,
+      "hunger": 0.28,
+      "prop": "prop_cs_burger_01",
+      "seconds": 4.5
+    },
+    {
+      "id": "taco",
+      "name": "Taco Bomb Taco",
+      "category": "Food",
+      "price": 7,
+      "hunger": 0.33,
+      "prop": "prop_taco_01",
+      "seconds": 4.0
+    },
+
+    {
+      "id": "crisps",
+      "name": "Bag of Crisps",
+      "category": "Snacks",
+      "price": 3,
+      "hunger": 0.14,
+      "prop": "prop_food_bs_chips",
+      "seconds": 3.0
+    },
+    {
+      "id": "choc_ego",
+      "name": "Ego Chaser Bar",
+      "category": "Snacks",
+      "price": 3,
+      "hunger": 0.13,
+      "prop": "prop_choc_ego",
+      "seconds": 3.0
+    },
+    {
+      "id": "choc_meteorite",
+      "name": "Meteorite Bar",
+      "category": "Snacks",
+      "price": 3,
+      "hunger": 0.13,
+      "prop": "prop_choc_meto",
+      "seconds": 3.0
+    },
+    {
+      "id": "choc_pq",
+      "name": "P&Q Bar",
+      "category": "Snacks",
+      "price": 3,
+      "hunger": 0.12,
+      "prop": "prop_choc_pq",
+      "seconds": 3.0
+    },
+    {
+      "id": "jerky",
+      "name": "Beef Jerky",
+      "category": "Snacks",
+      "price": 6,
+      "hunger": 0.20,
+      "prop": "prop_food_bs_chips",
+      "seconds": 3.5
+    },
+    {
+      "id": "apple",
+      "name": "Apple",
+      "category": "Snacks",
+      "price": 2,
+      "hunger": 0.15,
+      "prop": "prop_apple_01",
+      "seconds": 3.5
+    },
+
+    {
+      "id": "ecola",
+      "name": "eCola",
+      "category": "Drinks",
+      "price": 2,
+      "hunger": 0.06,
+      "wake": 0.04,
+      "drink": true,
+      "prop": "prop_ecola_can",
+      "seconds": 3.5
+    },
+    {
+      "id": "sprunk",
+      "name": "Sprunk",
+      "category": "Drinks",
+      "price": 2,
+      "hunger": 0.06,
+      "wake": 0.03,
+      "drink": true,
+      "prop": "prop_ld_can_01",
+      "seconds": 3.5
+    },
+    {
+      "id": "water",
+      "name": "Raine Water",
+      "category": "Drinks",
+      "price": 2,
+      "hunger": 0.05,
+      "drink": true,
+      "prop": "prop_ld_flow_bottle",
+      "seconds": 3.5
+    },
+    {
+      "id": "coffee",
+      "name": "Bean Machine Coffee",
+      "category": "Drinks",
+      "price": 4,
+      "hunger": 0.05,
+      "wake": 0.10,
+      "drink": true,
+      "prop": "prop_amb_coffeecup_01",
+      "seconds": 4.0
+    },
+    {
+      "id": "energy",
+      "name": "Junk Energy",
+      "category": "Drinks",
+      "price": 5,
+      "hunger": 0.05,
+      "wake": 0.14,
+      "drink": true,
+      "prop": "prop_energy_drink",
+      "seconds": 3.5
+    },
+    {
+      "id": "orangotang",
+      "name": "Orang-O-Tang",
+      "category": "Drinks",
+      "price": 3,
+      "hunger": 0.08,
+      "wake": 0.03,
+      "drink": true,
+      "prop": "prop_ld_can_01",
+      "seconds": 3.5
+    }
+  ],
+
+  "_animations": [
+    "The two interaction animation sets used. Both are checked at load; if one will not",
+    "stream, the item is still eaten and only the animation is skipped."
+  ],
+
+  "animations": {
+    "eat": { "dict": "mp_player_inteat@burger", "clip": "mp_player_int_eat_burger" },
+    "drink": { "dict": "mp_player_intdrink", "clip": "loop_bottle" }
+  }
 }

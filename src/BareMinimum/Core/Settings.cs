@@ -184,6 +184,17 @@ namespace BareMinimum.Core
         /// </summary>
         public Keys InteractKey = Keys.E;
 
+        /// <summary>
+        /// Opens the settings menu. F7.
+        ///
+        /// Verified free on this machine's Enhanced install before it was chosen: the only hit
+        /// for "F7" anywhere under scripts\ was a KEY-CODE REFERENCE TABLE inside
+        /// SafeCracker.ini (its actual binding is StartKey=85, U), and no dll carries "F7" as
+        /// a string in either ASCII or UTF-16. In use nearby: F2 Hoodrich, F3 Overspray,
+        /// F8 Dealien Roleplay Menu, F10 and F11 PullMeOverRemade.
+        /// </summary>
+        public Keys MenuKey = Keys.F7;
+
         // ======================================================================
 
         /// <summary>
@@ -265,6 +276,7 @@ namespace BareMinimum.Core
                                                        cfg.HudFlashWhenCritical);
 
                 cfg.InteractKey = ini.GetKey("Keys", "Interact", cfg.InteractKey);
+                cfg.MenuKey = ini.GetKey("Keys", "Menu", cfg.MenuKey);
 
                 Log.Level = cfg.LogLevel;
             }

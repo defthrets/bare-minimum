@@ -1,6 +1,7 @@
 using System;
 using GTA;
 using BareMinimum.Core;
+using BareMinimum.Food;
 using BareMinimum.Needs;
 using BareMinimum.UI;
 using BareMinimum.Venues;
@@ -33,6 +34,11 @@ namespace BareMinimum
         private readonly Effects _effects;
         private readonly Beds _beds;
         private readonly Sleeping _sleeping;
+        private readonly Catalogue _catalogue;
+        private readonly Eating _eating;
+        private readonly Counters _counters;
+        private readonly Shop _shop;
+        private readonly SettingsPanel _settings;
         private readonly Gauge _gauge;
 
         private int _failures;
@@ -47,14 +53,22 @@ namespace BareMinimum
             _effects = new Effects(_cfg);
             _beds = new Beds();
             _sleeping = new Sleeping(_cfg, _needs, _beds);
+
+            _catalogue = new Catalogue(_cfg);
+            _eating = new Eating(_catalogue, _needs);
+            _counters = new Counters();
+            _shop = new Shop(_cfg, _catalogue, _counters, _eating, _needs);
+
+            _settings = new SettingsPanel(_cfg, _needs);
             _gauge = new Gauge(_cfg);
 
             Interval = 0;
             Tick += OnTick;
             Aborted += OnAborted;
 
-            Log.Info(Build.Name + " " + Build.Version + " loaded. Interact key " +
-                     _cfg.InteractKey + ".");
+            Log.Info(Build.Name + " " + Build.Version + " loaded. Interact " +
+                     _cfg.InteractKey + ", menu " + _cfg.MenuKey + ", " +
+                     _catalogue.Count + " item(s) on sale.");
 
             if (!_cfg.Enabled)
             {
@@ -64,7 +78,7 @@ namespace BareMinimum
 
         private void OnTick(object sender, EventArgs e)
         {
-            if (_parked || !_cfg.Enabled) return;
+            if (_parked) return;
 
             try
             {
@@ -72,6 +86,19 @@ namespace BareMinimum
                 if (me == null || !me.Exists()) return;
 
                 Greet();
+
+                // THE SETTINGS MENU RUNS EVEN WHEN THE MOD IS SWITCHED OFF, and it has to:
+                // "Mod enabled" is a row inside it, so gating it behind that flag would make
+                // turning the mod off a one-way trip that could only be undone by editing the
+                // ini and reloading scripts.
+                //
+                // It stands down while the shop is up. F7 is a RAW KEY, so the menu's
+                // control-suppression cannot block it the way it blocks the game's own inputs
+                // -- without this, pressing F7 at a till draws both menus on top of each other
+                // and every arrow press drives both of them at once.
+                _settings.Update(_sleeping.Busy || _shop.IsOpen);
+
+                if (!_cfg.Enabled) return;
 
                 var dt = Game.LastFrameTime;
 
@@ -81,9 +108,17 @@ namespace BareMinimum
                 // state file get written on a stutter.
                 if (dt < 0f || dt > 1f) dt = 0f;
 
-                // FIRST, so the prompt and the keypress are handled before anything else
-                // reads input on the same frame.
-                _sleeping.Update();
+                _catalogue.CheckProps();
+
+                // A menu owns the interact key while it is up, so nothing else may read it.
+                // Without this, pressing E to buy a sandwich at a counter next to a bed would
+                // also be pressing E to go to sleep.
+                var menuOpen = _shop.IsOpen || _settings.IsOpen;
+
+                if (!menuOpen) _sleeping.Update();
+
+                _shop.Update(_sleeping.Busy || _settings.IsOpen);
+                _eating.Update();
 
                 // While the sleep sequence owns the screen, the effects and the HUD stand
                 // down -- a limp applied through a fade is still applied when you wake up,
@@ -159,6 +194,9 @@ namespace BareMinimum
         /// </summary>
         private void Cleanup()
         {
+            try { _settings.Shutdown(); } catch (Exception ex) { Log.Error("Settings shutdown", ex); }
+            try { _shop.Shutdown(); } catch (Exception ex) { Log.Error("Shop shutdown", ex); }
+            try { _eating.Shutdown(); } catch (Exception ex) { Log.Error("Eating shutdown", ex); }
             try { _sleeping.Shutdown(); } catch (Exception ex) { Log.Error("Sleep shutdown", ex); }
             try { _effects.Clear(); } catch (Exception ex) { Log.Error("Clearing effects", ex); }
             try { _needs.SaveNow(); } catch (Exception ex) { Log.Error("Final save", ex); }
