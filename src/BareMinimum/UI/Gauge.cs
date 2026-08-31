@@ -455,11 +455,16 @@ namespace BareMinimum.UI
 
             var empty = 1f - fraction;
 
-            // Small. This bar is about sixteen pixels wide on an ultrawide and nine on a
-            // 1080p screen, and an amplitude that looked gentle as a fraction of the height
-            // is several pixels of vertical travel across a couple of columns -- which is not
-            // a wave, it is a flicker.
-            var swing = h * 0.007f * (0.25f + 0.75f * empty);
+            // HOW FAR THE SURFACE TRAVELS. 0.007 of the bar's height was the number that
+            // came out of killing the jitter, and it was an overcorrection: on a bar two
+            // hundred and thirty-five pixels tall that is under two pixels, which is
+            // certainly smooth and very nearly invisible.
+            //
+            // The jitter was never the amplitude anyway -- it was a wave rolling ACROSS
+            // fifteen pixels of width. Now that the surface swells and tips as a whole
+            // instead, it can travel a proper distance and stay perfectly smooth, because
+            // a straight line moving slowly is smooth however far it moves.
+            var swing = h * 0.048f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
 
             var floor = y + h;
 
@@ -510,7 +515,10 @@ namespace BareMinimum.UI
             // one way. A straight line cannot have a kink in it, which is the other half of
             // why this is smooth where a sine sampled at eight points was not.
             var swell = (float)Math.Sin(t * (2.0 * Math.PI / 5.5)) * swing;
-            var tip = (float)Math.Sin(t * (2.0 * Math.PI / 7.3)) * swing * 0.55f;
+            // The tilt is measured across the bar's WIDTH, which is fifteen pixels against
+            // the height's two hundred and thirty-five. Leaning it as far as the swell rises
+            // would stand the surface on its end, so it gets a third of the travel.
+            var tip = (float)Math.Sin(t * (2.0 * Math.PI / 7.3)) * swing * 0.32f;
 
             var crest = Mix(body, Color.FromArgb(body.A, 255, 240, 205), 0.55f);
 
@@ -525,7 +533,13 @@ namespace BareMinimum.UI
                 var lean = ((i + 0.5f) / columns - 0.5f) * 2f;
 
                 var topY = surfaceY + swell + tip * lean;
+
+                // Clamped at BOTH ends now. A swell seven times what it was can push the
+                // surface above the top of the channel on a full bar and below its foot on
+                // a nearly empty one, and a crest drawn outside the bar is a line floating
+                // beside the gauge.
                 if (topY < y) topY = y;
+                if (topY > y + h - h * 0.007f) topY = y + h - h * 0.007f;
 
                 if (topY < bodyTop) Hud.Bar(left, topY, right - left, bodyTop - topY, body);
 

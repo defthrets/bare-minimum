@@ -436,6 +436,20 @@ namespace BareMinimum.Core
         public float HudBarWidth = 0.0046f;
 
         /// <summary>
+        /// How far the hunger bar's surface travels, 0 to 1.
+        ///
+        /// A DIAL BECAUSE THIS ONE IS PURE FEEL and has been wrong in both directions. The
+        /// first version was a wave rolling across a fifteen-pixel bar, which jittered; the
+        /// fix for that dropped the travel to under two pixels on a bar two hundred and
+        /// thirty-five tall, which is smooth and invisible. This is the number in between,
+        /// and where "in between" lands is a matter of taste and monitor.
+        ///
+        /// Only the hunger bar has it. Sleep does not slosh -- it breathes, and the depth of
+        /// that already comes off how tired you are.
+        /// </summary>
+        public float HudBarWave = 0.6f;
+
+        /// <summary>
         /// The mark in the foot of the bar, as a share of the bar's width.
         ///
         /// A dial because these bars are narrow -- Fumes' width is about sixteen pixels on an
@@ -600,6 +614,7 @@ namespace BareMinimum.Core
                 cfg.HudBarWidth = ini.GetFloat("HUD", "BarWidth", cfg.HudBarWidth, 0.001f, 0.2f);
                 cfg.HudBarIconScale = ini.GetFloat("HUD", "BarIconScale",
                                                    cfg.HudBarIconScale, 0.2f, 3f);
+                cfg.HudBarWave = ini.GetFloat("HUD", "BarWave", cfg.HudBarWave, 0f, 1f);
 
                 cfg.HudAnimate = ini.GetBool("HUD", "Animate", cfg.HudAnimate);
                 cfg.HudShimmer = ini.GetFloat("HUD", "Shimmer", cfg.HudShimmer, 0f, 1f);
