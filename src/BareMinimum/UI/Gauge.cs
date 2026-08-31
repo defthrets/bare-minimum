@@ -545,6 +545,62 @@ namespace BareMinimum.UI
 
                 Hud.Bar(left, topY, right - left, h * 0.007f, crest);
             }
+
+            Sediment(x, y, w, h, surfaceY + swell, t, empty);
+        }
+
+        /// <summary>
+        /// FOOD: bits settling through it.
+        ///
+        /// FUMES SENDS BUBBLES UP; THIS SENDS CRUMBS DOWN, and the direction is the point.
+        /// Gas rising through petrol is a tank; something heavier than what it is in, sinking
+        /// slowly and drifting as it goes, is a stomach. It also runs AGAINST the churn, which
+        /// travels upward -- so the two together read as contents turning over rather than as
+        /// one thing scrolling.
+        ///
+        /// DETERMINISTIC, straight off the clock and the mote's own index: no state to keep
+        /// between frames and no Random being pumped sixty times a second for three specks.
+        /// That trick is the fuel gauge's and it is the only sane way to do particles here.
+        /// </summary>
+        private void Sediment(float x, float y, float w, float h, float surfaceY,
+                              float t, float empty)
+        {
+            const int count = 3;
+
+            var level = y + h - surfaceY;
+            if (level < h * 0.10f) return;
+
+            // Square ON SCREEN. A rectangle given equal width and height fractions is as wide
+            // as the screen is wider than it is tall, which at three pixels reads as a dash.
+            var size = w * 0.22f;
+            var tall = size * Aspect();
+
+            for (var i = 0; i < count; i++)
+            {
+                // Slow, and a little quicker when there is less to sink through. Speeds that
+                // do not divide into each other, so the three never fall in formation.
+                var speed = 0.085f + i * 0.021f + empty * 0.05f;
+                var phase = (t * speed + i * 0.37f) % 1f;
+
+                var py = surfaceY + level * phase;
+
+                // A drift across as it falls, a different width and rate each. This is what
+                // separates a crumb settling from a dot being lowered on a string.
+                var lane = 0.30f + i * 0.20f;
+                var sway = (float)Math.Sin(t * (0.5f + i * 0.13f) + i * 2.1f) * 0.16f;
+
+                var px = x + w * (lane + sway) - size / 2f;
+
+                // Faded in off the surface and out at the floor, rather than appearing and
+                // vanishing. The in is quicker than the out: something drops into view and
+                // settles out of it.
+                var edge = Math.Min(phase * 5f, Math.Min((1f - phase) * 3f, 1f));
+
+                var alpha = (int)(120 * Math.Max(edge, 0f));
+                if (alpha <= 4) continue;
+
+                Hud.Bar(px, py, size, tall, Fade(Color.FromArgb(alpha, 60, 40, 24)));
+            }
         }
 
         /// <summary>
@@ -647,6 +703,70 @@ namespace BareMinimum.UI
             var cap = Mix(body, Color.FromArgb(body.A, 255, 248, 232), 0.30f + 0.35f * eased);
 
             Hud.Bar(x, surfaceY, w, h * 0.010f, cap);
+
+            Motes(x, y, w, h, surfaceY, eased, tired);
+        }
+
+        /// <summary>
+        /// SLEEP: quiet lights drifting up through it.
+        ///
+        /// WHAT CALM LOOKS LIKE. Fumes' bubbles are gas escaping -- they have somewhere to be
+        /// and they get there. These have nowhere to be: they rise slowly, wander sideways,
+        /// brighten and dim on their own time, and go out before they reach the top. Dust in
+        /// a shaft of light, or whatever you see with your eyes shut.
+        ///
+        /// THEY MOVE WITH THE BREATH. Their climb is scaled by the breath phase, so they lift
+        /// on the draw in and very nearly stop on the let out. That is the whole reason they
+        /// are here rather than a second set of bubbles: it ties the particles to the one
+        /// rhythm this bar already has, and a thing that pauses when the breathing pauses
+        /// reads as calm rather than as decoration running on top.
+        ///
+        /// Deterministic off the clock and the index, like the sediment and like the fuel
+        /// gauge's bubbles: no state, no Random per frame.
+        /// </summary>
+        private void Motes(float x, float y, float w, float h, float surfaceY,
+                           float eased, float tired)
+        {
+            const int count = 4;
+
+            var level = y + h - surfaceY;
+            if (level < h * 0.10f) return;
+
+            var t = (Environment.TickCount & int.MaxValue) / 1000f;
+
+            var size = w * 0.20f;
+            var tall = size * Aspect();
+
+            // The climb slows to a fifth of itself at the bottom of the let-out rather than
+            // stopping dead: a particle that halts completely reads as a dropped frame.
+            var lift = 0.20f + 0.80f * (0.5f + 0.5f * eased);
+
+            for (var i = 0; i < count; i++)
+            {
+                var speed = (0.055f + i * 0.012f) * lift;
+
+                // Climbing, so the phase runs from the floor upward.
+                var phase = (t * speed + i * 0.29f) % 1f;
+
+                var py = y + h - level * phase;
+
+                var lane = 0.22f + i * (0.56f / (count - 1));
+                var sway = (float)Math.Sin(t * (0.31f + i * 0.07f) + i * 1.7f) * 0.13f;
+
+                var px = x + w * (lane + sway) - size / 2f;
+
+                var edge = Math.Min(phase * 4f, Math.Min((1f - phase) * 2.2f, 1f));
+
+                // A slow twinkle of their own on top of the fade, each on a different beat.
+                var twinkle = 0.55f + 0.45f * (float)Math.Sin(t * (0.9f + i * 0.23f) + i);
+
+                // Brighter the more tired you are. On a nearly full meter these are barely
+                // there, which is right -- there is nothing to say yet.
+                var alpha = (int)(150 * Math.Max(edge, 0f) * twinkle * (0.45f + 0.55f * tired));
+                if (alpha <= 4) continue;
+
+                Hud.Bar(px, py, size, tall, Fade(Color.FromArgb(alpha, 236, 240, 255)));
+            }
         }
 
         /// <summary>
