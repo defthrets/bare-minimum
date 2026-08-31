@@ -82,11 +82,18 @@ def main():
     good &= check("apple", "HUNGER, the apple")
     print("")
 
-    # THE WHOLE CANVAS, unlike the eye that used to be here. The eye carried a Z up in
-    # its corner, and the Z's ink made a closing eye measure as an opening one -- so that
-    # check had to be cropped to the eye itself. The moon has nothing beside it: the phase
-    # is the entire drawing, so the entire drawing is what gets counted.
-    good &= check("moon", "SLEEP, the moon")
+    # NO CHECK FOR THE MOON, and that is on purpose rather than an oversight.
+    #
+    # It used to be an eye that closed, then a moon that waned, and both were checked here
+    # for the same reason the apple is: five shapes that each look plausible on their own
+    # can still be out of order as a set, and only counting pixels catches it.
+    #
+    # The moon is now a plain crescent at every stage -- asked for, and see make_icons.py.
+    # It carries the state in COLOUR alone, blue through to dark purple, so there is no
+    # ordering left in the art to verify. Asserting it got emptier would fail five files
+    # that are identical on purpose.
+    #
+    # If the phases ever come back, so does this line.
 
     print("")
 

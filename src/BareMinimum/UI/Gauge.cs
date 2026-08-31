@@ -447,7 +447,7 @@ namespace BareMinimum.UI
         /// </summary>
         private void Churn(float x, float y, float w, float h, float fraction, Color body)
         {
-            var t = (Environment.TickCount & int.MaxValue) / 1000f;
+            var t = Clock();
 
             var level = h * fraction;
             var surfaceY = y + h - level;
@@ -487,8 +487,9 @@ namespace BareMinimum.UI
 
                 var u = (i + 0.5f) / bands;
 
-                var a = Pulse(u - t * 0.071f, 0.58f);
-                var b = Pulse(u - t * 0.045f + 0.5f, 0.76f);
+                // Nearly twice as slow as they were: a thirty-second lap and a fifty.
+                var a = Pulse(u - t * 0.038f, 0.58f);
+                var b = Pulse(u - t * 0.024f + 0.5f, 0.76f);
 
                 var lift = (a * 0.6f + b * 0.4f) * (0.09f + 0.13f * empty);
 
@@ -513,11 +514,13 @@ namespace BareMinimum.UI
             // The tilt is LINEAR across the width, so the surface is a straight line leaning
             // one way. A straight line cannot have a kink in it, which is the other half of
             // why this is smooth where a sine sampled at eight points was not.
-            var swell = (float)Math.Sin(t * (2.0 * Math.PI / 5.5)) * swing;
+            // Ten seconds and thirteen and a half, up from five and a half and seven and
+            // a third. Still coprime enough that the pair does not visibly repeat.
+            var swell = (float)Math.Sin(t * (2.0 * Math.PI / 10.0)) * swing;
             // The tilt is measured across the bar's WIDTH, which is fifteen pixels against
             // the height's two hundred and thirty-five. Leaning it as far as the swell rises
             // would stand the surface on its end, so it gets a third of the travel.
-            var tip = (float)Math.Sin(t * (2.0 * Math.PI / 7.3)) * swing * 0.32f;
+            var tip = (float)Math.Sin(t * (2.0 * Math.PI / 13.5)) * swing * 0.32f;
 
             var crest = Mix(body, Color.FromArgb(body.A, 255, 240, 205), 0.55f);
 
@@ -584,7 +587,7 @@ namespace BareMinimum.UI
             {
                 // A little quicker when there is less to sink through. Speeds that do not
                 // divide into each other, so the three never fall in formation.
-                var speed = (0.085f + i * 0.021f + empty * 0.05f) * drift;
+                var speed = (0.048f + i * 0.012f + empty * 0.028f) * drift;
                 var phase = (t * speed + i * 0.37f) % 1f;
 
                 var py = surfaceY + level * phase;
@@ -656,7 +659,11 @@ namespace BareMinimum.UI
         {
             var tired = 1f - fraction;
 
-            var period = 4000f + 3000f * tired;
+            // SIX AND A HALF SECONDS RESTED, ELEVEN EXHAUSTED, up from four and seven.
+            // Four is a real resting breath, which is exactly the trouble: a HUD element does
+            // not have to breathe at a human rate, it has to be slow enough to sit beside the
+            // minimap for an hour without pulling at the eye.
+            var period = (6500f + 4500f * tired) / PaceOf();
             var now = (Environment.TickCount & int.MaxValue) % (int)period;
 
             // Not a plain sine: a breath draws in quicker than it lets out. Raising the phase
@@ -750,7 +757,7 @@ namespace BareMinimum.UI
             var drift = Clamp01(_cfg.HudBarDrift);
             if (drift <= 0.001f) return;
 
-            var t = (Environment.TickCount & int.MaxValue) / 1000f;
+            var t = Clock();
 
             // Settles to a quarter of itself at the bottom of the let-out rather than
             // stopping: air that halts dead reads as a dropped frame.
@@ -764,12 +771,12 @@ namespace BareMinimum.UI
                 // two each way is air moving about.
                 var back = (i % 2) == 1;
 
-                var across = (t * (0.085f + i * 0.019f) * drift * carry + i * 0.41f) % 1f;
+                var across = (t * (0.048f + i * 0.011f) * drift * carry + i * 0.41f) % 1f;
                 var u = back ? 1f - across : across;
 
                 // Rising much more slowly than it travels. Sideways is the motion; the climb
                 // is only there so the same wisp never retraces its own line.
-                var climb = (t * (0.018f + i * 0.005f) * drift * carry + i * 0.27f) % 1f;
+                var climb = (t * (0.010f + i * 0.003f) * drift * carry + i * 0.27f) % 1f;
 
                 var py = y + h - level * climb;
 
@@ -814,6 +821,24 @@ namespace BareMinimum.UI
                     Hud.Bar(l, py + curl * thick * 2.2f, r - l, thick, ink);
                 }
             }
+        }
+
+        /// <summary>
+        /// The clock the bars run on: real seconds, scaled by the pace dial.
+        ///
+        /// EVERYTHING PERIODIC IN A BAR TAKES ITS TIME FROM HERE, so one number moves the
+        /// swell, the tilt, the breath, the bands and the specks together and none of them
+        /// can be left behind when the others are slowed.
+        /// </summary>
+        private float Clock()
+        {
+            return (Environment.TickCount & int.MaxValue) / 1000f * PaceOf();
+        }
+
+        private float PaceOf()
+        {
+            var pace = _cfg.HudBarPace;
+            return pace < 0.05f ? 0.05f : pace;
         }
 
         /// <summary>

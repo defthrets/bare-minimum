@@ -450,6 +450,20 @@ namespace BareMinimum.Core
         public float HudBarWave = 0.6f;
 
         /// <summary>
+        /// Overall speed of everything that moves inside a bar. 1 is as shipped.
+        ///
+        /// ONE DIAL OVER THE LOT, on top of the individual ones, because "too fast" has now
+        /// been said four times about four different parts and every answer so far has been
+        /// to slow one of them. This scales the swell, the tilt, the breath, the drifting
+        /// bands and the specks together, so the whole instrument can be taken down a gear
+        /// without any part of it coming out of step with the rest.
+        ///
+        /// Below 1 is slower. The base numbers have already been slowed nearly twice over
+        /// underneath it, so 1 is not where it started.
+        /// </summary>
+        public float HudBarPace = 1f;
+
+        /// <summary>
         /// How quickly the specks inside the bars move, 0 to 1. 0 stops them dead.
         ///
         /// A DIAL FOR THE SAME REASON BarWave IS ONE: pace is feel, and feel does not survive
@@ -625,6 +639,7 @@ namespace BareMinimum.Core
                                                    cfg.HudBarIconScale, 0.2f, 3f);
                 cfg.HudBarWave = ini.GetFloat("HUD", "BarWave", cfg.HudBarWave, 0f, 1f);
                 cfg.HudBarDrift = ini.GetFloat("HUD", "BarDrift", cfg.HudBarDrift, 0f, 1f);
+                cfg.HudBarPace = ini.GetFloat("HUD", "BarPace", cfg.HudBarPace, 0.15f, 2f);
 
                 cfg.HudAnimate = ini.GetBool("HUD", "Animate", cfg.HudAnimate);
                 cfg.HudShimmer = ini.GetFloat("HUD", "Shimmer", cfg.HudShimmer, 0f, 1f);

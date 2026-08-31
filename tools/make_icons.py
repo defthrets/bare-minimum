@@ -361,58 +361,46 @@ def _squash(img, sx, sy, px, py):
 # you are rested, down to a thin crescent when you are not -- so the silhouette still
 # carries the reading and the colour is still only confirming it.
 #
-# HOW FAR THE SHADOW HAS SLID CLEAR, per stage, in radii.
+# THE CRESCENT, AND ONLY THE CRESCENT. It waned through five phases at first, on the
+# same argument the apple is built on: let the silhouette carry the state and leave the
+# colour to confirm it. That was overruled, and this is a plain crescent at every stage.
 #
-# BIGGER MEANS MORE MOON, WHICH IS THE OPPOSITE OF WHAT IT LOOKS LIKE. The shadow is a
-# disc the same size sitting on top; at an offset of 0 it covers the moon completely,
-# and at 2 it has walked off the edge and covers nothing. So the rested end of this
-# table is the LARGE number. Written the other way round first, and the result was a
-# moon that got fuller as you got more tired.
+# WHAT THAT COSTS, so nobody has to rediscover it: in Bars mode, nothing -- the bar is
+# the reading and the mark is only identity, exactly as the pump is in Fumes. In Icons
+# mode the moon now says how tired you are in COLOUR ALONE, blue through to dark purple,
+# where the apple still says it in shape as well. The phases are one table away if that
+# turns out to matter: put MOON_SHADOW back and index it by stage.
 #
-# Not linear: the interesting half of a moon is the crescent end, so the steps bunch
-# up there and the two full-ish stages are further apart than they look.
-MOON_SHADOW = {4: 2.20, 3: 1.42, 2: 1.05, 1: 0.78, 0: 0.52}
-
-# The craters, as (x, y, radius) against the disc's own centre and radius. Only drawn
-# where they survive the shadow, so they disappear as it wanes -- which is what stops
-# the full moon and the gibbous reading as the same picture with a bite out of it.
+# TWO CIRCLES, AND THE CUTTER IS THE BIGGER ONE. That is the whole trick and it is not
+# obvious: subtract a circle the same size or smaller and you get a fat gibbous with
+# blunt ends. A LARGER circle, offset less than its own radius, cuts an arc that closes
+# in faster than the outer edge does -- which is what draws the horns out to points.
+MOON_R = 88.0                   # the moon's own radius
+MOON_CUT_R = 95.0               # the cutter: bigger, which is what makes the horns
+MOON_CUT_OFFSET = 38.0          # how far the cutter sits from centre
 #
-# KEPT OFF THE TERMINATOR. A crater sitting exactly where the shadow's edge falls reads
-# as a nick in the rim rather than as a crater, so they are biased to the left where the
-# lit part survives longest, and the one nearest the middle is the smallest.
-MOON_CRATERS = ((-0.40, -0.24, 0.16), (-0.08, 0.34, 0.19), (0.22, -0.34, 0.11))
+# The pair above is a compromise a razor point cannot survive: push the cutter further
+# out and the horns come to a finer tip, and at 256 the rim routine starts fringing them
+# -- it offsets the alpha in eight directions, and where the shape is thinner than the
+# rim there is nothing left for the offsets to agree on. These sit just short of that.
+MOON_CUT_ANGLE = -46.0          # up and to the right, as the reference has it
 
 
-def moon(stage):
-    """stage 4 = full, stage 0 = a thin crescent."""
+def moon(stage=0):
+    """A crescent. The same one at every stage -- see the note above."""
     img, d = canvas()
 
-    cx, cy, r = 128, 138, 84
+    cx, cy = 128, 132
 
-    disc = Image.new("RGBA", img.size, CLEAR)
-    dd = ImageDraw.Draw(disc)
+    d.ellipse([s(cx - MOON_R), s(cy - MOON_R), s(cx + MOON_R), s(cy + MOON_R)], fill=WHITE)
 
-    dd.ellipse([s(cx - r), s(cy - r), s(cx + r), s(cy + r)], fill=WHITE)
+    a = math.radians(MOON_CUT_ANGLE)
+    ox = cx + math.cos(a) * MOON_CUT_OFFSET
+    oy = cy + math.sin(a) * MOON_CUT_OFFSET
 
-    for ox, oy, cr in MOON_CRATERS:
-        px, py, pr = cx + ox * r, cy + oy * r, cr * r
-        dd.ellipse([s(px - pr), s(py - pr), s(px + pr), s(py + pr)], fill=CLEAR)
+    d.ellipse([s(ox - MOON_CUT_R), s(oy - MOON_CUT_R),
+               s(ox + MOON_CUT_R), s(oy + MOON_CUT_R)], fill=CLEAR)
 
-    shadow = MOON_SHADOW[stage]
-
-    # Past two radii the discs cannot touch, so there is nothing to subtract.
-    if shadow < 2.0:
-        # THE SHADOW IS A DISC THE SAME SIZE, SLID ACROSS. That is what a moon actually
-        # is, and it is why the inner edge of a crescent curves the same way as the
-        # outer one -- draw the inside as an arc bending the other way and you have a
-        # banana. Very slightly larger, so the two rims cannot leave a hairline of white
-        # where they nearly touch.
-        sx = cx + r * shadow
-        sr = r * 1.015
-
-        dd.ellipse([s(sx - sr), s(cy - sr), s(sx + sr), s(cy + sr)], fill=CLEAR)
-
-    img.alpha_composite(disc)
     return img
 
 
@@ -570,9 +558,6 @@ def main():
     # bar marks get a copy without one. Same drawing, one flag apart.
     for stage in range(5):
         save(apple(stage), "apple%d_flat.png" % stage, outline=False)
-
-    for stage in range(5):
-        save(eye(stage), "eye%d_flat.png" % stage, outline=False)
 
     # THE MOON REPLACED THE EYE. eye() is still here and still works -- it is a decent
     # piece of drawing and the argument for the moon was about meaning, not quality --
