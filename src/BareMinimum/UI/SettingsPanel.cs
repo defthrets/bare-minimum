@@ -541,10 +541,10 @@ namespace BareMinimum.UI
                   "How wide the bars are. The fuel gauge in Fumes uses 0.0046.",
                   () => _cfg.Style == HudStyle.Bars, "Bars only.");
 
-            Float("Hunger wave height", "HUD", "BarWave",
+            Float("Surface movement", "HUD", "BarWave",
                   () => _cfg.HudBarWave, v => _cfg.HudBarWave = v,
                   0.05f, 0f, 1f, "0.00",
-                  "How far the hunger bar's surface rises and falls. Sleep breathes instead.",
+                  "How far the levels move. Hunger bows; sleep takes a drop and settles.",
                   () => _cfg.Style == HudStyle.Bars, "Bars only.");
 
             Float("Bar drift speed", "HUD", "BarDrift",

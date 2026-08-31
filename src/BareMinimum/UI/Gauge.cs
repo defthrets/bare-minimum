@@ -750,11 +750,14 @@ namespace BareMinimum.UI
                 bob = (float)(Math.Sin(u * Math.PI * 2.6) * Math.Exp(-u * 3.4));
             }
 
-            // SEVEN PIXELS AT ITS WORST on a bar two hundred and thirty-five tall, up from
-            // three. Three was honest and nearly invisible; this is three per cent of the
-            // reading for a couple of seconds and back to exact for the other eleven, which
-            // is a trade worth making for an animation you can actually see land.
-            var level = h * fraction - bob * h * 0.030f;
+            // JUST NOTICEABLE, WHICH IS A NARROWER TARGET THAN EITHER OF THE TWO BEFORE IT.
+            // Three pixels was invisible, seven pulled the eye. Four is a drop you catch out
+            // of the corner of your vision and then have to look at to confirm -- which is
+            // exactly where a thing that happens every thirteen seconds, for hours, belongs.
+            //
+            // On the same dial as the food bar's surface, so one number is "how much do the
+            // levels move" across the whole instrument.
+            var level = h * fraction - bob * h * 0.017f * Clamp01(_cfg.HudBarWave) * 1.6f;
 
             if (level < 0f) level = 0f;
             if (level > h) level = h;
@@ -823,16 +826,19 @@ namespace BareMinimum.UI
                 {
                     var u = cycle / Fall;
 
-                    var dropW = Math.Max(w * 0.24f, 0.0010f);
+                    var dropW = Math.Max(w * 0.18f, 0.0009f);
                     var dropH = dropW * Aspect() * 1.35f;
 
                     var dy = surfaceY - reach + reach * u * u;
 
-                    // Fades in off the top rather than blinking into existence at the ceiling.
-                    var seen = Math.Min(1f, u * 4f);
+                    // Fades in off the top rather than blinking into existence at the ceiling,
+                    // and out again on the last of the fall so it does not arrive as a bright
+                    // dot sitting on the line. What lands is nearly gone by the time it does,
+                    // which is the difference between a drop and a bullet.
+                    var seen = Math.Min(1f, Math.Min(u * 4f, (1f - u) * 3.4f + 0.30f));
 
                     Hud.Bar(x + (w - dropW) / 2f, dy - dropH, dropW, dropH,
-                            Fade(Color.FromArgb((int)(215 * seen), 236, 244, 255)));
+                            Fade(Color.FromArgb((int)(150 * seen), 232, 240, 255)));
                 }
             }
 
@@ -909,7 +915,7 @@ namespace BareMinimum.UI
                 var fade = 1f - phase;
                 fade = fade * fade;
 
-                var alpha = (int)(150f * fade);
+                var alpha = (int)(105f * fade);
                 if (alpha <= 5) continue;
 
                 Hud.Bar(x, ry, w, thick,

@@ -436,16 +436,16 @@ namespace BareMinimum.Core
         public float HudBarWidth = 0.0046f;
 
         /// <summary>
-        /// How far the hunger bar's surface travels, 0 to 1.
+        /// How far EITHER bar's surface moves, 0 to 1.
         ///
-        /// A DIAL BECAUSE THIS ONE IS PURE FEEL and has been wrong in both directions. The
-        /// first version was a wave rolling across a fifteen-pixel bar, which jittered; the
-        /// fix for that dropped the travel to under two pixels on a bar two hundred and
-        /// thirty-five tall, which is smooth and invisible. This is the number in between,
-        /// and where "in between" lands is a matter of taste and monitor.
+        /// A DIAL BECAUSE THIS ONE IS PURE FEEL and has been wrong in both directions on both
+        /// bars. Hunger started as a wave rolling across fifteen pixels, which jittered, and
+        /// the fix took the travel down to under two pixels, which is smooth and invisible.
+        /// Sleep went three pixels (nobody could see it), then seven (it pulled the eye), and
+        /// now sits between.
         ///
-        /// Only the hunger bar has it. Sleep does not slosh -- it breathes, and the depth of
-        /// that already comes off how tired you are.
+        /// ONE NUMBER FOR BOTH, because "how much do the levels move" is one question however
+        /// differently the two answer it -- hunger bows, sleep takes a drop and settles.
         /// </summary>
         public float HudBarWave = 0.6f;
 
