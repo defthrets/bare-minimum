@@ -82,17 +82,19 @@ def main():
     good &= check("apple", "HUNGER, the apple")
     print("")
 
-    # THE MOON IS BACK IN, because it has something to check again.
+    # NO CHECK FOR THE MOON, and that is on purpose rather than an oversight.
     #
-    # It ran sun-through-to-crescent, then a plain crescent at every stage -- and while it
-    # was plain there was no ordering in the art to verify and this assert would have
-    # failed five files that were identical on purpose.
+    # It has been three things: an eye that closed, a moon that waned, and a sun that set.
+    # All three were checked here for the same reason the apple is -- five shapes that each
+    # look plausible on their own can still be out of order as a set, and only counting
+    # pixels catches it.
     #
-    # It is a sequence again: a rayed sun, a shorter-rayed sun, a bare disc, a fat crescent
-    # and a thin one. That empties at every step exactly as the apple does, and five shapes
-    # that each look plausible alone can still be out of order as a set -- which is the
-    # whole reason this script exists.
-    good &= check("moon", "SLEEP, sun through to crescent")
+    # It is a plain crescent at every stage now, asked for twice, and carries its state in
+    # COLOUR alone. There is no ordering left in the art to verify, and asserting it got
+    # emptier would fail five files that are identical on purpose.
+    #
+    # If a sequence ever comes back, so does this line:
+    #     good &= check("moon", "SLEEP")
 
     print("")
 

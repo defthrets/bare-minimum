@@ -356,7 +356,7 @@ namespace BareMinimum.UI
                 return;
             }
 
-            if (sleep) Night(x, top, w, h, fraction, body, Stage(need));
+            if (sleep) Night(x, top, w, h, fraction, body);
             else Churn(x, top, w, h, fraction, body);
 
             Foot(flat, centreX, top, w, h, fraction);
@@ -700,8 +700,7 @@ namespace BareMinimum.UI
         /// moves, because travel is what this bar has failed at twice: in the corner of the
         /// eye, anything crossing the screen is the one thing that cannot be ignored.
         /// </summary>
-        private void Night(float x, float y, float w, float h, float fraction, Color body,
-                           int stage)
+        private void Night(float x, float y, float w, float h, float fraction, Color body)
         {
             var tired = 1f - fraction;
 
@@ -746,14 +745,11 @@ namespace BareMinimum.UI
 
             // ---- what is IN the sky ----
             //
-            // Stars are night. Below stage two the sun has gone down -- see the icon, which
-            // runs sun through to crescent -- so anywhere above that they would be stars in
-            // daylight. Those stages get light instead.
-            if (level > h * 0.06f)
-            {
-                if (stage <= 1) Stars(x, y, w, h, surfaceY, t, tired);
-                else Daylight(x, y, w, h, surfaceY, t, fraction);
-            }
+            // STARS AT EVERY STAGE. They were held back to the last two for a while, on the
+            // grounds that the icon showed a sun above those and stars in daylight are just
+            // dots. The sun is gone; it is a crescent moon at every stage now, so it is night
+            // in this meter the whole way down and the sky is never empty.
+            if (level > h * 0.06f) Stars(x, y, w, h, surfaceY, t, tired);
 
             if (level <= 0.002f) return;
 
@@ -762,78 +758,17 @@ namespace BareMinimum.UI
             // A dark line ABOVE and a bright cap BELOW, drawn last so nothing can paint over
             // them. Two hard edges a pixel apart, which is a boundary you read rather than
             // one you estimate.
+            //
+            // The cap lifts toward a COOL white. It was a warm one, left over from when this
+            // meter ran daylight at the top of its ramp -- and a warm highlight on a blue
+            // fill is the one bit of gold that would have survived taking the sun out.
             var cap = h * 0.008f;
 
             Hud.Bar(x, surfaceY - cap * 0.6f, w, cap * 0.6f,
                     Fade(Color.FromArgb(210, 6, 6, 8)));
 
             Hud.Bar(x, surfaceY, w, cap,
-                    Mix(body, Color.FromArgb(body.A, 255, 252, 242), 0.55f + 0.30f * pulse));
-        }
-
-        /// <summary>
-        /// Light in the sky, for the stages where the sun is still up.
-        ///
-        /// THREE BROAD SHAFTS AT FIXED HEIGHTS, brightening and fading on beats that do not
-        /// divide into each other. Nothing travels -- same rule as the stars, and for the
-        /// same reason -- so what changes is only how much light is in the bar.
-        ///
-        /// Warm, and warmer the fuller it is. Against a fill that is already gold at the top
-        /// of the ramp this is barely a tint; against the dusk blue at stage two it reads as
-        /// the last of the light, which is exactly the handover into the star stages.
-        /// </summary>
-        private void Daylight(float x, float y, float w, float h, float surfaceY,
-                              float t, float fraction)
-        {
-            const int shafts = 3;
-
-            var level = y + h - surfaceY;
-
-            var bands = Bands(h);
-
-            for (var i = 0; i < shafts; i++)
-            {
-                // Where it sits in the fill, and how deep it reaches.
-                var at = 0.24f + i * 0.26f;
-                var reach = 0.20f + (i % 2) * 0.08f;
-
-                // Seventeen, twenty-three and thirty-one seconds.
-                var beat = 17f + i * 7f;
-
-                var swell = 0.5f + 0.5f * (float)Math.Sin(t * (2.0 * Math.PI / beat) + i * 2.1f);
-
-                var strength = 0.16f * swell * fraction;
-                if (strength < 0.004f) continue;
-
-                var top = surfaceY + level * (at - reach * 0.5f);
-                var bot = surfaceY + level * (at + reach * 0.5f);
-
-                if (bot <= y || top >= y + h) continue;
-
-                // Drawn in bands with a soft falloff to both edges, so a shaft has no hard
-                // line on it anywhere -- a hard-edged band of light is a stripe, and there is
-                // already one of those at the waterline doing a job.
-                var steps = Math.Max(4, bands / 6);
-
-                for (var k = 0; k < steps; k++)
-                {
-                    var sTop = top + (bot - top) * k / steps;
-                    var sBot = top + (bot - top) * (k + 1) / steps;
-
-                    if (sBot <= y || sTop >= y + h) continue;
-
-                    if (sTop < y) sTop = y;
-                    if (sBot > y + h) sBot = y + h;
-                    if (sBot <= sTop) continue;
-
-                    var u = (k + 0.5f) / steps;
-                    var soft = (float)Math.Sin(u * Math.PI);
-
-                    Hud.Bar(x, sTop, w, sBot - sTop,
-                            Mix(Color.FromArgb(0, 0, 0, 0),
-                                Color.FromArgb((int)(190 * strength * soft), 255, 240, 200), 1f));
-                }
-            }
+                    Mix(body, Color.FromArgb(body.A, 244, 248, 255), 0.55f + 0.30f * pulse));
         }
 
         /// <summary>
@@ -849,8 +784,6 @@ namespace BareMinimum.UI
         /// somewhere else entirely. The jump happens while it is completely dark, so what you
         /// see is stars coming out over a sky -- never one sliding to a new seat.
         ///
-        /// ONLY ON THE LAST TWO STAGES. Above those the sun is still up -- the icon says so,
-        /// running sun through to crescent -- and stars in daylight are just dots.
         /// </summary>
         private void Stars(float x, float y, float w, float h, float surfaceY,
                            float t, float tired)
@@ -1126,26 +1059,23 @@ namespace BareMinimum.UI
             Color.FromArgb(235, 152, 216, 132)    // full      green
         };
 
-        // SLEEP RUNS THE DAY: sunlight down through dusk to deep night.
+        // SLEEP IS BLUE AWAKE, DEEP PURPLE EXHAUSTED. It ran sunlight-through-to-night for
+        // a while, alongside a sun icon; both are gone and the ramp goes back with them --
+        // there is no sun in this meter any more and nothing in it should be gold.
         //
-        // It was blue at both the rested end and the middle, which was fine while the icon
-        // was an eye. The icon is a SUN now at the rested end, and a blue sun is nothing --
-        // so the top of the ramp is daylight and the bottom is the sky the crescent hangs in.
+        // It shares nothing with the hunger ramp, which is the point: a glance at colour
+        // alone says WHICH meter as well as how it is doing, and neither of them has to be
+        // read against the other.
         //
-        // The whole arc is one idea from top to bottom: sun and gold when you are fresh,
-        // dusk in the middle, night when you are finished. Nothing in the hunger ramp is
-        // anywhere near the blue or the violet, so a glance at colour alone still says WHICH
-        // meter as well as how it is doing -- which was the point of splitting them.
-        //
-        // It also darkens as it goes, where the food ramp stays bright the whole way. A tired
-        // icon should be a dim one; a hungry one should not.
+        // It also darkens as it goes, where the food ramp stays bright the whole way. A
+        // tired icon should be a dim one; a hungry one should not.
         private static readonly Color[] SleepRamp =
         {
-            Color.FromArgb(235,  70,  38, 100),   // empty     deep night
-            Color.FromArgb(235, 104,  74, 168),   // bad       violet
-            Color.FromArgb(235, 140, 150, 214),   // middling  dusk blue
-            Color.FromArgb(235, 232, 184, 122),   // fine      late sun
-            Color.FromArgb(235, 255, 206,  92)    // full      daylight
+            Color.FromArgb(235,  74,  40, 104),   // empty     deep purple
+            Color.FromArgb(235, 102,  62, 148),   // bad       purple
+            Color.FromArgb(235, 124, 100, 200),   // middling  violet
+            Color.FromArgb(235, 110, 146, 228),   // fine      blue-violet
+            Color.FromArgb(235,  96, 178, 246)    // full      awake blue
         };
 
         private static Color OnRamp(float t)

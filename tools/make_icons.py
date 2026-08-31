@@ -361,33 +361,25 @@ def _squash(img, sx, sy, px, py):
 # you are rested, down to a thin crescent when you are not -- so the silhouette still
 # carries the reading and the colour is still only confirming it.
 #
-# SUN THROUGH TO MOON. Wide awake is daylight; worn out is a crescent and two stars,
-# and the three stages between are the sun going down.
+# THE CRESCENT, AND ONLY THE CRESCENT, at every stage. It waned through phases once and
+# ran sun-through-to-moon once, and both are gone: this is a plain crescent moon with two
+# stars, the same drawing five times over.
 #
-# THIS PUTS THE STATE BACK IN THE SILHOUETTE, which is the argument the apple has always
-# been built on and which the plain crescent had quietly given up: five identical moons
-# said everything in colour, and colour is the channel that fails first -- on a bright
-# sky, on a cheap monitor, for anybody colourblind. A sun and a crescent cannot be
-# confused by anyone.
+# WHAT THAT COSTS, so nobody has to rediscover it and put the phases back by accident:
+# in Bars mode, nothing -- the bar is the reading and the mark is only identity, exactly
+# as the pump is in Fumes. In Icons mode the sleep icon now says how tired you are in
+# COLOUR ALONE, blue through to deep purple, where the apple still says it in shape as
+# well. That is a deliberate trade, asked for twice.
 #
-# Per stage: how long the rays are (0 for none), how far the shadow has slid clear, and
-# how many stars are out.
-#
-#   4  full sun, long rays          -- rested
-#   3  sun, short rays              -- the sun getting low
-#   2  a bare disc                  -- neither one nor the other; dusk
-#   1  a fat crescent, one star     -- night coming on
-#   0  the crescent, two stars      -- and this is the one that was drawn to reference
-#
-# SHADOW: BIGGER MEANS MORE MOON. The cutter is a disc sitting on top; at a small offset
-# it covers nearly everything and leaves a thin crescent, and past R + CUT_R it has
-# walked off entirely. So the number goes DOWN as you get more tired. Written the other
-# way round once already, and the moon got fuller the longer you stayed up.
+# Per stage: ray length (none), shadow offset, and how many stars are out. Kept as a
+# table rather than collapsed to a constant, because it is the one place the phases could
+# come back from and a table of five identical rows says that more clearly than a
+# stage-less function would.
 MOON_STAGES = {
-    4: (52.0, 0.0, 0),
-    3: (30.0, 0.0, 0),
-    2: (0.0, 0.0, 0),
-    1: (0.0, 54.0, 1),
+    4: (0.0, 36.0, 2),
+    3: (0.0, 36.0, 2),
+    2: (0.0, 36.0, 2),
+    1: (0.0, 36.0, 2),
     0: (0.0, 36.0, 2),
 }
 
