@@ -356,7 +356,7 @@ namespace BareMinimum.UI
                 return;
             }
 
-            if (sleep) Night(x, top, w, h, fraction, body);
+            if (sleep) Night(x, top, w, h, fraction, body, Stage(need));
             else Churn(x, top, w, h, fraction, body);
 
             Foot(flat, centreX, top, w, h, fraction);
@@ -463,7 +463,12 @@ namespace BareMinimum.UI
             // fifteen pixels of width. Now that the surface swells and tips as a whole
             // instead, it can travel a proper distance and stay perfectly smooth, because
             // a straight line moving slowly is smooth however far it moves.
-            var swing = h * 0.032f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
+            // AMPLITUDE, NOT ONLY PERIOD. Six rounds of "still too fast" have all been
+            // answered by halving the clock, and that has clearly not been the whole story: a
+            // crest travelling five pixels reads as quick even when it takes a minute to do
+            // it, because what the eye measures is how far the line has jumped since it last
+            // looked. Cutting the distance calms it as much as cutting the rate.
+            var swing = h * 0.018f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
 
             var floor = y + h;
 
@@ -495,8 +500,8 @@ namespace BareMinimum.UI
                 // going somewhere. Which is the point -- this is the fifth halving, and the
                 // brief the whole way has been that a bar beside the minimap should reward a
                 // second look and do nothing at all to the first.
-                var a = Pulse(u - t * 0.00275f, 0.58f);
-                var b = Pulse(u - t * 0.0017f + 0.5f, 0.76f);
+                var a = Pulse(u - t * 0.00138f, 0.58f);
+                var b = Pulse(u - t * 0.00085f + 0.5f, 0.76f);
 
                 var warm = (a * 0.6f + b * 0.4f) * (0.09f + 0.13f * empty);
 
@@ -547,14 +552,13 @@ namespace BareMinimum.UI
             //
             // Twenty-two seconds and thirty-one, and the bow is now the slowest thing in
             // either bar. It is a stomach settling, not a pulse.
-            // SEVENTY-TWO SECONDS AND A HUNDRED AND FOUR. A full bow takes over a minute:
-            // you cannot watch this happen, you can only come back to it and find it
-            // different. Halved five times now, and each time it was still too quick.
+            // A HUNDRED AND FORTY-FOUR SECONDS AND TWO HUNDRED AND EIGHT. Two and a half
+            // minutes for one bow, on half the travel it had before.
             //
-            // [HUD] BarPace lifts the whole instrument back up if this proves to be past the
-            // point of being worth drawing at all.
-            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 72.0)) * swing;
-            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 104.0)) * swing * 0.40f;
+            // [HUD] BarPace lifts the whole instrument back up in one number if this has gone
+            // past the point of being worth drawing at all, and [HUD] BarWave the distance.
+            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 144.0)) * swing;
+            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 208.0)) * swing * 0.40f;
 
             var crest = Mix(body, Color.FromArgb(body.A, 255, 240, 205), 0.55f);
 
@@ -623,7 +627,7 @@ namespace BareMinimum.UI
                 // divide into each other, so the three never fall in formation.
                 // Halved again: three minutes to sink the bar at the default drift. A
                 // crumb suspended rather than a crumb falling.
-                var speed = (0.012f + i * 0.003f + empty * 0.007f) * drift;
+                var speed = (0.006f + i * 0.0015f + empty * 0.0035f) * drift;
                 var phase = (t * speed + i * 0.37f) % 1f;
 
                 var py = surfaceY + level * phase;
@@ -679,23 +683,25 @@ namespace BareMinimum.UI
         private int _screenW;
 
         /// <summary>
-        /// SLEEP: a night sky, standing still.
+        /// SLEEP: the sky in it, and a waterline you can actually read.
         ///
-        /// A TOTAL REDO, and the lesson behind it is worth keeping. The first version breathed
-        /// and the second blew wind through itself, and both were reported as too fast --
-        /// which they were not, particularly. The trouble is that ANY travel is too fast for
-        /// this bar, because it sits in the corner of the eye for a whole session and the one
-        /// thing that pulls at peripheral vision is something moving across it.
+        /// THE LEVEL COMES FIRST AND EVERYTHING ELSE GETS OUT OF ITS WAY. The last version
+        /// put a soft glow sixteen per cent of the bar deep under the surface, and a soft
+        /// edge is exactly what you cannot take a reading off -- the boundary smeared into
+        /// the fill and the honest answer was that you could not tell where the level was.
+        /// That is the one job this whole object has.
         ///
-        /// So nothing here moves. Not the level, not the contents. What changes is BRIGHTNESS
-        /// only: a glow that rises and falls at the waterline, and a scatter of fixed stars
-        /// that come up and go out at their own times. There is no speed to get wrong, which
-        /// is the actual fix rather than another number.
+        /// So the waterline is now a hard bright cap with a dark line above it, and the fill
+        /// beneath is darkest right under that cap. A light edge against a dark edge is the
+        /// most legible boundary there is, and it is legible at a glance rather than after a
+        /// second's staring.
         ///
-        /// It ties to the moon and the two stars on the icon, so the meter looks like one
-        /// thought from top to bottom.
+        /// The animation lives in the BRIGHTNESS of that cap and in the sky below it. Nothing
+        /// moves, because travel is what this bar has failed at twice: in the corner of the
+        /// eye, anything crossing the screen is the one thing that cannot be ignored.
         /// </summary>
-        private void Night(float x, float y, float w, float h, float fraction, Color body)
+        private void Night(float x, float y, float w, float h, float fraction, Color body,
+                           int stage)
         {
             var tired = 1f - fraction;
 
@@ -705,11 +711,16 @@ namespace BareMinimum.UI
             var surfaceY = y + h - level;
             var floor = y + h;
 
-            // ---- the body, in bands, darkening downward ----
+            // Forty seconds a cycle. The slowest thing in the mod, and the only thing about
+            // this bar that changes at all.
+            var pulse = 0.5f + 0.5f * (float)Math.Sin(t * (2.0 * Math.PI / 40.0));
+
+            // ---- the fill ----
             //
-            // A NIGHT SKY IS NOT FLAT. Brightest at the top where the light is and deeper
-            // toward the bottom -- which also means the level reads as depth rather than as a
-            // block of colour, and gives the stars something to sit in.
+            // DARKEST AT THE TOP, brightening downward -- the opposite way round from before.
+            // The old gradient was brightest at the surface, which put the lightest part of
+            // the fill immediately under the lightest part of the bar and blurred the two
+            // together. Dark under the cap is what makes the cap an edge.
             var bands = Bands(h);
 
             for (var i = 0; i < bands; i++)
@@ -721,50 +732,108 @@ namespace BareMinimum.UI
 
                 var u = (i + 0.5f) / bands;
 
-                // Down to two thirds at the floor. Gentle: any more and the bottom of a full
-                // bar looks empty.
+                // A short, sharp shade under the cap and then flat: enough to separate the
+                // two, not so much that the bar looks half empty.
+                var shade = u < 0.14f ? 0.38f * (1f - u / 0.14f) : 0f;
+
                 var deep = Mix(body, Color.FromArgb(body.A,
-                                                    (int)(body.R * 0.62f),
-                                                    (int)(body.G * 0.62f),
-                                                    (int)(body.B * 0.68f)), u);
+                                                    (int)(body.R * 0.45f),
+                                                    (int)(body.G * 0.45f),
+                                                    (int)(body.B * 0.55f)), shade);
 
                 Hud.Bar(x, bTop, w, bBot - bTop, deep);
             }
 
-            if (level <= 0.002f) return;
-
-            // ---- the glow at the waterline ----
+            // ---- what is IN the sky ----
             //
-            // The only thing standing in for a level animation, and it does not move the
-            // level: the surface stays exactly where the number says it is, and a soft band
-            // beneath it brightens and fades. Moonlight on water, and a reading you cannot
-            // misread as a different number.
-            //
-            // Forty seconds a cycle. Slower than anything else in the mod, on purpose.
-            var pulse = 0.5f + 0.5f * (float)Math.Sin(t * (2.0 * Math.PI / 40.0));
-
-            var glowDepth = Math.Min(level, h * 0.16f);
-            var glowBands = Math.Max(3, Bands(h) / 5);
-
-            for (var i = 0; i < glowBands; i++)
+            // Stars are night. Below stage two the sun has gone down -- see the icon, which
+            // runs sun through to crescent -- so anywhere above that they would be stars in
+            // daylight. Those stages get light instead.
+            if (level > h * 0.06f)
             {
-                var gTop = surfaceY + glowDepth * i / glowBands;
-                var gBot = surfaceY + glowDepth * (i + 1) / glowBands;
-
-                // Strongest at the surface, gone by the bottom of the glow.
-                var falloff = 1f - (i + 0.5f) / glowBands;
-
-                var strength = 0.30f * falloff * falloff * (0.45f + 0.55f * pulse);
-
-                Hud.Bar(x, gTop, w, gBot - gTop,
-                        Mix(body, Color.FromArgb(body.A, 255, 250, 238), strength));
+                if (stage <= 1) Stars(x, y, w, h, surfaceY, t, tired);
+                else Daylight(x, y, w, h, surfaceY, t, fraction);
             }
 
-            // The waterline itself, a hair brighter than the glow under it.
-            Hud.Bar(x, surfaceY, w, h * 0.006f,
-                    Mix(body, Color.FromArgb(body.A, 255, 250, 240), 0.42f + 0.28f * pulse));
+            if (level <= 0.002f) return;
 
-            Stars(x, y, w, h, surfaceY, t, tired);
+            // ---- the waterline ----
+            //
+            // A dark line ABOVE and a bright cap BELOW, drawn last so nothing can paint over
+            // them. Two hard edges a pixel apart, which is a boundary you read rather than
+            // one you estimate.
+            var cap = h * 0.008f;
+
+            Hud.Bar(x, surfaceY - cap * 0.6f, w, cap * 0.6f,
+                    Fade(Color.FromArgb(210, 6, 6, 8)));
+
+            Hud.Bar(x, surfaceY, w, cap,
+                    Mix(body, Color.FromArgb(body.A, 255, 252, 242), 0.55f + 0.30f * pulse));
+        }
+
+        /// <summary>
+        /// Light in the sky, for the stages where the sun is still up.
+        ///
+        /// THREE BROAD SHAFTS AT FIXED HEIGHTS, brightening and fading on beats that do not
+        /// divide into each other. Nothing travels -- same rule as the stars, and for the
+        /// same reason -- so what changes is only how much light is in the bar.
+        ///
+        /// Warm, and warmer the fuller it is. Against a fill that is already gold at the top
+        /// of the ramp this is barely a tint; against the dusk blue at stage two it reads as
+        /// the last of the light, which is exactly the handover into the star stages.
+        /// </summary>
+        private void Daylight(float x, float y, float w, float h, float surfaceY,
+                              float t, float fraction)
+        {
+            const int shafts = 3;
+
+            var level = y + h - surfaceY;
+
+            var bands = Bands(h);
+
+            for (var i = 0; i < shafts; i++)
+            {
+                // Where it sits in the fill, and how deep it reaches.
+                var at = 0.24f + i * 0.26f;
+                var reach = 0.20f + (i % 2) * 0.08f;
+
+                // Seventeen, twenty-three and thirty-one seconds.
+                var beat = 17f + i * 7f;
+
+                var swell = 0.5f + 0.5f * (float)Math.Sin(t * (2.0 * Math.PI / beat) + i * 2.1f);
+
+                var strength = 0.16f * swell * fraction;
+                if (strength < 0.004f) continue;
+
+                var top = surfaceY + level * (at - reach * 0.5f);
+                var bot = surfaceY + level * (at + reach * 0.5f);
+
+                if (bot <= y || top >= y + h) continue;
+
+                // Drawn in bands with a soft falloff to both edges, so a shaft has no hard
+                // line on it anywhere -- a hard-edged band of light is a stripe, and there is
+                // already one of those at the waterline doing a job.
+                var steps = Math.Max(4, bands / 6);
+
+                for (var k = 0; k < steps; k++)
+                {
+                    var sTop = top + (bot - top) * k / steps;
+                    var sBot = top + (bot - top) * (k + 1) / steps;
+
+                    if (sBot <= y || sTop >= y + h) continue;
+
+                    if (sTop < y) sTop = y;
+                    if (sBot > y + h) sBot = y + h;
+                    if (sBot <= sTop) continue;
+
+                    var u = (k + 0.5f) / steps;
+                    var soft = (float)Math.Sin(u * Math.PI);
+
+                    Hud.Bar(x, sTop, w, sBot - sTop,
+                            Mix(Color.FromArgb(0, 0, 0, 0),
+                                Color.FromArgb((int)(190 * strength * soft), 255, 240, 200), 1f));
+                }
+            }
         }
 
         /// <summary>
@@ -780,10 +849,8 @@ namespace BareMinimum.UI
         /// somewhere else entirely. The jump happens while it is completely dark, so what you
         /// see is stars coming out over a sky -- never one sliding to a new seat.
         ///
-        /// POSITIONS FROM A HASH of the star and its cycle number. No Random, which would
-        /// scatter them afresh every frame and make them flicker about; no table, which would
-        /// be a page of numbers to read and repeat itself the moment anybody looked twice.
-        /// Deterministic, stateless, and different every appearance.
+        /// ONLY ON THE LAST TWO STAGES. Above those the sun is still up -- the icon says so,
+        /// running sun through to crescent -- and stars in daylight are just dots.
         /// </summary>
         private void Stars(float x, float y, float w, float h, float surfaceY,
                            float t, float tired)
@@ -791,7 +858,6 @@ namespace BareMinimum.UI
             const int count = 9;
 
             var level = y + h - surfaceY;
-            if (level < h * 0.06f) return;
 
             var size = Math.Max(w * 0.16f, 0.0008f);
             var tall = size * Aspect();
@@ -813,17 +879,18 @@ namespace BareMinimum.UI
                 var lit = (float)Math.Sin(phase * Math.PI);
                 lit = lit * lit * lit;
 
-                var alpha = (int)(230f * lit * (0.45f + 0.55f * tired));
+                var alpha = (int)(230f * lit * (0.55f + 0.45f * tired));
                 if (alpha <= 6) continue;
 
-                // Kept off both walls, so no star is ever half a star.
+                // Kept off both walls and clear of the waterline, so no star is ever half a
+                // star or sitting on the one line that has to stay readable.
                 var lane = 0.20f + 0.60f * Scatter(i * 3.1f + cycle * 17.3f);
-                var deep = 0.06f + 0.88f * Scatter(i * 7.7f + cycle * 29.1f + 5.5f);
+                var deep = 0.10f + 0.84f * Scatter(i * 7.7f + cycle * 29.1f + 5.5f);
 
                 var sy = y + h - level * deep;
 
                 Hud.Bar(x + w * lane - size / 2f, sy - tall / 2f, size, tall,
-                        Fade(Color.FromArgb(alpha, 240, 244, 255)));
+                        Fade(Color.FromArgb(alpha, 250, 250, 255)));
             }
         }
 
@@ -1059,23 +1126,26 @@ namespace BareMinimum.UI
             Color.FromArgb(235, 152, 216, 132)    // full      green
         };
 
-        // SLEEP GETS ITS OWN RAMP: blue awake, dark purple exhausted.
+        // SLEEP RUNS THE DAY: sunlight down through dusk to deep night.
         //
-        // Sharing the food ramp made a rested character green and a starving one red, and
-        // that is the same sentence twice -- two meters saying "bad" in identical colours is
-        // two meters you have to read the shape of to tell apart. Blue is awake and night is
-        // purple, and neither is in the hunger ramp anywhere, so a glance at the colour alone
-        // now says WHICH meter as well as how it is doing.
+        // It was blue at both the rested end and the middle, which was fine while the icon
+        // was an eye. The icon is a SUN now at the rested end, and a blue sun is nothing --
+        // so the top of the ramp is daylight and the bottom is the sky the crescent hangs in.
         //
-        // It also darkens as it goes, where the food ramp stays bright the whole way. A
-        // tired icon should be a dim one; a hungry one should not.
+        // The whole arc is one idea from top to bottom: sun and gold when you are fresh,
+        // dusk in the middle, night when you are finished. Nothing in the hunger ramp is
+        // anywhere near the blue or the violet, so a glance at colour alone still says WHICH
+        // meter as well as how it is doing -- which was the point of splitting them.
+        //
+        // It also darkens as it goes, where the food ramp stays bright the whole way. A tired
+        // icon should be a dim one; a hungry one should not.
         private static readonly Color[] SleepRamp =
         {
-            Color.FromArgb(235,  74,  40, 104),   // empty     dark purple
-            Color.FromArgb(235, 102,  62, 148),   // bad       purple
-            Color.FromArgb(235, 124, 100, 200),   // middling  violet
-            Color.FromArgb(235, 110, 146, 228),   // fine      blue-violet
-            Color.FromArgb(235,  96, 178, 246)    // full      awake blue
+            Color.FromArgb(235,  70,  38, 100),   // empty     deep night
+            Color.FromArgb(235, 104,  74, 168),   // bad       violet
+            Color.FromArgb(235, 140, 150, 214),   // middling  dusk blue
+            Color.FromArgb(235, 232, 184, 122),   // fine      late sun
+            Color.FromArgb(235, 255, 206,  92)    // full      daylight
         };
 
         private static Color OnRamp(float t)
