@@ -1128,20 +1128,41 @@ namespace BareMinimum.UI
         // The colour ramp
         // ======================================================================
         //
-        // Green at full through amber to red at empty. Five stops rather than a straight
-        // two-colour blend, because green to red interpolated directly runs through a muddy
-        // brown at the halfway point -- putting real gold and orange in the middle keeps every
-        // part of the range a colour somebody would name.
+        // GREEN THE WHOLE WAY, deep at empty and light at full.
+        //
+        // It ran red-orange-amber-gold-green, which is very nearly the fuel gauge's own ramp:
+        // Fumes runs red to yellow through the same oranges, and four of these five stops sat
+        // inside that range. Measured in Lab the two bars came within dE 0.6 of each other at
+        // 44% -- not similar, the SAME COLOUR -- so a glance at the HUD found two amber
+        // columns and had to work out which was which by position.
+        //
+        // Green is the only family left. Fuel owns red through yellow; sleep owns blue through
+        // purple; the gap between them is green one way and magenta the other, and magenta
+        // cannot be reached. Any ramp from magenta to green passes through neutral grey
+        // BETWEEN its stops however vivid the stops themselves are -- measured at a minimum
+        // chroma of 4 to 8 across every version tried -- and the only routes around that
+        // neutral run through yellow, which is fuel, or through cyan, which is sleep.
+        //
+        // So this trades range for separation. Green to green spans dE 58 where red to green
+        // spanned 101, and the level is a little less legible from colour alone -- but the
+        // fill HEIGHT is what says how full a bar is, and colour was only ever confirming it.
+        // Being unmistakably not the fuel gauge is worth more than the second opinion.
+        //
+        // Deep at empty rather than alarming at empty, because the alarm is elsewhere: below
+        // stage 1 Colour pulses this toward white, which is a far louder signal than any hue.
+        //
+        // Never lighter at the bottom than the channel behind it, and never washed out --
+        // every point holds a chroma of at least 30, so no part of the range goes grey.
 
         private static readonly float[] Stops = { 0f, 0.25f, 0.50f, 0.75f, 1f };
 
         private static readonly Color[] Ramp =
         {
-            Color.FromArgb(235, 216,  58,  50),   // empty     red
-            Color.FromArgb(235, 228, 108,  46),   // bad       orange
-            Color.FromArgb(235, 240, 170,  56),   // middling  amber
-            Color.FromArgb(235, 228, 208,  94),   // fine      gold
-            Color.FromArgb(235, 152, 216, 132)    // full      green
+            Color.FromArgb(235,  18,  78,  46),   // empty     deep forest
+            Color.FromArgb(235,  30, 124,  68),   // bad       dark green
+            Color.FromArgb(235,  48, 168,  96),   // middling  green
+            Color.FromArgb(235,  92, 204, 132),   // fine      fresh green
+            Color.FromArgb(235, 156, 232, 172)    // full      light mint
         };
 
         // SLEEP IS BLUE AWAKE, DEEP PURPLE EXHAUSTED. It ran sunlight-through-to-night for
@@ -1152,8 +1173,12 @@ namespace BareMinimum.UI
         // alone says WHICH meter as well as how it is doing, and neither of them has to be
         // read against the other.
         //
-        // It also darkens as it goes, where the food ramp stays bright the whole way. A
-        // tired icon should be a dim one; a hungry one should not.
+        // BOTH RAMPS DARKEN AS THEY EMPTY NOW, which they did not when this comment first
+        // claimed the food ramp stayed bright -- food has since moved into the greens to get
+        // clear of the fuel gauge, and it darkens too. That leaves hue carrying the whole
+        // distinction between the two meters, which it does easily: green against blue-violet
+        // measures dE 72 at the closest approach any two levels can produce, where anything
+        // above about 30 is already unmistakable.
         private static readonly Color[] SleepRamp =
         {
             Color.FromArgb(235,  74,  40, 104),   // empty     deep purple
