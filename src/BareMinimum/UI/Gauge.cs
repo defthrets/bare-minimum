@@ -575,11 +575,17 @@ namespace BareMinimum.UI
             var size = w * 0.22f;
             var tall = size * Aspect();
 
+            // A THIRD OF WHAT THIS WAS. Three specks crossing a bar in six seconds is
+            // traffic; these are meant to be something you notice on the second look. At the
+            // default that is most of a minute to sink the length of the bar.
+            var drift = Clamp01(_cfg.HudBarDrift);
+            if (drift <= 0.001f) return;
+
             for (var i = 0; i < count; i++)
             {
-                // Slow, and a little quicker when there is less to sink through. Speeds that
-                // do not divide into each other, so the three never fall in formation.
-                var speed = 0.085f + i * 0.021f + empty * 0.05f;
+                // A little quicker when there is less to sink through. Speeds that do not
+                // divide into each other, so the three never fall in formation.
+                var speed = (0.085f + i * 0.021f + empty * 0.05f) * drift;
                 var phase = (t * speed + i * 0.37f) % 1f;
 
                 var py = surfaceY + level * phase;
@@ -587,7 +593,7 @@ namespace BareMinimum.UI
                 // A drift across as it falls, a different width and rate each. This is what
                 // separates a crumb settling from a dot being lowered on a string.
                 var lane = 0.30f + i * 0.20f;
-                var sway = (float)Math.Sin(t * (0.5f + i * 0.13f) + i * 2.1f) * 0.16f;
+                var sway = (float)Math.Sin(t * (0.5f + i * 0.13f) * drift + i * 2.1f) * 0.16f;
 
                 var px = x + w * (lane + sway) - size / 2f;
 
@@ -741,9 +747,12 @@ namespace BareMinimum.UI
             // stopping dead: a particle that halts completely reads as a dropped frame.
             var lift = 0.20f + 0.80f * (0.5f + 0.5f * eased);
 
+            var drift = Clamp01(_cfg.HudBarDrift);
+            if (drift <= 0.001f) return;
+
             for (var i = 0; i < count; i++)
             {
-                var speed = (0.055f + i * 0.012f) * lift;
+                var speed = (0.055f + i * 0.012f) * lift * drift;
 
                 // Climbing, so the phase runs from the floor upward.
                 var phase = (t * speed + i * 0.29f) % 1f;
@@ -751,14 +760,16 @@ namespace BareMinimum.UI
                 var py = y + h - level * phase;
 
                 var lane = 0.22f + i * (0.56f / (count - 1));
-                var sway = (float)Math.Sin(t * (0.31f + i * 0.07f) + i * 1.7f) * 0.13f;
+                var sway = (float)Math.Sin(t * (0.31f + i * 0.07f) * drift + i * 1.7f) * 0.13f;
 
                 var px = x + w * (lane + sway) - size / 2f;
 
                 var edge = Math.Min(phase * 4f, Math.Min((1f - phase) * 2.2f, 1f));
 
                 // A slow twinkle of their own on top of the fade, each on a different beat.
-                var twinkle = 0.55f + 0.45f * (float)Math.Sin(t * (0.9f + i * 0.23f) + i);
+                // The twinkle slows with them. A speck creeping up the bar while flashing
+                // at its old rate is two different animations sharing a dot.
+                var twinkle = 0.55f + 0.45f * (float)Math.Sin(t * (0.9f + i * 0.23f) * drift + i);
 
                 // Brighter the more tired you are. On a nearly full meter these are barely
                 // there, which is right -- there is nothing to say yet.

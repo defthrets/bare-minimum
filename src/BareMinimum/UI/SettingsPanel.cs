@@ -545,6 +545,12 @@ namespace BareMinimum.UI
                   "How far the hunger bar's surface rises and falls. Sleep breathes instead.",
                   () => _cfg.Style == HudStyle.Bars, "Bars only.");
 
+            Float("Bar drift speed", "HUD", "BarDrift",
+                  () => _cfg.HudBarDrift, v => _cfg.HudBarDrift = v,
+                  0.05f, 0f, 1f, "0.00",
+                  "How fast the specks inside the bars move. 0 stops them.",
+                  () => _cfg.Style == HudStyle.Bars, "Bars only.");
+
             Float("Bar mark size", "HUD", "BarIconScale",
                   () => _cfg.HudBarIconScale, v => _cfg.HudBarIconScale = v,
                   0.05f, 0.20f, 2.00f, "0.00",

@@ -450,6 +450,15 @@ namespace BareMinimum.Core
         public float HudBarWave = 0.6f;
 
         /// <summary>
+        /// How quickly the specks inside the bars move, 0 to 1. 0 stops them dead.
+        ///
+        /// A DIAL FOR THE SAME REASON BarWave IS ONE: pace is feel, and feel does not survive
+        /// being guessed at. These went in at roughly three times this and read as busy --
+        /// they are meant to be something you notice on the second look, not traffic.
+        /// </summary>
+        public float HudBarDrift = 0.35f;
+
+        /// <summary>
         /// The mark in the foot of the bar, as a share of the bar's width.
         ///
         /// A dial because these bars are narrow -- Fumes' width is about sixteen pixels on an
@@ -615,6 +624,7 @@ namespace BareMinimum.Core
                 cfg.HudBarIconScale = ini.GetFloat("HUD", "BarIconScale",
                                                    cfg.HudBarIconScale, 0.2f, 3f);
                 cfg.HudBarWave = ini.GetFloat("HUD", "BarWave", cfg.HudBarWave, 0f, 1f);
+                cfg.HudBarDrift = ini.GetFloat("HUD", "BarDrift", cfg.HudBarDrift, 0f, 1f);
 
                 cfg.HudAnimate = ini.GetBool("HUD", "Animate", cfg.HudAnimate);
                 cfg.HudShimmer = ini.GetFloat("HUD", "Shimmer", cfg.HudShimmer, 0f, 1f);
