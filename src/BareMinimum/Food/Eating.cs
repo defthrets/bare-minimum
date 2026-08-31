@@ -51,6 +51,15 @@ namespace BareMinimum.Food
         private int _finishAt;
         private bool _animStarted;
 
+        /// <summary>
+        /// True when what is running is a SCENARIO rather than an animation.
+        ///
+        /// Kept apart because they are stopped by different natives: STOP_ANIM_TASK does
+        /// nothing at all to a scenario, and a player left in WORLD_HUMAN_SMOKING when his
+        /// cigarette is taken away smokes an empty hand until something else interrupts him.
+        /// </summary>
+        private bool _scenarioStarted;
+
         /// <summary>Which half of a combo is in hand. Meaningless for anything else.</summary>
         private bool _drinking;
 
@@ -92,6 +101,7 @@ namespace BareMinimum.Food
 
                 AskAnim(_menu.Eat);
                 AskAnim(_menu.Sip);
+                AskAnim(_menu.Smoke);
             }
             catch (Exception ex)
             {
@@ -165,6 +175,22 @@ namespace BareMinimum.Food
 
                 if (now >= _finishAt) { Finish(); return; }
 
+                // KEEP TRYING TO START IT. Animate asks for a dictionary and gives up for
+                // that frame rather than spinning on it, so the very first attempt fails
+                // whenever the anim was not already in memory -- which is every purchase from
+                // a one-key stall, because only the shelf menu pre-loads as you scroll. One
+                // retry a frame for the length of the meal costs nothing and is the difference
+                // between an animation that usually plays and one that always does.
+                if (!_animStarted)
+                {
+                    var me = Game.Player.Character;
+
+                    if (me != null && me.Exists() && !me.IsDead)
+                    {
+                        Animate(me, _item, _drinking);
+                    }
+                }
+
                 // Halfway through a stretch, put down the sandwich and pick up the cup, or
                 // the other way about. The need is untouched until the whole thing is done.
                 if (_swapAt != 0 && now >= _swapAt) Swap();
@@ -188,8 +214,20 @@ namespace BareMinimum.Food
             _item = null;
             _swapAt = 0;
 
-            if (item.Drink) _needs.Drink(item.Hunger, item.Wake);
-            else _needs.Eat(item.Hunger);
+            // WAKE IS NOT A DRINKS-ONLY PROPERTY. This used to read "if drink, apply food
+            // and wake; otherwise apply food" -- so a cigarette, whose whole effect IS its
+            // wake, did nothing at all, and so did the wake on nineteen other items: the
+            // donuts, the soups, the breakfast, the toastie. Twenty things quietly having no
+            // effect, because the branch that applied the value only ran on one kind of item.
+            if (item.Drink)
+            {
+                _needs.Drink(item.Hunger, item.Wake);
+            }
+            else
+            {
+                _needs.Eat(item.Hunger);
+                if (item.Wake > 0f) _needs.Wake(item.Wake);
+            }
 
             if (item.Booze > 0f) _needs.Booze(item.Booze);
 
@@ -214,9 +252,15 @@ namespace BareMinimum.Food
 
                 if (item.Smoke)
                 {
-                    // A cigarette has no stomach reading to give and no drunk state to
-                    // report. It says what it did, which is very little, on purpose.
+                    // No stomach reading to give and no drunk state to report -- but it does
+                    // DO something, and saying so is the difference between a cigarette that
+                    // works and one the player has no reason to believe in.
                     msg += "That is better.";
+
+                    if (item.Wake > 0f)
+                    {
+                        msg += "  Rested " + (int)Math.Round(_needs.Sleep.Value * 100f) + "%.";
+                    }
                 }
                 else if (item.Booze > 0f)
                 {
@@ -371,19 +415,29 @@ namespace BareMinimum.Food
                      : (item.Drink || drinking) ? _menu.Sip
                      : _menu.Eat;
 
-            if (!anim.Valid) return;
+            // Checked against this build before anything is asked of it. A dictionary that
+            // is not here never loads, so without this the code below requests it forever and
+            // plays nothing -- which is exactly how the smoking animation shipped: one
+            // guessed name, and a single log line saying it "was not loaded YET" for good.
+            anim.Resolve(item.Smoke ? "Smoking animation"
+                                    : (item.Drink || drinking) ? "Drinking animation"
+                                    : "Eating animation");
+
+            if (!anim.Usable) return;
 
             try
             {
+                if (!anim.Valid)
+                {
+                    Scenario(me, anim);
+                    return;
+                }
+
                 // Asked for, never waited on. Same reasoning as the prop above: a spin here
                 // stops the frame that would have loaded it.
                 if (!Function.Call<bool>(Hash.HAS_ANIM_DICT_LOADED, anim.Dict))
                 {
                     Function.Call(Hash.REQUEST_ANIM_DICT, anim.Dict);
-
-                    Log.Once("anim-" + anim.Dict,
-                             "Animation " + anim.Dict + " was not loaded yet - eating without it " +
-                             "this time.");
                     return;
                 }
 
@@ -395,6 +449,40 @@ namespace BareMinimum.Food
             catch (Exception ex)
             {
                 Log.Once("anim-fail-" + anim.Dict, "Could not play " + anim.Dict + ": " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// The floor under the animation: a scenario, when no dictionary exists.
+        ///
+        /// Scenarios are not asset names that can be missing the way an animation dictionary
+        /// can, and WORLD_HUMAN_SMOKING is the same one the hot dog man has been visibly
+        /// using on his cigarette break since the day it went in. It is not as good -- it
+        /// squares the player up and ignores the prop in his hand -- but a man standing
+        /// perfectly still holding a cigarette is worse.
+        ///
+        /// NOT IN A VEHICLE. A scenario cannot run at the wheel and asking for one there
+        /// cancels the driving task, which is a considerably bigger problem than a missing
+        /// animation.
+        /// </summary>
+        private void Scenario(Ped me, AnimRef anim)
+        {
+            if (string.IsNullOrEmpty(anim.Scenario)) return;
+            if (InVehicle(me)) return;
+
+            try
+            {
+                Function.Call(Hash.TASK_START_SCENARIO_IN_PLACE, me.Handle, anim.Scenario, 0, true);
+
+                _animStarted = true;
+                _scenarioStarted = true;
+
+                Log.Once("anim-scenario-" + anim.Scenario,
+                         "Using the " + anim.Scenario + " scenario instead of an animation.");
+            }
+            catch (Exception ex)
+            {
+                Log.Once("anim-scenario-fail", "Could not start " + anim.Scenario + ": " + ex.Message);
             }
         }
 
@@ -415,15 +503,24 @@ namespace BareMinimum.Food
                     var me = Game.Player.Character;
                     if (me != null && me.Exists())
                     {
-                        // The SPECIFIC task, not CLEAR_PED_TASKS. Clearing everything would
-                        // also cancel whatever else the player happened to be doing -- which
-                        // at a shop counter is usually nothing, and while walking is not.
-                        Function.Call(Hash.STOP_ANIM_TASK, me.Handle,
-                                      _menu.Eat.Dict, _menu.Eat.Clip, 3f);
-                        Function.Call(Hash.STOP_ANIM_TASK, me.Handle,
-                                      _menu.Sip.Dict, _menu.Sip.Clip, 3f);
-                        Function.Call(Hash.STOP_ANIM_TASK, me.Handle,
-                                      _menu.Smoke.Dict, _menu.Smoke.Clip, 3f);
+                        if (_scenarioStarted)
+                        {
+                            // No choice here: STOP_ANIM_TASK does nothing to a scenario, and
+                            // there is no stop-this-one-scenario native. Safe enough in
+                            // practice, because Scenario() refuses to start one in a vehicle
+                            // -- so the task being cleared is a man standing on a pavement.
+                            Function.Call(Hash.CLEAR_PED_TASKS, me.Handle);
+                        }
+                        else
+                        {
+                            // The SPECIFIC task, not CLEAR_PED_TASKS. Clearing everything
+                            // would also cancel whatever else the player happened to be doing
+                            // -- which at a shop counter is usually nothing, and while walking
+                            // is not.
+                            Stop(me, _menu.Eat);
+                            Stop(me, _menu.Sip);
+                            Stop(me, _menu.Smoke);
+                        }
                     }
                 }
                 catch
@@ -432,9 +529,18 @@ namespace BareMinimum.Food
                 }
 
                 _animStarted = false;
+                _scenarioStarted = false;
             }
 
             DropProp();
+        }
+
+        /// <summary>Ends one animation, if it was ever given a real dictionary to play.</summary>
+        private static void Stop(Ped me, AnimRef anim)
+        {
+            if (!anim.Valid) return;
+
+            Function.Call(Hash.STOP_ANIM_TASK, me.Handle, anim.Dict, anim.Clip, 3f);
         }
 
         /// <summary>Removes whatever is in the hand. Used mid-meal by Swap as well as at the end.</summary>

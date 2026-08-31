@@ -2013,12 +2013,55 @@
     "eat": {
       "dict": "mp_player_inteat@burger",
       "clip": "mp_player_int_eat_burger",
-      "hand": "left"
+      "hand": "left",
+      "scenario": "WORLD_HUMAN_STAND_IMPATIENT"
     },
     "drink": {
       "dict": "mp_player_intdrink",
       "clip": "loop_bottle",
-      "hand": "left"
+      "hand": "left",
+      "scenario": "WORLD_HUMAN_DRINKING"
+    },
+    "_comment": [
+      "How eating, drinking and smoking look.",
+      "",
+      "'options' is a list of dict/clip pairs tried IN ORDER, and the first whose",
+      "DICTIONARY EXISTS in your build wins -- the same treatment the prop and ped",
+      "model lists get, for the same reason. A dictionary that is not there never",
+      "loads, so the mod requests it forever and plays nothing, which is precisely how",
+      "the smoking animation shipped broken: one guessed name and no alternative.",
+      "",
+      "The chosen pair is written to the log at start-up, along with any that were",
+      "skipped, so a wrong guess costs a log line rather than a silent mime.",
+      "",
+      "A CLIP inside a real dictionary still cannot be checked -- there is no native",
+      "for it. If the log says a dictionary was chosen and you still see nothing, the",
+      "clip name is the thing that is wrong.",
+      "",
+      "'scenario' is the floor under all of it: used when no dictionary matches.",
+      "Scenarios cannot be missing the way an animation can."
+    ],
+    "smoke": {
+      "options": [
+        {
+          "dict": "amb@world_human_smoking@male@male_a@base",
+          "clip": "base"
+        },
+        {
+          "dict": "amb@world_human_smoking@male@male_a@idle_a",
+          "clip": "idle_a"
+        },
+        {
+          "dict": "amb@world_human_smoking_pot@male@base",
+          "clip": "base"
+        },
+        {
+          "dict": "mp_player_intsmoke",
+          "clip": "mp_player_int_smoke"
+        }
+      ],
+      "scenario": "WORLD_HUMAN_SMOKING",
+      "hand": "right"
     }
   },
   "speech": {

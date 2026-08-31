@@ -404,7 +404,14 @@ namespace BareMinimum.Needs
         /// the cap a pocketful of energy drinks is a permanent replacement for sleep, and the
         /// entire sleep half of the mod becomes a shopping list.
         /// </summary>
-        private void Wake(float amount)
+        /// <summary>
+        /// Puts some of the sleep meter back. Coffee, sugar, nicotine.
+        ///
+        /// PUBLIC because it is not only drinks. It used to be called from Drink alone, which
+        /// silently threw away the wake value on twenty solid food items -- every donut,
+        /// every cigarette, the soups, the breakfast. See Eating.Finish.
+        /// </summary>
+        public void Wake(float amount)
         {
             var ceiling = Math.Min(1f, _cfg.SleepTiredAt + 0.12f);
             if (Sleep.Value >= ceiling) return;

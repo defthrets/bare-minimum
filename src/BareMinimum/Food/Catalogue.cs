@@ -117,6 +117,33 @@ namespace BareMinimum.Food
         public string Clip = "";
 
         /// <summary>
+        /// Candidate dict/clip pairs, tried in order. The first whose DICT EXISTS wins.
+        ///
+        /// THE SAME TREATMENT THE MODEL LISTS GET, and for the same reason. An animation
+        /// dictionary that is not in this build never loads, so HAS_ANIM_DICT_LOADED stays
+        /// false forever and the mod silently plays nothing -- which is exactly how the
+        /// smoking animation shipped broken: one guessed name, no alternative, and a single
+        /// log line nobody was looking for.
+        ///
+        /// A clip inside a real dict still cannot be checked. But a wrong dict is most of the
+        /// risk, and naming several means one wrong guess costs nothing.
+        /// </summary>
+        public string[][] Options = new string[0][];
+
+        /// <summary>
+        /// A scenario to run instead when no dictionary works at all.
+        ///
+        /// The floor under the whole thing. Scenarios are not asset names that might be
+        /// missing -- WORLD_HUMAN_SMOKING is the same one the hot dog man uses on his break,
+        /// and that has been visibly working since the day it went in. Something imperfect
+        /// beats a man standing still holding a cigarette.
+        /// </summary>
+        public string Scenario = "";
+
+        /// <summary>Set once the options have been checked against this build.</summary>
+        public bool Resolved;
+
+        /// <summary>
         /// Which hand this animation brings to the mouth. Left for the MP eat and drink sets.
         ///
         /// In the file rather than in code because it is a thing you can only learn by
@@ -127,6 +154,63 @@ namespace BareMinimum.Food
         public bool LeftHanded = true;
 
         public bool Valid => !string.IsNullOrEmpty(Dict) && !string.IsNullOrEmpty(Clip);
+
+        /// <summary>Whether there is anything at all to play, anim or scenario.</summary>
+        public bool Usable => Valid || !string.IsNullOrEmpty(Scenario);
+
+        /// <summary>
+        /// Picks the first candidate whose dictionary exists here, and names the misses.
+        ///
+        /// Runs once, on first use rather than at load: DOES_ANIM_DICT_EXIST is a native and
+        /// the catalogue is built before the game is necessarily ready to answer.
+        /// </summary>
+        public void Resolve(string what)
+        {
+            if (Resolved) return;
+            Resolved = true;
+
+            if (Options.Length == 0) return;
+
+            var missing = new System.Collections.Generic.List<string>();
+
+            foreach (var pair in Options)
+            {
+                if (pair == null || pair.Length < 2) continue;
+
+                try
+                {
+                    if (Function.Call<bool>(Hash.DOES_ANIM_DICT_EXIST, pair[0]))
+                    {
+                        Dict = pair[0];
+                        Clip = pair[1];
+
+                        if (missing.Count > 0)
+                        {
+                            Log.Info(what + ": not in this build, skipped - " +
+                                     string.Join(", ", missing.ToArray()));
+                        }
+
+                        Log.Info(what + ": using " + Dict + " / " + Clip + ".");
+                        return;
+                    }
+                }
+                catch
+                {
+                    // Treated as missing, same as a name that is simply not there.
+                }
+
+                missing.Add(pair[0]);
+            }
+
+            Dict = "";
+            Clip = "";
+
+            Log.Warn(what + ": none of " + missing.Count + " animation dictionar(ies) exist - " +
+                     string.Join(", ", missing.ToArray()) +
+                     (string.IsNullOrEmpty(Scenario)
+                          ? ". Nothing will play."
+                          : ". Falling back to the " + Scenario + " scenario."));
+        }
     }
 
     /// <summary>
@@ -366,6 +450,34 @@ namespace BareMinimum.Food
 
             if (!string.IsNullOrEmpty(dict)) into.Dict = dict;
             if (!string.IsNullOrEmpty(clip)) into.Clip = clip;
+
+            var scenario = node["scenario"].AsString("");
+            if (!string.IsNullOrEmpty(scenario)) into.Scenario = scenario;
+
+            // A list of candidates, if the file gives one. The single dict/clip above stays
+            // supported because two of the three animations have never needed alternatives.
+            var options = node["options"];
+            var list = new System.Collections.Generic.List<string[]>();
+
+            for (var i = 0; i < options.Count; i++)
+            {
+                var d = options[i]["dict"].AsString("");
+                var c = options[i]["clip"].AsString("");
+
+                if (d.Length > 0 && c.Length > 0) list.Add(new[] { d, c });
+            }
+
+            if (list.Count > 0)
+            {
+                into.Options = list.ToArray();
+                into.Resolved = false;
+            }
+            else if (!string.IsNullOrEmpty(into.Dict))
+            {
+                // One named pair is a list of one, so everything downstream has a single path.
+                into.Options = new[] { new[] { into.Dict, into.Clip } };
+                into.Resolved = false;
+            }
 
             var hand = node["hand"].AsString("");
             if (!string.IsNullOrEmpty(hand))
