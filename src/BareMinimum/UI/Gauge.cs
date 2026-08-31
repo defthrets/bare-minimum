@@ -238,7 +238,7 @@ namespace BareMinimum.UI
                 // object with two halves; a little apart they read as two things.
                 if (_cfg.Style == HudStyle.Bars)
                 {
-                    Bars(needs, x, top, side, gap);
+                    Bars(needs, x, bottom);
                     return;
                 }
 
@@ -268,55 +268,54 @@ namespace BareMinimum.UI
         /// minimap are indistinguishable from each other, and the entire point of this mod's
         /// HUD is knowing at a glance which meter you are looking at.
         /// </summary>
-        private void Bars(Needs.Needs needs, float x, float top, float side, float gap)
+        private void Bars(Needs.Needs needs, float x, float bottom)
         {
-            var iconW = side * 0.66f / Aspect();
-            var iconH = side * 0.66f;
+            var barW = Math.Max(0.001f, _cfg.HudBarWidth);
+            var barH = Math.Max(0.004f, _cfg.HudBarLength);
 
-            var barW = side * 0.34f / Aspect();
-            var barH = Math.Max(0.02f, _cfg.HudBarLength);
+            // ANCHORED TO THE FOOT, and to nothing else. It used to be reconstructed as
+            // top + side * 2 + gap, which is the same number in auto position and is NOT in
+            // manual -- so Gap, whose job here is the space BETWEEN the two bars, was also
+            // sliding the pair up and down the screen. One thing, one effect.
+            var barTop = bottom - barH;
 
-            // The pair sits with its FEET on the same line the icons ended on, so switching
-            // style does not move the HUD up the screen.
-            var floor = top + side * 2f + gap;
-            var barTop = floor - barH;
+            // GAP IS THE SPACE BETWEEN THEM. In the icon layout it is the vertical space
+            // between two stacked pictures; upright and side by side, the same setting means
+            // the horizontal one, which is what somebody reaching for "gap" while looking at
+            // two bars is reaching for.
+            //
+            // A MINIMUM under it, because at the fuel gauge's width -- nine pixels on a 1080p
+            // screen -- a gap of nothing leaves two bars touching, and two bars touching read
+            // as one bar with a line down it.
+            var pitch = barW + Math.Max(barW * 1.6f, _cfg.HudGap * barW * 2.4f);
 
-            // Wide enough apart to read as two gauges, close enough to read as one instrument.
-            var pitch = Math.Max(barW * 2.1f, iconW * 1.15f);
-
-            Column(needs.Hunger, _apple, x + iconW / 2f, barTop, barH,
-                   barW, iconW, iconH, false);
-
-            Column(needs.Sleep, _eye, x + iconW / 2f + pitch, barTop, barH,
-                   barW, iconW, iconH, true);
+            Column(needs.Hunger, _apple, x + barW / 2f, barTop, barH, barW, false);
+            Column(needs.Sleep, _eye, x + barW / 2f + pitch, barTop, barH, barW, true);
         }
 
         /// <summary>One upright bar: the mark above it, the channel, and the level inside.</summary>
         private void Column(Need need, Icon[] set, float centreX, float top, float h,
-                            float w, float iconW, float iconH, bool sleep)
+                            float w, bool sleep)
         {
             if (_cfg.HudHideWhenFine && need.Value > _cfg.HudFineAbove) return;
 
             var body = Colour(need, sleep);
-
             var icon = set[Stage(need)];
-
-            if (icon != null && !icon.Missing)
-            {
-                icon.DrawSized(centreX, top - iconH * 0.62f, iconW, iconH,
-                               _cfg.HudAnimate ? Shimmer(body, need, sleep ? 0.37f : 0f) : body);
-            }
 
             var x = centreX - w / 2f;
 
-            // A dark surround and a darker channel, so it reads on a bright sky as well as on
-            // tarmac. Same two-layer treatment the menus use.
-            var edge = w * 0.16f;
+            // THE FUEL GAUGE'S OWN NUMBERS, alphas included. A surround at 205 over a channel
+            // at 165, and an edge of 0.22 of the bar's width with a floor under it -- a
+            // proportional edge alone becomes a hairline on a narrow bar, and a fixed one
+            // becomes a frame thicker than the gauge. Both of those were argued out in Fumes
+            // and there is no reason to argue them again here.
+            var edge = w * 0.22f;
+            if (edge < 0.0005f) edge = 0.0005f;
 
             Hud.Bar(x - edge, top - edge * Aspect(), w + edge * 2f, h + edge * 2f * Aspect(),
-                    Fade(Color.FromArgb(190, 0, 0, 0)));
+                    Fade(Color.FromArgb(205, 0, 0, 0)));
 
-            Hud.Bar(x, top, w, h, Fade(Color.FromArgb(150, 26, 26, 30)));
+            Hud.Bar(x, top, w, h, Fade(Color.FromArgb(165, 28, 28, 32)));
 
             var fraction = Clamp01(need.Value);
             if (fraction <= 0.002f) return;
@@ -330,6 +329,40 @@ namespace BareMinimum.UI
 
             if (sleep) Breathe(x, top, w, h, fraction, body);
             else Churn(x, top, w, h, fraction, body);
+
+            Foot(icon, centreX, top, w, h, fraction);
+        }
+
+        /// <summary>
+        /// The stage mark, standing in the bottom of the bar.
+        ///
+        /// INSIDE IT, the way the pump sits in the fuel gauge in Fumes -- which is the right
+        /// place for it and not only because it matches. Above the bar it was a third object
+        /// floating near the minimap with a gap to explain; in the foot it is part of the
+        /// instrument, and the two gauges take up less room for it.
+        ///
+        /// THE INK FLIPS WHEN THE LEVEL COVERS IT. Black on the fill, white on the empty
+        /// channel -- a mark drawn in one colour is invisible for half of the range it is
+        /// there to label. Straight from the fuel gauge, where it was learnt on a mark that
+        /// spent every empty tank unreadable.
+        ///
+        /// Drawn LAST, over the level, so the fill does not paint across it.
+        /// </summary>
+        private void Foot(Icon icon, float centreX, float top, float w, float h, float fraction)
+        {
+            if (icon == null || icon.Missing) return;
+
+            // Square on screen. A share of the bar's width, so it sits in the channel.
+            var iconW = w * Math.Max(0.2f, _cfg.HudBarIconScale);
+            var iconH = iconW * Aspect();
+
+            var inset = w * 0.16f;
+
+            var covered = h * fraction >= iconH + inset;
+
+            icon.DrawSized(centreX, top + h - inset - iconH / 2f, iconW, iconH,
+                           Fade(covered ? Color.FromArgb(245, 10, 10, 12)
+                                        : Color.FromArgb(225, 232, 232, 238)));
         }
 
         /// <summary>
@@ -361,8 +394,6 @@ namespace BareMinimum.UI
         /// </summary>
         private void Churn(float x, float y, float w, float h, float fraction, Color body)
         {
-            const int columns = 8;
-
             var t = (Environment.TickCount & int.MaxValue) / 1000f;
 
             var level = h * fraction;
@@ -403,29 +434,79 @@ namespace BareMinimum.UI
 
             if (level <= 0.002f) return;
 
-            // ---- the surface ----
+            // ---- the surface: A ROLLING SWELL, NOT THE FUEL GAUGE'S CHOP ----
+            //
+            // Fumes adds two sines at frequencies that do not divide into each other, which
+            // is right for petrol: it gives a restless, broken surface that never repeats,
+            // and fuel in a moving tank IS broken water.
+            //
+            // Food is not petrol and should not move like it. This is ONE long wave with a
+            // wavelength longer than the bar is wide, travelling steadily across -- so at any
+            // instant the surface is a single smooth arc tilting one way, and over time it
+            // rolls. No interference, no chop, nothing that can beat against itself.
+            //
+            // Under it, the whole surface rises and falls slowly, which is the part that
+            // makes it look like a quantity settling rather than a texture playing.
             var crest = Mix(body, Color.FromArgb(body.A, 255, 240, 205), 0.55f);
+
+            var columns = Columns(w);
+
+            // Slow, and slower still when there is plenty. A full stomach is a quiet one.
+            var roll = t * (0.55f + 0.85f * empty);
+            var breath = (float)Math.Sin(t * 0.62f) * swing * 0.30f;
 
             for (var i = 0; i < columns; i++)
             {
                 var left = x + w * i / columns;
                 var right = x + w * (i + 1) / columns;
 
-                var u = (float)i / (columns - 1);
+                // Centre of the column, not its edge: sampling at the edge puts the wave half
+                // a column out of step with the rectangle that is drawing it, which is a
+                // visible stagger once the columns are thin.
+                var u = (i + 0.5f) / columns;
 
-                // Two waves at frequencies that do not divide into each other: one sine reads
-                // as a machine, two read as something alive.
-                var wave = (float)(Math.Sin(t * 3.1f + u * 6.9f) * swing * 0.62f +
-                                   Math.Sin(t * 4.9f - u * 11.3f) * swing * 0.38f);
+                // Just over one wavelength across the bar. Any more and it is chop again.
+                var wave = (float)Math.Sin((roll + u * 1.15f) * Math.PI * 2.0) * swing + breath;
 
                 var topY = surfaceY + wave;
                 if (topY < y) topY = y;
 
                 if (topY < bodyTop) Hud.Bar(left, topY, right - left, bodyTop - topY, body);
 
-                Hud.Bar(left, topY, right - left, h * 0.010f, crest);
+                Hud.Bar(left, topY, right - left, h * 0.008f, crest);
             }
         }
+
+        /// <summary>
+        /// How many columns to draw a surface in, for a bar this wide.
+        ///
+        /// SMOOTHNESS IS RESOLUTION. A wave drawn in eight columns is eight steps whatever
+        /// the maths behind it says, and on a bar thirty pixels wide those steps are four
+        /// pixels each and plainly visible. One column per two pixels is under what anybody
+        /// can pick out.
+        ///
+        /// Bounded at both ends: sub-pixel rectangles are a lottery with the rasteriser, and
+        /// forty of them on a bar nobody can see is work for nothing.
+        /// </summary>
+        private int Columns(float w)
+        {
+            if (_screenW <= 0)
+            {
+                try { _screenW = GTA.UI.Screen.Resolution.Width; }
+                catch { _screenW = 1920; }
+            }
+
+            var px = w * _screenW;
+            var n = (int)(px / 2f);
+
+            if (n < 8) n = 8;
+            if (n > 40) n = 40;
+
+            return n;
+        }
+
+        /// <summary>Cached, because the resolution cannot change without a reload anyway.</summary>
+        private int _screenW;
 
         /// <summary>
         /// SLEEP: the whole column breathing, in and out.

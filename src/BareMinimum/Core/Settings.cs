@@ -353,7 +353,7 @@ namespace BareMinimum.Core
         /// <summary>Clear air between the two icons, as a fraction of the icon's own height.</summary>
         public float HudGap = 0.22f;
 
-        public float HudOpacity = 0.92f;
+        public float HudOpacity = 0.72f;
 
         /// <summary>
         /// Hide an icon entirely while that need is comfortable.
@@ -418,8 +418,26 @@ namespace BareMinimum.Core
         /// Named Length rather than Width because the bars stand up: the number is the run of
         /// the fill, and calling that a width while it measures downward is the sort of thing
         /// somebody edits in the wrong direction once and never trusts again.
+        ///
+        /// LIFTED STRAIGHT FROM THE FUEL GAUGE IN FUMES, along with the width and the icon
+        /// scale below. Two mods by the same hand putting instruments on the same screen
+        /// should agree about how big an instrument is, and Fumes' numbers have been looked
+        /// at on this monitor for months, which is worth more than a fresh guess.
         /// </summary>
-        public float HudBarLength = 0.075f;
+        public float HudBarLength = 0.1635f;
+
+        /// <summary>How WIDE a bar is, as a fraction of screen width. Fumes' figure.</summary>
+        public float HudBarWidth = 0.0046f;
+
+        /// <summary>
+        /// The mark in the foot of the bar, as a share of the bar's width.
+        ///
+        /// A dial because these bars are narrow -- Fumes' width is about sixteen pixels on an
+        /// ultrawide and nine on a 1080p screen -- and the apple has five states that have to
+        /// be told apart at whatever that comes to. Fumes uses 0.66 for a pump, which is a
+        /// simpler shape; this starts wider and can be pulled back.
+        /// </summary>
+        public float HudBarIconScale = 1.0f;
 
         // ---- Keys ------------------------------------------------------------
 
@@ -572,11 +590,10 @@ namespace BareMinimum.Core
                 cfg.HudGap = ini.GetFloat("HUD", "Gap", cfg.HudGap, 0f, 3f);
                 cfg.HudOpacity = ini.GetFloat("HUD", "Opacity", cfg.HudOpacity, 0.05f, 1f);
                 cfg.Style = ParseStyle(ini.GetString("HUD", "Style", ""), cfg.Style);
-                // BarWidth is the old name from when these lay on their side. Read as a
-                // fallback so an ini written in the last day keeps working.
-                cfg.HudBarLength = ini.GetFloat("HUD", "BarLength",
-                                    ini.GetFloat("HUD", "BarWidth", cfg.HudBarLength, 0.02f, 0.5f),
-                                    0.02f, 0.5f);
+                cfg.HudBarLength = ini.GetFloat("HUD", "BarLength", cfg.HudBarLength, 0.004f, 0.6f);
+                cfg.HudBarWidth = ini.GetFloat("HUD", "BarWidth", cfg.HudBarWidth, 0.001f, 0.2f);
+                cfg.HudBarIconScale = ini.GetFloat("HUD", "BarIconScale",
+                                                   cfg.HudBarIconScale, 0.2f, 3f);
 
                 cfg.HudAnimate = ini.GetBool("HUD", "Animate", cfg.HudAnimate);
                 cfg.HudShimmer = ini.GetFloat("HUD", "Shimmer", cfg.HudShimmer, 0f, 1f);

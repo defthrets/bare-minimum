@@ -391,8 +391,20 @@ namespace BareMinimum.UI
 
             Float("Bar height", "HUD", "BarLength",
                   () => _cfg.HudBarLength, v => _cfg.HudBarLength = v,
-                  0.004f, 0.02f, 0.30f, "0.000",
+                  0.004f, 0.010f, 0.400f, "0.0000",
                   "How tall the bars are, as a fraction of the screen.",
+                  () => _cfg.Style == HudStyle.Bars, "Bars only.");
+
+            Float("Bar width", "HUD", "BarWidth",
+                  () => _cfg.HudBarWidth, v => _cfg.HudBarWidth = v,
+                  0.0004f, 0.0010f, 0.0400f, "0.0000",
+                  "How wide the bars are. The fuel gauge in Fumes uses 0.0046.",
+                  () => _cfg.Style == HudStyle.Bars, "Bars only.");
+
+            Float("Bar mark size", "HUD", "BarIconScale",
+                  () => _cfg.HudBarIconScale, v => _cfg.HudBarIconScale = v,
+                  0.05f, 0.20f, 2.00f, "0.00",
+                  "The apple and eye in the foot of each bar, against the bar's width.",
                   () => _cfg.Style == HudStyle.Bars, "Bars only.");
 
             Bool("Markers on pause map", "Map", "ShopBlipsOnMainMap",
