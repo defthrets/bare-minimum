@@ -423,10 +423,18 @@ namespace BareMinimum.Core
         /// screen height. Bars only.
         ///
         /// The plate is inside this figure so that the number means the same thing here as
-        /// Height does in Fumes, where the pump sits inside the gauge. Set both to 0.1678 and
-        /// the two instruments are the same height on screen; when this measured the bar
-        /// alone they were not, and no amount of care with either number would have made them
-        /// agree.
+        /// Height does in Fumes, where the pump sits inside the gauge. Set both to the SAME
+        /// number and the two instruments are the same height on screen; when this measured
+        /// the bar alone they were not, and no amount of care with either number would have
+        /// made them agree.
+        ///
+        /// THE DEFAULT IS DELIBERATELY TALLER THAN THE FUEL GAUGE. It was set to Fumes' own
+        /// 0.1678 so the two would match exactly, and then tuned upward from there in front
+        /// of the actual minimap -- which is the only place this can honestly be judged. Two
+        /// meters read at a glance want a bit more column than one meter read on purpose.
+        ///
+        /// So 0.1678 is not a magic number to restore; it is simply what Fumes ships, and
+        /// what to set this to if an exact match is ever wanted again.
         ///
         /// Named Length rather than Width because the bars stand up: the number is the run of
         /// the fill, and calling that a width while it measures downward is the sort of thing
@@ -437,7 +445,7 @@ namespace BareMinimum.Core
         /// should agree about how big an instrument is, and Fumes' numbers have been looked
         /// at on this monitor for months, which is worth more than a fresh guess.
         /// </summary>
-        public float HudBarLength = 0.1678f;
+        public float HudBarLength = 0.184f;
 
         /// <summary>How WIDE a bar is, as a fraction of screen width. Fumes' figure.</summary>
         public float HudBarWidth = 0.0046f;
