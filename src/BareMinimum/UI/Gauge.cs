@@ -490,12 +490,13 @@ namespace BareMinimum.UI
 
                 var u = (i + 0.5f) / bands;
 
-                // A THREE-MINUTE LAP AND A FIVE. At this rate the contents are not really
-                // travelling any more, they are just never quite the same twice -- which is
-                // what was wanted: something that rewards a second look and does nothing at
-                // all to the first one.
-                var a = Pulse(u - t * 0.0055f, 0.58f);
-                var b = Pulse(u - t * 0.0034f + 0.5f, 0.76f);
+                // A SIX-MINUTE LAP AND A TEN. The contents are not travelling in any
+                // sense you could time; they are a slow change of shade that happens to be
+                // going somewhere. Which is the point -- this is the fifth halving, and the
+                // brief the whole way has been that a bar beside the minimap should reward a
+                // second look and do nothing at all to the first.
+                var a = Pulse(u - t * 0.00275f, 0.58f);
+                var b = Pulse(u - t * 0.0017f + 0.5f, 0.76f);
 
                 var warm = (a * 0.6f + b * 0.4f) * (0.09f + 0.13f * empty);
 
@@ -546,11 +547,14 @@ namespace BareMinimum.UI
             //
             // Twenty-two seconds and thirty-one, and the bow is now the slowest thing in
             // either bar. It is a stomach settling, not a pulse.
-            // THIRTY-SIX SECONDS AND FIFTY-TWO. A full bow now takes over half a minute,
-            // which is slower than a HUD element has any business being and is exactly the
-            // point: at this rate you cannot catch it moving, you can only notice that it has.
-            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 36.0)) * swing;
-            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 52.0)) * swing * 0.40f;
+            // SEVENTY-TWO SECONDS AND A HUNDRED AND FOUR. A full bow takes over a minute:
+            // you cannot watch this happen, you can only come back to it and find it
+            // different. Halved five times now, and each time it was still too quick.
+            //
+            // [HUD] BarPace lifts the whole instrument back up if this proves to be past the
+            // point of being worth drawing at all.
+            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 72.0)) * swing;
+            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 104.0)) * swing * 0.40f;
 
             var crest = Mix(body, Color.FromArgb(body.A, 255, 240, 205), 0.55f);
 
@@ -617,9 +621,9 @@ namespace BareMinimum.UI
             {
                 // A little quicker when there is less to sink through. Speeds that do not
                 // divide into each other, so the three never fall in formation.
-                // Halved again. A crumb takes a minute and a half to sink the bar at the
-                // default drift, so it reads as something settling rather than falling.
-                var speed = (0.024f + i * 0.006f + empty * 0.014f) * drift;
+                // Halved again: three minutes to sink the bar at the default drift. A
+                // crumb suspended rather than a crumb falling.
+                var speed = (0.012f + i * 0.003f + empty * 0.007f) * drift;
                 var phase = (t * speed + i * 0.37f) % 1f;
 
                 var py = surfaceY + level * phase;

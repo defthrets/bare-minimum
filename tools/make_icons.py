@@ -361,56 +361,60 @@ def _squash(img, sx, sy, px, py):
 # you are rested, down to a thin crescent when you are not -- so the silhouette still
 # carries the reading and the colour is still only confirming it.
 #
-# THE CRESCENT, AND ONLY THE CRESCENT. It waned through five phases at first, on the
-# same argument the apple is built on: let the silhouette carry the state and leave the
-# colour to confirm it. That was overruled, and this is a plain crescent at every stage.
+# SUN THROUGH TO MOON. Wide awake is daylight; worn out is a crescent and two stars,
+# and the three stages between are the sun going down.
 #
-# WHAT THAT COSTS, so nobody has to rediscover it: in Bars mode, nothing -- the bar is
-# the reading and the mark is only identity, exactly as the pump is in Fumes. In Icons
-# mode the moon now says how tired you are in COLOUR ALONE, blue through to dark purple,
-# where the apple still says it in shape as well. The phases are one table away if that
-# turns out to matter: put MOON_SHADOW back and index it by stage.
+# THIS PUTS THE STATE BACK IN THE SILHOUETTE, which is the argument the apple has always
+# been built on and which the plain crescent had quietly given up: five identical moons
+# said everything in colour, and colour is the channel that fails first -- on a bright
+# sky, on a cheap monitor, for anybody colourblind. A sun and a crescent cannot be
+# confused by anyone.
 #
-# TWO CIRCLES, AND THE CUTTER IS THE BIGGER ONE. That is the whole trick and it is not
-# obvious: subtract a circle the same size or smaller and you get a fat gibbous with
-# blunt ends. A LARGER circle, offset less than its own radius, cuts an arc that closes
-# in faster than the outer edge does -- which is what draws the horns out to points.
-MOON_R = 88.0                   # the moon's own radius
+# Per stage: how long the rays are (0 for none), how far the shadow has slid clear, and
+# how many stars are out.
+#
+#   4  full sun, long rays          -- rested
+#   3  sun, short rays              -- the sun getting low
+#   2  a bare disc                  -- neither one nor the other; dusk
+#   1  a fat crescent, one star     -- night coming on
+#   0  the crescent, two stars      -- and this is the one that was drawn to reference
+#
+# SHADOW: BIGGER MEANS MORE MOON. The cutter is a disc sitting on top; at a small offset
+# it covers nearly everything and leaves a thin crescent, and past R + CUT_R it has
+# walked off entirely. So the number goes DOWN as you get more tired. Written the other
+# way round once already, and the moon got fuller the longer you stayed up.
+MOON_STAGES = {
+    4: (52.0, 0.0, 0),
+    3: (30.0, 0.0, 0),
+    2: (0.0, 0.0, 0),
+    1: (0.0, 54.0, 1),
+    0: (0.0, 36.0, 2),
+}
+
+MOON_R = 88.0                   # the disc's radius
 MOON_CUT_R = 78.0               # the cutter
-MOON_CUT_OFFSET = 36.0          # how far the cutter sits from centre
 MOON_CUT_ANGLE = -46.0          # up and to the right, as the reference has it
 
-# THICKNESS IS R - CUT_R + OFFSET, and it was 31 of a possible 88 -- a fine crescent
-# that looked right at 256 and closed up into a hairline at the fifteen pixels a bar is
-# actually drawn at. It is 46 now, a bit over half the radius.
+# THICKNESS IS R - CUT_R + OFFSET. At offset 36 that is 46 of a possible 88 -- a bit over
+# half the radius, which is what it took to still read at the fifteen pixels a bar is
+# drawn at. A finer crescent looked right at 256 and closed into a hairline in the game.
 #
-# That means the cutter is SMALLER than the moon where it used to be larger, which costs
-# the very sharp horn tips: a cutter bigger than the disc closes in faster than the outer
-# edge and pulls the ends out to points, and a smaller one cannot. Blunter horns are the
-# price of a crescent you can see, and at fifteen pixels nobody was ever going to see the
-# points anyway.
+# It also means the cutter is SMALLER than the disc, which costs the very sharp horn
+# tips: only a cutter bigger than the disc closes in faster than the outer edge and pulls
+# the ends out to points. Blunter horns are the price of a crescent you can see.
 
-# Two stars in the open corner, as (x, y, radius).
+# Eight rays, as a fraction of the disc's radius for their inner end.
+MOON_RAY_COUNT = 8
+MOON_RAY_INNER = 1.16
+MOON_RAY_WIDTH = 0.30
+
+# The stars, as (x, y, radius). The second one only comes out at the last stage.
 #
-# THEY ARE NOT DECORATION. The crescent leaves the top right of the canvas completely
-# empty, so at HUD size the icon is a small mark in the corner of a large transparent
-# square -- it reads smaller than it is and sits off-centre in its own box. The stars fill
-# that corner, which balances the icon and says night twice over.
-#
-# Kept OUTSIDE the moon's outer circle, so the rim routine never has to reconcile a star
-# and the moon's edge in the same few pixels.
+# They sit INSIDE the disc's outer circle but well inside the CUTTER's, which is the void
+# the crescent opens onto -- so they are nowhere near the lit edge and the rim routine
+# never has to reconcile a star and the moon's rim in the same few pixels. That is the
+# constraint that matters: check against MOON_CUT_R if these ever move again.
 MOON_STARS = ((176.0, 62.0, 22.0), (211.0, 106.0, 15.0))
-#
-# PULLED IN AND GROWN. Out at the canvas edge they were two specks in the corner with a
-# gap between them and the moon, so the icon read as three separate small things rather
-# than as one mark -- and at bar size the far one was almost gone. Closer and larger,
-# they group with the crescent and the whole thing reads as a single logo.
-#
-# They now sit INSIDE the moon's outer circle but well inside the cutter's, which is the
-# void the crescent opens onto -- so they are nowhere near the lit edge and the rim
-# routine never has to reconcile a star and the moon's rim in the same few pixels. That
-# is the constraint that matters, not the outer circle: check against MOON_CUT_R if these
-# ever move again.
 
 
 def star(d, cx, cy, r):
@@ -428,21 +432,47 @@ def star(d, cx, cy, r):
 
 
 def moon(stage=0):
-    """A crescent. The same one at every stage -- see the note above."""
+    """Stage 4 is a sun, stage 0 is the crescent. See MOON_STAGES."""
     img, d = canvas()
 
     cx, cy = 128, 132
 
+    rays, shadow, stars = MOON_STAGES[stage]
+
+    # RAYS FIRST, so the disc drawn over them buries their inner ends. Drawn as tapered
+    # triangles rather than lines: a line of even width reads as a spoke, and a sun's rays
+    # come to a point.
+    if rays > 0.0:
+        inner = MOON_R * MOON_RAY_INNER
+        outer = inner + rays
+
+        for i in range(MOON_RAY_COUNT):
+            a = math.radians(i * 360.0 / MOON_RAY_COUNT + 22.5)
+            across = a + math.pi / 2.0
+
+            half = MOON_R * MOON_RAY_WIDTH / 2.0
+
+            tipx, tipy = cx + math.cos(a) * outer, cy + math.sin(a) * outer
+            bx, by = cx + math.cos(a) * inner, cy + math.sin(a) * inner
+
+            d.polygon([
+                (s(tipx), s(tipy)),
+                (s(bx + math.cos(across) * half), s(by + math.sin(across) * half)),
+                (s(bx - math.cos(across) * half), s(by - math.sin(across) * half)),
+            ], fill=WHITE)
+
     d.ellipse([s(cx - MOON_R), s(cy - MOON_R), s(cx + MOON_R), s(cy + MOON_R)], fill=WHITE)
 
-    a = math.radians(MOON_CUT_ANGLE)
-    ox = cx + math.cos(a) * MOON_CUT_OFFSET
-    oy = cy + math.sin(a) * MOON_CUT_OFFSET
+    if shadow > 0.0:
+        a = math.radians(MOON_CUT_ANGLE)
+        ox = cx + math.cos(a) * shadow
+        oy = cy + math.sin(a) * shadow
 
-    d.ellipse([s(ox - MOON_CUT_R), s(oy - MOON_CUT_R),
-               s(ox + MOON_CUT_R), s(oy + MOON_CUT_R)], fill=CLEAR)
+        d.ellipse([s(ox - MOON_CUT_R), s(oy - MOON_CUT_R),
+                   s(ox + MOON_CUT_R), s(oy + MOON_CUT_R)], fill=CLEAR)
 
-    for sx, sy, sr in MOON_STARS:
+    for i in range(stars):
+        sx, sy, sr = MOON_STARS[i]
         star(d, sx, sy, sr)
 
     return img

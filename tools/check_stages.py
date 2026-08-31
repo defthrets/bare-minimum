@@ -82,18 +82,17 @@ def main():
     good &= check("apple", "HUNGER, the apple")
     print("")
 
-    # NO CHECK FOR THE MOON, and that is on purpose rather than an oversight.
+    # THE MOON IS BACK IN, because it has something to check again.
     #
-    # It used to be an eye that closed, then a moon that waned, and both were checked here
-    # for the same reason the apple is: five shapes that each look plausible on their own
-    # can still be out of order as a set, and only counting pixels catches it.
+    # It ran sun-through-to-crescent, then a plain crescent at every stage -- and while it
+    # was plain there was no ordering in the art to verify and this assert would have
+    # failed five files that were identical on purpose.
     #
-    # The moon is now a plain crescent at every stage -- asked for, and see make_icons.py.
-    # It carries the state in COLOUR alone, blue through to dark purple, so there is no
-    # ordering left in the art to verify. Asserting it got emptier would fail five files
-    # that are identical on purpose.
-    #
-    # If the phases ever come back, so does this line.
+    # It is a sequence again: a rayed sun, a shorter-rayed sun, a bare disc, a fat crescent
+    # and a thin one. That empties at every step exactly as the apple does, and five shapes
+    # that each look plausible alone can still be out of order as a set -- which is the
+    # whole reason this script exists.
+    good &= check("moon", "SLEEP, sun through to crescent")
 
     print("")
 
