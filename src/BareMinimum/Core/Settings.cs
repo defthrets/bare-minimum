@@ -412,8 +412,14 @@ namespace BareMinimum.Core
         /// </summary>
         public HudStyle Style = HudStyle.Icons;
 
-        /// <summary>How long a bar is, as a fraction of screen width. Bars only.</summary>
-        public float HudBarWidth = 0.082f;
+        /// <summary>
+        /// How TALL a bar is, as a fraction of screen height. Bars only.
+        ///
+        /// Named Length rather than Width because the bars stand up: the number is the run of
+        /// the fill, and calling that a width while it measures downward is the sort of thing
+        /// somebody edits in the wrong direction once and never trusts again.
+        /// </summary>
+        public float HudBarLength = 0.075f;
 
         // ---- Keys ------------------------------------------------------------
 
@@ -566,7 +572,11 @@ namespace BareMinimum.Core
                 cfg.HudGap = ini.GetFloat("HUD", "Gap", cfg.HudGap, 0f, 3f);
                 cfg.HudOpacity = ini.GetFloat("HUD", "Opacity", cfg.HudOpacity, 0.05f, 1f);
                 cfg.Style = ParseStyle(ini.GetString("HUD", "Style", ""), cfg.Style);
-                cfg.HudBarWidth = ini.GetFloat("HUD", "BarWidth", cfg.HudBarWidth, 0.02f, 0.5f);
+                // BarWidth is the old name from when these lay on their side. Read as a
+                // fallback so an ini written in the last day keeps working.
+                cfg.HudBarLength = ini.GetFloat("HUD", "BarLength",
+                                    ini.GetFloat("HUD", "BarWidth", cfg.HudBarLength, 0.02f, 0.5f),
+                                    0.02f, 0.5f);
 
                 cfg.HudAnimate = ini.GetBool("HUD", "Animate", cfg.HudAnimate);
                 cfg.HudShimmer = ini.GetFloat("HUD", "Shimmer", cfg.HudShimmer, 0f, 1f);

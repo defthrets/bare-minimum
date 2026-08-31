@@ -389,10 +389,10 @@ namespace BareMinimum.UI
                    () => (int)_cfg.Style, v => _cfg.Style = (HudStyle)v,
                    "An apple and an eye that change shape, or two filled bars.");
 
-            Float("Bar length", "HUD", "BarWidth",
-                  () => _cfg.HudBarWidth, v => _cfg.HudBarWidth = v,
+            Float("Bar height", "HUD", "BarLength",
+                  () => _cfg.HudBarLength, v => _cfg.HudBarLength = v,
                   0.004f, 0.02f, 0.30f, "0.000",
-                  "How long the bars are, as a fraction of the screen.",
+                  "How tall the bars are, as a fraction of the screen.",
                   () => _cfg.Style == HudStyle.Bars, "Bars only.");
 
             Bool("Markers on pause map", "Map", "ShopBlipsOnMainMap",
