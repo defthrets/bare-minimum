@@ -611,13 +611,20 @@ def main():
     for stage in range(5):
         save(apple(stage), "apple%d.png" % stage)
 
-    # NO FLAT COPIES ANY MORE. There used to be a rim-free set for the marks that stood
-    # in the FOOT of a bar, where a flat silhouette with its ink flipped against the fill
-    # was right -- the way the pump works in Fumes. The marks sit UNDER the bars now, on
-    # the world rather than in a channel, so they want their rim and the outlined set is
-    # the only one anybody asks for.
+    # FLAT COPIES, NO RIM, for the marks under the bars.
     #
-    # save() still takes outline=False, so bringing them back is one loop.
+    # THE OUTLINED SET IS STILL THE ICON HUD'S. That one sits on the world at whatever size
+    # HudSize says and needs its rim to survive a bright sky. The bar marks are a logo
+    # under an instrument, asked for as a plain black silhouette, and a black rim on black
+    # art is invisible at best -- CustomSprite MULTIPLIES, so the rim and the fill come out
+    # the same colour and all it does is fatten the shape by thirteen units.
+    #
+    # Two sets, one drawing, one flag apart.
+    for stage in range(5):
+        save(apple(stage), "apple%d_flat.png" % stage, outline=False)
+
+    for stage in range(5):
+        save(moon(stage), "moon%d_flat.png" % stage, outline=False)
 
     # THE MOON REPLACED THE EYE. eye() is still here and still works -- it is a decent
     # piece of drawing and the argument for the moon was about meaning, not quality --

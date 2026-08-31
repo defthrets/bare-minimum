@@ -43,6 +43,17 @@ namespace BareMinimum.UI
         /// </summary>
         private readonly Icon[] _moon = new Icon[5];
 
+        /// <summary>
+        /// The same two marks WITHOUT their rim, for the logos under the bars.
+        ///
+        /// The outlined set stays the ICON HUD's: that one sits on the world at whatever size
+        /// HudSize says and needs a rim to survive a bright sky. The bar marks are a plain
+        /// black silhouette, and a black rim on black art does nothing but fatten the shape --
+        /// CustomSprite MULTIPLIES, so rim and fill come out the same colour.
+        /// </summary>
+        private readonly Icon[] _appleFlat = new Icon[5];
+        private readonly Icon[] _moonFlat = new Icon[5];
+
 
         private bool _measured;
 
@@ -54,6 +65,9 @@ namespace BareMinimum.UI
             {
                 _apple[i] = new Icon("apple" + i + ".png");
                 _moon[i] = new Icon("moon" + i + ".png");
+
+                _appleFlat[i] = new Icon("apple" + i + "_flat.png");
+                _moonFlat[i] = new Icon("moon" + i + "_flat.png");
 
             }
         }
@@ -325,7 +339,11 @@ namespace BareMinimum.UI
 
             var body = Colour(need, sleep);
 
-            var icon = set[Stage(need)];
+            var flat = (sleep ? _moonFlat : _appleFlat)[Stage(need)];
+
+            // Falls back to the outlined art if the rim-free copy did not deploy. A logo with
+            // a rim on it is a great deal better than no logo at all.
+            if (flat == null || flat.Missing) flat = set[Stage(need)];
 
             var x = centreX - w / 2f;
 
@@ -355,39 +373,34 @@ namespace BareMinimum.UI
             if (sleep) Night(x, top, w, h, fraction, body);
             else Churn(x, top, w, h, fraction, body);
 
-            Badge(icon, need, centreX, top + h, markW, markH, breath, sleep);
+            Badge(flat, centreX, top + h, markW, markH, breath);
         }
 
         /// <summary>
-        /// The stage mark, standing under the bar.
+        /// The logo under the bar: flat, black, no rim.
         ///
-        /// NOT called Mark: that name already belongs to the icon HUD's own draw, and two
+        /// NOT called Mark -- that name already belongs to the icon HUD's own draw, and two
         /// methods by one name meaning two different things is a trap even when it compiles.
         ///
-        /// OUT OF THE CHANNEL AND ON THE WORLD, which changes which art it wants. In the foot
-        /// it was a flat silhouette with its ink flipped against the fill, the way the pump
-        /// works in Fumes -- and that needed art with no rim, because CustomSprite MULTIPLIES
-        /// and a black outline stays black whatever ink it is handed.
+        /// NO COLOUR AND NO SHIMMER, unlike everything else this class draws. The bar above it
+        /// is already saying how full the meter is, in a length and in a ramp; the logo only
+        /// has to say WHICH meter, and a black silhouette says that and nothing else. Tinting
+        /// it would be a third voice repeating the other two, and shimmering it would make the
+        /// quietest thing on the instrument the one that moves.
         ///
-        /// Out here there is no channel behind it, only whatever the player is looking at. So
-        /// it takes the OUTLINED art and the meter's own colour, exactly as the icon HUD does
-        /// -- the rim is what holds it against a bright sky, and the colour is one more place
-        /// the state is stated.
-        ///
-        /// Sized off the bar's width but not bounded by it any more, which was the point of
-        /// moving it: fifteen pixels was never enough for five apples to be told apart.
+        /// Rim-free art, because a black rim on a black silhouette is invisible by definition:
+        /// CustomSprite MULTIPLIES, so both come out black and all the outline does is fatten
+        /// the shape by thirteen units.
         /// </summary>
-        private void Badge(Icon icon, Need need, float centreX, float footY,
-                           float markW, float markH, float breath, bool sleep)
+        private void Badge(Icon icon, float centreX, float footY,
+                           float markW, float markH, float breath)
         {
             if (icon == null || icon.Missing) return;
 
-            var tint = Colour(need, sleep);
-
-            if (_cfg.HudAnimate) tint = Shimmer(tint, need, sleep ? 0.37f : 0f);
-
-            icon.DrawSized(centreX, footY + breath + markH / 2f, markW, markH, tint);
+            icon.DrawSized(centreX, footY + breath + markH / 2f, markW, markH,
+                           Fade(Color.FromArgb(240, 12, 12, 14)));
         }
+
 
 
         /// <summary>
