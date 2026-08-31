@@ -711,30 +711,18 @@ namespace BareMinimum.UI
             // Forty seconds a cycle, for the brightness of the cap.
             var pulse = 0.5f + 0.5f * (float)Math.Sin(t * (2.0 * Math.PI / 40.0));
 
-            // A TIDE: the whole surface rising and falling as one rigid line.
+            // THE SURFACE DOES NOT MOVE AT ALL, and that is the whole design of what follows.
             //
-            // This bar needed a level animation and it also needs a level you can READ, and
-            // those pulled against each other for several goes. A glow under the surface blurs
-            // the edge. A wave across a fifteen-pixel bar jitters. A bow like the food bar's
-            // changes the surface's shape, which is the shape you are reading.
+            // Four things have been tried on this level. A glow under it blurred the edge. A
+            // wave across a fifteen-pixel bar jittered. A bow like the food bar's changes the
+            // very shape you are reading. A tide moved the line, which is honest at three
+            // pixels but is still the reading wandering.
             //
-            // A tide does none of that. The edge stays hard and dead level -- every pixel of
-            // it moves together -- so it is exactly as legible standing still as it is moving,
-            // and what changes is only where it sits.
-            //
-            // Small on purpose: about three pixels on a bar two hundred and thirty-five tall,
-            // which is a bit over one per cent of the reading. It has to be honest as well as
-            // visible, and a gauge that lies by five per cent to look nice is a broken gauge.
-            //
-            // Fourteen seconds, which is quick next to everything else here -- but a rigid
-            // line is the one thing in this bar that can move at a readable rate without
-            // pulling at the corner of the eye, because there is no texture in it to shimmer.
-            var tide = (float)Math.Sin(t * (2.0 * Math.PI / 14.0)) * h * 0.012f;
-
-            var level = h * fraction + tide;
-
-            if (level < 0f) level = 0f;
-            if (level > h) level = h;
+            // The answer is to animate the WATER and leave the LINE alone. See Ripples: rings
+            // spread down from the surface and fade, the way they do off a stone on a still
+            // lake at night, and the surface they leave behind is exactly where the number
+            // says it is. Nothing to misread, and something to watch.
+            var level = h * fraction;
 
             var surfaceY = y + h - level;
 
@@ -773,7 +761,11 @@ namespace BareMinimum.UI
             // grounds that the icon showed a sun above those and stars in daylight are just
             // dots. The sun is gone; it is a crescent moon at every stage now, so it is night
             // in this meter the whole way down and the sky is never empty.
-            if (level > h * 0.06f) Stars(x, y, w, h, surfaceY, t, tired);
+            if (level > h * 0.06f)
+            {
+                Stars(x, y, w, h, surfaceY, t, tired);
+                Ripples(x, w, h, level, surfaceY, t, body);
+            }
 
             if (level <= 0.002f) return;
 
@@ -793,6 +785,61 @@ namespace BareMinimum.UI
 
             Hud.Bar(x, surfaceY, w, cap,
                     Mix(body, Color.FromArgb(body.A, 244, 248, 255), 0.55f + 0.30f * pulse));
+        }
+
+        /// <summary>
+        /// Rings spreading down from the waterline.
+        ///
+        /// THE LEVEL ANIMATION THAT DOES NOT TOUCH THE LEVEL. Everything else tried here moved
+        /// the surface or softened it, and both of those cost the one reading this object
+        /// exists to give. These start AT the surface and travel away from it, so the line
+        /// they leave is exactly where the number says it is.
+        ///
+        /// A stone dropped on a still lake, which is the same picture as the moon and the
+        /// stars above it. Each ring is born bright and thin at the waterline, spreads down a
+        /// short way, and is gone well before the floor -- so the bottom of the bar stays as
+        /// quiet as a sleeping meter should be.
+        ///
+        /// Three of them, on periods that do not divide into each other, so there is never a
+        /// beat you could count. Deterministic off the clock and the index, like everything
+        /// else that moves in these bars.
+        /// </summary>
+        private void Ripples(float x, float w, float h, float level, float surfaceY,
+                             float t, Color body)
+        {
+            const int count = 3;
+
+            // Never more than a fifth of the bar, and never more than half of what is in it --
+            // on a nearly empty meter a ring the size of the fill is a flash, not a ripple.
+            var reach = Math.Min(h * 0.20f, level * 0.5f);
+            if (reach < h * 0.02f) return;
+
+            var thick = Math.Max(h * 0.005f, 0.0008f);
+
+            for (var i = 0; i < count; i++)
+            {
+                // Eleven, fourteen and a half, eighteen.
+                var beat = 11f + i * 3.5f;
+
+                var phase = (t / beat + i * 0.41f) % 1f;
+
+                // Eased out: quick away from the surface, slowing as it goes, the way a ring
+                // on water actually travels. Linear reads as a scanner.
+                var travel = 1f - (1f - phase) * (1f - phase);
+
+                var ry = surfaceY + reach * travel;
+
+                // Brightest as it leaves and gone by the end. Squared, so most of its life is
+                // spent faint -- a ring that stays bright to the end is a bar, not a ripple.
+                var fade = 1f - phase;
+                fade = fade * fade;
+
+                var alpha = (int)(150f * fade);
+                if (alpha <= 5) continue;
+
+                Hud.Bar(x, ry, w, thick,
+                        Fade(Color.FromArgb(alpha, 226, 236, 255)));
+            }
         }
 
         /// <summary>
