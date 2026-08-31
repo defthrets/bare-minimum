@@ -376,14 +376,44 @@ def _squash(img, sx, sy, px, py):
 # blunt ends. A LARGER circle, offset less than its own radius, cuts an arc that closes
 # in faster than the outer edge does -- which is what draws the horns out to points.
 MOON_R = 88.0                   # the moon's own radius
-MOON_CUT_R = 95.0               # the cutter: bigger, which is what makes the horns
-MOON_CUT_OFFSET = 38.0          # how far the cutter sits from centre
-#
-# The pair above is a compromise a razor point cannot survive: push the cutter further
-# out and the horns come to a finer tip, and at 256 the rim routine starts fringing them
-# -- it offsets the alpha in eight directions, and where the shape is thinner than the
-# rim there is nothing left for the offsets to agree on. These sit just short of that.
+MOON_CUT_R = 78.0               # the cutter
+MOON_CUT_OFFSET = 36.0          # how far the cutter sits from centre
 MOON_CUT_ANGLE = -46.0          # up and to the right, as the reference has it
+
+# THICKNESS IS R - CUT_R + OFFSET, and it was 31 of a possible 88 -- a fine crescent
+# that looked right at 256 and closed up into a hairline at the fifteen pixels a bar is
+# actually drawn at. It is 46 now, a bit over half the radius.
+#
+# That means the cutter is SMALLER than the moon where it used to be larger, which costs
+# the very sharp horn tips: a cutter bigger than the disc closes in faster than the outer
+# edge and pulls the ends out to points, and a smaller one cannot. Blunter horns are the
+# price of a crescent you can see, and at fifteen pixels nobody was ever going to see the
+# points anyway.
+
+# Two stars in the open corner, as (x, y, radius).
+#
+# THEY ARE NOT DECORATION. The crescent leaves the top right of the canvas completely
+# empty, so at HUD size the icon is a small mark in the corner of a large transparent
+# square -- it reads smaller than it is and sits off-centre in its own box. The stars fill
+# that corner, which balances the icon and says night twice over.
+#
+# Kept OUTSIDE the moon's outer circle, so the rim routine never has to reconcile a star
+# and the moon's edge in the same few pixels.
+MOON_STARS = ((196.0, 56.0, 17.0), (226.0, 100.0, 11.0))
+
+
+def star(d, cx, cy, r):
+    """A four-pointed sparkle: long points, waist pulled right in."""
+    waist = r * 0.26
+
+    pts = [
+        (cx, cy - r), (cx + waist, cy - waist),
+        (cx + r, cy), (cx + waist, cy + waist),
+        (cx, cy + r), (cx - waist, cy + waist),
+        (cx - r, cy), (cx - waist, cy - waist),
+    ]
+
+    d.polygon([(s(px), s(py)) for px, py in pts], fill=WHITE)
 
 
 def moon(stage=0):
@@ -400,6 +430,9 @@ def moon(stage=0):
 
     d.ellipse([s(ox - MOON_CUT_R), s(oy - MOON_CUT_R),
                s(ox + MOON_CUT_R), s(oy + MOON_CUT_R)], fill=CLEAR)
+
+    for sx, sy, sr in MOON_STARS:
+        star(d, sx, sy, sr)
 
     return img
 
