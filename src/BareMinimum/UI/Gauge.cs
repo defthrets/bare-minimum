@@ -711,18 +711,43 @@ namespace BareMinimum.UI
             // Forty seconds a cycle, for the brightness of the cap.
             var pulse = 0.5f + 0.5f * (float)Math.Sin(t * (2.0 * Math.PI / 40.0));
 
-            // THE SURFACE DOES NOT MOVE AT ALL, and that is the whole design of what follows.
+            // A DROP LANDING, AND THE WATER SETTLING AFTER IT.
             //
-            // Four things have been tried on this level. A glow under it blurred the edge. A
-            // wave across a fifteen-pixel bar jittered. A bow like the food bar's changes the
-            // very shape you are reading. A tide moved the line, which is honest at three
-            // pixels but is still the reading wandering.
+            // On a bar fifteen pixels wide, the only surface movement anybody can actually see
+            // is VERTICAL -- horizontal shape barely survives the width, which is what sank
+            // the travelling wave and the tilt. So the difference between this bar and the
+            // food bar cannot be the shape of the motion. It has to be the RHYTHM of it.
             //
-            // The answer is to animate the WATER and leave the LINE alone. See Ripples: rings
-            // spread down from the surface and fade, the way they do off a stone on a still
-            // lake at night, and the surface they leave behind is exactly where the number
-            // says it is. Nothing to misread, and something to watch.
-            var level = h * fraction;
+            // Food breathes: one long sine, always going, never still. This is the opposite
+            // shape of event -- nothing at all for most of the cycle, then a knock, then a
+            // bob that dies away and leaves the surface flat again. A drip into a still pool.
+            //
+            // TWO THINGS FALL OUT OF THAT FOR FREE. The surface rests at exactly the true
+            // level for most of every cycle, so the reading is not merely honest on average,
+            // it is exact most of the time. And the rings below are no longer three unrelated
+            // timers -- they leave from the moment of the knock, which is what a ring is.
+            var beat = 13f;
+
+            var strike = (t / beat) % 1f;
+
+            // The bob: a couple of oscillations under an exponential decay, then flat. Fifteen
+            // hundredths of the cycle to happen in, so the still is much longer than the
+            // moving -- get that ratio wrong and it is a wobble rather than an event.
+            var bob = 0f;
+
+            if (strike < 0.42f)
+            {
+                var u = strike / 0.42f;
+
+                bob = (float)(Math.Sin(u * Math.PI * 2.6) * Math.Exp(-u * 3.4));
+            }
+
+            // About three pixels at its worst on a bar two hundred and thirty-five tall, and
+            // it is back to nothing within four seconds. Honest as well as visible.
+            var level = h * fraction - bob * h * 0.013f;
+
+            if (level < 0f) level = 0f;
+            if (level > h) level = h;
 
             var surfaceY = y + h - level;
 
@@ -764,7 +789,7 @@ namespace BareMinimum.UI
             if (level > h * 0.06f)
             {
                 Stars(x, y, w, h, surfaceY, t, tired);
-                Ripples(x, w, h, level, surfaceY, t, body);
+                Ripples(x, w, h, level, y + h - h * fraction, strike, body);
             }
 
             if (level <= 0.002f) return;
@@ -805,7 +830,7 @@ namespace BareMinimum.UI
         /// else that moves in these bars.
         /// </summary>
         private void Ripples(float x, float w, float h, float level, float surfaceY,
-                             float t, Color body)
+                             float strike, Color body)
         {
             const int count = 3;
 
@@ -818,15 +843,20 @@ namespace BareMinimum.UI
 
             for (var i = 0; i < count; i++)
             {
-                // Eleven, fourteen and a half, eighteen.
-                var beat = 11f + i * 3.5f;
+                // ALL THREE LEAVE FROM THE SAME KNOCK, a fifth of a cycle apart, rather than
+                // running on three timers of their own. Rings that arrive unrelated to the
+                // thing that made them are not rings, they are stripes -- and the surface
+                // above is already carrying the event, so this only has to agree with it.
+                var phase = strike - i * 0.13f;
 
-                var phase = (t / beat + i * 0.41f) % 1f;
+                if (phase < 0f || phase > 1f) continue;
 
                 // Eased out: quick away from the surface, slowing as it goes, the way a ring
                 // on water actually travels. Linear reads as a scanner.
                 var travel = 1f - (1f - phase) * (1f - phase);
 
+                // From the RESTING surface, not the bobbing one: a ring is already in the
+                // water and does not ride the splash that launched it.
                 var ry = surfaceY + reach * travel;
 
                 // Brightest as it leaves and gone by the end. Squared, so most of its life is
