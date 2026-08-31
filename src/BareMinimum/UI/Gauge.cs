@@ -356,7 +356,7 @@ namespace BareMinimum.UI
                 return;
             }
 
-            if (sleep) Breathe(x, top, w, h, fraction, body);
+            if (sleep) Night(x, top, w, h, fraction, body);
             else Churn(x, top, w, h, fraction, body);
 
             Foot(flat, centreX, top, w, h, fraction);
@@ -463,11 +463,14 @@ namespace BareMinimum.UI
             // fifteen pixels of width. Now that the surface swells and tips as a whole
             // instead, it can travel a proper distance and stay perfectly smooth, because
             // a straight line moving slowly is smooth however far it moves.
-            var swing = h * 0.048f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
+            var swing = h * 0.032f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
 
             var floor = y + h;
 
-            var bodyTop = surfaceY + swing;
+            // Below the lowest the surface can reach. The bow and the drift can push down
+            // together, so the body has to start under BOTH or the columns above it draw over
+            // ground the body has already covered -- which is a seam, in alpha, every frame.
+            var bodyTop = surfaceY + swing * 1.45f;
             if (bodyTop > floor) bodyTop = floor;
 
             // ---- the contents ----
@@ -487,14 +490,14 @@ namespace BareMinimum.UI
 
                 var u = (i + 0.5f) / bands;
 
-                // Slower again: a fifty-second lap and an eighty.
-                var a = Pulse(u - t * 0.020f, 0.58f);
-                var b = Pulse(u - t * 0.013f + 0.5f, 0.76f);
+                // A ninety-second lap and a hundred and forty.
+                var a = Pulse(u - t * 0.011f, 0.58f);
+                var b = Pulse(u - t * 0.007f + 0.5f, 0.76f);
 
-                var lift = (a * 0.6f + b * 0.4f) * (0.09f + 0.13f * empty);
+                var warm = (a * 0.6f + b * 0.4f) * (0.09f + 0.13f * empty);
 
                 Hud.Bar(x, bTop, w, bBot - bTop,
-                        Mix(body, Color.FromArgb(body.A, 255, 245, 220), lift));
+                        Mix(body, Color.FromArgb(body.A, 255, 245, 220), warm));
             }
 
             if (level <= 0.002f) return;
@@ -521,13 +524,27 @@ namespace BareMinimum.UI
             // hunger drains faster while you sprint (see Needs.Exertion), so running yourself
             // hungry makes this visibly livelier. That link is worth more than the base speed
             // ever was and it is the one part of the timing nobody has asked to slow.
+            // Still climbs as the meter empties. Hunger drains faster while you sprint
+            // (Needs.Exertion), so running yourself hungry makes this visibly livelier --
+            // the one part of the timing that is meant to move.
             var hurry = 1f + 0.85f * empty;
 
-            var swell = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 16.0)) * swing;
-            // The tilt is measured across the bar's WIDTH, which is fifteen pixels against
-            // the height's two hundred and thirty-five. Leaning it as far as the swell rises
-            // would stand the surface on its end, so it gets a third of the travel.
-            var tip = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 23.0)) * swing * 0.32f;
+            // A MENISCUS THAT BREATHES, NOT A PLANE THAT TILTS.
+            //
+            // The tilt had to go. A straight surface leaning one way and then the other is
+            // two hard diagonals swapping over, and on a bar fifteen pixels wide the
+            // changeover is a corner rather than a curve -- smooth in the maths and angular
+            // on the screen, which is exactly how it was reported.
+            //
+            // This bows instead: a parabola pinned at both walls and pushed up or down in the
+            // middle, which is how liquid actually sits in something narrow and which cannot
+            // have a corner in it at any amplitude. Under it the whole surface drifts a
+            // little, on a period that does not divide into the bow's.
+            //
+            // Twenty-two seconds and thirty-one, and the bow is now the slowest thing in
+            // either bar. It is a stomach settling, not a pulse.
+            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 22.0)) * swing;
+            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 31.0)) * swing * 0.40f;
 
             var crest = Mix(body, Color.FromArgb(body.A, 255, 240, 205), 0.55f);
 
@@ -538,15 +555,15 @@ namespace BareMinimum.UI
                 var left = x + w * i / columns;
                 var right = x + w * (i + 1) / columns;
 
-                // -1 at one edge, +1 at the other.
-                var lean = ((i + 0.5f) / columns - 0.5f) * 2f;
+                // -1 at one wall, +1 at the other.
+                var across = ((i + 0.5f) / columns - 0.5f) * 2f;
 
-                var topY = surfaceY + swell + tip * lean;
+                // 1 in the middle, 0 at both walls: the curve itself, and the reason there is
+                // no seam anywhere along the surface.
+                var curve = 1f - across * across;
 
-                // Clamped at BOTH ends now. A swell seven times what it was can push the
-                // surface above the top of the channel on a full bar and below its foot on
-                // a nearly empty one, and a crest drawn outside the bar is a line floating
-                // beside the gauge.
+                var topY = surfaceY + lift + bow * curve;
+
                 if (topY < y) topY = y;
                 if (topY > y + h - h * 0.007f) topY = y + h - h * 0.007f;
 
@@ -555,7 +572,7 @@ namespace BareMinimum.UI
                 Hud.Bar(left, topY, right - left, h * 0.007f, crest);
             }
 
-            Sediment(x, y, w, h, surfaceY + swell, t, empty);
+            Sediment(x, y, w, h, surfaceY + lift, t, empty);
         }
 
         /// <summary>
@@ -650,48 +667,37 @@ namespace BareMinimum.UI
         private int _screenW;
 
         /// <summary>
-        /// SLEEP: the whole column breathing, in and out.
+        /// SLEEP: a night sky, standing still.
         ///
-        /// NOT A LIQUID, deliberately. Two bars side by side doing the same slosh is one
-        /// animation drawn twice, and the reason for having two is that they are different
-        /// things. Hunger turns over; sleep swells and fades as a whole, on the one rhythm
-        /// everybody reads without being told what it is.
+        /// A TOTAL REDO, and the lesson behind it is worth keeping. The first version breathed
+        /// and the second blew wind through itself, and both were reported as too fast --
+        /// which they were not, particularly. The trouble is that ANY travel is too fast for
+        /// this bar, because it sits in the corner of the eye for a whole session and the one
+        /// thing that pulls at peripheral vision is something moving across it.
         ///
-        /// THE BREATH SLOWS AND DEEPENS AS IT EMPTIES -- a shallow four-second cycle rested,
-        /// a long heavy seven-second one exhausted -- so the animation carries the state
-        /// rather than decorating it. Inside the fill a soft wash rises with the breath and
-        /// falls back with it, which is what stops a breathing bar being a dimmer switch.
+        /// So nothing here moves. Not the level, not the contents. What changes is BRIGHTNESS
+        /// only: a glow that rises and falls at the waterline, and a scatter of fixed stars
+        /// that come up and go out at their own times. There is no speed to get wrong, which
+        /// is the actual fix rather than another number.
+        ///
+        /// It ties to the moon and the two stars on the icon, so the meter looks like one
+        /// thought from top to bottom.
         /// </summary>
-        private void Breathe(float x, float y, float w, float h, float fraction, Color body)
+        private void Night(float x, float y, float w, float h, float fraction, Color body)
         {
             var tired = 1f - fraction;
 
-            // SIX AND A HALF SECONDS RESTED, ELEVEN EXHAUSTED, up from four and seven.
-            // Four is a real resting breath, which is exactly the trouble: a HUD element does
-            // not have to breathe at a human rate, it has to be slow enough to sit beside the
-            // minimap for an hour without pulling at the eye.
-            var period = (6500f + 4500f * tired) / PaceOf();
-            var now = (Environment.TickCount & int.MaxValue) % (int)period;
-
-            // Not a plain sine: a breath draws in quicker than it lets out. Raising the phase
-            // to a power before the sine leans the curve without a second function.
-            var phase = now / period;
-            var eased = (float)Math.Sin(Math.Pow(phase, 0.78) * Math.PI * 2.0);
-
-            var depth = 0.06f + 0.16f * tired;
+            var t = Clock();
 
             var level = h * fraction;
-
-            // The level rises and falls very slightly with the breath. Alone it is too small
-            // to see; with the wash below it, it is the difference between a bar that is
-            // breathing and one that is being dimmed.
-            var swell = level * (1f + depth * 0.10f * eased);
-            if (swell > h) swell = h;
-
-            var surfaceY = y + h - swell;
+            var surfaceY = y + h - level;
             var floor = y + h;
 
-            // ---- the contents, in bands ----
+            // ---- the body, in bands, darkening downward ----
+            //
+            // A NIGHT SKY IS NOT FLAT. Brightest at the top where the light is and deeper
+            // toward the bottom -- which also means the level reads as depth rather than as a
+            // block of colour, and gives the stars something to sit in.
             var bands = Bands(h);
 
             for (var i = 0; i < bands; i++)
@@ -703,140 +709,103 @@ namespace BareMinimum.UI
 
                 var u = (i + 0.5f) / bands;
 
-                // A broad, soft band centred where the breath has got to -- high in the glass
-                // at the top of the inhale, sunk to the bottom at the end of the let-out.
-                var centre = 0.5f - 0.42f * eased;
+                // Down to two thirds at the floor. Gentle: any more and the bottom of a full
+                // bar looks empty.
+                var deep = Mix(body, Color.FromArgb(body.A,
+                                                    (int)(body.R * 0.62f),
+                                                    (int)(body.G * 0.62f),
+                                                    (int)(body.B * 0.68f)), u);
 
-                var wash = Pulse(u - centre + 0.5f, 0.62f);
-
-                var lift = depth * (0.35f + 0.65f * wash) * (0.5f + 0.5f * eased);
-
-                Hud.Bar(x, bTop, w, bBot - bTop,
-                        Mix(body, Color.FromArgb(body.A, 255, 250, 238), Math.Max(0f, lift)));
+                Hud.Bar(x, bTop, w, bBot - bTop, deep);
             }
 
-            if (swell <= 0.002f) return;
+            if (level <= 0.002f) return;
 
-            // A brighter skin on the surface, strongest at the top of the breath. It is the
-            // only part clearly moving when the meter is nearly full.
-            var cap = Mix(body, Color.FromArgb(body.A, 255, 248, 232), 0.30f + 0.35f * eased);
+            // ---- the glow at the waterline ----
+            //
+            // The only thing standing in for a level animation, and it does not move the
+            // level: the surface stays exactly where the number says it is, and a soft band
+            // beneath it brightens and fades. Moonlight on water, and a reading you cannot
+            // misread as a different number.
+            //
+            // Forty seconds a cycle. Slower than anything else in the mod, on purpose.
+            var pulse = 0.5f + 0.5f * (float)Math.Sin(t * (2.0 * Math.PI / 40.0));
 
-            Hud.Bar(x, surfaceY, w, h * 0.010f, cap);
+            var glowDepth = Math.Min(level, h * 0.16f);
+            var glowBands = Math.Max(3, Bands(h) / 5);
 
-            Wind(x, y, w, h, surfaceY, eased, tired);
+            for (var i = 0; i < glowBands; i++)
+            {
+                var gTop = surfaceY + glowDepth * i / glowBands;
+                var gBot = surfaceY + glowDepth * (i + 1) / glowBands;
+
+                // Strongest at the surface, gone by the bottom of the glow.
+                var falloff = 1f - (i + 0.5f) / glowBands;
+
+                var strength = 0.30f * falloff * falloff * (0.45f + 0.55f * pulse);
+
+                Hud.Bar(x, gTop, w, gBot - gTop,
+                        Mix(body, Color.FromArgb(body.A, 255, 250, 238), strength));
+            }
+
+            // The waterline itself, a hair brighter than the glow under it.
+            Hud.Bar(x, surfaceY, w, h * 0.006f,
+                    Mix(body, Color.FromArgb(body.A, 255, 250, 240), 0.42f + 0.28f * pulse));
+
+            Stars(x, y, w, h, surfaceY, t, tired);
         }
 
         /// <summary>
-        /// SLEEP: wind through it.
+        /// Fixed stars in the sky below the waterline.
         ///
-        /// RISING SPECKS WERE THE WRONG IDEA. Upward is what Fumes' bubbles do and what the
-        /// crumbs in the other bar do in reverse -- three vertical animations side by side is
-        /// one animation with three coats of paint on it. And nothing about a dot going up
-        /// says sleep; it says a tank.
+        /// THEY DO NOT MOVE AT ALL. Bubbles rise, crumbs sink, wind blows across -- this bar
+        /// has now tried two of those and the answer both times was that it was too quick.
+        /// Stars solve it by having nowhere to go: each one sits at a position derived from
+        /// its own index and only fades up and down, so there is no rate to be wrong about.
         ///
-        /// Wind does. Thin pale wisps blow ACROSS the column, curling as they go, drifting
-        /// upward far more slowly than they travel sideways, and fading out before they leave.
-        /// Sideways is the axis nothing else here uses, which is most of why it reads as its
-        /// own thing -- and drifting sideways with no particular destination is what the
-        /// inside of your head does on the way out.
+        /// POSITIONS FROM A CHEAP HASH, not Random and not a table. Random per frame would
+        /// make them flicker about; a table would be a dozen numbers to read and tune. A pair
+        /// of sines on the index scatters them well enough that no two line up, and it costs
+        /// nothing and keeps no state.
         ///
-        /// THEY BLOW WITH THE BREATH. Every speed here is scaled by the breath phase, so the
-        /// air moves on the draw in and settles on the let out. That is the same tie as
-        /// before and it is the point: a thing that stills when the breathing stills reads as
-        /// calm, and the same thing at a constant rate underneath reads as a screensaver.
-        ///
-        /// Deterministic off the clock and the wisp's own index, like everything else that
-        /// moves in these bars: no state between frames, no Random per speck.
+        /// Only drawn below the surface, so the sky fills as you rest and empties as you tire
+        /// -- which is the level doing the work, quietly, without anything sliding about.
         /// </summary>
-        private void Wind(float x, float y, float w, float h, float surfaceY,
-                          float eased, float tired)
+        private void Stars(float x, float y, float w, float h, float surfaceY,
+                           float t, float tired)
         {
-            const int count = 5;
-
-            // Segments per wisp. The curl is the whole difference between wind and a ruler:
-            // each segment sits a hair above or below its neighbour, so a streak arrives
-            // bent and changes shape as it crosses.
-            const int segments = 6;
+            const int count = 9;
 
             var level = y + h - surfaceY;
-            if (level < h * 0.10f) return;
+            if (level < h * 0.06f) return;
 
-            var drift = Clamp01(_cfg.HudBarDrift);
-            if (drift <= 0.001f) return;
-
-            var t = Clock();
-
-            // Settles to a quarter of itself at the bottom of the let-out rather than
-            // stopping: air that halts dead reads as a dropped frame.
-            var carry = 0.25f + 0.75f * (0.5f + 0.5f * eased);
-
-            // IT WAS DRAWING SUB-PIXEL LINES. h is already a fraction of the screen --
-            // 0.1635 of it -- so h * 0.0040 is 0.00065 of the screen height, which on a
-            // 1440-tall monitor is nine tenths of ONE PIXEL. Multiplied by a fade, a swell
-            // and a tired-scale on top, there was nothing there to see. Reported, correctly,
-            // as no wind animation at all.
-            //
-            // 0.020 is about four and a half pixels, which is a wisp rather than a rumour.
-            var thick = Math.Max(h * 0.020f, 0.0010f);
+            var size = Math.Max(w * 0.16f, 0.0008f);
+            var tall = size * Aspect();
 
             for (var i = 0; i < count; i++)
             {
-                // ACROSS, alternating direction. All four going the same way is a conveyor;
-                // two each way is air moving about.
-                var back = (i % 2) == 1;
+                // Scattered by a pair of sines on the index. Irrational-ish multipliers, so
+                // the pattern does not fall into rows.
+                var lane = 0.5f + 0.34f * (float)Math.Sin(i * 2.399963f);
+                var depth = (float)((i * 0.6180339887) % 1.0);
 
-                var across = (t * (0.048f + i * 0.011f) * drift * carry + i * 0.41f) % 1f;
-                var u = back ? 1f - across : across;
+                var sy = y + h - level * depth;
 
-                // Rising much more slowly than it travels. Sideways is the motion; the climb
-                // is only there so the same wisp never retraces its own line.
-                var climb = (t * (0.010f + i * 0.003f) * drift * carry + i * 0.27f) % 1f;
+                // Each on its own slow beat, none of them harmonics of each other, so the sky
+                // never blinks all at once.
+                var beat = 9f + (i % 4) * 3.5f;
 
-                var py = y + h - level * climb;
+                var twinkle = 0.5f + 0.5f * (float)Math.Sin(t * (2.0 * Math.PI / beat) + i * 1.7f);
 
-                // LONGER THAN THE BAR IS WIDE, and clipped to it. What you see is a section
-                // of something passing through rather than a dash appearing in mid-air and
-                // vanishing again -- which is the difference between weather and a cursor.
-                var len = w * 1.6f;
-                var px = x - len + (w + len) * u;
+                // Sharpened, so each one is out more than it is in -- a sky of nine lamps all
+                // half lit is a dotted line, and stars are mostly not there.
+                twinkle = twinkle * twinkle * twinkle;
 
-                // Faded in and out along its climb, so nothing pops at the surface or the
-                // floor. The out is quicker than the in.
-                var fade = Math.Min(climb * 3.5f, Math.Min((1f - climb) * 2.2f, 1f));
+                var alpha = (int)(215f * twinkle * (0.45f + 0.55f * tired));
+                if (alpha <= 6) continue;
 
-                // And a slow swell of its own, each on a different beat, so the four are
-                // never all present at once.
-                var breathe = 0.45f + 0.55f * (float)Math.Sin(t * (0.23f + i * 0.06f) * drift + i * 1.9f);
-
-                // Brighter, and with a higher floor when rested. It was topping out around
-                // seventy on a one-pixel line; three of those multipliers stack, and each one
-                // is under one.
-                var alpha = (int)(200f * Math.Max(fade, 0f) * Math.Max(breathe, 0f) *
-                                  (0.55f + 0.45f * tired));
-
-                if (alpha <= 4) continue;
-
-                var ink = Fade(Color.FromArgb(alpha, 232, 238, 255));
-
-                for (var seg = 0; seg < segments; seg++)
-                {
-                    // Exactly tiling, computed from one expression, so no two segments
-                    // overlap -- these are alpha draws and an overlap is a bright notch.
-                    var l = px + len * seg / segments;
-                    var r = px + len * (seg + 1) / segments;
-
-                    if (r <= x || l >= x + w) continue;
-
-                    if (l < x) l = x;
-                    if (r > x + w) r = x + w;
-                    if (r <= l) continue;
-
-                    // The curl: a wave along the wisp's own length, travelling with it.
-                    var s = (seg + 0.5f) / segments;
-                    var curl = (float)Math.Sin((s * 2.2f + t * 0.20f * drift + i) * Math.PI * 2.0);
-
-                    Hud.Bar(l, py + curl * thick * 1.3f, r - l, thick, ink);
-                }
+                Hud.Bar(x + w * lane - size / 2f, sy - tall / 2f, size, tall,
+                        Fade(Color.FromArgb(alpha, 240, 244, 255)));
             }
         }
 

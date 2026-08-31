@@ -399,7 +399,18 @@ MOON_CUT_ANGLE = -46.0          # up and to the right, as the reference has it
 #
 # Kept OUTSIDE the moon's outer circle, so the rim routine never has to reconcile a star
 # and the moon's edge in the same few pixels.
-MOON_STARS = ((196.0, 56.0, 17.0), (226.0, 100.0, 11.0))
+MOON_STARS = ((176.0, 62.0, 22.0), (211.0, 106.0, 15.0))
+#
+# PULLED IN AND GROWN. Out at the canvas edge they were two specks in the corner with a
+# gap between them and the moon, so the icon read as three separate small things rather
+# than as one mark -- and at bar size the far one was almost gone. Closer and larger,
+# they group with the crescent and the whole thing reads as a single logo.
+#
+# They now sit INSIDE the moon's outer circle but well inside the cutter's, which is the
+# void the crescent opens onto -- so they are nowhere near the lit edge and the rim
+# routine never has to reconcile a star and the moon's rim in the same few pixels. That
+# is the constraint that matters, not the outer circle: check against MOON_CUT_R if these
+# ever move again.
 
 
 def star(d, cx, cy, r):
