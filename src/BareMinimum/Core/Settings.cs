@@ -423,7 +423,7 @@ namespace BareMinimum.Core
         /// screen height. Bars only.
         ///
         /// The plate is inside this figure so that the number means the same thing here as
-        /// Height does in Fumes, where the pump sits inside the gauge. Set both to 0.1635 and
+        /// Height does in Fumes, where the pump sits inside the gauge. Set both to 0.1678 and
         /// the two instruments are the same height on screen; when this measured the bar
         /// alone they were not, and no amount of care with either number would have made them
         /// agree.
@@ -437,7 +437,7 @@ namespace BareMinimum.Core
         /// should agree about how big an instrument is, and Fumes' numbers have been looked
         /// at on this monitor for months, which is worth more than a fresh guess.
         /// </summary>
-        public float HudBarLength = 0.1635f;
+        public float HudBarLength = 0.1678f;
 
         /// <summary>How WIDE a bar is, as a fraction of screen width. Fumes' figure.</summary>
         public float HudBarWidth = 0.0046f;
