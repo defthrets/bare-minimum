@@ -1171,6 +1171,13 @@ namespace BareMinimum.UI
         // is now paid for directly. Lightness is what keeps the margin: L* 33 here against
         // fuel's darkest of 48.
         //
+        // THE TOP END IS FREE, and that is worth knowing before anybody tunes it. Once the
+        // bottom went brown the closest approach to fuel moved down there, so every one of
+        // these greens measures exactly dE 51 from fuel and 63 from sleep whatever is done to
+        // them -- the full end stopped being the binding constraint and can be chosen on looks
+        // alone, as long as it stays green. It was a pale mint at chroma 42 and is a vivid
+        // green at 66.
+        //
         // Never lighter at the bottom than the channel behind it, and never washed out --
         // every point holds a chroma of at least 25, so no part of the range goes grey.
 
@@ -1180,9 +1187,9 @@ namespace BareMinimum.UI
         {
             Color.FromArgb(235, 102,  72,  34),   // empty     brown
             Color.FromArgb(235,  82, 122,  54),   // bad       olive
-            Color.FromArgb(235,  48, 168,  96),   // middling  green
-            Color.FromArgb(235,  92, 204, 132),   // fine      fresh green
-            Color.FromArgb(235, 156, 232, 172)    // full      light mint
+            Color.FromArgb(235,  40, 176,  88),   // middling  green
+            Color.FromArgb(235,  66, 212, 112),   // fine      fresh green
+            Color.FromArgb(235, 104, 234, 140)    // full      vivid green
         };
 
         // SLEEP IS BLUE AWAKE, DEEP PURPLE EXHAUSTED. It ran sunlight-through-to-night for

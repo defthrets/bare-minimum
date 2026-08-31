@@ -108,6 +108,55 @@
       "desc": "Add water and low expectations."
     },
     {
+      "_note": "THE TACO FARMER, the walk-up hatch. Its own wall paints a seedling growing",
+      "_note2": "out of a taco shell and the board lists nine plates, so it is not a Taco Bomb",
+      "_note3": "and should not be selling one -- this was the generic taco until the sign",
+      "_note4": "turned out to have a name on it.",
+      "id": "farmer_taco",
+      "name": "Taco Farmer Taco",
+      "category": "Food",
+      "price": 8,
+      "hunger": 0.36,
+      "shop": false,
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02",
+        "ng_proc_food_taco1",
+        "prop_food_bs_taco"
+      ],
+      "seconds": 4.0,
+      "icon": "taco",
+      "tint": "#e8b24a",
+      "desc": "Grown, allegedly, rather than assembled."
+    },
+    {
+      "_note": "The drive-through's own plate. Carne asada tops the board and a combo is what",
+      "_note2": "a drive-through sells, so this comes with a drink and eats slowly in a car.",
+      "id": "farmer_plate",
+      "name": "Carne Asada Plate",
+      "category": "Food",
+      "price": 13,
+      "hunger": 0.64,
+      "shop": false,
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02",
+        "prop_food_bs_bowl",
+        "prop_sandwich_01"
+      ],
+      "drinkProp": [
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup",
+        "prop_ld_can_01"
+      ],
+      "combo": true,
+      "seconds": 5.5,
+      "vehicleSeconds": 55,
+      "icon": "taco",
+      "tint": "#d59a3e",
+      "desc": "Carne asada, rice, beans and a cup the size of your forearm."
+    },
+    {
       "id": "taco",
       "name": "Taco Bomb Taco",
       "category": "Food",

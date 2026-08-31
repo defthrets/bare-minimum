@@ -258,9 +258,12 @@
       "kind": "diner"
     },
     {
-      "handle": "vespuccitacos",
-      "name": "Taco Window",
-      "vendor": "tacos_vespucci",
+      "handle": "thetacofarmer",
+      "name": "The Taco Farmer",
+      "vendor": [
+        "tacos_vespucci",
+        "taco_farmer_drivethru"
+      ],
       "gender": "none",
       "verified": false,
       "kind": "taco"
