@@ -160,6 +160,19 @@ namespace BareMinimum.UI
         /// <summary>Which way it was nudged: -1 for left, +1 for right.</summary>
         public int AdjustBy { get; private set; }
 
+        /// <summary>
+        /// Whether CTRL was held for the nudge just reported, asking for a finer step.
+        /// </summary>
+        ///
+        /// READ AS A KEY, not as a GTA control. There is no frontend control for "modifier",
+        /// and the pad has no spare button worth spending on this -- it is a keyboard nicety
+        /// for somebody lining a HUD up against the minimap, and on a pad the coarse step is
+        /// the only step. Nothing downstream breaks when it is always false.
+        ///
+        /// Safe despite CTRL being duck and cover in the game: the menu already suppresses
+        /// both for as long as it is open, so holding it does nothing but change this flag.
+        public bool Fine { get; private set; }
+
         /// <summary>Where the first visible row sits in the list.</summary>
         private int _scroll;
 
@@ -220,6 +233,7 @@ namespace BareMinimum.UI
             Activated = null;
             Adjusted = null;
             AdjustBy = 0;
+            Fine = false;
             TabChanged = false;
             JustClosed = false;
 
@@ -391,6 +405,13 @@ namespace BareMinimum.UI
 
             Adjusted = row;
             AdjustBy = by;
+
+            // Fully qualified rather than a using, because System.Windows.Forms.Control and
+            // GTA.Control would then both be in scope and every GTA.Control in this file is
+            // one careless edit from being ambiguous.
+            Fine = Game.IsKeyPressed(System.Windows.Forms.Keys.LControlKey)
+                || Game.IsKeyPressed(System.Windows.Forms.Keys.RControlKey);
+
             Sound("NAV_LEFT_RIGHT");
         }
 

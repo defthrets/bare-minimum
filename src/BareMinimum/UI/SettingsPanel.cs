@@ -40,7 +40,7 @@ namespace BareMinimum.UI
             public string Key = "";
 
             public Func<string> Show;
-            public Action<int> Nudge;
+            public Action<int, bool> Nudge;
 
             /// <summary>What to write to the ini. Null for an action row.</summary>
             public Func<string> Persist;
@@ -141,7 +141,7 @@ namespace BareMinimum.UI
                     var option = _ui.Adjusted.Tag as Option;
                     if (option != null && option.Nudge != null)
                     {
-                        option.Nudge(_ui.AdjustBy);
+                        option.Nudge(_ui.AdjustBy, _ui.Fine);
                         Touch(option);
                         Refill();
                     }
@@ -160,7 +160,7 @@ namespace BareMinimum.UI
                     {
                         // Enter on a value row nudges it forward, so a toggle can be flipped
                         // without anybody having to discover that left and right do anything.
-                        option.Nudge(1);
+                        option.Nudge(1, false);
                         Touch(option);
                         Refill();
                     }
@@ -236,8 +236,8 @@ namespace BareMinimum.UI
             }
 
             _ui.Subtitle = _dirty
-                ? "~y~Saving...~s~   left/right to change, enter to toggle"
-                : "Saved.  left/right to change, enter to toggle";
+                ? "~y~Saving...~s~   left/right to change, ctrl for fine steps"
+                : "Saved.  left/right to change, ctrl for fine steps";
         }
 
         /// <summary>
@@ -584,7 +584,7 @@ namespace BareMinimum.UI
                     var i = get();
                     return i >= 0 && i < names.Length ? names[i].ToUpperInvariant() : "?";
                 },
-                Nudge = dir =>
+                Nudge = (dir, fine) =>
                 {
                     var i = get() + (dir >= 0 ? 1 : -1);
 
@@ -613,7 +613,7 @@ namespace BareMinimum.UI
                 Available = available,
                 Unavailable = unavailable,
                 Show = () => get() ? "ON" : "OFF",
-                Nudge = dir => set(!get()),
+                Nudge = (dir, fine) => set(!get()),
                 Persist = () => get() ? "true" : "false"
             });
         }
@@ -621,10 +621,34 @@ namespace BareMinimum.UI
         /// <summary>
         /// A number with a step, a range and a display format.
         ///
-        /// The value is ROUNDED TO THE STEP after every nudge. Repeated floating-point addition
-        /// drifts -- twenty presses of +0.02 from 0.34 does not land on 0.74, it lands on
+        /// The value is ROUNDED after every nudge. Repeated floating-point addition drifts --
+        /// twenty presses of +0.02 from 0.34 does not land on 0.74, it lands on
         /// 0.7400000000000001, which then formats as the right thing while quietly failing an
         /// equality check and writing a mess into the ini.
+        ///
+        /// HOLDING CTRL TAKES THE SMALLER STEP, for lining a HUD up against the minimap where
+        /// the coarse step overshoots in both directions.
+        ///
+        /// THE FINE STEP IS THE FINEST THING THE ROW CAN SHOW, not a flat tenth. A tenth of
+        /// this row's step is invisible on almost every row here -- HUD X moves by 0.004 and
+        /// prints three decimals, so a tenth changes the fourth and the number on screen does
+        /// not move. A press that visibly does nothing is the exact complaint that turned out
+        /// to be a real bug in the Gap setting, and it is not worth manufacturing a fresh one
+        /// for the sake of a tidier rule.
+        ///
+        /// It is also the finest step worth having. HUD X at three decimals moves the bars
+        /// about two pixels at 1080p; a tenth of the coarse step would be two thirds of one
+        /// pixel, which DRAW_RECT cannot resolve, so half those presses would land on the same
+        /// pixel and read as a dead key.
+        ///
+        /// Where a row's format cannot show anything finer -- whole hours, whole metres -- the
+        /// two steps come out equal and CTRL simply does nothing, which is the honest answer.
+        ///
+        /// ROUNDING IS TO THE FINE STEP EVEN ON A COARSE PRESS. Rounding to the coarse step
+        /// would put every press back on the coarse grid and quietly throw away the fine
+        /// tuning that came before it -- nudge to 0.253, press right, and you would get 0.256
+        /// rather than 0.257. The fine step is a clean decimal, so it kills the drift just as
+        /// well without deciding the value has to sit on a grid.
         /// </summary>
         private void Float(string name, string section, string key,
                            Func<float> get, Action<float> set,
@@ -640,19 +664,51 @@ namespace BareMinimum.UI
                 Available = available,
                 Unavailable = unavailable,
                 Show = () => get().ToString(format, CultureInfo.InvariantCulture),
-                Nudge = dir =>
+                Nudge = (dir, fine) =>
                 {
-                    var v = get() + step * dir;
+                    var small = Fine(step, format);
+
+                    var v = get() + (fine ? small : step) * dir;
 
                     if (v < min) v = min;
                     if (v > max) v = max;
 
-                    if (step > 0f) v = (float)(Math.Round(v / step) * step);
+                    if (small > 0f) v = (float)(Math.Round(v / small) * small);
 
                     set(v);
                 },
                 Persist = () => get().ToString("0.####", CultureInfo.InvariantCulture)
             });
+        }
+
+        /// <summary>
+        /// The step CTRL takes: a tenth of the row's own, or the smallest amount its display
+        /// format can show, whichever is BIGGER.
+        ///
+        /// Bigger, because the point is a step you can see happen. See Float for why.
+        /// </summary>
+        private static float Fine(float step, string format)
+        {
+            var tick = 1f;
+
+            if (!string.IsNullOrEmpty(format))
+            {
+                var dot = format.IndexOf('.');
+
+                // No decimal point is a whole-number row -- hours, metres -- and one unit is
+                // as fine as it can be shown.
+                var places = dot < 0 ? 0 : format.Length - dot - 1;
+
+                for (var i = 0; i < places; i++) tick /= 10f;
+            }
+
+            var small = step / 10f;
+            if (small < tick) small = tick;
+
+            // Never coarser than the row's own step, which would make CTRL the blunt one.
+            if (small > step) small = step;
+
+            return small;
         }
 
         // ======================================================================
