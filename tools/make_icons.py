@@ -348,6 +348,75 @@ def _squash(img, sx, sy, px, py):
 
 
 # ===========================================================================
+# SLEEP -- a moon, waning
+# ===========================================================================
+#
+# It was an eye that closed. A moon says the same thing with none of the trouble: an
+# eye has to stay an eye at every width, which is why it needed a lid modelled as two
+# half-ellipses and an iris that shrinks to match, and it still only ever meant sleep
+# by convention. A moon means night to everybody, and it comes with its own way of
+# running down.
+#
+# THE PHASE IS THE STATE, exactly as the bites are for the apple. Full and round when
+# you are rested, down to a thin crescent when you are not -- so the silhouette still
+# carries the reading and the colour is still only confirming it.
+#
+# HOW FAR THE SHADOW HAS SLID CLEAR, per stage, in radii.
+#
+# BIGGER MEANS MORE MOON, WHICH IS THE OPPOSITE OF WHAT IT LOOKS LIKE. The shadow is a
+# disc the same size sitting on top; at an offset of 0 it covers the moon completely,
+# and at 2 it has walked off the edge and covers nothing. So the rested end of this
+# table is the LARGE number. Written the other way round first, and the result was a
+# moon that got fuller as you got more tired.
+#
+# Not linear: the interesting half of a moon is the crescent end, so the steps bunch
+# up there and the two full-ish stages are further apart than they look.
+MOON_SHADOW = {4: 2.20, 3: 1.42, 2: 1.05, 1: 0.78, 0: 0.52}
+
+# The craters, as (x, y, radius) against the disc's own centre and radius. Only drawn
+# where they survive the shadow, so they disappear as it wanes -- which is what stops
+# the full moon and the gibbous reading as the same picture with a bite out of it.
+#
+# KEPT OFF THE TERMINATOR. A crater sitting exactly where the shadow's edge falls reads
+# as a nick in the rim rather than as a crater, so they are biased to the left where the
+# lit part survives longest, and the one nearest the middle is the smallest.
+MOON_CRATERS = ((-0.40, -0.24, 0.16), (-0.08, 0.34, 0.19), (0.22, -0.34, 0.11))
+
+
+def moon(stage):
+    """stage 4 = full, stage 0 = a thin crescent."""
+    img, d = canvas()
+
+    cx, cy, r = 128, 138, 84
+
+    disc = Image.new("RGBA", img.size, CLEAR)
+    dd = ImageDraw.Draw(disc)
+
+    dd.ellipse([s(cx - r), s(cy - r), s(cx + r), s(cy + r)], fill=WHITE)
+
+    for ox, oy, cr in MOON_CRATERS:
+        px, py, pr = cx + ox * r, cy + oy * r, cr * r
+        dd.ellipse([s(px - pr), s(py - pr), s(px + pr), s(py + pr)], fill=CLEAR)
+
+    shadow = MOON_SHADOW[stage]
+
+    # Past two radii the discs cannot touch, so there is nothing to subtract.
+    if shadow < 2.0:
+        # THE SHADOW IS A DISC THE SAME SIZE, SLID ACROSS. That is what a moon actually
+        # is, and it is why the inner edge of a crescent curves the same way as the
+        # outer one -- draw the inside as an arc bending the other way and you have a
+        # banana. Very slightly larger, so the two rims cannot leave a hairline of white
+        # where they nearly touch.
+        sx = cx + r * shadow
+        sr = r * 1.015
+
+        dd.ellipse([s(sx - sr), s(cy - sr), s(sx + sr), s(cy + sr)], fill=CLEAR)
+
+    img.alpha_composite(disc)
+    return img
+
+
+# ===========================================================================
 # SLEEP -- an eye closing
 # ===========================================================================
 #
@@ -505,13 +574,14 @@ def main():
     for stage in range(5):
         save(eye(stage), "eye%d_flat.png" % stage, outline=False)
 
-    # Three frames per stage. Frame 0 keeps the plain name because it is the resting
-    # state and everything else in the mod -- the menu title marks, the settings panel --
-    # asks for eyeN.png and wants the eye at rest.
+    # THE MOON REPLACED THE EYE. eye() is still here and still works -- it is a decent
+    # piece of drawing and the argument for the moon was about meaning, not quality --
+    # but nothing asks for its files any more, so nothing writes them.
     for stage in range(5):
-        for phase in range(3):
-            name = "eye%d.png" % stage if phase == 0 else "eye%d_%d.png" % (stage, phase)
-            save(eye(stage, phase), name)
+        save(moon(stage), "moon%d.png" % stage)
+
+    for stage in range(5):
+        save(moon(stage), "moon%d_flat.png" % stage, outline=False)
 
     print("Done. Deploy with:  .\\build.ps1 -Deploy -FreshData")
 

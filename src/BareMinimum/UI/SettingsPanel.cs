@@ -88,16 +88,15 @@ namespace BareMinimum.UI
 
             _ui.Title = "BARE MINIMUM";
             _ui.LeftRightAdjusts = true;
-            // THE EYE BLINKS UP HERE. It is the one place in the mod with room for it: a
-            // menu is looked AT, so a mark that moves every few seconds is noticed and read
-            // as character. The same movement beside the minimap is in peripheral vision all
-            // the time, which is a different thing entirely and is why the HUD does not do it.
+            // THE BLINK WENT WITH THE EYE. It was the one place in the mod with room for a
+            // moving mark -- a menu is looked AT, so something that stirs every few seconds
+            // reads as character rather than as movement in the corner of your vision. A moon
+            // does not blink, and a moon that did would be a joke rather than an icon.
+            //
+            // Flipbook still takes them one file at a time, so a static mark costs nothing and
+            // never looks at the clock.
             _ui.TitleLeft = new Flipbook("apple2.png");
-            _ui.TitleRight = new Flipbook("eye2.png", "eye2_1.png", "eye2_2.png")
-            {
-                EveryMs = 5400,
-                SpanMs = 300
-            };
+            _ui.TitleRight = new Flipbook("moon2.png");
 
             Build();
         }

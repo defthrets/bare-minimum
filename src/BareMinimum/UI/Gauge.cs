@@ -33,16 +33,15 @@ namespace BareMinimum.UI
         private readonly Icon[] _apple = new Icon[5];
 
         /// <summary>
-        /// Five stages of eye. THE RESTING FRAME ONLY.
+        /// Five phases of moon, full down to a thin crescent.
         ///
-        /// The blink frames exist and are used -- by the settings panel's title mark, which is
-        /// a thing you look at. Beside the minimap they were wrong: that icon lives in
-        /// peripheral vision for the whole session, and something that shuts and reopens there
-        /// reads as movement in the corner of your eye, over and over, forever.
-        ///
-        /// What is left is quieter by design. See Shimmer and Bob.
+        /// IT WAS AN EYE THAT CLOSED. The moon says the same thing with none of the trouble:
+        /// an eye has to stay an eye at every width, which is why it needed a lid modelled as
+        /// two half-ellipses and an iris that shrank to match, and it still only ever meant
+        /// sleep by convention. A moon means night to everybody and comes with its own way of
+        /// running down.
         /// </summary>
-        private readonly Icon[] _eye = new Icon[5];
+        private readonly Icon[] _moon = new Icon[5];
 
         /// <summary>
         /// The same two marks WITHOUT their black rim, for standing in the foot of a bar.
@@ -56,7 +55,7 @@ namespace BareMinimum.UI
         /// The HUD icons keep their rim, because they sit on the world and need it.
         /// </summary>
         private readonly Icon[] _appleFlat = new Icon[5];
-        private readonly Icon[] _eyeFlat = new Icon[5];
+        private readonly Icon[] _moonFlat = new Icon[5];
 
         private bool _measured;
 
@@ -67,10 +66,10 @@ namespace BareMinimum.UI
             for (var i = 0; i < 5; i++)
             {
                 _apple[i] = new Icon("apple" + i + ".png");
-                _eye[i] = new Icon("eye" + i + ".png");
+                _moon[i] = new Icon("moon" + i + ".png");
 
                 _appleFlat[i] = new Icon("apple" + i + "_flat.png");
-                _eyeFlat[i] = new Icon("eye" + i + "_flat.png");
+                _moonFlat[i] = new Icon("moon" + i + "_flat.png");
             }
         }
 
@@ -260,7 +259,7 @@ namespace BareMinimum.UI
                 }
 
                 Mark(_apple, needs.Hunger, x, top + side / 2f, wide, side, 0f, false);
-                Mark(_eye, needs.Sleep, x, top + side + gap + side / 2f, wide, side, 0.37f, true);
+                Mark(_moon, needs.Sleep, x, top + side + gap + side / 2f, wide, side, 0.37f, true);
             }
             catch (Exception ex)
             {
@@ -315,7 +314,7 @@ namespace BareMinimum.UI
             var pitch = barW * (1f + Math.Max(0.45f, _cfg.HudGap * 2.4f));
 
             Column(needs.Hunger, _apple, x + barW / 2f, barTop, barH, barW, false);
-            Column(needs.Sleep, _eye, x + barW / 2f + pitch, barTop, barH, barW, true);
+            Column(needs.Sleep, _moon, x + barW / 2f + pitch, barTop, barH, barW, true);
         }
 
         /// <summary>One upright bar: the mark above it, the channel, and the level inside.</summary>
@@ -326,7 +325,7 @@ namespace BareMinimum.UI
 
             var body = Colour(need, sleep);
 
-            var flat = (sleep ? _eyeFlat : _appleFlat)[Stage(need)];
+            var flat = (sleep ? _moonFlat : _appleFlat)[Stage(need)];
 
             // Falls back to the outlined art if the flat copy did not deploy. A mark with a
             // rim on it is a great deal better than no mark at all.
@@ -710,73 +709,110 @@ namespace BareMinimum.UI
 
             Hud.Bar(x, surfaceY, w, h * 0.010f, cap);
 
-            Motes(x, y, w, h, surfaceY, eased, tired);
+            Wind(x, y, w, h, surfaceY, eased, tired);
         }
 
         /// <summary>
-        /// SLEEP: quiet lights drifting up through it.
+        /// SLEEP: wind through it.
         ///
-        /// WHAT CALM LOOKS LIKE. Fumes' bubbles are gas escaping -- they have somewhere to be
-        /// and they get there. These have nowhere to be: they rise slowly, wander sideways,
-        /// brighten and dim on their own time, and go out before they reach the top. Dust in
-        /// a shaft of light, or whatever you see with your eyes shut.
+        /// RISING SPECKS WERE THE WRONG IDEA. Upward is what Fumes' bubbles do and what the
+        /// crumbs in the other bar do in reverse -- three vertical animations side by side is
+        /// one animation with three coats of paint on it. And nothing about a dot going up
+        /// says sleep; it says a tank.
         ///
-        /// THEY MOVE WITH THE BREATH. Their climb is scaled by the breath phase, so they lift
-        /// on the draw in and very nearly stop on the let out. That is the whole reason they
-        /// are here rather than a second set of bubbles: it ties the particles to the one
-        /// rhythm this bar already has, and a thing that pauses when the breathing pauses
-        /// reads as calm rather than as decoration running on top.
+        /// Wind does. Thin pale wisps blow ACROSS the column, curling as they go, drifting
+        /// upward far more slowly than they travel sideways, and fading out before they leave.
+        /// Sideways is the axis nothing else here uses, which is most of why it reads as its
+        /// own thing -- and drifting sideways with no particular destination is what the
+        /// inside of your head does on the way out.
         ///
-        /// Deterministic off the clock and the index, like the sediment and like the fuel
-        /// gauge's bubbles: no state, no Random per frame.
+        /// THEY BLOW WITH THE BREATH. Every speed here is scaled by the breath phase, so the
+        /// air moves on the draw in and settles on the let out. That is the same tie as
+        /// before and it is the point: a thing that stills when the breathing stills reads as
+        /// calm, and the same thing at a constant rate underneath reads as a screensaver.
+        ///
+        /// Deterministic off the clock and the wisp's own index, like everything else that
+        /// moves in these bars: no state between frames, no Random per speck.
         /// </summary>
-        private void Motes(float x, float y, float w, float h, float surfaceY,
-                           float eased, float tired)
+        private void Wind(float x, float y, float w, float h, float surfaceY,
+                          float eased, float tired)
         {
             const int count = 4;
+
+            // Segments per wisp. The curl is the whole difference between wind and a ruler:
+            // each segment sits a hair above or below its neighbour, so a streak arrives
+            // bent and changes shape as it crosses.
+            const int segments = 6;
 
             var level = y + h - surfaceY;
             if (level < h * 0.10f) return;
 
-            var t = (Environment.TickCount & int.MaxValue) / 1000f;
-
-            var size = w * 0.20f;
-            var tall = size * Aspect();
-
-            // The climb slows to a fifth of itself at the bottom of the let-out rather than
-            // stopping dead: a particle that halts completely reads as a dropped frame.
-            var lift = 0.20f + 0.80f * (0.5f + 0.5f * eased);
-
             var drift = Clamp01(_cfg.HudBarDrift);
             if (drift <= 0.001f) return;
 
+            var t = (Environment.TickCount & int.MaxValue) / 1000f;
+
+            // Settles to a quarter of itself at the bottom of the let-out rather than
+            // stopping: air that halts dead reads as a dropped frame.
+            var carry = 0.25f + 0.75f * (0.5f + 0.5f * eased);
+
+            var thick = Math.Max(h * 0.0040f, 0.0006f);
+
             for (var i = 0; i < count; i++)
             {
-                var speed = (0.055f + i * 0.012f) * lift * drift;
+                // ACROSS, alternating direction. All four going the same way is a conveyor;
+                // two each way is air moving about.
+                var back = (i % 2) == 1;
 
-                // Climbing, so the phase runs from the floor upward.
-                var phase = (t * speed + i * 0.29f) % 1f;
+                var across = (t * (0.085f + i * 0.019f) * drift * carry + i * 0.41f) % 1f;
+                var u = back ? 1f - across : across;
 
-                var py = y + h - level * phase;
+                // Rising much more slowly than it travels. Sideways is the motion; the climb
+                // is only there so the same wisp never retraces its own line.
+                var climb = (t * (0.018f + i * 0.005f) * drift * carry + i * 0.27f) % 1f;
 
-                var lane = 0.22f + i * (0.56f / (count - 1));
-                var sway = (float)Math.Sin(t * (0.31f + i * 0.07f) * drift + i * 1.7f) * 0.13f;
+                var py = y + h - level * climb;
 
-                var px = x + w * (lane + sway) - size / 2f;
+                // LONGER THAN THE BAR IS WIDE, and clipped to it. What you see is a section
+                // of something passing through rather than a dash appearing in mid-air and
+                // vanishing again -- which is the difference between weather and a cursor.
+                var len = w * 1.6f;
+                var px = x - len + (w + len) * u;
 
-                var edge = Math.Min(phase * 4f, Math.Min((1f - phase) * 2.2f, 1f));
+                // Faded in and out along its climb, so nothing pops at the surface or the
+                // floor. The out is quicker than the in.
+                var fade = Math.Min(climb * 3.5f, Math.Min((1f - climb) * 2.2f, 1f));
 
-                // A slow twinkle of their own on top of the fade, each on a different beat.
-                // The twinkle slows with them. A speck creeping up the bar while flashing
-                // at its old rate is two different animations sharing a dot.
-                var twinkle = 0.55f + 0.45f * (float)Math.Sin(t * (0.9f + i * 0.23f) * drift + i);
+                // And a slow swell of its own, each on a different beat, so the four are
+                // never all present at once.
+                var breathe = 0.45f + 0.55f * (float)Math.Sin(t * (0.23f + i * 0.06f) * drift + i * 1.9f);
 
-                // Brighter the more tired you are. On a nearly full meter these are barely
-                // there, which is right -- there is nothing to say yet.
-                var alpha = (int)(150 * Math.Max(edge, 0f) * twinkle * (0.45f + 0.55f * tired));
+                var alpha = (int)(125f * Math.Max(fade, 0f) * Math.Max(breathe, 0f) *
+                                  (0.40f + 0.60f * tired));
+
                 if (alpha <= 4) continue;
 
-                Hud.Bar(px, py, size, tall, Fade(Color.FromArgb(alpha, 236, 240, 255)));
+                var ink = Fade(Color.FromArgb(alpha, 232, 238, 255));
+
+                for (var seg = 0; seg < segments; seg++)
+                {
+                    // Exactly tiling, computed from one expression, so no two segments
+                    // overlap -- these are alpha draws and an overlap is a bright notch.
+                    var l = px + len * seg / segments;
+                    var r = px + len * (seg + 1) / segments;
+
+                    if (r <= x || l >= x + w) continue;
+
+                    if (l < x) l = x;
+                    if (r > x + w) r = x + w;
+                    if (r <= l) continue;
+
+                    // The curl: a wave along the wisp's own length, travelling with it.
+                    var s = (seg + 0.5f) / segments;
+                    var curl = (float)Math.Sin((s * 2.2f + t * 0.20f * drift + i) * Math.PI * 2.0);
+
+                    Hud.Bar(l, py + curl * thick * 2.2f, r - l, thick, ink);
+                }
             }
         }
 

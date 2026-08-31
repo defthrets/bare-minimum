@@ -82,9 +82,11 @@ def main():
     good &= check("apple", "HUNGER, the apple")
     print("")
 
-    # The eye only, with the Z's corner left out of the count. The Z lives up and to the
-    # right of the eye, from about (170, 0); the eye never reaches above y=80.
-    good &= check("eye", "SLEEP, the eye (Z excluded)", box=(0, 80, 256, 256))
+    # THE WHOLE CANVAS, unlike the eye that used to be here. The eye carried a Z up in
+    # its corner, and the Z's ink made a closing eye measure as an opening one -- so that
+    # check had to be cropped to the eye itself. The moon has nothing beside it: the phase
+    # is the entire drawing, so the entire drawing is what gets counted.
+    good &= check("moon", "SLEEP, the moon")
 
     print("")
 
