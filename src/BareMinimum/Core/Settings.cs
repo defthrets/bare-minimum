@@ -473,14 +473,14 @@ namespace BareMinimum.Core
         public float HudBarDrift = 0.35f;
 
         /// <summary>
-        /// The mark in the foot of the bar, as a share of the bar's width.
+        /// The mark UNDER the bar, as a share of the bar's width.
         ///
-        /// A dial because these bars are narrow -- Fumes' width is about sixteen pixels on an
-        /// ultrawide and nine on a 1080p screen -- and the apple has five states that have to
-        /// be told apart at whatever that comes to. Fumes uses 0.66 for a pump, which is a
-        /// simpler shape; this starts wider and can be pulled back.
+        /// It used to stand in the foot of the channel, where it could never be wider than the
+        /// bar itself -- about sixteen pixels on an ultrawide and nine on a 1080p screen, and
+        /// an apple with five states to tell apart does not survive that. Underneath, nothing
+        /// bounds it but taste, so the default is getting on for twice the bar's width.
         /// </summary>
-        public float HudBarIconScale = 1.0f;
+        public float HudBarIconScale = 1.9f;
 
         // ---- Keys ------------------------------------------------------------
 

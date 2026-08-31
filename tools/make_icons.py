@@ -611,19 +611,13 @@ def main():
     for stage in range(5):
         save(apple(stage), "apple%d.png" % stage)
 
-    # FLAT COPIES, NO RIM, for the marks that stand in the foot of a bar.
+    # NO FLAT COPIES ANY MORE. There used to be a rim-free set for the marks that stood
+    # in the FOOT of a bar, where a flat silhouette with its ink flipped against the fill
+    # was right -- the way the pump works in Fumes. The marks sit UNDER the bars now, on
+    # the world rather than in a channel, so they want their rim and the outlined set is
+    # the only one anybody asks for.
     #
-    # The bar draws its mark the way the fuel gauge in Fumes draws its pump: as a flat
-    # silhouette, near-black over the fill and near-white over the empty channel. That
-    # only works on art with no outline of its own. CustomSprite MULTIPLIES its colour
-    # with the texture, so a black rim stays black whatever ink it is given -- ask for a
-    # black silhouette and you get a black shape inside a black halo, which at fifteen
-    # pixels wide is a smudge; ask for a white one and the rim cuts it up.
-    #
-    # So the HUD icons keep their rim, because they sit on the world and need it, and the
-    # bar marks get a copy without one. Same drawing, one flag apart.
-    for stage in range(5):
-        save(apple(stage), "apple%d_flat.png" % stage, outline=False)
+    # save() still takes outline=False, so bringing them back is one loop.
 
     # THE MOON REPLACED THE EYE. eye() is still here and still works -- it is a decent
     # piece of drawing and the argument for the moon was about meaning, not quality --

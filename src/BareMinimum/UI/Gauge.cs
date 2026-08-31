@@ -43,19 +43,6 @@ namespace BareMinimum.UI
         /// </summary>
         private readonly Icon[] _moon = new Icon[5];
 
-        /// <summary>
-        /// The same two marks WITHOUT their black rim, for standing in the foot of a bar.
-        ///
-        /// The bars draw their mark as a flat silhouette the way the fuel gauge in Fumes
-        /// draws its pump -- near-black over the fill, near-white over the empty channel --
-        /// and that needs art with no outline of its own. CustomSprite MULTIPLIES, so a black
-        /// rim stays black whatever ink it is given: a black silhouette comes out as a shape
-        /// inside a halo, and a white one gets cut up by it.
-        ///
-        /// The HUD icons keep their rim, because they sit on the world and need it.
-        /// </summary>
-        private readonly Icon[] _appleFlat = new Icon[5];
-        private readonly Icon[] _moonFlat = new Icon[5];
 
         private bool _measured;
 
@@ -68,8 +55,6 @@ namespace BareMinimum.UI
                 _apple[i] = new Icon("apple" + i + ".png");
                 _moon[i] = new Icon("moon" + i + ".png");
 
-                _appleFlat[i] = new Icon("apple" + i + "_flat.png");
-                _moonFlat[i] = new Icon("moon" + i + "_flat.png");
             }
         }
 
@@ -289,11 +274,23 @@ namespace BareMinimum.UI
             var barW = Math.Max(0.001f, _cfg.HudBarWidth);
             var barH = Math.Max(0.004f, _cfg.HudBarLength);
 
+            // THE MARKS SIT UNDER THE BARS NOW, not in the foot of them. In the channel they
+            // could never be wider than the bar -- fifteen pixels on an ultrawide, nine on a
+            // 1080p screen -- and an apple with five states to tell apart does not survive
+            // that. Out here it is bounded by nothing but taste.
+            var markW = barW * Math.Max(0.2f, _cfg.HudBarIconScale);
+            var markH = markW * Aspect();
+
+            var breath = barW * 0.55f;
+
             // ANCHORED TO THE FOOT, and to nothing else. It used to be reconstructed as
             // top + side * 2 + gap, which is the same number in auto position and is NOT in
             // manual -- so Gap, whose job here is the space BETWEEN the two bars, was also
             // sliding the pair up and down the screen. One thing, one effect.
-            var barTop = bottom - barH;
+            //
+            // The mark comes out of the SAME allowance, so the pair still ends on the line the
+            // icons ended on and switching style does not shunt the HUD up or down the screen.
+            var barTop = bottom - markH - breath - barH;
 
             // GAP IS THE SPACE BETWEEN THEM. In the icon layout it is the vertical space
             // between two stacked pictures; upright and side by side, the same setting means
@@ -313,23 +310,22 @@ namespace BareMinimum.UI
             // nothing overlaps. Everything above that is the setting doing its job.
             var pitch = barW * (1f + Math.Max(0.45f, _cfg.HudGap * 2.4f));
 
-            Column(needs.Hunger, _apple, x + barW / 2f, barTop, barH, barW, false);
-            Column(needs.Sleep, _moon, x + barW / 2f + pitch, barTop, barH, barW, true);
+            Column(needs.Hunger, _apple, x + barW / 2f, barTop, barH, barW,
+                   markW, markH, breath, false);
+
+            Column(needs.Sleep, _moon, x + barW / 2f + pitch, barTop, barH, barW,
+                   markW, markH, breath, true);
         }
 
         /// <summary>One upright bar: the mark above it, the channel, and the level inside.</summary>
         private void Column(Need need, Icon[] set, float centreX, float top, float h,
-                            float w, bool sleep)
+                            float w, float markW, float markH, float breath, bool sleep)
         {
             if (_cfg.HudHideWhenFine && need.Value > _cfg.HudFineAbove) return;
 
             var body = Colour(need, sleep);
 
-            var flat = (sleep ? _moonFlat : _appleFlat)[Stage(need)];
-
-            // Falls back to the outlined art if the flat copy did not deploy. A mark with a
-            // rim on it is a great deal better than no mark at all.
-            if (flat == null || flat.Missing) flat = set[Stage(need)];
+            var icon = set[Stage(need)];
 
             var x = centreX - w / 2f;
 
@@ -359,47 +355,40 @@ namespace BareMinimum.UI
             if (sleep) Night(x, top, w, h, fraction, body);
             else Churn(x, top, w, h, fraction, body);
 
-            Foot(flat, centreX, top, w, h, fraction);
+            Badge(icon, need, centreX, top + h, markW, markH, breath, sleep);
         }
 
         /// <summary>
-        /// The stage mark, standing in the bottom of the bar.
+        /// The stage mark, standing under the bar.
         ///
-        /// INSIDE IT, the way the pump sits in the fuel gauge in Fumes -- which is the right
-        /// place for it and not only because it matches. Above the bar it was a third object
-        /// floating near the minimap with a gap to explain; in the foot it is part of the
-        /// instrument, and the two gauges take up less room for it.
+        /// NOT called Mark: that name already belongs to the icon HUD's own draw, and two
+        /// methods by one name meaning two different things is a trap even when it compiles.
         ///
-        /// THE INK FLIPS WHEN THE LEVEL COVERS IT. Black on the fill, white on the empty
-        /// channel -- a mark drawn in one colour is invisible for half of the range it is
-        /// there to label. Straight from the fuel gauge, where it was learnt on a mark that
-        /// spent every empty tank unreadable.
+        /// OUT OF THE CHANNEL AND ON THE WORLD, which changes which art it wants. In the foot
+        /// it was a flat silhouette with its ink flipped against the fill, the way the pump
+        /// works in Fumes -- and that needed art with no rim, because CustomSprite MULTIPLIES
+        /// and a black outline stays black whatever ink it is handed.
         ///
-        /// Drawn LAST, over the level, so the fill does not paint across it.
+        /// Out here there is no channel behind it, only whatever the player is looking at. So
+        /// it takes the OUTLINED art and the meter's own colour, exactly as the icon HUD does
+        /// -- the rim is what holds it against a bright sky, and the colour is one more place
+        /// the state is stated.
+        ///
+        /// Sized off the bar's width but not bounded by it any more, which was the point of
+        /// moving it: fifteen pixels was never enough for five apples to be told apart.
         /// </summary>
-        private void Foot(Icon icon, float centreX, float top, float w, float h, float fraction)
+        private void Badge(Icon icon, Need need, float centreX, float footY,
+                           float markW, float markH, float breath, bool sleep)
         {
             if (icon == null || icon.Missing) return;
 
-            // Square on screen. A share of the bar's width, so it sits in the channel.
-            var iconW = w * Math.Max(0.2f, _cfg.HudBarIconScale);
-            var iconH = iconW * Aspect();
+            var tint = Colour(need, sleep);
 
-            var inset = w * 0.16f;
+            if (_cfg.HudAnimate) tint = Shimmer(tint, need, sleep ? 0.37f : 0f);
 
-            // THE INK FLIPS WITH THE LEVEL, exactly as the pump does in Fumes: near-black
-            // where the fill is behind it, near-white where the empty channel is. A mark
-            // drawn in one colour is invisible for half the range it exists to label, and
-            // that was learnt over there on a pump that spent every empty tank unreadable.
-            //
-            // It works here only because the art handed in has no rim of its own -- see
-            // _appleFlat. With one, the black pass would be a shape inside a halo.
-            var covered = h * fraction >= iconH + inset;
-
-            icon.DrawSized(centreX, top + h - inset - iconH / 2f, iconW, iconH,
-                           Fade(covered ? Color.FromArgb(240, 10, 10, 12)
-                                        : Color.FromArgb(225, 235, 235, 240)));
+            icon.DrawSized(centreX, footY + breath + markH / 2f, markW, markH, tint);
         }
+
 
         /// <summary>
         /// How many slices the filled part is drawn in.
