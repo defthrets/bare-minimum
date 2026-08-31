@@ -706,13 +706,37 @@ namespace BareMinimum.UI
 
             var t = Clock();
 
-            var level = h * fraction;
-            var surfaceY = y + h - level;
             var floor = y + h;
 
-            // Forty seconds a cycle. The slowest thing in the mod, and the only thing about
-            // this bar that changes at all.
+            // Forty seconds a cycle, for the brightness of the cap.
             var pulse = 0.5f + 0.5f * (float)Math.Sin(t * (2.0 * Math.PI / 40.0));
+
+            // A TIDE: the whole surface rising and falling as one rigid line.
+            //
+            // This bar needed a level animation and it also needs a level you can READ, and
+            // those pulled against each other for several goes. A glow under the surface blurs
+            // the edge. A wave across a fifteen-pixel bar jitters. A bow like the food bar's
+            // changes the surface's shape, which is the shape you are reading.
+            //
+            // A tide does none of that. The edge stays hard and dead level -- every pixel of
+            // it moves together -- so it is exactly as legible standing still as it is moving,
+            // and what changes is only where it sits.
+            //
+            // Small on purpose: about three pixels on a bar two hundred and thirty-five tall,
+            // which is a bit over one per cent of the reading. It has to be honest as well as
+            // visible, and a gauge that lies by five per cent to look nice is a broken gauge.
+            //
+            // Fourteen seconds, which is quick next to everything else here -- but a rigid
+            // line is the one thing in this bar that can move at a readable rate without
+            // pulling at the corner of the eye, because there is no texture in it to shimmer.
+            var tide = (float)Math.Sin(t * (2.0 * Math.PI / 14.0)) * h * 0.012f;
+
+            var level = h * fraction + tide;
+
+            if (level < 0f) level = 0f;
+            if (level > h) level = h;
+
+            var surfaceY = y + h - level;
 
             // ---- the fill ----
             //
@@ -797,9 +821,18 @@ namespace BareMinimum.UI
 
             for (var i = 0; i < count; i++)
             {
-                // Between nine and nineteen seconds a life, none of them a multiple of
-                // another, so the sky never empties or fills all at once.
-                var beat = 9f + (i % 5) * 2.5f;
+                // TWO SPEEDS, AND THE FAST ONE IS THE TWINKLE.
+                //
+                // A star used to have one: a nine-to-nineteen second rise and fall, which is
+                // a slow pulse and reads as a lamp on a dimmer. Real twinkling is
+                // scintillation -- a quick, irregular flicker on top of a star that is
+                // otherwise just there.
+                //
+                // So the slow curve stays and now only decides WHETHER a star is out and how
+                // strongly, and a fast pair of waves on top does the actual twinkling. The
+                // life is shorter with it, four and a half to ten seconds, because a star that
+                // scintillates for twenty is a fault light.
+                var beat = 4.5f + (i % 5) * 1.3f;
 
                 var raw = t / beat + i * 0.37f;
 
@@ -812,7 +845,16 @@ namespace BareMinimum.UI
                 var lit = (float)Math.Sin(phase * Math.PI);
                 lit = lit * lit * lit;
 
-                var alpha = (int)(230f * lit * (0.55f + 0.45f * tired));
+                // THE TWINKLE. Two waves about a second apart in period and not harmonics of
+                // each other, so no star settles into a rhythm you could tap along to. Held
+                // above a third rather than allowed to reach nothing: a star that goes fully
+                // out mid-life is not twinkling, it is a dead pixel.
+                var fast = 0.5f + 0.5f * (float)Math.Sin(t * 7.3f + i * 2.1f);
+                var slow = 0.5f + 0.5f * (float)Math.Sin(t * 4.6f - i * 1.7f);
+
+                var twinkle = 0.34f + 0.66f * (fast * 0.62f + slow * 0.38f);
+
+                var alpha = (int)(240f * lit * twinkle * (0.55f + 0.45f * tired));
                 if (alpha <= 6) continue;
 
                 // Kept off both walls and clear of the waterline, so no star is ever half a
