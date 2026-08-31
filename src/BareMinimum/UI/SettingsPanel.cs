@@ -95,7 +95,7 @@ namespace BareMinimum.UI
             //
             // Flipbook still takes them one file at a time, so a static mark costs nothing and
             // never looks at the clock.
-            _ui.TitleLeft = new Flipbook("apple2.png");
+            _ui.TitleLeft = new Flipbook("food0.png");
             // moon0, NOT the middle of the set. The stages run sun through to crescent now, so
             // moon2 is a bare disc -- accurate for the halfway point and useless as a mark.
             // The crescent and its two stars are the thing anybody would recognise.

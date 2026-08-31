@@ -137,6 +137,83 @@ def face(px):
 
 
 # ===========================================================================
+# HUNGER -- a drumstick
+# ===========================================================================
+#
+# THE SAME DRAWING AT EVERY STAGE, like the moon. It was an apple eaten down to a core
+# across five states, which is the argument this whole icon set was built on -- and it is
+# gone by the same decision that took the moon's phases: hunger now says how it is doing
+# in COLOUR ALONE. See check_stages, which as a result has nothing left to check.
+#
+# Drawn to a reference silhouette: fat rounded meat up and to the right, a narrow neck,
+# and a two-knuckled bone end down to the left.
+#
+# BUILT ALONG A HORIZONTAL AXIS AND ROTATED, rather than with every point worked out on
+# the diagonal. PIL cannot rotate a primitive, but it can rotate a LAYER, and one rotate
+# at the end is far less arithmetic to get wrong than thirty rotated coordinates -- the
+# same trick the apple's leaf used.
+DRUM_ANGLE = 38.0               # degrees anticlockwise; meat ends up upper-right
+
+# THE TAPER NEEDS LENGTH OR IT IS A BALL ON A STUB. First attempt put a 68-radius meat
+# eighty units from a 21-radius neck; over that little run the sides are nearly vertical
+# and the whole thing read as a balloon with a knot. Ninety-odd units between a smaller
+# fat end and a narrower neck is what makes it a leg.
+DRUM_MEAT = (184.0, 128.0, 61.0)        # centre x, y, radius of the fat end
+DRUM_NECK = (90.0, 128.0, 16.0)         # where the meat narrows to
+DRUM_SHAFT = (54.0, 94.0, 9.0)          # bone: from x, to x, half-height
+DRUM_KNOB = (50.0, 17.0, 15.0)          # knuckles: centre x, y offset, radius
+
+# Two nicks in the meat. In the reference they are highlights on a black shape, which on
+# a WHITE-on-alpha source means punching holes -- the tint multiplies, so a hole is the
+# only way to get a mark that survives being coloured.
+DRUM_MARKS = ((203.0, 104.0, 13.0, 9.0), (176.0, 106.0, 6.0, 6.0))
+
+
+def drumstick(stage=0):
+    """A chicken drumstick. The same one at every stage -- see the note above."""
+    img, d = canvas()
+
+    layer = Image.new("RGBA", img.size, CLEAR)
+    ld = ImageDraw.Draw(layer)
+
+    mx, my, mr = DRUM_MEAT
+    nx, ny, nr = DRUM_NECK
+
+    # The meat, and the neck it tapers into: a circle at each end and the quad between
+    # them, which gives one continuous outline with no join to hide.
+    # Very slightly longer than it is round, which is the difference between a leg and a
+    # balloon at a glance. Only a few units -- more and it is an aubergine.
+    ld.ellipse([s(mx - mr * 1.06), s(my - mr), s(mx + mr * 1.06), s(my + mr)], fill=WHITE)
+    ld.ellipse([s(nx - nr), s(ny - nr), s(nx + nr), s(ny + nr)], fill=WHITE)
+    ld.polygon([(s(nx), s(ny - nr)), (s(mx), s(my - mr)),
+                (s(mx), s(my + mr)), (s(nx), s(ny + nr))], fill=WHITE)
+
+    # The bone.
+    x0, x1, half = DRUM_SHAFT
+    ld.polygon([(s(x0), s(my - half)), (s(x1), s(my - half * 1.35)),
+                (s(x1), s(my + half * 1.35)), (s(x0), s(my + half))], fill=WHITE)
+
+    kx, ko, kr = DRUM_KNOB
+    for side in (-1, 1):
+        ky = my + ko * side
+        ld.ellipse([s(kx - kr), s(ky - kr), s(kx + kr), s(ky + kr)], fill=WHITE)
+
+    # NO COLLAR CUT. Two goes were spent notching the join between meat and bone to say
+    # they are different materials, and both left a ragged edge -- the cut runs almost
+    # parallel to the taper there, so it takes slivers rather than a clean bite, and the
+    # rim routine then traces every one of them.
+    #
+    # It does not need one. The two knuckles at the end are what say "bone", and the
+    # silhouette reads as a leg without a step in it.
+
+    for hx, hy, hw, hh in DRUM_MARKS:
+        ld.ellipse([s(hx - hw), s(hy - hh), s(hx + hw), s(hy + hh)], fill=CLEAR)
+
+    img.alpha_composite(layer.rotate(DRUM_ANGLE, resample=Image.BICUBIC, center=(s(128), s(128))))
+    return img
+
+
+# ===========================================================================
 # HUNGER -- an apple, bitten down to a core
 # ===========================================================================
 #
@@ -384,8 +461,8 @@ MOON_STAGES = {
 }
 
 MOON_R = 88.0                   # the disc's radius
-MOON_CUT_R = 78.0               # the cutter
-MOON_CUT_ANGLE = -46.0          # up and to the right, as the reference has it
+MOON_CUT_R = 80.0               # the cutter
+MOON_CUT_ANGLE = 0.0            # straight right: the horns point up and down
 
 # THICKNESS IS R - CUT_R + OFFSET. At offset 36 that is 46 of a possible 88 -- a bit over
 # half the radius, which is what it took to still read at the fifteen pixels a bar is
@@ -406,21 +483,38 @@ MOON_RAY_WIDTH = 0.30
 # the crescent opens onto -- so they are nowhere near the lit edge and the rim routine
 # never has to reconcile a star and the moon's rim in the same few pixels. That is the
 # constraint that matters: check against MOON_CUT_R if these ever move again.
-MOON_STARS = ((176.0, 62.0, 22.0), (211.0, 106.0, 15.0))
+# FIVE-POINTED, and outside the crescent's own circle for the big one.
+#
+# The small star sits inside the moon's disc but well inside the CUTTER's, which is the
+# void the crescent opens onto -- so it is nowhere near the lit edge. The big one clears
+# the disc entirely. That is the constraint that matters, not the canvas: check against
+# MOON_CUT_R and MOON_R if these ever move.
+MOON_STARS = ((198.0, 92.0, 25.0), (188.0, 158.0, 17.0))
 
 
 def star(d, cx, cy, r):
-    """A four-pointed sparkle: long points, waist pulled right in."""
-    waist = r * 0.26
+    """
+    A five-pointed star, point up.
 
-    pts = [
-        (cx, cy - r), (cx + waist, cy - waist),
-        (cx + r, cy), (cx + waist, cy + waist),
-        (cx, cy + r), (cx - waist, cy + waist),
-        (cx - r, cy), (cx - waist, cy - waist),
-    ]
+    NOT the four-pointed sparkle it was. A sparkle is a glint -- it says "shiny", which is
+    what it was doing next to a moon that did not need it. Five points is what everybody
+    draws when they mean a star, and the reference has them.
 
-    d.polygon([(s(px), s(py)) for px, py in pts], fill=WHITE)
+    Inner radius is 0.40 of the outer. The mathematically pure figure is 0.382; a little
+    fatter survives being shrunk to fifteen pixels, where a thin-armed star fills in at the
+    waist and comes out a blob.
+    """
+    inner = r * 0.40
+
+    pts = []
+
+    for i in range(10):
+        rad = r if i % 2 == 0 else inner
+        a = math.radians(-90.0 + i * 36.0)
+
+        pts.append((s(cx + math.cos(a) * rad), s(cy + math.sin(a) * rad)))
+
+    d.polygon(pts, fill=WHITE)
 
 
 def moon(stage=0):
@@ -608,8 +702,12 @@ def eye(stage, phase=0):
 def main():
     print("Writing icons to " + OUT)
 
+    # THE DRUMSTICK REPLACED THE APPLE, and the apple's five states with it. apple() and
+    # its whole apparatus -- the profile spline, the bite table, the core -- are still here
+    # and still work; nothing asks for the files any more, so nothing writes them. Same as
+    # eye(), which the moon replaced the same way.
     for stage in range(5):
-        save(apple(stage), "apple%d.png" % stage)
+        save(drumstick(stage), "food%d.png" % stage)
 
     # FLAT COPIES, NO RIM, for the marks under the bars.
     #
@@ -621,10 +719,7 @@ def main():
     #
     # Two sets, one drawing, one flag apart.
     for stage in range(5):
-        save(apple(stage), "apple%d_flat.png" % stage, outline=False)
-
-    for stage in range(5):
-        save(moon(stage), "moon%d_flat.png" % stage, outline=False)
+        save(drumstick(stage), "food%d_flat.png" % stage, outline=False)
 
     # THE MOON REPLACED THE EYE. eye() is still here and still works -- it is a decent
     # piece of drawing and the argument for the moon was about meaning, not quality --

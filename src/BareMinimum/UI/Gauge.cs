@@ -30,7 +30,7 @@ namespace BareMinimum.UI
         /// CustomSprite keeps a texture handle, so building one per frame leaks the lot. Ten
         /// icons is the entire cost of the HUD.
         /// </summary>
-        private readonly Icon[] _apple = new Icon[5];
+        private readonly Icon[] _food = new Icon[5];
 
         /// <summary>
         /// Five phases of moon, full down to a thin crescent.
@@ -51,7 +51,7 @@ namespace BareMinimum.UI
         /// black silhouette, and a black rim on black art does nothing but fatten the shape --
         /// CustomSprite MULTIPLIES, so rim and fill come out the same colour.
         /// </summary>
-        private readonly Icon[] _appleFlat = new Icon[5];
+        private readonly Icon[] _foodFlat = new Icon[5];
         private readonly Icon[] _moonFlat = new Icon[5];
 
 
@@ -63,10 +63,10 @@ namespace BareMinimum.UI
 
             for (var i = 0; i < 5; i++)
             {
-                _apple[i] = new Icon("apple" + i + ".png");
+                _food[i] = new Icon("food" + i + ".png");
                 _moon[i] = new Icon("moon" + i + ".png");
 
-                _appleFlat[i] = new Icon("apple" + i + "_flat.png");
+                _foodFlat[i] = new Icon("food" + i + "_flat.png");
                 _moonFlat[i] = new Icon("moon" + i + "_flat.png");
 
             }
@@ -257,7 +257,7 @@ namespace BareMinimum.UI
                     return;
                 }
 
-                Mark(_apple, needs.Hunger, x, top + side / 2f, wide, side, 0f, false);
+                Mark(_food, needs.Hunger, x, top + side / 2f, wide, side, 0f, false);
                 Mark(_moon, needs.Sleep, x, top + side + gap + side / 2f, wide, side, 0.37f, true);
             }
             catch (Exception ex)
@@ -324,7 +324,7 @@ namespace BareMinimum.UI
             // nothing overlaps. Everything above that is the setting doing its job.
             var pitch = barW * (1f + Math.Max(0.45f, _cfg.HudGap * 2.4f));
 
-            Column(needs.Hunger, _apple, x + barW / 2f, barTop, barH, barW,
+            Column(needs.Hunger, _food, x + barW / 2f, barTop, barH, barW,
                    markW, markH, breath, false);
 
             Column(needs.Sleep, _moon, x + barW / 2f + pitch, barTop, barH, barW,
@@ -339,7 +339,7 @@ namespace BareMinimum.UI
 
             var body = Colour(need, sleep);
 
-            var flat = (sleep ? _moonFlat : _appleFlat)[Stage(need)];
+            var flat = (sleep ? _moonFlat : _foodFlat)[Stage(need)];
 
             // Falls back to the outlined art if the rim-free copy did not deploy. A logo with
             // a rim on it is a great deal better than no logo at all.
@@ -685,22 +685,27 @@ namespace BareMinimum.UI
         private int _screenW;
 
         /// <summary>
-        /// SLEEP: the sky in it, and a waterline you can actually read.
+        /// SLEEP: the same surface the food bar has, running the other way.
         ///
-        /// THE LEVEL COMES FIRST AND EVERYTHING ELSE GETS OUT OF ITS WAY. The last version
-        /// put a soft glow sixteen per cent of the bar deep under the surface, and a soft
-        /// edge is exactly what you cannot take a reading off -- the boundary smeared into
-        /// the fill and the honest answer was that you could not tell where the level was.
-        /// That is the one job this whole object has.
+        /// THE DROP IS GONE. It was the fifth thing tried on this level and the most involved
+        /// -- a drop falling, an impact, a damped bob, rings spreading -- and it made the two
+        /// bars two different instruments rather than one instrument with two channels. This
+        /// takes the food bar's meniscus, which was arrived at over about as many goes, and
+        /// gets its calm for free.
         ///
-        /// So the waterline is now a hard bright cap with a dark line above it, and the fill
-        /// beneath is darkest right under that cap. A light edge against a dark edge is the
-        /// most legible boundary there is, and it is legible at a glance rather than after a
-        /// second's staring.
+        /// REVERSED, so they are not the same thing twice. Food bows UP in the middle and this
+        /// bows DOWN; food drifts one way and this drifts the other. Two bars side by side
+        /// moving in opposite phase read as a pair, where two moving together read as one wide
+        /// thing, and it costs a minus sign.
         ///
-        /// The animation lives in the BRIGHTNESS of that cap and in the sky below it. Nothing
-        /// moves, because travel is what this bar has failed at twice: in the corner of the
-        /// eye, anything crossing the screen is the one thing that cannot be ignored.
+        /// AND IT QUICKENS AS THE METER EMPTIES, exactly as the food bar's does. On that side
+        /// the link is to sprinting -- running burns food, so running makes it livelier. Here
+        /// it is simply that the more tired you are the less still this sits, which is the same
+        /// idea and needed no extra wiring: both read `empty` and nothing else.
+        ///
+        /// What stays is the hard waterline and the dark band above it. That was never about
+        /// the drop -- it is the fix for not being able to tell where the level was, and it
+        /// outlives every animation that has been hung off it.
         /// </summary>
         private void Night(float x, float y, float w, float h, float fraction, Color body)
         {
@@ -708,83 +713,39 @@ namespace BareMinimum.UI
 
             var t = Clock();
 
+            var level = h * fraction;
+            var surfaceY = y + h - level;
             var floor = y + h;
 
-            // Forty seconds a cycle, for the brightness of the cap.
-            var pulse = 0.5f + 0.5f * (float)Math.Sin(t * (2.0 * Math.PI / 40.0));
+            var empty = tired;
 
-            // A DROP LANDING, AND THE WATER SETTLING AFTER IT.
-            //
-            // On a bar fifteen pixels wide, the only surface movement anybody can actually see
-            // is VERTICAL -- horizontal shape barely survives the width, which is what sank
-            // the travelling wave and the tilt. So the difference between this bar and the
-            // food bar cannot be the shape of the motion. It has to be the RHYTHM of it.
-            //
-            // Food breathes: one long sine, always going, never still. This is the opposite
-            // shape of event -- nothing at all for most of the cycle, then a knock, then a
-            // bob that dies away and leaves the surface flat again. A drip into a still pool.
-            //
-            // TWO THINGS FALL OUT OF THAT FOR FREE. The surface rests at exactly the true
-            // level for most of every cycle, so the reading is not merely honest on average,
-            // it is exact most of the time. And the rings below are no longer three unrelated
-            // timers -- they leave from the moment of the knock, which is what a ring is.
-            var beat = 13f;
+            // Backwards, which is the whole difference from the food bar.
+            var hurry = -(1f + 0.85f * empty);
 
-            var cycle = (t / beat) % 1f;
+            var swing = h * 0.018f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
 
-            // THE FIRST FIFTH OF THE CYCLE IS THE DROP FALLING. It was only ever the splash
-            // before, which is an effect without a cause -- the surface flinched and nothing
-            // had touched it. A drop you watch come down explains everything that follows and
-            // costs one rectangle.
-            const float Fall = 0.20f;
-
-            var hit = cycle < Fall ? -1f : (cycle - Fall) / (1f - Fall);
-
-            // The bob: a couple of oscillations under an exponential decay, then flat. It gets
-            // a bit over a third of what remains, so the still is much longer than the moving
-            // -- get that ratio wrong and it is a wobble rather than an event.
-            var bob = 0f;
-
-            if (hit >= 0f && hit < 0.42f)
-            {
-                var u = hit / 0.42f;
-
-                bob = (float)(Math.Sin(u * Math.PI * 2.6) * Math.Exp(-u * 3.4));
-            }
-
-            // JUST NOTICEABLE, WHICH IS A NARROWER TARGET THAN EITHER OF THE TWO BEFORE IT.
-            // Three pixels was invisible, seven pulled the eye. Four is a drop you catch out
-            // of the corner of your vision and then have to look at to confirm -- which is
-            // exactly where a thing that happens every thirteen seconds, for hours, belongs.
-            //
-            // On the same dial as the food bar's surface, so one number is "how much do the
-            // levels move" across the whole instrument.
-            var level = h * fraction - bob * h * 0.017f * Clamp01(_cfg.HudBarWave) * 1.6f;
-
-            if (level < 0f) level = 0f;
-            if (level > h) level = h;
-
-            var surfaceY = y + h - level;
+            // Below the lowest the surface can reach: the bow and the drift can push down
+            // together, so the body has to start under both or the columns above it draw over
+            // ground the body has already covered -- a seam, in alpha, every frame.
+            var bodyTop = surfaceY + swing * 1.45f;
+            if (bodyTop > floor) bodyTop = floor;
 
             // ---- the fill ----
             //
-            // DARKEST AT THE TOP, brightening downward -- the opposite way round from before.
-            // The old gradient was brightest at the surface, which put the lightest part of
-            // the fill immediately under the lightest part of the bar and blurred the two
-            // together. Dark under the cap is what makes the cap an edge.
+            // DARKEST AT THE TOP, brightening downward. The lightest part of the fill must not
+            // sit immediately under the lightest part of the bar, or the cap stops being an
+            // edge and the level goes back to being unreadable.
             var bands = Bands(h);
 
             for (var i = 0; i < bands; i++)
             {
-                var bTop = surfaceY + (floor - surfaceY) * i / bands;
-                var bBot = surfaceY + (floor - surfaceY) * (i + 1) / bands;
+                var bTop = bodyTop + (floor - bodyTop) * i / bands;
+                var bBot = bodyTop + (floor - bodyTop) * (i + 1) / bands;
 
                 if (bBot - bTop <= 0f) continue;
 
                 var u = (i + 0.5f) / bands;
 
-                // A short, sharp shade under the cap and then flat: enough to separate the
-                // two, not so much that the bar looks half empty.
                 var shade = u < 0.14f ? 0.38f * (1f - u / 0.14f) : 0f;
 
                 var deep = Mix(body, Color.FromArgb(body.A,
@@ -795,133 +756,45 @@ namespace BareMinimum.UI
                 Hud.Bar(x, bTop, w, bBot - bTop, deep);
             }
 
-            // ---- what is IN the sky ----
-            //
-            // STARS AT EVERY STAGE. They were held back to the last two for a while, on the
-            // grounds that the icon showed a sun above those and stars in daylight are just
-            // dots. The sun is gone; it is a crescent moon at every stage now, so it is night
-            // in this meter the whole way down and the sky is never empty.
-            if (level > h * 0.06f)
-            {
-                Stars(x, y, w, h, surfaceY, t, tired);
-                Ripples(x, w, h, level, y + h - h * fraction, hit, body);
-            }
+            // ---- the sky ----
+            if (level > h * 0.06f) Stars(x, y, w, h, surfaceY, t, tired);
 
             if (level <= 0.002f) return;
 
-            // ---- the drop on its way down ----
+            // ---- the surface ----
             //
-            // Accelerating, because a drop does. Linear would read as a lift descending, and
-            // the squared ease is the whole difference between something falling and
-            // something being lowered.
-            //
-            // Only when there is somewhere to fall FROM. On a nearly full bar the channel
-            // above the surface is a few pixels and a drop would appear already landed, so it
-            // is skipped and the splash happens on its own -- which is no worse than what this
-            // did before the drop existed.
-            if (cycle < Fall)
-            {
-                var above = surfaceY - y;
-                var reach = Math.Min(h * 0.30f, above);
+            // The food bar's meniscus, negated: a parabola pinned at both walls and pushed the
+            // opposite way, which cannot have a corner in it at any amplitude. Same periods, so
+            // the two bars share a rhythm without ever being in step.
+            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 144.0)) * swing;
+            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 208.0)) * swing * 0.40f;
 
-                if (reach > h * 0.05f)
-                {
-                    var u = cycle / Fall;
+            var columns = Columns(w);
 
-                    var dropW = Math.Max(w * 0.18f, 0.0009f);
-                    var dropH = dropW * Aspect() * 1.35f;
+            // The dark line above the cap, drawn per column so it follows the curve.
+            var shadow = Fade(Color.FromArgb(210, 6, 6, 8));
 
-                    var dy = surfaceY - reach + reach * u * u;
-
-                    // Fades in off the top rather than blinking into existence at the ceiling,
-                    // and out again on the last of the fall so it does not arrive as a bright
-                    // dot sitting on the line. What lands is nearly gone by the time it does,
-                    // which is the difference between a drop and a bullet.
-                    var seen = Math.Min(1f, Math.Min(u * 4f, (1f - u) * 3.4f + 0.30f));
-
-                    Hud.Bar(x + (w - dropW) / 2f, dy - dropH, dropW, dropH,
-                            Fade(Color.FromArgb((int)(150 * seen), 232, 240, 255)));
-                }
-            }
-
-            // ---- the waterline ----
-            //
-            // A dark line ABOVE and a bright cap BELOW, drawn last so nothing can paint over
-            // them. Two hard edges a pixel apart, which is a boundary you read rather than
-            // one you estimate.
-            //
-            // The cap lifts toward a COOL white. It was a warm one, left over from when this
-            // meter ran daylight at the top of its ramp -- and a warm highlight on a blue
-            // fill is the one bit of gold that would have survived taking the sun out.
             var cap = h * 0.008f;
 
-            Hud.Bar(x, surfaceY - cap * 0.6f, w, cap * 0.6f,
-                    Fade(Color.FromArgb(210, 6, 6, 8)));
-
-            Hud.Bar(x, surfaceY, w, cap,
-                    Mix(body, Color.FromArgb(body.A, 244, 248, 255), 0.55f + 0.30f * pulse));
-        }
-
-        /// <summary>
-        /// Rings spreading down from the waterline.
-        ///
-        /// THE LEVEL ANIMATION THAT DOES NOT TOUCH THE LEVEL. Everything else tried here moved
-        /// the surface or softened it, and both of those cost the one reading this object
-        /// exists to give. These start AT the surface and travel away from it, so the line
-        /// they leave is exactly where the number says it is.
-        ///
-        /// A stone dropped on a still lake, which is the same picture as the moon and the
-        /// stars above it. Each ring is born bright and thin at the waterline, spreads down a
-        /// short way, and is gone well before the floor -- so the bottom of the bar stays as
-        /// quiet as a sleeping meter should be.
-        ///
-        /// Three of them, on periods that do not divide into each other, so there is never a
-        /// beat you could count. Deterministic off the clock and the index, like everything
-        /// else that moves in these bars.
-        /// </summary>
-        private void Ripples(float x, float w, float h, float level, float surfaceY,
-                             float strike, Color body)
-        {
-            const int count = 3;
-
-            // Never more than a fifth of the bar, and never more than half of what is in it --
-            // on a nearly empty meter a ring the size of the fill is a flash, not a ripple.
-            var reach = Math.Min(h * 0.20f, level * 0.5f);
-            if (reach < h * 0.02f) return;
-
-            var thick = Math.Max(h * 0.005f, 0.0008f);
-
-            // Nothing has landed yet.
-            if (strike < 0f) return;
-
-            for (var i = 0; i < count; i++)
+            for (var i = 0; i < columns; i++)
             {
-                // ALL THREE LEAVE FROM THE SAME KNOCK, a fifth of a cycle apart, rather than
-                // running on three timers of their own. Rings that arrive unrelated to the
-                // thing that made them are not rings, they are stripes -- and the surface
-                // above is already carrying the event, so this only has to agree with it.
-                var phase = strike - i * 0.13f;
+                var left = x + w * i / columns;
+                var right = x + w * (i + 1) / columns;
 
-                if (phase < 0f || phase > 1f) continue;
+                var across = ((i + 0.5f) / columns - 0.5f) * 2f;
+                var curve = 1f - across * across;
 
-                // Eased out: quick away from the surface, slowing as it goes, the way a ring
-                // on water actually travels. Linear reads as a scanner.
-                var travel = 1f - (1f - phase) * (1f - phase);
+                var topY = surfaceY + lift + bow * curve;
 
-                // From the RESTING surface, not the bobbing one: a ring is already in the
-                // water and does not ride the splash that launched it.
-                var ry = surfaceY + reach * travel;
+                if (topY < y) topY = y;
+                if (topY > y + h - cap) topY = y + h - cap;
 
-                // Brightest as it leaves and gone by the end. Squared, so most of its life is
-                // spent faint -- a ring that stays bright to the end is a bar, not a ripple.
-                var fade = 1f - phase;
-                fade = fade * fade;
+                if (topY < bodyTop) Hud.Bar(left, topY, right - left, bodyTop - topY, body);
 
-                var alpha = (int)(105f * fade);
-                if (alpha <= 5) continue;
+                Hud.Bar(left, topY - cap * 0.6f, right - left, cap * 0.6f, shadow);
 
-                Hud.Bar(x, ry, w, thick,
-                        Fade(Color.FromArgb(alpha, 226, 236, 255)));
+                Hud.Bar(left, topY, right - left, cap,
+                        Mix(body, Color.FromArgb(body.A, 244, 248, 255), 0.62f));
             }
         }
 

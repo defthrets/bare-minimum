@@ -78,28 +78,37 @@ def check(prefix, label, box=None):
 
 def main():
     good = True
-
-    good &= check("apple", "HUNGER, the apple")
-    print("")
-
-    # NO CHECK FOR THE MOON, and that is on purpose rather than an oversight.
-    #
-    # It has been three things: an eye that closed, a moon that waned, and a sun that set.
-    # All three were checked here for the same reason the apple is -- five shapes that each
-    # look plausible on their own can still be out of order as a set, and only counting
-    # pixels catches it.
-    #
-    # It is a plain crescent at every stage now, asked for twice, and carries its state in
-    # COLOUR alone. There is no ordering left in the art to verify, and asserting it got
-    # emptier would fail five files that are identical on purpose.
-    #
-    # If a sequence ever comes back, so does this line:
-    #     good &= check("moon", "SLEEP")
+    checked = 0
 
     print("")
+
+    # NOTHING LEFT TO CHECK, AND THAT IS NOT A BUG IN THIS SCRIPT.
+    #
+    # It existed because five shapes that each look plausible on their own can still be out
+    # of order as a SET, and only counting pixels catches it -- it caught a 25% apple with
+    # less fruit left than the finished core, which every eye in the room had passed.
+    #
+    # Both icons are now a single drawing repeated five times: a drumstick and a crescent
+    # moon, asked for in that form. They carry their state in COLOUR alone, so there is no
+    # ordering in the art to verify, and asserting either got emptier would fail ten files
+    # that are identical on purpose.
+    #
+    # The moment either grows a sequence again, put its line back:
+    #     good &= check("food", "HUNGER"); checked += 1
+    #     good &= check("moon", "SLEEP"); checked += 1
+
+    print("")
+
+    if checked == 0:
+        # SAY SO RATHER THAN PRINTING OK. A check that verifies nothing and reports success
+        # is worse than no check: the next person runs it, sees OK, and believes the set was
+        # proven in order.
+        print("NOTHING CHECKED - both icons are a single drawing repeated, so there is no")
+        print("order in the art to verify. See the note in main().")
+        return 0
 
     if good:
-        print("OK - both sets get emptier at every step.")
+        print("OK - every checked set gets emptier at every step.")
         return 0
 
     print("FAILED - a stage is not emptier than the one before it. See above.")
