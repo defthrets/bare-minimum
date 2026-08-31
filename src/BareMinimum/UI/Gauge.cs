@@ -1151,15 +1151,30 @@ namespace BareMinimum.UI
         // Deep at empty rather than alarming at empty, because the alarm is elsewhere: below
         // stage 1 Colour pulses this toward white, which is a far louder signal than any hue.
         //
+        // A WARM CAST ON THE BOTTOM TWO STOPS, so the empty end reads as olive rather than
+        // as a pure green. Food going off is a brown business and the deep end looked a bit
+        // synthetic without it.
+        //
+        // It costs nothing against the fuel gauge, which is the one thing that had to be
+        // checked before warming anything: the worst approach to fuel is dE 58 with the warmth
+        // in and dE 58 without it, because that worst case is at the FULL end of both ramps
+        // and never came from the empty one. Nothing down here is within reach of fuel at any
+        // level -- the darkest stop is L* 32 against fuel's own darkest of 45, so lightness
+        // alone keeps them apart even where the hues converge.
+        //
+        // 121 degrees of hue, down from 154. Worth knowing that the untinted green was already
+        // leaning teal, so the first part of this shift only brings it to a neutral green --
+        // a smaller move than this does not read as warm at all, it just reads as green.
+        //
         // Never lighter at the bottom than the channel behind it, and never washed out --
-        // every point holds a chroma of at least 30, so no part of the range goes grey.
+        // every point holds a chroma of at least 25, so no part of the range goes grey.
 
         private static readonly float[] Stops = { 0f, 0.25f, 0.50f, 0.75f, 1f };
 
         private static readonly Color[] Ramp =
         {
-            Color.FromArgb(235,  18,  78,  46),   // empty     deep forest
-            Color.FromArgb(235,  30, 124,  68),   // bad       dark green
+            Color.FromArgb(235,  66,  80,  40),   // empty     dark olive
+            Color.FromArgb(235,  64, 128,  62),   // bad       olive green
             Color.FromArgb(235,  48, 168,  96),   // middling  green
             Color.FromArgb(235,  92, 204, 132),   // fine      fresh green
             Color.FromArgb(235, 156, 232, 172)    // full      light mint
