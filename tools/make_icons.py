@@ -488,6 +488,23 @@ def main():
     for stage in range(5):
         save(apple(stage), "apple%d.png" % stage)
 
+    # FLAT COPIES, NO RIM, for the marks that stand in the foot of a bar.
+    #
+    # The bar draws its mark the way the fuel gauge in Fumes draws its pump: as a flat
+    # silhouette, near-black over the fill and near-white over the empty channel. That
+    # only works on art with no outline of its own. CustomSprite MULTIPLIES its colour
+    # with the texture, so a black rim stays black whatever ink it is given -- ask for a
+    # black silhouette and you get a black shape inside a black halo, which at fifteen
+    # pixels wide is a smudge; ask for a white one and the rim cuts it up.
+    #
+    # So the HUD icons keep their rim, because they sit on the world and need it, and the
+    # bar marks get a copy without one. Same drawing, one flag apart.
+    for stage in range(5):
+        save(apple(stage), "apple%d_flat.png" % stage, outline=False)
+
+    for stage in range(5):
+        save(eye(stage), "eye%d_flat.png" % stage, outline=False)
+
     # Three frames per stage. Frame 0 keeps the plain name because it is the resting
     # state and everything else in the mod -- the menu title marks, the settings panel --
     # asks for eyeN.png and wants the eye at rest.

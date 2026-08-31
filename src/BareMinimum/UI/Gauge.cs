@@ -44,6 +44,20 @@ namespace BareMinimum.UI
         /// </summary>
         private readonly Icon[] _eye = new Icon[5];
 
+        /// <summary>
+        /// The same two marks WITHOUT their black rim, for standing in the foot of a bar.
+        ///
+        /// The bars draw their mark as a flat silhouette the way the fuel gauge in Fumes
+        /// draws its pump -- near-black over the fill, near-white over the empty channel --
+        /// and that needs art with no outline of its own. CustomSprite MULTIPLIES, so a black
+        /// rim stays black whatever ink it is given: a black silhouette comes out as a shape
+        /// inside a halo, and a white one gets cut up by it.
+        ///
+        /// The HUD icons keep their rim, because they sit on the world and need it.
+        /// </summary>
+        private readonly Icon[] _appleFlat = new Icon[5];
+        private readonly Icon[] _eyeFlat = new Icon[5];
+
         private bool _measured;
 
         public Gauge(Settings cfg)
@@ -54,6 +68,9 @@ namespace BareMinimum.UI
             {
                 _apple[i] = new Icon("apple" + i + ".png");
                 _eye[i] = new Icon("eye" + i + ".png");
+
+                _appleFlat[i] = new Icon("apple" + i + "_flat.png");
+                _eyeFlat[i] = new Icon("eye" + i + "_flat.png");
             }
         }
 
@@ -308,7 +325,12 @@ namespace BareMinimum.UI
             if (_cfg.HudHideWhenFine && need.Value > _cfg.HudFineAbove) return;
 
             var body = Colour(need, sleep);
-            var icon = set[Stage(need)];
+
+            var flat = (sleep ? _eyeFlat : _appleFlat)[Stage(need)];
+
+            // Falls back to the outlined art if the flat copy did not deploy. A mark with a
+            // rim on it is a great deal better than no mark at all.
+            if (flat == null || flat.Missing) flat = set[Stage(need)];
 
             var x = centreX - w / 2f;
 
@@ -330,15 +352,15 @@ namespace BareMinimum.UI
 
             if (!_cfg.HudAnimate)
             {
-                var flat = h * fraction;
-                Hud.Bar(x, top + h - flat, w, flat, body);
+                var still = h * fraction;
+                Hud.Bar(x, top + h - still, w, still, body);
                 return;
             }
 
             if (sleep) Breathe(x, top, w, h, fraction, body);
             else Churn(x, top, w, h, fraction, body);
 
-            Foot(icon, centreX, top, w, h);
+            Foot(flat, centreX, top, w, h, fraction);
         }
 
         /// <summary>
@@ -356,7 +378,7 @@ namespace BareMinimum.UI
         ///
         /// Drawn LAST, over the level, so the fill does not paint across it.
         /// </summary>
-        private void Foot(Icon icon, float centreX, float top, float w, float h)
+        private void Foot(Icon icon, float centreX, float top, float w, float h, float fraction)
         {
             if (icon == null || icon.Missing) return;
 
@@ -366,19 +388,18 @@ namespace BareMinimum.UI
 
             var inset = w * 0.16f;
 
-            // ONE INK, LIGHT, ALWAYS -- because these icons already carry their own black
-            // rim, baked in by tools/make_icons.py, and CustomSprite MULTIPLIES its colour
-            // with the texture: white takes the tint, black stays black whatever it is given.
-            // So a light mark comes out light with a black outline round it, and that outline
-            // is what separates it from a bright fill or an empty channel alike.
+            // THE INK FLIPS WITH THE LEVEL, exactly as the pump does in Fumes: near-black
+            // where the fill is behind it, near-white where the empty channel is. A mark
+            // drawn in one colour is invisible for half the range it exists to label, and
+            // that was learnt over there on a pump that spent every empty tank unreadable.
             //
-            // It was flipping to near-black over the fill, copied from the fuel gauge. That
-            // is right for the pump, which has no rim of its own and would vanish into a full
-            // tank -- but multiplying black art by black ink turns the whole apple into a
-            // silhouette and takes the outline with it, which is the one thing here that did
-            // not need solving.
+            // It works here only because the art handed in has no rim of its own -- see
+            // _appleFlat. With one, the black pass would be a shape inside a halo.
+            var covered = h * fraction >= iconH + inset;
+
             icon.DrawSized(centreX, top + h - inset - iconH / 2f, iconW, iconH,
-                           Fade(Color.FromArgb(235, 240, 240, 245)));
+                           Fade(covered ? Color.FromArgb(240, 10, 10, 12)
+                                        : Color.FromArgb(225, 235, 235, 240)));
         }
 
         /// <summary>
