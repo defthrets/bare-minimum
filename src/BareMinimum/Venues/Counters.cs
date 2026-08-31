@@ -81,6 +81,58 @@ namespace BareMinimum.Venues
 
         // ======================================================================
 
+        /// <summary>
+        /// Writes each till model to the log the first time one is stood at.
+        ///
+        /// WHICH SHOPS THESE PROPS ACTUALLY LIVE IN IS NOT KNOWABLE FROM HERE. The intent
+        /// above is every 24/7, LTD and Rob's Liquor -- but prop_till_01 and the two cash
+        /// registers are generic fittings, and a generic fitting turns up in clothing shops,
+        /// barbers and Ammu-Nation just as readily as in a shop that sells food. Finding one
+        /// there offers a club sandwich at a gun counter.
+        ///
+        /// Guessing which to drop is the wrong move in both directions: leave a bad one in and
+        /// the food shop appears where it should not, take a good one out and a real shop
+        /// stops working. So the model gets named in the log instead, next to the room key
+        /// Brands already writes, and one walk through a wrong counter says exactly which
+        /// entry to remove.
+        /// </summary>
+        private void Name(Prop till)
+        {
+            if (till == null || !till.Exists()) return;
+
+            int hash;
+            try { hash = till.Model.Hash; }
+            catch { return; }
+
+            if (!_named.Add(hash)) return;
+
+            // Bounded for the same reason the room keys are: a long session should not fill
+            // the log with this.
+            if (_named.Count > 12) return;
+
+            // Matched by re-hashing the NAMES rather than by index into _tills, which holds
+            // only the models that exist in this build and so does not line up with the list
+            // above the moment one of them is missing.
+            var name = "unrecognised";
+
+            foreach (var candidate in TillModels)
+            {
+                try
+                {
+                    if (Function.Call<int>(Hash.GET_HASH_KEY, candidate) != hash) continue;
+                }
+                catch { continue; }
+
+                name = candidate;
+                break;
+            }
+
+            Log.Info("Counter prop: " + name +
+                     "  (if this counter is not a food shop, remove that model from TillModels)");
+        }
+
+        private readonly HashSet<int> _named = new HashSet<int>();
+
         private int[] Resolve(string[] names, string what, ref int[] cache)
         {
             if (cache != null) return cache;
@@ -144,6 +196,7 @@ namespace BareMinimum.Venues
                 {
                     _found = till;
                     _kind = Counter.Till;
+                    Name(till);
                     return _kind;
                 }
 
