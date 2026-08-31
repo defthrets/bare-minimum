@@ -292,10 +292,17 @@ namespace BareMinimum.UI
             // could never be wider than the bar -- fifteen pixels on an ultrawide, nine on a
             // 1080p screen -- and an apple with five states to tell apart does not survive
             // that. Out here it is bounded by nothing but taste.
-            var markW = barW * Math.Max(0.2f, _cfg.HudBarIconScale);
-            var markH = markW * Aspect();
+            // THE PLATE IS EXACTLY THE BAR'S OUTLINE WIDTH. Same expression as the surround
+            // in Column, not a number that happens to match -- these two have to stay equal
+            // through any change to the edge, and the way to guarantee that is to compute
+            // them the same way from the same input.
+            var edge = barW * 0.22f;
+            if (edge < 0.0005f) edge = 0.0005f;
 
-            var breath = barW * 0.55f;
+            var plateW = barW + edge * 2f;
+            var plateH = plateW * Aspect();
+
+            var breath = edge * 2f;
 
             // ANCHORED TO THE FOOT, and to nothing else. It used to be reconstructed as
             // top + side * 2 + gap, which is the same number in auto position and is NOT in
@@ -304,7 +311,7 @@ namespace BareMinimum.UI
             //
             // The mark comes out of the SAME allowance, so the pair still ends on the line the
             // icons ended on and switching style does not shunt the HUD up or down the screen.
-            var barTop = bottom - markH - breath - barH;
+            var barTop = bottom - plateH - breath - barH;
 
             // GAP IS THE SPACE BETWEEN THEM. In the icon layout it is the vertical space
             // between two stacked pictures; upright and side by side, the same setting means
@@ -320,20 +327,22 @@ namespace BareMinimum.UI
             // got past 0.67. A floor is meant to stop two frames overlapping, not to sit on
             // top of the value it is guarding.
             //
-            // 0.45 is exactly two edges wide, so at Gap = 0 the black surrounds touch and
-            // nothing overlaps. Everything above that is the setting doing its job.
-            var pitch = barW * (1f + Math.Max(0.45f, _cfg.HudGap * 2.4f));
+            // 0.45 is exactly two edges, which put the black surrounds -- and now the black
+            // PLATES under them, which are the same width -- flush against each other. Two
+            // plates touching read as one wide plate with a line down it, so the floor is a
+            // little over that and the pair always has daylight between them.
+            var pitch = barW * (1f + Math.Max(0.56f, _cfg.HudGap * 2.4f));
 
             Column(needs.Hunger, _food, x + barW / 2f, barTop, barH, barW,
-                   markW, markH, breath, false);
+                   plateW, plateH, breath, false);
 
             Column(needs.Sleep, _moon, x + barW / 2f + pitch, barTop, barH, barW,
-                   markW, markH, breath, true);
+                   plateW, plateH, breath, true);
         }
 
         /// <summary>One upright bar: the mark above it, the channel, and the level inside.</summary>
         private void Column(Need need, Icon[] set, float centreX, float top, float h,
-                            float w, float markW, float markH, float breath, bool sleep)
+                            float w, float plateW, float plateH, float breath, bool sleep)
         {
             if (_cfg.HudHideWhenFine && need.Value > _cfg.HudFineAbove) return;
 
@@ -373,33 +382,55 @@ namespace BareMinimum.UI
             if (sleep) Night(x, top, w, h, fraction, body);
             else Churn(x, top, w, h, fraction, body);
 
-            Badge(flat, centreX, top + h, markW, markH, breath);
+            Badge(flat, centreX, top + h, plateW, plateH, breath);
         }
 
         /// <summary>
-        /// The logo under the bar: flat, black, no rim.
+        /// The logo under the bar: a white mark on a black plate.
         ///
         /// NOT called Mark -- that name already belongs to the icon HUD's own draw, and two
         /// methods by one name meaning two different things is a trap even when it compiles.
         ///
-        /// NO COLOUR AND NO SHIMMER, unlike everything else this class draws. The bar above it
-        /// is already saying how full the meter is, in a length and in a ramp; the logo only
-        /// has to say WHICH meter, and a black silhouette says that and nothing else. Tinting
-        /// it would be a third voice repeating the other two, and shimmering it would make the
-        /// quietest thing on the instrument the one that moves.
+        /// A PLATE, BECAUSE A BLACK LOGO ON THE WORLD IS ONLY LEGIBLE HALF THE TIME. It was a
+        /// plain black silhouette and it disappeared against tarmac and at night -- which was
+        /// flagged as the cost when it went in, and it turned out to matter. Giving it its own
+        /// dark ground and inverting the ink fixes it in both directions at once: white on
+        /// black reads on any background there is, because the background is no longer part
+        /// of the problem.
         ///
-        /// Rim-free art, because a black rim on a black silhouette is invisible by definition:
-        /// CustomSprite MULTIPLIES, so both come out black and all the outline does is fatten
-        /// the shape by thirteen units.
+        /// The plate is EXACTLY the width of the bar's outline, computed from the same
+        /// expression rather than a matching number, so the instrument stays one column from
+        /// top to bottom.
+        ///
+        /// Still the rim-free art. The rim exists to hold a mark against the world, and there
+        /// is no world behind this one any more -- on a black plate a black outline is
+        /// invisible and only fattens the shape.
         /// </summary>
         private void Badge(Icon icon, float centreX, float footY,
-                           float markW, float markH, float breath)
+                           float plateW, float plateH, float breath)
         {
+            var plateX = centreX - plateW / 2f;
+            var plateY = footY + breath;
+
+            Hud.Bar(plateX, plateY, plateW, plateH,
+                    Fade(Color.FromArgb(205, 0, 0, 0)));
+
             if (icon == null || icon.Missing) return;
 
-            icon.DrawSized(centreX, footY + breath + markH / 2f, markW, markH,
-                           Fade(Color.FromArgb(240, 12, 12, 14)));
+            // Inside the plate rather than filling it. A mark flush to its own edges reads as
+            // a cropped picture; the margin is what makes it a badge.
+            var markW = plateW * Clamp(_cfg.HudBarIconScale, 0.2f, 1f);
+            var markH = markW * Aspect();
+
+            icon.DrawSized(centreX, plateY + plateH / 2f, markW, markH,
+                           Fade(Color.FromArgb(240, 242, 246, 252)));
         }
+
+        private static float Clamp(float v, float lo, float hi)
+        {
+            return v < lo ? lo : v > hi ? hi : v;
+        }
+
 
 
 

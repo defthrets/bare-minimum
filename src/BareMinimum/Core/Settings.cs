@@ -473,14 +473,16 @@ namespace BareMinimum.Core
         public float HudBarDrift = 0.35f;
 
         /// <summary>
-        /// The mark UNDER the bar, as a share of the bar's width.
+        /// The mark under the bar, as a share of its BLACK PLATE. 1 fills the plate edge to
+        /// edge; the default leaves a margin, which is what makes it read as a badge rather
+        /// than a cropped picture.
         ///
-        /// It used to stand in the foot of the channel, where it could never be wider than the
-        /// bar itself -- about sixteen pixels on an ultrawide and nine on a 1080p screen, and
-        /// an apple with five states to tell apart does not survive that. Underneath, nothing
-        /// bounds it but taste, so the default is getting on for twice the bar's width.
+        /// It has meant three things now -- share of the channel it stood in, then share of
+        /// the bar once it moved out from under it, and now share of the plate it sits on.
+        /// Clamped to 1 either way, because a mark wider than its own ground is just a mark
+        /// on the world again, which is the thing the plate exists to stop.
         /// </summary>
-        public float HudBarIconScale = 1.9f;
+        public float HudBarIconScale = 0.78f;
 
         // ---- Keys ------------------------------------------------------------
 
@@ -636,7 +638,7 @@ namespace BareMinimum.Core
                 cfg.HudBarLength = ini.GetFloat("HUD", "BarLength", cfg.HudBarLength, 0.004f, 0.6f);
                 cfg.HudBarWidth = ini.GetFloat("HUD", "BarWidth", cfg.HudBarWidth, 0.001f, 0.2f);
                 cfg.HudBarIconScale = ini.GetFloat("HUD", "BarIconScale",
-                                                   cfg.HudBarIconScale, 0.2f, 3f);
+                                                   cfg.HudBarIconScale, 0.2f, 1f);
                 cfg.HudBarWave = ini.GetFloat("HUD", "BarWave", cfg.HudBarWave, 0f, 1f);
                 cfg.HudBarDrift = ini.GetFloat("HUD", "BarDrift", cfg.HudBarDrift, 0f, 1f);
                 cfg.HudBarPace = ini.GetFloat("HUD", "BarPace", cfg.HudBarPace, 0.15f, 2f);

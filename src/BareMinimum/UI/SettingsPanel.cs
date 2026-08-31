@@ -555,8 +555,8 @@ namespace BareMinimum.UI
 
             Float("Bar mark size", "HUD", "BarIconScale",
                   () => _cfg.HudBarIconScale, v => _cfg.HudBarIconScale = v,
-                  0.05f, 0.20f, 2.00f, "0.00",
-                  "The apple and moon under each bar, against the bar's width.",
+                  0.05f, 0.20f, 1.00f, "0.00",
+                  "The mark on each bar's black plate, against the plate.",
                   () => _cfg.Style == HudStyle.Bars, "Bars only.");
         }
         // ======================================================================
