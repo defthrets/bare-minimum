@@ -39,10 +39,16 @@ namespace BareMinimum.Core
         ///
         /// Game hours, not real ones, because that is the clock the player is living on: they
         /// sleep by it, shops open by it, and a need measured in real minutes drifts out of
-        /// step with all of it the moment anybody changes the timescale. At GTA's default rate
-        /// a game hour is two real minutes, so 28 is a bit under an hour of real play.
+        /// step with all of it the moment anybody changes the timescale.
+        ///
+        /// SLOWED FROM 28. At GTA's default rate a game hour is two real minutes, so 28 was
+        /// under an hour of play from full to starving -- which turns a background system into
+        /// an errand, and turns fifty shops into somewhere you have to stop rather than
+        /// somewhere you can. 52 is a bit over two game days, and about an hour and three
+        /// quarters of real play: enough that eating is something you do while getting on
+        /// with the game rather than instead of it.
         /// </summary>
-        public float HungerHoursToEmpty = 28f;
+        public float HungerHoursToEmpty = 52f;
 
         /// <summary>Multiplier on the drain while sprinting, swimming or otherwise working.</summary>
         public float HungerExertionMultiplier = 2.2f;
@@ -61,7 +67,7 @@ namespace BareMinimum.Core
         /// sleep" lands where the effects do: the first slowdown arrives around twenty-eight
         /// hours awake, which is a bit over one day.
         /// </summary>
-        public float SleepHoursToEmpty = 44f;
+        public float SleepHoursToEmpty = 80f;
 
         /// <summary>
         /// GAME hours of sleep that take you from empty to fully rested.

@@ -32,6 +32,9 @@ namespace BareMinimum.UI
             public string Name = "";
             public string Note = "";
 
+            /// <summary>A heading, not a setting. Holds nothing and does nothing.</summary>
+            public bool Heading;
+
             /// <summary>Where it lives in the ini. Empty for an action row.</summary>
             public string Section = "";
             public string Key = "";
@@ -265,14 +268,34 @@ namespace BareMinimum.UI
                 _ui.Rows.Add(new Row
                 {
                     Left = option.Name,
-                    Right = option.Show == null ? "" : option.Show(),
+                    Right = option.Heading || option.Show == null ? "" : option.Show(),
                     Note = usable || string.IsNullOrEmpty(option.Unavailable)
                         ? option.Note
                         : option.Unavailable,
                     Enabled = usable,
+                    Header = option.Heading,
                     Tag = option
                 });
             }
+
+            // The rows have just been replaced, so the selection may be sitting on a heading
+            // or off the end of a shorter list.
+            _ui.Settle();
+        }
+
+        /// <summary>
+        /// A line naming the group beneath it.
+        ///
+        /// FLAT LIST WITH HEADINGS, NOT TABS, and that is forced rather than chosen: this
+        /// menu sets LeftRightAdjusts, so left and right are already spoken for -- they turn
+        /// the value on the selected row up and down, which is the right thing for a list of
+        /// numbers and leaves nothing to change a tab with.
+        ///
+        /// Headings are skipped by the selection, so they cost no keypresses to scroll past.
+        /// </summary>
+        private void Heading(string name)
+        {
+            _options.Add(new Option { Name = name, Heading = true });
         }
 
         // ======================================================================
@@ -281,6 +304,9 @@ namespace BareMinimum.UI
 
         private void Build()
         {
+            Heading("NEEDS");
+
+
             Bool("Mod enabled", "General", "Enabled",
                  () => _cfg.Enabled, v => _cfg.Enabled = v,
                  "Turns everything off without unloading the script.");
@@ -308,6 +334,9 @@ namespace BareMinimum.UI
                   1f, 1f, 200f, "0",
                   "Hours of sleep that take you from empty to fully rested. 12 makes a " +
                   "six-hour night worth half a meter.");
+
+            Heading("HOW IT FEELS");
+
 
             Float("Slow down below", "Effects", "HungerSlowAt",
                   () => _cfg.HungerSlowAt, v => _cfg.HungerSlowAt = v,
@@ -348,6 +377,9 @@ namespace BareMinimum.UI
                  () => _cfg.StarvingCostsHealth, v => _cfg.StarvingCostsHealth = v,
                  "Slowly, and it stops at a sixth of your health. It will not kill you.");
 
+            Heading("SLEEPING");
+
+
             Bool("Sleep in beds", "Sleeping", "InBeds",
                  () => _cfg.SleepInBeds, v => _cfg.SleepInBeds = v,
                  "Safehouse beds, and any other bed the game will admit to.");
@@ -369,6 +401,9 @@ namespace BareMinimum.UI
                   () => _cfg.CarHours, v => _cfg.CarHours = v,
                   1f, 1f, 24f, "0", "How long a doze in a car lasts.");
 
+            Heading("SHOPS AND THE MAP");
+
+
             Float("Prices", "Money", "PriceMultiplier",
                   () => _cfg.PriceMultiplier, v => _cfg.PriceMultiplier = v,
                   0.1f, 0f, 10f, "0.0",
@@ -385,74 +420,30 @@ namespace BareMinimum.UI
                   () => _cfg.ShowShopBlips,
                   "~y~Turn shop map markers ON first.");
 
-            Choice("HUD style", "HUD", "Style", new[] { "Icons", "Bars" },
-                   () => (int)_cfg.Style, v => _cfg.Style = (HudStyle)v,
-                   "An apple and an eye that change shape, or two filled bars.");
-
-            Float("Bar height", "HUD", "BarLength",
-                  () => _cfg.HudBarLength, v => _cfg.HudBarLength = v,
-                  0.004f, 0.010f, 0.400f, "0.0000",
-                  "How tall the bars are, as a fraction of the screen.",
-                  () => _cfg.Style == HudStyle.Bars, "Bars only.");
-
-            Float("Bar width", "HUD", "BarWidth",
-                  () => _cfg.HudBarWidth, v => _cfg.HudBarWidth = v,
-                  0.0004f, 0.0010f, 0.0400f, "0.0000",
-                  "How wide the bars are. The fuel gauge in Fumes uses 0.0046.",
-                  () => _cfg.Style == HudStyle.Bars, "Bars only.");
-
-            Float("Bar mark size", "HUD", "BarIconScale",
-                  () => _cfg.HudBarIconScale, v => _cfg.HudBarIconScale = v,
-                  0.05f, 0.20f, 2.00f, "0.00",
-                  "The apple and eye in the foot of each bar, against the bar's width.",
-                  () => _cfg.Style == HudStyle.Bars, "Bars only.");
-
             Bool("Markers on pause map", "Map", "ShopBlipsOnMainMap",
                  () => _cfg.ShopBlipsOnMainMap, v => _cfg.ShopBlipsOnMainMap = v,
                  "Off keeps the big map clear and leaves them on the minimap only.",
                  () => _cfg.ShowShopBlips,
                  "~y~Turn shop map markers ON first.");
 
+            Heading("HUD");
+
+
             Bool("Show HUD", "HUD", "Show",
                  () => _cfg.ShowHud, v => _cfg.ShowHud = v,
                  "The apple and the eye beside the minimap.");
+
+            Choice("HUD style", "HUD", "Style", new[] { "Icons", "Bars" },
+                   () => (int)_cfg.Style, v => _cfg.Style = (HudStyle)v,
+                   "An apple and an eye that change shape, or two filled bars.");
 
             Bool("Animate the icons", "HUD", "Animate",
                  () => _cfg.HudAnimate, v => _cfg.HudAnimate = v,
                  "The icons breathe, and sway once a meter is nearly out.");
 
-            Bool("HUD auto position", "HUD", "AutoPosition",
-                 () => _cfg.HudAutoPosition, v => _cfg.HudAutoPosition = v,
-                 "Places them against the minimap whatever shape your screen is. " +
-                 "Turn off to use X and Y.");
-
-            Float("HUD size", "HUD", "Size",
-                  () => _cfg.HudSize, v => _cfg.HudSize = v,
-                  0.002f, 0.005f, 0.30f, "0.000",
-                  "Icon height as a fraction of screen height. Watch it change as you press.");
-
-            Float("HUD gap", "HUD", "Gap",
-                  () => _cfg.HudGap, v => _cfg.HudGap = v,
-                  0.02f, 0f, 3f, "0.00",
-                  "Clear air between the two icons.");
-
             Float("HUD opacity", "HUD", "Opacity",
                   () => _cfg.HudOpacity, v => _cfg.HudOpacity = v,
                   0.05f, 0.05f, 1f, "0.00", "");
-
-            Float("HUD X", "HUD", "X",
-                  () => _cfg.HudX, v => _cfg.HudX = v,
-                  0.004f, -0.2f, 1.2f, "0.000",
-                  "Across the screen. 0 is the far left, 1 the far right.",
-                  () => !_cfg.HudAutoPosition,
-                  "~y~Turn HUD auto position OFF first~s~ - this does nothing while it is on.");
-
-            Float("HUD Y", "HUD", "Y",
-                  () => _cfg.HudY, v => _cfg.HudY = v,
-                  0.004f, -0.2f, 1.2f, "0.000",
-                  "Down the screen. 0 is the top, 1 the bottom. The icons sit ABOVE this line.",
-                  () => !_cfg.HudAutoPosition,
-                  "~y~Turn HUD auto position OFF first~s~ - this does nothing while it is on.");
 
             Bool("Hide when fine", "HUD", "HideWhenFine",
                  () => _cfg.HudHideWhenFine, v => _cfg.HudHideWhenFine = v,
@@ -500,8 +491,60 @@ namespace BareMinimum.UI
                     Notify("~r~Starving and exhausted.");
                 }
             });
-        }
 
+            Heading("HUD PLACEMENT");
+
+
+            Bool("HUD auto position", "HUD", "AutoPosition",
+                 () => _cfg.HudAutoPosition, v => _cfg.HudAutoPosition = v,
+                 "Places them against the minimap whatever shape your screen is. " +
+                 "Turn off to use X and Y.");
+
+            Float("HUD size", "HUD", "Size",
+                  () => _cfg.HudSize, v => _cfg.HudSize = v,
+                  0.002f, 0.005f, 0.30f, "0.000",
+                  "Icon height as a fraction of screen height. Watch it change as you press.");
+
+            Float("HUD gap", "HUD", "Gap",
+                  () => _cfg.HudGap, v => _cfg.HudGap = v,
+                  0.02f, 0f, 3f, "0.00",
+                  "Clear air between the two. Vertical for icons, horizontal for bars.");
+
+            Float("HUD X", "HUD", "X",
+                  () => _cfg.HudX, v => _cfg.HudX = v,
+                  0.004f, -0.2f, 1.2f, "0.000",
+                  "Across the screen. 0 is the far left, 1 the far right.",
+                  () => !_cfg.HudAutoPosition,
+                  "~y~Turn HUD auto position OFF first~s~ - this does nothing while it is on.");
+
+            Float("HUD Y", "HUD", "Y",
+                  () => _cfg.HudY, v => _cfg.HudY = v,
+                  0.004f, -0.2f, 1.2f, "0.000",
+                  "Down the screen. 0 is the top, 1 the bottom. The icons sit ABOVE this line.",
+                  () => !_cfg.HudAutoPosition,
+                  "~y~Turn HUD auto position OFF first~s~ - this does nothing while it is on.");
+
+            Heading("BARS");
+
+
+            Float("Bar height", "HUD", "BarLength",
+                  () => _cfg.HudBarLength, v => _cfg.HudBarLength = v,
+                  0.004f, 0.010f, 0.400f, "0.0000",
+                  "How tall the bars are, as a fraction of the screen.",
+                  () => _cfg.Style == HudStyle.Bars, "Bars only.");
+
+            Float("Bar width", "HUD", "BarWidth",
+                  () => _cfg.HudBarWidth, v => _cfg.HudBarWidth = v,
+                  0.0004f, 0.0010f, 0.0400f, "0.0000",
+                  "How wide the bars are. The fuel gauge in Fumes uses 0.0046.",
+                  () => _cfg.Style == HudStyle.Bars, "Bars only.");
+
+            Float("Bar mark size", "HUD", "BarIconScale",
+                  () => _cfg.HudBarIconScale, v => _cfg.HudBarIconScale = v,
+                  0.05f, 0.20f, 2.00f, "0.00",
+                  "The apple and eye in the foot of each bar, against the bar's width.",
+                  () => _cfg.Style == HudStyle.Bars, "Bars only.");
+        }
         // ======================================================================
         // Option builders
         // ======================================================================

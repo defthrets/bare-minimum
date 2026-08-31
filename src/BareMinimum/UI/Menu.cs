@@ -20,6 +20,16 @@ namespace BareMinimum.UI
         /// <summary>Shown in the strip under the list while this row is selected.</summary>
         public string Note = "";
 
+        /// <summary>
+        /// A heading rather than a setting: a line that names the group under it.
+        ///
+        /// SKIPPED BY THE SELECTION ENTIRELY, which is the whole reason it is a flag on the
+        /// row rather than just a greyed entry. A heading you can land on is a keypress that
+        /// does nothing, and by the fourth group that is four dead presses between the top of
+        /// the list and the bottom.
+        /// </summary>
+        public bool Header;
+
         /// <summary>A greyed row can be selected and read, but not activated.</summary>
         public bool Enabled = true;
 
@@ -302,7 +312,7 @@ namespace BareMinimum.UI
 
         private void Move(int by)
         {
-            Index = Wrap(Index + by, Rows.Count);
+            Index = NextSelectable(Index, by);
 
             // Keep the selection inside the visible window, scrolling only as far as it must.
             if (Index < _scroll) _scroll = Index;
@@ -315,9 +325,67 @@ namespace BareMinimum.UI
             Sound("NAV_UP_DOWN");
         }
 
+        /// <summary>
+        /// The next row in that direction that is not a heading.
+        ///
+        /// BOUNDED BY THE ROW COUNT, so a list that is nothing but headings -- which should
+        /// never happen and would hang this otherwise -- comes back where it started instead
+        /// of spinning the frame.
+        /// </summary>
+        private int NextSelectable(int from, int by)
+        {
+            if (Rows.Count == 0) return 0;
+
+            var step = by >= 0 ? 1 : -1;
+            var at = from;
+
+            for (var guard = 0; guard < Rows.Count; guard++)
+            {
+                at = Wrap(at + step, Rows.Count);
+
+                if (!Rows[at].Header) return at;
+            }
+
+            return from;
+        }
+
+        /// <summary>The first row that is not a heading. Where a freshly opened list lands.</summary>
+        private int FirstSelectable()
+        {
+            for (var i = 0; i < Rows.Count; i++)
+            {
+                if (!Rows[i].Header) return i;
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// Puts the selection somewhere legal after the rows have been rebuilt.
+        ///
+        /// Called by whoever refills the list. A panel that swaps its rows can easily leave
+        /// the selection sitting on a heading, and from there every keypress moves it two.
+        /// </summary>
+        public void Settle()
+        {
+            if (Rows.Count == 0) { Index = 0; _scroll = 0; return; }
+
+            Index = Clamp(Index, 0, Rows.Count - 1);
+
+            if (Rows[Index].Header) Index = FirstSelectable();
+
+            if (Index < _scroll) _scroll = Index;
+            else if (Index >= _scroll + Window) _scroll = Index - Window + 1;
+
+            if (_scroll > Math.Max(0, Rows.Count - Window)) _scroll = Math.Max(0, Rows.Count - Window);
+            if (_scroll < 0) _scroll = 0;
+        }
+
         private void Nudge(int by)
         {
             var row = Rows[Clamp(Index, 0, Rows.Count - 1)];
+
+            if (row.Header) return;
 
             if (!row.Enabled) { Sound("ERROR"); return; }
 
@@ -603,6 +671,22 @@ namespace BareMinimum.UI
 
         private void DrawRow(Row row, float left, float y, bool selected, int slot)
         {
+            if (row.Header)
+            {
+                // Darker than a row and shorter than one, with the name in the accent colour
+                // and a rule under it. It has to read as a break in the list rather than as
+                // another entry, or it is just a setting you cannot change.
+                Hud.Bar(left, y, PanelW, RowH, Color.FromArgb(238, 14, 14, 17));
+
+                Hud.Text(row.Left, left + 0.010f,
+                         y + (RowH - Hud.Height(0.30f, Plain)) / 2f, 0.30f,
+                         Color.FromArgb(235, 240, 170, 56), Plain, false, false, true);
+
+                Hud.Bar(left + 0.010f, y + RowH - 0.0018f, PanelW - 0.020f, 0.0012f,
+                        Color.FromArgb(150, 240, 170, 56));
+                return;
+            }
+
             Hud.Bar(left, y, PanelW, RowH,
                     selected ? Color.FromArgb(242, 240, 170, 56)
                              : Color.FromArgb(222, 20, 20, 24));

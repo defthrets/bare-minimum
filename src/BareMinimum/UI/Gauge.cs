@@ -287,7 +287,15 @@ namespace BareMinimum.UI
             // A MINIMUM under it, because at the fuel gauge's width -- nine pixels on a 1080p
             // screen -- a gap of nothing leaves two bars touching, and two bars touching read
             // as one bar with a line down it.
-            var pitch = barW + Math.Max(barW * 1.6f, _cfg.HudGap * barW * 2.4f);
+            // THE FLOOR HAS TO BE BELOW THE DEFAULT OR THE SETTING DOES NOTHING. It was
+            // max(barW * 1.6, gap * barW * 2.4), and Gap defaults to 0.22 -- which comes to
+            // 0.53 and loses to the floor, so the number moved and the bars did not until you
+            // got past 0.67. A floor is meant to stop two frames overlapping, not to sit on
+            // top of the value it is guarding.
+            //
+            // 0.45 is exactly two edges wide, so at Gap = 0 the black surrounds touch and
+            // nothing overlaps. Everything above that is the setting doing its job.
+            var pitch = barW * (1f + Math.Max(0.45f, _cfg.HudGap * 2.4f));
 
             Column(needs.Hunger, _apple, x + barW / 2f, barTop, barH, barW, false);
             Column(needs.Sleep, _eye, x + barW / 2f + pitch, barTop, barH, barW, true);
@@ -330,7 +338,7 @@ namespace BareMinimum.UI
             if (sleep) Breathe(x, top, w, h, fraction, body);
             else Churn(x, top, w, h, fraction, body);
 
-            Foot(icon, centreX, top, w, h, fraction);
+            Foot(icon, centreX, top, w, h);
         }
 
         /// <summary>
@@ -348,7 +356,7 @@ namespace BareMinimum.UI
         ///
         /// Drawn LAST, over the level, so the fill does not paint across it.
         /// </summary>
-        private void Foot(Icon icon, float centreX, float top, float w, float h, float fraction)
+        private void Foot(Icon icon, float centreX, float top, float w, float h)
         {
             if (icon == null || icon.Missing) return;
 
@@ -358,11 +366,19 @@ namespace BareMinimum.UI
 
             var inset = w * 0.16f;
 
-            var covered = h * fraction >= iconH + inset;
-
+            // ONE INK, LIGHT, ALWAYS -- because these icons already carry their own black
+            // rim, baked in by tools/make_icons.py, and CustomSprite MULTIPLIES its colour
+            // with the texture: white takes the tint, black stays black whatever it is given.
+            // So a light mark comes out light with a black outline round it, and that outline
+            // is what separates it from a bright fill or an empty channel alike.
+            //
+            // It was flipping to near-black over the fill, copied from the fuel gauge. That
+            // is right for the pump, which has no rim of its own and would vanish into a full
+            // tank -- but multiplying black art by black ink turns the whole apple into a
+            // silhouette and takes the outline with it, which is the one thing here that did
+            // not need solving.
             icon.DrawSized(centreX, top + h - inset - iconH / 2f, iconW, iconH,
-                           Fade(covered ? Color.FromArgb(245, 10, 10, 12)
-                                        : Color.FromArgb(225, 232, 232, 238)));
+                           Fade(Color.FromArgb(235, 240, 240, 245)));
         }
 
         /// <summary>
@@ -378,7 +394,24 @@ namespace BareMinimum.UI
         /// two of them overlapping is a bright seam. That lesson came from the fuel gauge and
         /// there is no reason to learn it twice.
         /// </summary>
-        private const int Bands = 22;
+        private int Bands(float h)
+        {
+            if (_screenH <= 0)
+            {
+                try { _screenH = GTA.UI.Screen.Resolution.Height; }
+                catch { _screenH = 1080; }
+            }
+
+            var n = (int)(h * _screenH / 4f);
+
+            if (n < 12) n = 12;
+            if (n > 64) n = 64;
+
+            return n;
+        }
+
+        /// <summary>Cached; the resolution cannot change without a reload anyway.</summary>
+        private int _screenH;
 
         /// <summary>
         /// HUNGER: a restless surface, and the contents turning over underneath it.
@@ -400,33 +433,39 @@ namespace BareMinimum.UI
             var surfaceY = y + h - level;
 
             var empty = 1f - fraction;
-            var swing = h * 0.014f * (0.20f + empty);
+
+            // Small. This bar is about sixteen pixels wide on an ultrawide and nine on a
+            // 1080p screen, and an amplitude that looked gentle as a fraction of the height
+            // is several pixels of vertical travel across a couple of columns -- which is not
+            // a wave, it is a flicker.
+            var swing = h * 0.007f * (0.25f + 0.75f * empty);
 
             var floor = y + h;
 
-            // The body starts at the lowest the surface can swing, so the columns above it
-            // have nothing to overlap.
             var bodyTop = surfaceY + swing;
             if (bodyTop > floor) bodyTop = floor;
 
-            // ---- the contents, in bands, each one its own colour ----
+            // ---- the contents ----
             //
-            // Two travelling pulses at different speeds and lengths. One alone reads as a
-            // stripe going round; two crossing read as something turning over.
-            for (var i = 0; i < Bands; i++)
+            // VERY SLOW AND VERY BROAD. Two humps drifting up the column, one about a
+            // fourteen-second lap and one about twenty-two, and both wide enough that any two
+            // neighbouring bands differ by a hair. That is what keeps it a gradient sliding
+            // rather than a set of stripes stepping past each other.
+            var bands = Bands(h);
+
+            for (var i = 0; i < bands; i++)
             {
-                var bTop = bodyTop + (floor - bodyTop) * i / Bands;
-                var bBot = bodyTop + (floor - bodyTop) * (i + 1) / Bands;
+                var bTop = bodyTop + (floor - bodyTop) * i / bands;
+                var bBot = bodyTop + (floor - bodyTop) * (i + 1) / bands;
 
                 if (bBot - bTop <= 0f) continue;
 
-                // 0 at the surface, 1 at the bottom of the glass.
-                var u = (i + 0.5f) / Bands;
+                var u = (i + 0.5f) / bands;
 
-                var a = Pulse(u - t * 0.21f, 0.30f);
-                var b = Pulse(u - t * 0.13f + 0.5f, 0.44f);
+                var a = Pulse(u - t * 0.071f, 0.58f);
+                var b = Pulse(u - t * 0.045f + 0.5f, 0.76f);
 
-                var lift = (a * 0.65f + b * 0.35f) * (0.10f + 0.16f * empty);
+                var lift = (a * 0.6f + b * 0.4f) * (0.09f + 0.13f * empty);
 
                 Hud.Bar(x, bTop, w, bBot - bTop,
                         Mix(body, Color.FromArgb(body.A, 255, 245, 220), lift));
@@ -434,46 +473,42 @@ namespace BareMinimum.UI
 
             if (level <= 0.002f) return;
 
-            // ---- the surface: A ROLLING SWELL, NOT THE FUEL GAUGE'S CHOP ----
+            // ---- the surface ----
             //
-            // Fumes adds two sines at frequencies that do not divide into each other, which
-            // is right for petrol: it gives a restless, broken surface that never repeats,
-            // and fuel in a moving tank IS broken water.
+            // NOT A TRAVELLING WAVE. That was the mistake: a wave rolling ACROSS a bar this
+            // narrow is eight two-pixel columns taking turns to jump, which reads as
+            // jittering however smooth the maths behind it is. There is simply not enough
+            // width for a wavelength to live in.
             //
-            // Food is not petrol and should not move like it. This is ONE long wave with a
-            // wavelength longer than the bar is wide, travelling steadily across -- so at any
-            // instant the surface is a single smooth arc tilting one way, and over time it
-            // rolls. No interference, no chop, nothing that can beat against itself.
+            // So the surface does the two things a settling liquid actually does in a narrow
+            // glass: it rises and falls as a whole, and it tips. Both slow -- five and a half
+            // seconds and seven and a bit, which do not divide into each other, so the pair
+            // never quite repeats without either of them being fast.
             //
-            // Under it, the whole surface rises and falls slowly, which is the part that
-            // makes it look like a quantity settling rather than a texture playing.
+            // The tilt is LINEAR across the width, so the surface is a straight line leaning
+            // one way. A straight line cannot have a kink in it, which is the other half of
+            // why this is smooth where a sine sampled at eight points was not.
+            var swell = (float)Math.Sin(t * (2.0 * Math.PI / 5.5)) * swing;
+            var tip = (float)Math.Sin(t * (2.0 * Math.PI / 7.3)) * swing * 0.55f;
+
             var crest = Mix(body, Color.FromArgb(body.A, 255, 240, 205), 0.55f);
 
             var columns = Columns(w);
-
-            // Slow, and slower still when there is plenty. A full stomach is a quiet one.
-            var roll = t * (0.55f + 0.85f * empty);
-            var breath = (float)Math.Sin(t * 0.62f) * swing * 0.30f;
 
             for (var i = 0; i < columns; i++)
             {
                 var left = x + w * i / columns;
                 var right = x + w * (i + 1) / columns;
 
-                // Centre of the column, not its edge: sampling at the edge puts the wave half
-                // a column out of step with the rectangle that is drawing it, which is a
-                // visible stagger once the columns are thin.
-                var u = (i + 0.5f) / columns;
+                // -1 at one edge, +1 at the other.
+                var lean = ((i + 0.5f) / columns - 0.5f) * 2f;
 
-                // Just over one wavelength across the bar. Any more and it is chop again.
-                var wave = (float)Math.Sin((roll + u * 1.15f) * Math.PI * 2.0) * swing + breath;
-
-                var topY = surfaceY + wave;
+                var topY = surfaceY + swell + tip * lean;
                 if (topY < y) topY = y;
 
                 if (topY < bodyTop) Hud.Bar(left, topY, right - left, bodyTop - topY, body);
 
-                Hud.Bar(left, topY, right - left, h * 0.008f, crest);
+                Hud.Bar(left, topY, right - left, h * 0.007f, crest);
             }
         }
 
@@ -547,14 +582,16 @@ namespace BareMinimum.UI
             var floor = y + h;
 
             // ---- the contents, in bands ----
-            for (var i = 0; i < Bands; i++)
+            var bands = Bands(h);
+
+            for (var i = 0; i < bands; i++)
             {
-                var bTop = surfaceY + (floor - surfaceY) * i / Bands;
-                var bBot = surfaceY + (floor - surfaceY) * (i + 1) / Bands;
+                var bTop = surfaceY + (floor - surfaceY) * i / bands;
+                var bBot = surfaceY + (floor - surfaceY) * (i + 1) / bands;
 
                 if (bBot - bTop <= 0f) continue;
 
-                var u = (i + 0.5f) / Bands;
+                var u = (i + 0.5f) / bands;
 
                 // A broad, soft band centred where the breath has got to -- high in the glass
                 // at the top of the inhale, sunk to the bottom at the end of the let-out.
