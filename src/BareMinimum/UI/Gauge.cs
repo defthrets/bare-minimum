@@ -1151,20 +1151,25 @@ namespace BareMinimum.UI
         // Deep at empty rather than alarming at empty, because the alarm is elsewhere: below
         // stage 1 Colour pulses this toward white, which is a far louder signal than any hue.
         //
-        // A WARM CAST ON THE BOTTOM TWO STOPS, so the empty end reads as olive rather than
-        // as a pure green. Food going off is a brown business and the deep end looked a bit
-        // synthetic without it.
+        // THE BOTTOM TWO STOPS ARE BROWN, so the ramp runs brown through to mint rather than
+        // green through to mint. Food going off is a brown business and a clean green deep end
+        // looked synthetic.
         //
-        // It costs nothing against the fuel gauge, which is the one thing that had to be
-        // checked before warming anything: the worst approach to fuel is dE 58 with the warmth
-        // in and dE 58 without it, because that worst case is at the FULL end of both ramps
-        // and never came from the empty one. Nothing down here is within reach of fuel at any
-        // level -- the darkest stop is L* 32 against fuel's own darkest of 45, so lightness
-        // alone keeps them apart even where the hues converge.
+        // 73 degrees of hue at the empty stop, from 154 where this started. Worth knowing that
+        // the untinted green was already leaning teal, so the first third of that journey only
+        // brings it to a neutral green -- small warm shifts here do not read as warm at all,
+        // they read as green, which is why this is not a gentle tint.
         //
-        // 121 degrees of hue, down from 154. Worth knowing that the untinted green was already
-        // leaning teal, so the first part of this shift only brings it to a neutral green --
-        // a smaller move than this does not read as warm at all, it just reads as green.
+        // THIS IS THE DIRECTION THAT HAS TO BE WATCHED, because brown is dark orange and
+        // orange is the fuel gauge. It stops at 73 for that reason: measured against every
+        // pair of levels the two bars can be at, this holds dE 51 from fuel, where one more
+        // step of warmth drops it to 45 and starts reading as rust rather than as brown.
+        //
+        // The closest approach also MOVED when the brown went in. Up to olive the worst case
+        // was at the full end of both ramps and warming the bottom cost literally nothing;
+        // past that it is this stop against fuel at a fifth of a tank, so any further warmth
+        // is now paid for directly. Lightness is what keeps the margin: L* 33 here against
+        // fuel's darkest of 48.
         //
         // Never lighter at the bottom than the channel behind it, and never washed out --
         // every point holds a chroma of at least 25, so no part of the range goes grey.
@@ -1173,8 +1178,8 @@ namespace BareMinimum.UI
 
         private static readonly Color[] Ramp =
         {
-            Color.FromArgb(235,  66,  80,  40),   // empty     dark olive
-            Color.FromArgb(235,  64, 128,  62),   // bad       olive green
+            Color.FromArgb(235, 102,  72,  34),   // empty     brown
+            Color.FromArgb(235,  82, 122,  54),   // bad       olive
             Color.FromArgb(235,  48, 168,  96),   // middling  green
             Color.FromArgb(235,  92, 204, 132),   // fine      fresh green
             Color.FromArgb(235, 156, 232, 172)    // full      light mint
