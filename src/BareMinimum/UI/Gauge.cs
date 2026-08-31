@@ -728,23 +728,33 @@ namespace BareMinimum.UI
             // timers -- they leave from the moment of the knock, which is what a ring is.
             var beat = 13f;
 
-            var strike = (t / beat) % 1f;
+            var cycle = (t / beat) % 1f;
 
-            // The bob: a couple of oscillations under an exponential decay, then flat. Fifteen
-            // hundredths of the cycle to happen in, so the still is much longer than the
-            // moving -- get that ratio wrong and it is a wobble rather than an event.
+            // THE FIRST FIFTH OF THE CYCLE IS THE DROP FALLING. It was only ever the splash
+            // before, which is an effect without a cause -- the surface flinched and nothing
+            // had touched it. A drop you watch come down explains everything that follows and
+            // costs one rectangle.
+            const float Fall = 0.20f;
+
+            var hit = cycle < Fall ? -1f : (cycle - Fall) / (1f - Fall);
+
+            // The bob: a couple of oscillations under an exponential decay, then flat. It gets
+            // a bit over a third of what remains, so the still is much longer than the moving
+            // -- get that ratio wrong and it is a wobble rather than an event.
             var bob = 0f;
 
-            if (strike < 0.42f)
+            if (hit >= 0f && hit < 0.42f)
             {
-                var u = strike / 0.42f;
+                var u = hit / 0.42f;
 
                 bob = (float)(Math.Sin(u * Math.PI * 2.6) * Math.Exp(-u * 3.4));
             }
 
-            // About three pixels at its worst on a bar two hundred and thirty-five tall, and
-            // it is back to nothing within four seconds. Honest as well as visible.
-            var level = h * fraction - bob * h * 0.013f;
+            // SEVEN PIXELS AT ITS WORST on a bar two hundred and thirty-five tall, up from
+            // three. Three was honest and nearly invisible; this is three per cent of the
+            // reading for a couple of seconds and back to exact for the other eleven, which
+            // is a trade worth making for an animation you can actually see land.
+            var level = h * fraction - bob * h * 0.030f;
 
             if (level < 0f) level = 0f;
             if (level > h) level = h;
@@ -789,10 +799,42 @@ namespace BareMinimum.UI
             if (level > h * 0.06f)
             {
                 Stars(x, y, w, h, surfaceY, t, tired);
-                Ripples(x, w, h, level, y + h - h * fraction, strike, body);
+                Ripples(x, w, h, level, y + h - h * fraction, hit, body);
             }
 
             if (level <= 0.002f) return;
+
+            // ---- the drop on its way down ----
+            //
+            // Accelerating, because a drop does. Linear would read as a lift descending, and
+            // the squared ease is the whole difference between something falling and
+            // something being lowered.
+            //
+            // Only when there is somewhere to fall FROM. On a nearly full bar the channel
+            // above the surface is a few pixels and a drop would appear already landed, so it
+            // is skipped and the splash happens on its own -- which is no worse than what this
+            // did before the drop existed.
+            if (cycle < Fall)
+            {
+                var above = surfaceY - y;
+                var reach = Math.Min(h * 0.30f, above);
+
+                if (reach > h * 0.05f)
+                {
+                    var u = cycle / Fall;
+
+                    var dropW = Math.Max(w * 0.24f, 0.0010f);
+                    var dropH = dropW * Aspect() * 1.35f;
+
+                    var dy = surfaceY - reach + reach * u * u;
+
+                    // Fades in off the top rather than blinking into existence at the ceiling.
+                    var seen = Math.Min(1f, u * 4f);
+
+                    Hud.Bar(x + (w - dropW) / 2f, dy - dropH, dropW, dropH,
+                            Fade(Color.FromArgb((int)(215 * seen), 236, 244, 255)));
+                }
+            }
 
             // ---- the waterline ----
             //
@@ -840,6 +882,9 @@ namespace BareMinimum.UI
             if (reach < h * 0.02f) return;
 
             var thick = Math.Max(h * 0.005f, 0.0008f);
+
+            // Nothing has landed yet.
+            if (strike < 0f) return;
 
             for (var i = 0; i < count; i++)
             {
