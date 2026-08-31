@@ -490,9 +490,12 @@ namespace BareMinimum.UI
 
                 var u = (i + 0.5f) / bands;
 
-                // A ninety-second lap and a hundred and forty.
-                var a = Pulse(u - t * 0.011f, 0.58f);
-                var b = Pulse(u - t * 0.007f + 0.5f, 0.76f);
+                // A THREE-MINUTE LAP AND A FIVE. At this rate the contents are not really
+                // travelling any more, they are just never quite the same twice -- which is
+                // what was wanted: something that rewards a second look and does nothing at
+                // all to the first one.
+                var a = Pulse(u - t * 0.0055f, 0.58f);
+                var b = Pulse(u - t * 0.0034f + 0.5f, 0.76f);
 
                 var warm = (a * 0.6f + b * 0.4f) * (0.09f + 0.13f * empty);
 
@@ -543,8 +546,11 @@ namespace BareMinimum.UI
             //
             // Twenty-two seconds and thirty-one, and the bow is now the slowest thing in
             // either bar. It is a stomach settling, not a pulse.
-            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 22.0)) * swing;
-            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 31.0)) * swing * 0.40f;
+            // THIRTY-SIX SECONDS AND FIFTY-TWO. A full bow now takes over half a minute,
+            // which is slower than a HUD element has any business being and is exactly the
+            // point: at this rate you cannot catch it moving, you can only notice that it has.
+            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 36.0)) * swing;
+            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 52.0)) * swing * 0.40f;
 
             var crest = Mix(body, Color.FromArgb(body.A, 255, 240, 205), 0.55f);
 
@@ -611,7 +617,9 @@ namespace BareMinimum.UI
             {
                 // A little quicker when there is less to sink through. Speeds that do not
                 // divide into each other, so the three never fall in formation.
-                var speed = (0.048f + i * 0.012f + empty * 0.028f) * drift;
+                // Halved again. A crumb takes a minute and a half to sink the bar at the
+                // default drift, so it reads as something settling rather than falling.
+                var speed = (0.024f + i * 0.006f + empty * 0.014f) * drift;
                 var phase = (t * speed + i * 0.37f) % 1f;
 
                 var py = surfaceY + level * phase;
@@ -756,20 +764,22 @@ namespace BareMinimum.UI
         }
 
         /// <summary>
-        /// Fixed stars in the sky below the waterline.
+        /// Stars coming out over the sky, each in a new place every time.
         ///
-        /// THEY DO NOT MOVE AT ALL. Bubbles rise, crumbs sink, wind blows across -- this bar
-        /// has now tried two of those and the answer both times was that it was too quick.
-        /// Stars solve it by having nowhere to go: each one sits at a position derived from
-        /// its own index and only fades up and down, so there is no rate to be wrong about.
+        /// THEY DO NOT MOVE AND THEY DO NOT STAY PUT EITHER. Nothing travels -- travel is what
+        /// this bar has failed at twice, and in the corner of the eye anything crossing the
+        /// screen is the one thing that cannot be ignored. But nine lamps blinking at nine
+        /// fixed points is a switchboard, not a sky.
         ///
-        /// POSITIONS FROM A CHEAP HASH, not Random and not a table. Random per frame would
-        /// make them flicker about; a table would be a dozen numbers to read and tune. A pair
-        /// of sines on the index scatters them well enough that no two line up, and it costs
-        /// nothing and keeps no state.
+        /// So each star lives a cycle: up out of nothing, a moment lit, back down to nothing.
+        /// Its POSITION comes from which cycle it is on, so the next time it appears it is
+        /// somewhere else entirely. The jump happens while it is completely dark, so what you
+        /// see is stars coming out over a sky -- never one sliding to a new seat.
         ///
-        /// Only drawn below the surface, so the sky fills as you rest and empties as you tire
-        /// -- which is the level doing the work, quietly, without anything sliding about.
+        /// POSITIONS FROM A HASH of the star and its cycle number. No Random, which would
+        /// scatter them afresh every frame and make them flicker about; no table, which would
+        /// be a page of numbers to read and repeat itself the moment anybody looked twice.
+        /// Deterministic, stateless, and different every appearance.
         /// </summary>
         private void Stars(float x, float y, float w, float h, float surfaceY,
                            float t, float tired)
@@ -784,29 +794,50 @@ namespace BareMinimum.UI
 
             for (var i = 0; i < count; i++)
             {
-                // Scattered by a pair of sines on the index. Irrational-ish multipliers, so
-                // the pattern does not fall into rows.
-                var lane = 0.5f + 0.34f * (float)Math.Sin(i * 2.399963f);
-                var depth = (float)((i * 0.6180339887) % 1.0);
+                // Between nine and nineteen seconds a life, none of them a multiple of
+                // another, so the sky never empties or fills all at once.
+                var beat = 9f + (i % 5) * 2.5f;
 
-                var sy = y + h - level * depth;
+                var raw = t / beat + i * 0.37f;
 
-                // Each on its own slow beat, none of them harmonics of each other, so the sky
-                // never blinks all at once.
-                var beat = 9f + (i % 4) * 3.5f;
+                var cycle = (float)Math.Floor(raw);
+                var phase = raw - cycle;
 
-                var twinkle = 0.5f + 0.5f * (float)Math.Sin(t * (2.0 * Math.PI / beat) + i * 1.7f);
+                // A whole life in one half-sine: nothing at both ends, brightest in the
+                // middle. Cubed, because a sky of nine half-lit lamps is a dotted line and
+                // stars are mostly not there.
+                var lit = (float)Math.Sin(phase * Math.PI);
+                lit = lit * lit * lit;
 
-                // Sharpened, so each one is out more than it is in -- a sky of nine lamps all
-                // half lit is a dotted line, and stars are mostly not there.
-                twinkle = twinkle * twinkle * twinkle;
-
-                var alpha = (int)(215f * twinkle * (0.45f + 0.55f * tired));
+                var alpha = (int)(230f * lit * (0.45f + 0.55f * tired));
                 if (alpha <= 6) continue;
+
+                // Kept off both walls, so no star is ever half a star.
+                var lane = 0.20f + 0.60f * Scatter(i * 3.1f + cycle * 17.3f);
+                var deep = 0.06f + 0.88f * Scatter(i * 7.7f + cycle * 29.1f + 5.5f);
+
+                var sy = y + h - level * deep;
 
                 Hud.Bar(x + w * lane - size / 2f, sy - tall / 2f, size, tall,
                         Fade(Color.FromArgb(alpha, 240, 244, 255)));
             }
+        }
+
+        /// <summary>
+        /// A repeatable 0-to-1 from one number. The usual sine-and-throw-away-the-top trick.
+        ///
+        /// NOT called Hash, obvious as that name is: GTA.Native.Hash is the native enum this
+        /// whole file calls through, and a private method by that name shadows it and breaks
+        /// every Function.Call in the class.
+        ///
+        /// Not good randomness and does not need to be: it scatters nine dots in a box, and
+        /// the only thing that matters is that the same input always gives the same dot and
+        /// that neighbouring inputs do not give neighbouring dots.
+        /// </summary>
+        private static float Scatter(float v)
+        {
+            var x = Math.Sin(v * 12.9898) * 43758.5453;
+            return (float)(x - Math.Floor(x));
         }
 
         /// <summary>
