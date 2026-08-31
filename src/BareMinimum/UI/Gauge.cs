@@ -487,9 +487,9 @@ namespace BareMinimum.UI
 
                 var u = (i + 0.5f) / bands;
 
-                // Nearly twice as slow as they were: a thirty-second lap and a fifty.
-                var a = Pulse(u - t * 0.038f, 0.58f);
-                var b = Pulse(u - t * 0.024f + 0.5f, 0.76f);
+                // Slower again: a fifty-second lap and an eighty.
+                var a = Pulse(u - t * 0.020f, 0.58f);
+                var b = Pulse(u - t * 0.013f + 0.5f, 0.76f);
 
                 var lift = (a * 0.6f + b * 0.4f) * (0.09f + 0.13f * empty);
 
@@ -514,13 +514,20 @@ namespace BareMinimum.UI
             // The tilt is LINEAR across the width, so the surface is a straight line leaning
             // one way. A straight line cannot have a kink in it, which is the other half of
             // why this is smooth where a sine sampled at eight points was not.
-            // Ten seconds and thirteen and a half, up from five and a half and seven and
-            // a third. Still coprime enough that the pair does not visibly repeat.
-            var swell = (float)Math.Sin(t * (2.0 * Math.PI / 10.0)) * swing;
+            // SIXTEEN SECONDS AND TWENTY-THREE. The swell is the slowest thing in either
+            // bar now, which is right: it is a stomach settling, not a pulse.
+            //
+            // THE RATE STILL CLIMBS AS THE METER EMPTIES, and that is deliberately kept --
+            // hunger drains faster while you sprint (see Needs.Exertion), so running yourself
+            // hungry makes this visibly livelier. That link is worth more than the base speed
+            // ever was and it is the one part of the timing nobody has asked to slow.
+            var hurry = 1f + 0.85f * empty;
+
+            var swell = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 16.0)) * swing;
             // The tilt is measured across the bar's WIDTH, which is fifteen pixels against
             // the height's two hundred and thirty-five. Leaning it as far as the swell rises
             // would stand the surface on its end, so it gets a third of the travel.
-            var tip = (float)Math.Sin(t * (2.0 * Math.PI / 13.5)) * swing * 0.32f;
+            var tip = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 23.0)) * swing * 0.32f;
 
             var crest = Mix(body, Color.FromArgb(body.A, 255, 240, 205), 0.55f);
 
@@ -744,7 +751,7 @@ namespace BareMinimum.UI
         private void Wind(float x, float y, float w, float h, float surfaceY,
                           float eased, float tired)
         {
-            const int count = 4;
+            const int count = 5;
 
             // Segments per wisp. The curl is the whole difference between wind and a ruler:
             // each segment sits a hair above or below its neighbour, so a streak arrives
@@ -763,7 +770,14 @@ namespace BareMinimum.UI
             // stopping: air that halts dead reads as a dropped frame.
             var carry = 0.25f + 0.75f * (0.5f + 0.5f * eased);
 
-            var thick = Math.Max(h * 0.0040f, 0.0006f);
+            // IT WAS DRAWING SUB-PIXEL LINES. h is already a fraction of the screen --
+            // 0.1635 of it -- so h * 0.0040 is 0.00065 of the screen height, which on a
+            // 1440-tall monitor is nine tenths of ONE PIXEL. Multiplied by a fade, a swell
+            // and a tired-scale on top, there was nothing there to see. Reported, correctly,
+            // as no wind animation at all.
+            //
+            // 0.020 is about four and a half pixels, which is a wisp rather than a rumour.
+            var thick = Math.Max(h * 0.020f, 0.0010f);
 
             for (var i = 0; i < count; i++)
             {
@@ -794,8 +808,11 @@ namespace BareMinimum.UI
                 // never all present at once.
                 var breathe = 0.45f + 0.55f * (float)Math.Sin(t * (0.23f + i * 0.06f) * drift + i * 1.9f);
 
-                var alpha = (int)(125f * Math.Max(fade, 0f) * Math.Max(breathe, 0f) *
-                                  (0.40f + 0.60f * tired));
+                // Brighter, and with a higher floor when rested. It was topping out around
+                // seventy on a one-pixel line; three of those multipliers stack, and each one
+                // is under one.
+                var alpha = (int)(200f * Math.Max(fade, 0f) * Math.Max(breathe, 0f) *
+                                  (0.55f + 0.45f * tired));
 
                 if (alpha <= 4) continue;
 
@@ -818,7 +835,7 @@ namespace BareMinimum.UI
                     var s = (seg + 0.5f) / segments;
                     var curl = (float)Math.Sin((s * 2.2f + t * 0.20f * drift + i) * Math.PI * 2.0);
 
-                    Hud.Bar(l, py + curl * thick * 2.2f, r - l, thick, ink);
+                    Hud.Bar(l, py + curl * thick * 1.3f, r - l, thick, ink);
                 }
             }
         }
