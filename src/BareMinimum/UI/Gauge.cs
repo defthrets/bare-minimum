@@ -286,7 +286,6 @@ namespace BareMinimum.UI
         private void Bars(Needs.Needs needs, float x, float bottom)
         {
             var barW = Math.Max(0.001f, _cfg.HudBarWidth);
-            var barH = Math.Max(0.004f, _cfg.HudBarLength);
 
             // THE MARKS SIT UNDER THE BARS NOW, not in the foot of them. In the channel they
             // could never be wider than the bar -- fifteen pixels on an ultrawide, nine on a
@@ -302,7 +301,17 @@ namespace BareMinimum.UI
             var plateW = barW + edge * 2f;
             var plateH = plateW * Aspect();
 
-            var breath = edge * 2f;
+            // THE PLATE BUTTS THE BAR. It sat a couple of edges below and read as a separate
+            // object parked under the gauge; the pump in Fumes is part of its gauge, and these
+            // should be part of theirs.
+            var breath = 0f;
+
+            // BARLENGTH IS THE WHOLE THING, PLATE INCLUDED -- which is what makes it directly
+            // comparable to the fuel gauge's Height, where the pump lives inside the same
+            // figure. It used to be the bar alone, so an identical number gave a taller
+            // instrument here than there and the two would not line up however carefully
+            // either was set.
+            var barH = Math.Max(0.004f, _cfg.HudBarLength - plateH);
 
             // ANCHORED TO THE FOOT, and to nothing else. It used to be reconstructed as
             // top + side * 2 + gap, which is the same number in auto position and is NOT in

@@ -419,7 +419,14 @@ namespace BareMinimum.Core
         public HudStyle Style = HudStyle.Icons;
 
         /// <summary>
-        /// How TALL a bar is, as a fraction of screen height. Bars only.
+        /// How tall the WHOLE gauge is -- bar plus the plate under it -- as a fraction of
+        /// screen height. Bars only.
+        ///
+        /// The plate is inside this figure so that the number means the same thing here as
+        /// Height does in Fumes, where the pump sits inside the gauge. Set both to 0.1635 and
+        /// the two instruments are the same height on screen; when this measured the bar
+        /// alone they were not, and no amount of care with either number would have made them
+        /// agree.
         ///
         /// Named Length rather than Width because the bars stand up: the number is the run of
         /// the fill, and calling that a width while it measures downward is the sort of thing
