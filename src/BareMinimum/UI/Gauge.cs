@@ -4,6 +4,7 @@ using GTA;
 using GTA.Native;
 using BareMinimum.Core;
 using BareMinimum.Needs;
+using Hud = BareMinimum.UI.Draw;
 
 namespace BareMinimum.UI
 {
@@ -235,6 +236,12 @@ namespace BareMinimum.UI
 
                 // Offset phases so the two never move together. In step they read as one
                 // object with two halves; a little apart they read as two things.
+                if (_cfg.Style == HudStyle.Bars)
+                {
+                    Bars(needs, x, top, side, gap);
+                    return;
+                }
+
                 Mark(_apple, needs.Hunger, x, top + side / 2f, wide, side, 0f);
                 Mark(_eye, needs.Sleep, x, top + side + gap + side / 2f, wide, side, 0.37f);
             }
@@ -242,6 +249,219 @@ namespace BareMinimum.UI
             {
                 Log.Once("gauge", "The HUD could not be drawn: " + ex.Message);
             }
+        }
+
+        // ======================================================================
+        // The bars
+        // ======================================================================
+
+        /// <summary>
+        /// The other HUD: two filled bars, in the manner of the fuel gauge in Fumes.
+        ///
+        /// THE ICONS AND THESE ANSWER DIFFERENT QUESTIONS. A shape that changes says "you are
+        /// getting hungry" at a glance and deliberately will not tell you a number; a bar
+        /// tells you the number and says nothing else. Neither is better, which is why this is
+        /// a setting rather than a replacement.
+        ///
+        /// The stage icon still sits at the head of each bar, small. Without it two coloured
+        /// strips beside the minimap are indistinguishable from each other and from the
+        /// game's own health and armour, and the whole point of this mod's HUD is knowing at
+        /// a glance which meter you are looking at.
+        /// </summary>
+        private void Bars(Needs.Needs needs, float x, float top, float side, float gap)
+        {
+            // The icon keeps its square; the bar is a shallow strip beside it.
+            var iconW = side * 0.72f / Aspect();
+            var iconH = side * 0.72f;
+
+            var barH = side * 0.40f;
+            var barW = Math.Max(0.02f, _cfg.HudBarWidth);
+
+            var lead = iconW * 1.25f;
+
+            Strip(needs.Hunger, _apple, x, top + side / 2f,
+                  iconW, iconH, lead, barW, barH, true);
+
+            Strip(needs.Sleep, _eye, x, top + side + gap + side / 2f,
+                  iconW, iconH, lead, barW, barH, false);
+        }
+
+        /// <summary>One bar: the mark, the channel, the fill and whichever animation it has.</summary>
+        private void Strip(Need need, Icon[] set, float x, float centreY,
+                           float iconW, float iconH, float lead,
+                           float barW, float barH, bool hunger)
+        {
+            if (_cfg.HudHideWhenFine && need.Value > _cfg.HudFineAbove) return;
+
+            var icon = set[Stage(need)];
+
+            if (icon != null && !icon.Missing)
+            {
+                icon.DrawSized(x + iconW / 2f, centreY, iconW, iconH,
+                               _cfg.HudAnimate ? Shimmer(Colour(need), need, hunger ? 0f : 0.37f)
+                                               : Colour(need));
+            }
+
+            var bx = x + lead;
+            var by = centreY - barH / 2f;
+
+            // A dark surround and a darker channel, so the bar reads on a bright sky as well
+            // as on tarmac. Same two-layer treatment the menus use.
+            var edge = barH * 0.16f;
+
+            Hud.Bar(bx - edge, by - edge, barW + edge * 2f, barH + edge * 2f,
+                     Fade(Color.FromArgb(190, 0, 0, 0)));
+
+            Hud.Bar(bx, by, barW, barH, Fade(Color.FromArgb(150, 26, 26, 30)));
+
+            var fraction = Clamp01(need.Value);
+            if (fraction <= 0.002f) return;
+
+            var body = Colour(need);
+
+            if (!_cfg.HudAnimate)
+            {
+                Hud.Bar(bx, by, barW * fraction, barH, body);
+                return;
+            }
+
+            if (hunger) Churn(bx, by, barW, barH, fraction, body);
+            else Breathe(bx, by, barW, barH, fraction, body);
+        }
+
+        /// <summary>
+        /// HUNGER: a restless front and a wave travelling down the bar.
+        ///
+        /// A STOMACH, NOT A TANK. Fumes draws a liquid because a fuel tank holds one; this is
+        /// the same idea turned through ninety degrees and given a different reason. The
+        /// leading edge is unsettled and something moves along the length of it -- which is
+        /// what a gut does, and which is legible as "working on it" without a single word.
+        ///
+        /// AND IT GETS WORSE AS IT EMPTIES, which is the opposite of the fuel gauge. A full
+        /// tank sloshes and settles as it fills; a full stomach is quiet and an empty one is
+        /// the one that rumbles. So the agitation is scaled by how little is left.
+        /// </summary>
+        private void Churn(float x, float y, float w, float h, float fraction, Color body)
+        {
+            const int columns = 10;
+
+            var t = (Environment.TickCount & int.MaxValue) / 1000f;
+
+            var level = w * fraction;
+
+            // Nothing at all when full, strongest when nearly gone.
+            var hunger = 1f - fraction;
+            var swing = w * 0.010f * (0.15f + hunger);
+
+            // The body up to the LEFTMOST the front can swing, in one rectangle. Only the
+            // sliver beyond that is drawn in columns, so nothing is ever painted twice and
+            // no seam can brighten -- the same trick, and the same reason, as Fumes.
+            var solid = level - swing;
+            if (solid > 0f) Hud.Bar(x, y, solid, h, body);
+
+            var crest = Mix(body, Color.FromArgb(body.A, 255, 240, 205), 0.5f);
+
+            for (var i = 0; i < columns; i++)
+            {
+                var topY = y + h * i / columns;
+                var botY = y + h * (i + 1) / columns;
+
+                var u = (float)i / (columns - 1);
+
+                // Two waves at frequencies that do not divide into each other: one sine reads
+                // as a machine, two read as something alive.
+                var front = level + (float)(Math.Sin(t * 2.9f + u * 6.3f) * swing * 0.62f +
+                                            Math.Sin(t * 4.7f - u * 10.1f) * swing * 0.38f);
+
+                if (front > w) front = w;
+                if (front < 0f) front = 0f;
+
+                if (front > solid && solid < w)
+                {
+                    var from = Math.Max(solid, 0f);
+                    Hud.Bar(x + from, topY, front - from, botY - topY, body);
+                }
+
+                Hud.Bar(x + front - w * 0.004f, topY, w * 0.004f, botY - topY, crest);
+            }
+
+            // THE WAVE ALONG THE LENGTH. A soft band travelling left to right through the
+            // filled part, wrapping round. It is what makes this bar read as churning rather
+            // than as a fuel gauge lying on its side.
+            var band = w * 0.11f;
+            var pos = ((t * 0.24f) % 1f) * (level + band) - band;
+
+            if (level > band * 0.5f)
+            {
+                var from = Math.Max(0f, pos);
+                var to = Math.Min(level, pos + band);
+
+                if (to > from)
+                {
+                    Hud.Bar(x + from, y, to - from,
+                             h, Mix(body, Color.FromArgb(body.A, 255, 245, 220), 0.22f));
+                }
+            }
+        }
+
+        /// <summary>
+        /// SLEEP: the whole bar breathing, in and out.
+        ///
+        /// NOT A LIQUID AT ALL, deliberately. Two bars stacked doing the same wave would be
+        /// one animation drawn twice, and the point of having two was that they are different
+        /// things. Hunger is restless and moves ALONG itself; sleep swells and fades as a
+        /// whole, which is the one rhythm everybody already reads as breathing.
+        ///
+        /// THE BREATH SLOWS AND DEEPENS AS IT EMPTIES. Rested, it is a shallow four-second
+        /// cycle you would have to look for. Exhausted, it is a long heavy seven-second one
+        /// you cannot miss -- so the animation is carrying the state, not decorating it.
+        /// </summary>
+        private void Breathe(float x, float y, float w, float h, float fraction, Color body)
+        {
+            var tired = 1f - fraction;
+
+            // Four seconds rested, seven exhausted.
+            var period = 4000f + 3000f * tired;
+
+            var now = (Environment.TickCount & int.MaxValue) % (int)period;
+
+            // Not a plain sine: a breath is a quicker draw in and a longer let out. Raising
+            // the phase to a power before the sine leans the curve without a second function.
+            var phase = now / period;
+            var eased = (float)Math.Sin(Math.Pow(phase, 0.78) * Math.PI * 2.0);
+
+            var depth = 0.06f + 0.16f * tired;
+
+            var level = w * fraction;
+
+            // The fill lengthens and shortens very slightly with the breath, and brightens
+            // with it. The length alone is too small to see; the brightness alone looks like
+            // a fault light. Together they read as one thing breathing.
+            var swell = 1f + depth * 0.11f * eased;
+
+            var lit = Mix(body, Color.FromArgb(body.A, 255, 250, 235),
+                          Math.Max(0f, depth * eased));
+
+            var shown = Math.Min(w, level * swell);
+
+            Hud.Bar(x, y, shown, h, lit);
+
+            // A brighter cap at the front, dimmest at the bottom of the breath. It is the only
+            // part that is clearly moving when the meter is nearly full.
+            var cap = Mix(lit, Color.FromArgb(body.A, 255, 245, 225), 0.35f + 0.35f * eased);
+
+            Hud.Bar(x + shown - w * 0.005f, y, w * 0.005f, h, cap);
+        }
+
+        /// <summary>The colour at the HUD's opacity, for the parts that do not go through Colour.</summary>
+        private Color Fade(Color c)
+        {
+            var a = (int)(c.A * _cfg.HudOpacity + 0.5f);
+
+            if (a < 0) a = 0;
+            if (a > 255) a = 255;
+
+            return Color.FromArgb(a, c.R, c.G, c.B);
         }
 
         /// <summary>

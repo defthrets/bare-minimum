@@ -385,6 +385,16 @@ namespace BareMinimum.UI
                   () => _cfg.ShowShopBlips,
                   "~y~Turn shop map markers ON first.");
 
+            Choice("HUD style", "HUD", "Style", new[] { "Icons", "Bars" },
+                   () => (int)_cfg.Style, v => _cfg.Style = (HudStyle)v,
+                   "An apple and an eye that change shape, or two filled bars.");
+
+            Float("Bar length", "HUD", "BarWidth",
+                  () => _cfg.HudBarWidth, v => _cfg.HudBarWidth = v,
+                  0.004f, 0.02f, 0.30f, "0.000",
+                  "How long the bars are, as a fraction of the screen.",
+                  () => _cfg.Style == HudStyle.Bars, "Bars only.");
+
             Bool("Markers on pause map", "Map", "ShopBlipsOnMainMap",
                  () => _cfg.ShopBlipsOnMainMap, v => _cfg.ShopBlipsOnMainMap = v,
                  "Off keeps the big map clear and leaves them on the minimap only.",
@@ -483,6 +493,43 @@ namespace BareMinimum.UI
         // ======================================================================
         // Option builders
         // ======================================================================
+
+        /// <summary>
+        /// One of a short list of named options, cycled with left and right.
+        ///
+        /// The same Option shape as everything else -- Show, Nudge, Persist -- so the menu
+        /// needs no new row type to display it. Wraps at both ends, because a two-item list
+        /// that stops at the edges gives you a left arrow that does nothing.
+        /// </summary>
+        private void Choice(string name, string section, string key, string[] names,
+                            Func<int> get, Action<int> set, string note)
+        {
+            _options.Add(new Option
+            {
+                Name = name,
+                Note = note,
+                Section = section,
+                Key = key,
+                Show = () =>
+                {
+                    var i = get();
+                    return i >= 0 && i < names.Length ? names[i].ToUpperInvariant() : "?";
+                },
+                Nudge = dir =>
+                {
+                    var i = get() + (dir >= 0 ? 1 : -1);
+
+                    while (i < 0) i += names.Length;
+
+                    set(i % names.Length);
+                },
+                Persist = () =>
+                {
+                    var i = get();
+                    return i >= 0 && i < names.Length ? names[i] : names[0];
+                }
+            });
+        }
 
         private void Bool(string name, string section, string key,
                           Func<bool> get, Action<bool> set, string note,

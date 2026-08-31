@@ -12,6 +12,16 @@ namespace BareMinimum.Core
     /// (it is the file players hand-edit), so an install that has been through an update is
     /// the NORMAL case for a file that lacks the newest keys.
     /// </summary>
+    /// <summary>Which HUD is drawn beside the minimap.</summary>
+    internal enum HudStyle
+    {
+        /// <summary>An apple and an eye that change shape. The default.</summary>
+        Icons,
+
+        /// <summary>Two filled bars, in the manner of the fuel gauge in Fumes.</summary>
+        Bars
+    }
+
     internal sealed class Settings
     {
         // ---- General ---------------------------------------------------------
@@ -392,6 +402,19 @@ namespace BareMinimum.Core
         /// </summary>
         public float HudSway = 0.6f;
 
+        /// <summary>
+        /// Which of the two HUDs is on screen.
+        ///
+        /// NOT A REPLACEMENT, A CHOICE. The icons were the original requirement and they are
+        /// still the default: a shape that changes says more at a glance than a length does.
+        /// But a bar reads a number off at once, which the icons deliberately do not, and
+        /// which some people would rather have.
+        /// </summary>
+        public HudStyle Style = HudStyle.Icons;
+
+        /// <summary>How long a bar is, as a fraction of screen width. Bars only.</summary>
+        public float HudBarWidth = 0.082f;
+
         // ---- Keys ------------------------------------------------------------
 
         /// <summary>
@@ -542,6 +565,9 @@ namespace BareMinimum.Core
                 cfg.HudSize = ini.GetFloat("HUD", "Size", cfg.HudSize, 0.005f, 0.30f);
                 cfg.HudGap = ini.GetFloat("HUD", "Gap", cfg.HudGap, 0f, 3f);
                 cfg.HudOpacity = ini.GetFloat("HUD", "Opacity", cfg.HudOpacity, 0.05f, 1f);
+                cfg.Style = ParseStyle(ini.GetString("HUD", "Style", ""), cfg.Style);
+                cfg.HudBarWidth = ini.GetFloat("HUD", "BarWidth", cfg.HudBarWidth, 0.02f, 0.5f);
+
                 cfg.HudAnimate = ini.GetBool("HUD", "Animate", cfg.HudAnimate);
                 cfg.HudShimmer = ini.GetFloat("HUD", "Shimmer", cfg.HudShimmer, 0f, 1f);
                 cfg.HudSway = ini.GetFloat("HUD", "Sway", cfg.HudSway, 0f, 1f);
@@ -622,6 +648,19 @@ namespace BareMinimum.Core
             }
 
             return list.ToArray();
+        }
+
+        /// <summary>Reads the HUD style, forgivingly. Anything unrecognised keeps the default.</summary>
+        private static HudStyle ParseStyle(string text, HudStyle fallback)
+        {
+            if (string.IsNullOrEmpty(text)) return fallback;
+
+            var s = text.Trim();
+
+            if (s.StartsWith("b", StringComparison.OrdinalIgnoreCase)) return HudStyle.Bars;
+            if (s.StartsWith("i", StringComparison.OrdinalIgnoreCase)) return HudStyle.Icons;
+
+            return fallback;
         }
 
         private static LogLevel ParseLevel(string text, LogLevel fallback)
