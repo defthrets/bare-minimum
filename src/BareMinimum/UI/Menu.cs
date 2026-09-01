@@ -154,6 +154,22 @@ namespace BareMinimum.UI
         /// </summary>
         public float Shimmer;
 
+        /// <summary>
+        /// Where the highlight and the tab marker are ACTUALLY drawn, chasing where they
+        /// ought to be.
+        ///
+        /// A list that moves its highlight instantly is readable but tells you nothing about
+        /// which way it went; one that slides carries the direction of travel, which is the
+        /// whole reason a long settings list feels navigable rather than teleporty.
+        ///
+        /// EASED PER FRAME AGAINST A WALL CLOCK, not stepped per frame. A fixed step per
+        /// frame runs twice as fast at 120fps as at 60, and this mod has been bitten by that
+        /// often enough to have a rule about it.
+        /// </summary>
+        private float _glide;
+        private float _tabGlide;
+        private int _lastFrame;
+
         /// <summary>The row nudged this frame, or null. Read it after Update.</summary>
         public Row Adjusted { get; private set; }
 
@@ -291,6 +307,20 @@ namespace BareMinimum.UI
             {
                 if (Pressed(GTA.Control.FrontendDown)) Move(1);
                 if (Pressed(GTA.Control.FrontendUp)) Move(-1);
+            }
+
+            // THE SHOULDER BUTTONS ALWAYS PAGE THE TABS, whatever left and right are doing.
+            //
+            // This is what lets a settings menu have tabs at all. Left and right are spoken
+            // for there -- they turn values up and down -- and for a long time that was taken
+            // as settling the question, so nearly forty settings lived in one flat list seven
+            // rows tall. The keys were the constraint, not the idea, and there is a second
+            // pair sitting unused: Q and E on a keyboard, LB and RB on a pad, which is where
+            // every other game in the genre puts exactly this.
+            if (Tabs.Count > 1)
+            {
+                if (Pressed(GTA.Control.FrontendRb)) SwitchTab(1);
+                if (Pressed(GTA.Control.FrontendLb)) SwitchTab(-1);
             }
 
             if (LeftRightAdjusts)
@@ -461,6 +491,45 @@ namespace BareMinimum.UI
         // Drawing
         // ======================================================================
 
+        /// <summary>
+        /// Walks the highlight and the tab marker toward where they belong.
+        ///
+        /// EXPONENTIAL, against the wall clock: a fixed fraction of the REMAINING distance per
+        /// millisecond, which lands in the same time whatever the framerate is and never
+        /// overshoots. A fixed step per frame would run at double speed on a 120Hz machine.
+        ///
+        /// It SNAPS on a big jump rather than sliding. Wrapping from the last row to the
+        /// first is a jump of the whole list, and sliding through thirty rows to get there
+        /// reads as the menu having lost its place -- the eye follows a short slide and gives
+        /// up on a long one.
+        /// </summary>
+        private void Ease()
+        {
+            var now = Game.GameTime;
+
+            var dt = _lastFrame == 0 ? 16 : now - _lastFrame;
+            _lastFrame = now;
+
+            // A paused game, a loading screen or a wrapped clock can hand back nonsense.
+            if (dt < 0 || dt > 200) dt = 16;
+
+            _glide = Chase(_glide, Index, dt, 3f);
+            _tabGlide = Chase(_tabGlide, Tab, dt, 2f);
+        }
+
+        private static float Chase(float at, float to, int dt, float snapOver)
+        {
+            var gap = to - at;
+
+            if (Math.Abs(gap) > snapOver) return to;
+            if (Math.Abs(gap) < 0.001f) return to;
+
+            // 0.016 per ms settles about 95% of the way in a fifth of a second.
+            var k = 1f - (float)Math.Pow(1.0 - 0.016, dt);
+
+            return at + gap * k;
+        }
+
         public void Draw()
         {
             if (!IsOpen) return;
@@ -473,6 +542,8 @@ namespace BareMinimum.UI
                 // The header reports how tall it actually came out rather than being assumed
                 // to be HeaderH. Its height depends on the MEASURED height of the title text,
                 // and a fixed constant is what let the title and the subtitle overlap.
+                Ease();
+
                 y += Header(left, y);
 
                 if (Tabs.Count > 0)
@@ -638,17 +709,29 @@ namespace BareMinimum.UI
 
             var w = PanelW / Tabs.Count;
 
+            // ONE MARKER THAT SLIDES, drawn before the labels rather than a filled cell drawn
+            // per tab. Sliding is what says which way you just went round the strip, and with
+            // six tabs on a narrow panel that is the difference between paging confidently
+            // and counting the cells each time.
+            Hud.Bar(left + _tabGlide * w, y, w, TabsH, Color.FromArgb(240, 240, 170, 56));
+
+            // Six labels do not fit at the size four do. Measured off the panel rather than
+            // stepped by hand so it stays right if the tabs are ever regrouped.
+            var scale = Tabs.Count <= 4 ? 0.30f : Tabs.Count <= 6 ? 0.26f : 0.23f;
+
             for (var i = 0; i < Tabs.Count; i++)
             {
                 var x = left + i * w;
-                var on = i == Tab;
 
-                if (on) Hud.Bar(x, y, w, TabsH, Color.FromArgb(240, 240, 170, 56));
+                // How much of the marker is under THIS label, so the ink crosses over with
+                // the bar instead of flicking to black a frame early or late.
+                var under = 1f - Math.Min(1f, Math.Abs(_tabGlide - i));
 
-                Hud.Text(Tabs[i], x + w / 2f, y + 0.005f, 0.30f,
-                         on ? Color.FromArgb(255, 16, 16, 18)
-                            : Color.FromArgb(210, 200, 200, 208),
-                         Plain, true, false, !on);
+                var ink = Blend(Color.FromArgb(210, 200, 200, 208),
+                                Color.FromArgb(255, 16, 16, 18), under);
+
+                Hud.Text(Tabs[i], x + w / 2f, y + 0.005f + (0.30f - scale) * 0.012f, scale,
+                         ink, Plain, true, false, under < 0.5f);
             }
         }
 
@@ -667,12 +750,29 @@ namespace BareMinimum.UI
 
             _scroll = Clamp(_scroll, 0, Math.Max(0, Rows.Count - shown));
 
+            // ONE HIGHLIGHT, DRAWN UNDER EVERYTHING, at the eased position rather than on
+            // the selected row's own rectangle. Each row painting its own highlight is what
+            // makes a list teleport: the bar can only ever be in one of seven places. Lifted
+            // out, it can be between two of them, which is what a slide is.
+            var slot = _glide - _scroll;
+
+            if (slot > -1f && slot < shown)
+            {
+                Hud.Bar(left, y + slot * RowH, PanelW, RowH,
+                        Color.FromArgb(242, 240, 170, 56));
+            }
+
             for (var i = 0; i < shown; i++)
             {
                 var at = _scroll + i;
                 if (at >= Rows.Count) break;
 
-                DrawRow(Rows[at], left, y + i * RowH, at == Index, i);
+                // How much of the bar is under this row, which is what the ink follows. A
+                // row half covered gets half-way ink, so the text crosses over WITH the bar
+                // instead of every row flicking to black on the frame the index changed.
+                var lit = 1f - Math.Min(1f, Math.Abs(_glide - at));
+
+                DrawRow(Rows[at], left, y + i * RowH, lit, i);
             }
 
             y += shown * RowH;
@@ -690,7 +790,7 @@ namespace BareMinimum.UI
             return y;
         }
 
-        private void DrawRow(Row row, float left, float y, bool selected, int slot)
+        private void DrawRow(Row row, float left, float y, float lit, int slot)
         {
             if (row.Header)
             {
@@ -708,18 +808,19 @@ namespace BareMinimum.UI
                 return;
             }
 
+            // The dark row plate, painted only where the highlight is NOT. Drawn with the
+            // remaining alpha so the amber underneath shows through exactly as far as the
+            // bar has slid onto this row.
             Hud.Bar(left, y, PanelW, RowH,
-                    selected ? Color.FromArgb(242, 240, 170, 56)
-                             : Color.FromArgb(222, 20, 20, 24));
+                    Color.FromArgb((int)(222 * (1f - lit)), 20, 20, 24));
 
             // Black ink on the amber highlight, light ink on the dark rows. The outline is
             // turned OFF for the dark-on-light case: both of GTA's text decorations draw in
             // BLACK, so an outline round black text fills in the holes in 8, 9 and 0 until
             // they are one blob. Learned on Fumes' gauge.
-            var ink = selected
-                ? Color.FromArgb(255, 14, 14, 16)
-                : row.Enabled ? Color.FromArgb(235, 232, 232, 238)
-                              : Color.FromArgb(160, 150, 150, 158);
+            var ink = Blend(row.Enabled ? Color.FromArgb(235, 232, 232, 238)
+                                        : Color.FromArgb(160, 150, 150, 158),
+                            Color.FromArgb(255, 14, 14, 16), lit);
 
             var textLeft = left + 0.010f;
 
@@ -746,7 +847,7 @@ namespace BareMinimum.UI
                 // The SELECTED row is left alone: it is already sitting on a full-strength
                 // amber bar, and a picture breathing against that is two brightnesses
                 // arguing in the same forty pixels.
-                if (!selected && row.Enabled)
+                if (lit < 0.5f && row.Enabled)
                 {
                     tint = Sheen.On(tint, slot * 0.125f, Shimmer * 0.7f);
                 }
@@ -760,12 +861,12 @@ namespace BareMinimum.UI
             // row is half again taller than the line of text in it.
             var textY = y + (RowH - Hud.Height(0.34f, Plain)) / 2f;
 
-            Hud.Text(row.Left, textLeft, textY, 0.34f, ink, Plain, false, false, !selected);
+            Hud.Text(row.Left, textLeft, textY, 0.34f, ink, Plain, false, false, lit < 0.5f);
 
             if (string.IsNullOrEmpty(row.Right)) return;
 
             Hud.Text(row.Right, left + PanelW - 0.010f, textY, 0.34f, ink,
-                     Plain, false, true, !selected);
+                     Plain, false, true, lit < 0.5f);
         }
 
         /// <summary>The description strip: whatever the selected row wants to say.</summary>
@@ -843,6 +944,19 @@ namespace BareMinimum.UI
         }
 
         /// <summary>Wraps round the ends, so holding down past the last row returns to the first.</summary>
+        /// <summary>One colour toward another. Straight lerp, alpha included.</summary>
+        private static Color Blend(Color a, Color b, float t)
+        {
+            if (t <= 0f) return a;
+            if (t >= 1f) return b;
+
+            return Color.FromArgb(
+                (int)(a.A + (b.A - a.A) * t),
+                (int)(a.R + (b.R - a.R) * t),
+                (int)(a.G + (b.G - a.G) * t),
+                (int)(a.B + (b.B - a.B) * t));
+        }
+
         private static int Wrap(int v, int count)
         {
             if (count <= 0) return 0;

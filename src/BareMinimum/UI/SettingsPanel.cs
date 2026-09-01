@@ -35,6 +35,9 @@ namespace BareMinimum.UI
             /// <summary>A heading, not a setting. Holds nothing and does nothing.</summary>
             public bool Heading;
 
+            /// <summary>Which tab it lives under.</summary>
+            public int Tab;
+
             /// <summary>Where it lives in the ini. Empty for an action row.</summary>
             public string Section = "";
             public string Key = "";
@@ -102,6 +105,9 @@ namespace BareMinimum.UI
             _ui.TitleRight = new Flipbook("moon0.png");
 
             Build();
+
+            // The tab strip, in the order Build named them.
+            _ui.Tabs.AddRange(_tabs);
         }
 
         public bool IsOpen => _ui.IsOpen;
@@ -135,6 +141,11 @@ namespace BareMinimum.UI
                 _ui.Update();
 
                 if (_ui.JustClosed) { Flush(); return; }
+
+                // A new page of rows. The pending write is NOT flushed here -- paging is not
+                // finishing, and a settle timer that survives the page is the whole point of
+                // waiting for the player to stop.
+                if (_ui.TabChanged) Refill();
 
                 if (_ui.Adjusted != null)
                 {
@@ -231,13 +242,13 @@ namespace BareMinimum.UI
         {
             if (_saveBroken)
             {
-                _ui.Subtitle = "~r~Cannot save~s~ - see the log.  left/right to change";
+                _ui.Subtitle = "~r~Cannot save~s~ - see the log.  Q/E tabs";
                 return;
             }
 
             _ui.Subtitle = _dirty
-                ? "~y~Saving...~s~   left/right to change, ctrl for fine steps"
-                : "Saved.  left/right to change, ctrl for fine steps";
+                ? "~y~Saving...~s~   left/right change, ctrl fine, Q/E tabs"
+                : "Saved.  left/right change, ctrl fine, Q/E tabs";
         }
 
         /// <summary>
@@ -265,7 +276,15 @@ namespace BareMinimum.UI
 
             foreach (var option in _options)
             {
+                // ONE TAB'S WORTH. Every option still lives in the one list -- the ini write
+                // walks all of them and does not care which page a row was on -- so the tab
+                // only decides what is drawn.
+                if (option.Tab != _ui.Tab) continue;
+
                 var usable = option.Available == null || option.Available();
+
+                string art;
+                if (!Art.TryGetValue(option.Name, out art)) art = "";
 
                 _ui.Rows.Add(new Row
                 {
@@ -276,6 +295,7 @@ namespace BareMinimum.UI
                         : option.Unavailable,
                     Enabled = usable,
                     Header = option.Heading,
+                    IconFile = art,
                     Tag = option
                 });
             }
@@ -288,17 +308,109 @@ namespace BareMinimum.UI
         /// <summary>
         /// A line naming the group beneath it.
         ///
-        /// FLAT LIST WITH HEADINGS, NOT TABS, and that is forced rather than chosen: this
-        /// menu sets LeftRightAdjusts, so left and right are already spoken for -- they turn
-        /// the value on the selected row up and down, which is the right thing for a list of
-        /// numbers and leaves nothing to change a tab with.
+        /// HEADINGS STILL EXIST, but only INSIDE a tab that has two groups in it -- which
+        /// is now just the HUD tab, where the placement settings sit under the look ones.
         ///
-        /// Headings are skipped by the selection, so they cost no keypresses to scroll past.
+        /// This used to say a flat list was forced rather than chosen, because the menu sets
+        /// LeftRightAdjusts and so left and right were already spoken for turning values up
+        /// and down. That was true about those two keys and wrong about the conclusion: the
+        /// shoulder buttons were sitting unused the whole time, and that is where the tabs
+        /// went in the end.
         /// </summary>
         private void Heading(string name)
         {
-            _options.Add(new Option { Name = name, Heading = true });
+            Add(new Option { Name = name, Heading = true });
         }
+
+        /// <summary>
+        /// Which picture goes on which row, keyed by the row's own name.
+        ///
+        /// ONE TABLE RATHER THAN A PARAMETER ON EVERY HELPER. Float, Bool and Choice already
+        /// take between six and ten arguments each, and an eleventh that is nearly always the
+        /// same handful of files would bury the numbers that matter in the call. Keyed by name
+        /// because the name is what a reader is looking at when they wonder which icon a row
+        /// has; a row with no entry simply gets none, so nothing breaks if one is missed.
+        ///
+        /// DELIBERATELY REUSED. Twelve glyphs cover thirty-nine rows: every hours setting is a
+        /// clock, every placement setting is the frame. Rows that share a picture share a kind
+        /// of job, and that is a faster read down a list than thirty-nine unique drawings none
+        /// of which mean anything yet.
+        /// </summary>
+        private static readonly Dictionary<string, string> Art =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            { "Mod enabled",              "s_power.png"  },
+            { "Empty both needs",         "s_power.png"  },
+
+            { "Hunger",                   "food0.png"    },
+            { "Hunger: hours to empty",   "s_clock.png"  },
+            { "Sleep",                    "moon0.png"    },
+            { "Sleep: hours to empty",    "s_clock.png"  },
+            { "Sleep: hours to full",     "s_clock.png"  },
+
+            { "Slow down below",          "s_run.png"    },
+            { "Stomach walk below",       "food0.png"    },
+            { "Tired below",              "moon0.png"    },
+            { "Drunk walk below",         "p_bottle.png" },
+            { "Camera sway",              "s_wave.png"   },
+            { "Well-fed speed bonus",     "s_run.png"    },
+            { "Bonus starts above",       "s_run.png"    },
+            { "Starving costs health",    "s_heart.png"  },
+
+            { "Sleep in beds",            "s_bed.png"    },
+            { "Sleep in cars",            "s_car.png"    },
+            { "Count other mods' sleep",  "moon0.png"    },
+            { "Bed hours",                "s_bed.png"    },
+            { "Car hours",                "s_car.png"    },
+
+            { "Prices",                   "s_cart.png"   },
+            { "Shop map markers",         "s_pin.png"    },
+            { "Marker range",             "s_pin.png"    },
+            { "Markers on pause map",     "s_pin.png"    },
+
+            { "Show HUD",                 "s_eye.png"    },
+            { "HUD style",                "s_layout.png" },
+            { "Animate the icons",        "s_wave.png"   },
+            { "HUD opacity",              "s_eye.png"    },
+            { "Hide when fine",           "s_eye.png"    },
+            { "Flash when critical",      "s_wave.png"   },
+
+            { "HUD auto position",        "s_layout.png" },
+            { "HUD size",                 "s_layout.png" },
+            { "HUD gap",                  "s_layout.png" },
+            { "HUD X",                    "s_layout.png" },
+            { "HUD Y",                    "s_layout.png" },
+
+            { "Bar height",               "s_bars.png"   },
+            { "Bar width",                "s_bars.png"   },
+            { "Surface movement",         "s_wave.png"   },
+            { "Bar drift speed",          "s_wave.png"   },
+            { "Bar mark size",            "s_bars.png"   },
+        };
+
+        /// <summary>Adds a row to whichever tab is currently being built.</summary>
+        private void Add(Option option)
+        {
+            option.Tab = _tab;
+            _options.Add(option);
+        }
+
+        /// <summary>
+        /// Starts a new TAB. Everything added after this lands under it.
+        ///
+        /// Seven groups and thirty-nine settings used to be one flat list scrolling through a
+        /// seven-row window, so reaching the bars meant holding Down through everything else.
+        /// Six tabs put every group within a page of its own, and only the HUD tab scrolls at
+        /// all.
+        /// </summary>
+        private void Group(string name)
+        {
+            if (!_tabs.Contains(name)) _tabs.Add(name);
+            _tab = _tabs.IndexOf(name);
+        }
+
+        private readonly List<string> _tabs = new List<string>();
+        private int _tab;
 
         // ======================================================================
         // The options
@@ -306,7 +418,7 @@ namespace BareMinimum.UI
 
         private void Build()
         {
-            Heading("NEEDS");
+            Group("NEEDS");
 
 
             Bool("Mod enabled", "General", "Enabled",
@@ -337,7 +449,7 @@ namespace BareMinimum.UI
                   "Hours of sleep that take you from empty to fully rested. 12 makes a " +
                   "six-hour night worth half a meter.");
 
-            Heading("HOW IT FEELS");
+            Group("FEEL");
 
 
             Float("Slow down below", "Effects", "HungerSlowAt",
@@ -379,7 +491,7 @@ namespace BareMinimum.UI
                  () => _cfg.StarvingCostsHealth, v => _cfg.StarvingCostsHealth = v,
                  "Slowly, and it stops at a sixth of your health. It will not kill you.");
 
-            Heading("SLEEPING");
+            Group("SLEEP");
 
 
             Bool("Sleep in beds", "Sleeping", "InBeds",
@@ -403,7 +515,7 @@ namespace BareMinimum.UI
                   () => _cfg.CarHours, v => _cfg.CarHours = v,
                   1f, 1f, 24f, "0", "How long a doze in a car lasts.");
 
-            Heading("SHOPS AND THE MAP");
+            Group("SHOPS");
 
 
             Float("Prices", "Money", "PriceMultiplier",
@@ -428,7 +540,7 @@ namespace BareMinimum.UI
                  () => _cfg.ShowShopBlips,
                  "~y~Turn shop map markers ON first.");
 
-            Heading("HUD");
+            Group("HUD");
 
 
             Bool("Show HUD", "HUD", "Show",
@@ -457,7 +569,7 @@ namespace BareMinimum.UI
 
             // ---- actions ------------------------------------------------------
 
-            _options.Add(new Option
+            Add(new Option
             {
                 Name = "Settings",
                 Note = "Saved automatically to BareMinimum.ini, keeping your comments and " +
@@ -466,7 +578,7 @@ namespace BareMinimum.UI
                 Activate = () => { _saveAt = 0; _saveBroken = false; Flush(); }
             });
 
-            _options.Add(new Option
+            Add(new Option
             {
                 Name = "Fill both needs",
                 Note = "Fed and rested, right now. For testing, or for mercy.",
@@ -480,7 +592,7 @@ namespace BareMinimum.UI
                 }
             });
 
-            _options.Add(new Option
+            Add(new Option
             {
                 Name = "Empty both needs",
                 Note = "Starving and exhausted, right now. For seeing what the effects look like.",
@@ -494,7 +606,7 @@ namespace BareMinimum.UI
                 }
             });
 
-            Heading("HUD PLACEMENT");
+            Heading("PLACEMENT");
 
 
             Bool("HUD auto position", "HUD", "AutoPosition",
@@ -526,7 +638,7 @@ namespace BareMinimum.UI
                   () => !_cfg.HudAutoPosition,
                   "~y~Turn HUD auto position OFF first~s~ - this does nothing while it is on.");
 
-            Heading("BARS");
+            Group("BARS");
 
 
             Float("Bar height", "HUD", "BarLength",
@@ -573,7 +685,7 @@ namespace BareMinimum.UI
         private void Choice(string name, string section, string key, string[] names,
                             Func<int> get, Action<int> set, string note)
         {
-            _options.Add(new Option
+            Add(new Option
             {
                 Name = name,
                 Note = note,
@@ -604,7 +716,7 @@ namespace BareMinimum.UI
                           Func<bool> get, Action<bool> set, string note,
                           Func<bool> available = null, string unavailable = "")
         {
-            _options.Add(new Option
+            Add(new Option
             {
                 Name = name,
                 Note = note,
@@ -655,7 +767,7 @@ namespace BareMinimum.UI
                            float step, float min, float max, string format, string note,
                            Func<bool> available = null, string unavailable = "")
         {
-            _options.Add(new Option
+            Add(new Option
             {
                 Name = name,
                 Note = note,
