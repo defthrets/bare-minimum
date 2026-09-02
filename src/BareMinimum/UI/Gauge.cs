@@ -611,13 +611,23 @@ namespace BareMinimum.UI
             //
             // Twenty-two seconds and thirty-one, and the bow is now the slowest thing in
             // either bar. It is a stomach settling, not a pulse.
-            // A HUNDRED AND FORTY-FOUR SECONDS AND TWO HUNDRED AND EIGHT. Two and a half
-            // minutes for one bow, on half the travel it had before.
+            // NINETY SECONDS AND A HUNDRED AND THIRTY -- THE FOOD BAR'S OWN, and no longer
+            // the pair the sleep bar uses.
             //
-            // [HUD] BarPace lifts the whole instrument back up in one number if this has gone
-            // past the point of being worth drawing at all, and [HUD] BarWave the distance.
-            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 144.0)) * swing;
-            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 208.0)) * swing * 0.40f;
+            // The two ran identical periods in opposite directions, which was the point when
+            // the sleep surface was built out of this one. It is not the point any more: a
+            // stomach and a night's rest are not the same tempo, and asking for the food side
+            // to move more is a reasonable thing to want without dragging sleep along with it.
+            //
+            // 1.6x the old rate, and the RATIO between the two is kept exactly -- 144:208 and
+            // 90:130 are the same 0.692 -- because that ratio is what stops the bow and the
+            // drift ever lining up into a single obvious pulse. Speeding them by different
+            // amounts would have given the surface a beat.
+            //
+            // [HUD] BarPace lifts the whole instrument in one number, and [HUD] BarWave the
+            // distance. Neither is in the settings menu yet.
+            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 90.0)) * swing;
+            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 130.0)) * swing * 0.40f;
 
             var crest = Mix(body, Color.FromArgb(body.A, 255, 240, 205), 0.55f);
 
