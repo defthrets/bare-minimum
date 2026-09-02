@@ -546,7 +546,7 @@ namespace BareMinimum.Core
         public Keys MenuKey = Keys.F7;
 
         /// <summary>Opens the pocket: what you have bought and not eaten yet.</summary>
-        public Keys BagKey = Keys.F6;
+        public Keys BagKey = Keys.F11;
 
         // ======================================================================
 
