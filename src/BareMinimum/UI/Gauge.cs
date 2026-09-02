@@ -510,7 +510,24 @@ namespace BareMinimum.UI
             // crest travelling five pixels reads as quick even when it takes a minute to do
             // it, because what the eye measures is how far the line has jumped since it last
             // looked. Cutting the distance calms it as much as cutting the rate.
-            var swing = h * 0.018f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
+            // TRAVEL IS A FRACTION OF THE SCREEN, NOT OF THE BAR.
+            //
+            // It was h * 0.018, and the period is fixed, so the amplitude WAS the speed: make
+            // the gauge taller and the surface covers more ground in the same 144 seconds and
+            // reads faster. Taking BarLength from 0.1635 to 0.184 -- which is a height
+            // decision, made by eye against the minimap -- sped this up by thirteen and a half
+            // per cent as a side effect, and undid a good part of the tuning that got it calm
+            // in the first place.
+            //
+            // 0.00273 is exactly what h * 0.018 came to at the height it was tuned at, so the
+            // motion is unchanged there and now stays put at every other height too. One
+            // thing, one effect: BarLength sets how big the gauge is and HudBarWave sets how
+            // much the surface moves, and neither reaches into the other any more.
+            var swing = 0.00273f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
+
+            // Still answerable to the bar it is drawn in. An absolute travel on a gauge
+            // shrunk to a sliver would be a surface taller than its own column.
+            if (swing > h * 0.20f) swing = h * 0.20f;
 
             var floor = y + h;
 
@@ -762,7 +779,24 @@ namespace BareMinimum.UI
             // Backwards, which is the whole difference from the food bar.
             var hurry = -(1f + 0.85f * empty);
 
-            var swing = h * 0.018f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
+            // TRAVEL IS A FRACTION OF THE SCREEN, NOT OF THE BAR.
+            //
+            // It was h * 0.018, and the period is fixed, so the amplitude WAS the speed: make
+            // the gauge taller and the surface covers more ground in the same 144 seconds and
+            // reads faster. Taking BarLength from 0.1635 to 0.184 -- which is a height
+            // decision, made by eye against the minimap -- sped this up by thirteen and a half
+            // per cent as a side effect, and undid a good part of the tuning that got it calm
+            // in the first place.
+            //
+            // 0.00273 is exactly what h * 0.018 came to at the height it was tuned at, so the
+            // motion is unchanged there and now stays put at every other height too. One
+            // thing, one effect: BarLength sets how big the gauge is and HudBarWave sets how
+            // much the surface moves, and neither reaches into the other any more.
+            var swing = 0.00273f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
+
+            // Still answerable to the bar it is drawn in. An absolute travel on a gauge
+            // shrunk to a sliver would be a surface taller than its own column.
+            if (swing > h * 0.20f) swing = h * 0.20f;
 
             // Below the lowest the surface can reach: the bow and the drift can push down
             // together, so the body has to start under both or the columns above it draw over
