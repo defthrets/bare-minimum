@@ -233,6 +233,9 @@ namespace BareMinimum.Core
         /// <summary>How hungry and how tired, across sessions. The player's save.</summary>
         public static string StateFile => Path.Combine(Writable, "needs.json");
 
+        /// <summary>What each character is carrying. Beside needs.json, and saved like it.</summary>
+        public static string PantryFile => Path.Combine(Writable, "pantry.json");
+
         private static void EnsureDir(string path)
         {
             try

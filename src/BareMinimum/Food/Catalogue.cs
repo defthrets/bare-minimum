@@ -256,6 +256,26 @@ namespace BareMinimum.Food
                                                       Clip = "mp_player_int_smoke" };
 
         public IList<Item> Items => _items;
+
+        /// <summary>
+        /// One item by id, or null.
+        ///
+        /// Linear, and that is fine: the catalogue is a hundred-odd entries and this is called
+        /// when a menu opens or a pocket is drawn, not per frame per row. A dictionary here
+        /// would be a second copy of the list to keep in step for no measurable gain.
+        /// </summary>
+        public Item Find(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return null;
+
+            for (var i = 0; i < _items.Count; i++)
+            {
+                if (string.Equals(_items[i].Id, id, StringComparison.OrdinalIgnoreCase))
+                    return _items[i];
+            }
+
+            return null;
+        }
         public IList<string> Categories => _categories;
         public int Count => _items.Count;
 

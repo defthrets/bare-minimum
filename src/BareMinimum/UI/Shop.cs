@@ -26,6 +26,7 @@ namespace BareMinimum.UI
         private readonly Catalogue _menu;
         private readonly Counters _counters;
         private readonly Eating _eating;
+        private readonly Pantry _pantry;
         private readonly Needs.Needs _needs;
 
         private readonly Menu _ui = new Menu
@@ -51,10 +52,11 @@ namespace BareMinimum.UI
             new System.Collections.Generic.Dictionary<string, Icon>(StringComparer.OrdinalIgnoreCase);
 
         public Shop(Core.Settings cfg, Catalogue menu, Counters counters, Eating eating,
-                    Needs.Needs needs)
+                    Needs.Needs needs, Pantry pantry)
         {
             _cfg = cfg;
             _menu = menu;
+            _pantry = pantry;
             _counters = counters;
             _eating = eating;
             _needs = needs;
@@ -358,6 +360,36 @@ namespace BareMinimum.UI
                 // mod, a wanted level. Re-checked at the moment of payment, which is the only
                 // moment that counts.
                 Notify("~r~Not enough money.");
+                Refill();
+                return;
+            }
+
+            // ---- into the pocket ----
+            //
+            // THE SHOP STAYS OPEN. That is most of the point: buying was eating, so a shop
+            // with fifteen things on the shelf sold you exactly one of them per visit -- the
+            // second was refused while you were still chewing the first. Shopping is a thing
+            // you do once, for several items.
+            if (_cfg.BuyToPantry)
+            {
+                if (_pantry.Full)
+                {
+                    Notify("~y~Your pockets are full.");
+                    return;
+                }
+
+                if (!Charge(item.Price)) return;
+
+                if (!_pantry.Add(item.Id))
+                {
+                    Refund(item.Price);
+                    Notify("~r~No room for that - refunded.");
+                    return;
+                }
+
+                Notify("~g~" + item.Name + "~s~ - in your pocket. " +
+                       _pantry.Total + " of " + _pantry.Slots + ".");
+
                 Refill();
                 return;
             }

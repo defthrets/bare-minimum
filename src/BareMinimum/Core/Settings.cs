@@ -521,7 +521,32 @@ namespace BareMinimum.Core
         /// a string in either ASCII or UTF-16. In use nearby: F2 Hoodrich, F3 Overspray,
         /// F8 Dealien Roleplay Menu, F10 and F11 PullMeOverRemade.
         /// </summary>
+        /// <summary>
+        /// Buying puts it in your pocket instead of eating it on the spot.
+        ///
+        /// ON BY DEFAULT, because instant eating is the thing this replaces: it sells you
+        /// exactly one item per visit -- the second is refused while you are still chewing the
+        /// first -- and it makes stocking up before a long drive impossible. A shop with
+        /// fifteen things on the shelf should let you leave with fifteen things.
+        ///
+        /// Off restores the old behaviour exactly, for anybody who wants the mod to stay a
+        /// two-key affair with nothing to manage.
+        /// </summary>
+        public bool BuyToPantry = true;
+
+        /// <summary>
+        /// How many items fit in a pocket, all kinds counted together.
+        ///
+        /// A total rather than a number of squares. A pocket holds what it holds; it does not
+        /// care whether that is twenty tacos or one of everything, and a player who runs out of
+        /// room wants to know how many MORE THINGS they can carry, not how many kinds.
+        /// </summary>
+        public int PantrySlots = 20;
+
         public Keys MenuKey = Keys.F7;
+
+        /// <summary>Opens the pocket: what you have bought and not eaten yet.</summary>
+        public Keys BagKey = Keys.F6;
 
         // ======================================================================
 
@@ -668,6 +693,10 @@ namespace BareMinimum.Core
 
                 cfg.InteractKey = ini.GetKey("Keys", "Interact", cfg.InteractKey);
                 cfg.MenuKey = ini.GetKey("Keys", "Menu", cfg.MenuKey);
+                cfg.BagKey = ini.GetKey("Keys", "Bag", cfg.BagKey);
+
+                cfg.BuyToPantry = ini.GetBool("Money", "BuyToPantry", cfg.BuyToPantry);
+                cfg.PantrySlots = (int)ini.GetFloat("Money", "PantrySlots", cfg.PantrySlots, 1f, 200f);
 
                 Log.Level = cfg.LogLevel;
             }

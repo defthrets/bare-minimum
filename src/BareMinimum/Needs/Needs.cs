@@ -430,7 +430,14 @@ namespace BareMinimum.Needs
         /// to Trevor and inheriting Franklin's empty stomach is the kind of detail that reads
         /// as a bug even to somebody who could not say why.
         /// </summary>
-        private static string Who()
+        /// <summary>
+        /// INTERNAL rather than private, because the pantry keys on it too.
+        ///
+        /// One definition of "which character is this" for the whole mod. Two would drift the
+        /// first time somebody added a fourth playable ped, and a bag that disagrees with a
+        /// stomach about whose it is would be a very confusing bug to read.
+        /// </summary>
+        internal static string Who()
         {
             try
             {

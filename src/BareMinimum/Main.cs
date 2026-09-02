@@ -47,6 +47,8 @@ namespace BareMinimum
         private readonly Shop _shop;
         private readonly SettingsPanel _settings;
         private readonly Gauge _gauge;
+        private readonly Pantry _pantry;
+        private readonly Bag _bag;
 
         private int _failures;
         private bool _parked;
@@ -70,12 +72,23 @@ namespace BareMinimum
             _speech.Load(_catalogue.Lines);
 
             _eating = new Eating(_catalogue, _needs, _speech);
+
+            // AFTER the catalogue, because the pantry drops anything it is carrying that
+            // foods.json no longer defines, and it cannot know that until the list is read.
+            _pantry = new Pantry(_cfg, _catalogue);
             _counters = new Counters();
             _socials = new Social.Socials(_cfg);
             _socials.Load();
 
-            _vendors = new Vendors(_cfg, _catalogue, _eating, _needs, _socials);
-            _shop = new Shop(_cfg, _catalogue, _counters, _eating, _needs);
+            _vendors = new Vendors(_cfg, _catalogue, _eating, _needs, _socials, _pantry);
+            _shop = new Shop(_cfg, _catalogue, _counters, _eating, _needs, _pantry);
+
+            _bag = new Bag(_cfg, _catalogue, _pantry, _eating);
+
+            // The bridge other mods reach by reflection. Wired LAST, so anything that finds
+            // the type finds a working one behind it -- Api.Pantry.Ready is false until this
+            // line runs, and the caller is expected to keep asking rather than resolve once.
+            Api.Pantry.Wire(_pantry, _catalogue, _eating);
 
             _settings = new SettingsPanel(_cfg, _needs);
             _gauge = new Gauge(_cfg);
@@ -85,7 +98,7 @@ namespace BareMinimum
             Aborted += OnAborted;
 
             Log.Info(Build.Name + " " + Build.Version + " loaded. Interact " +
-                     _cfg.InteractKey + ", menu " + _cfg.MenuKey + ", " +
+                     _cfg.InteractKey + ", menu " + _cfg.MenuKey + ", pocket " + _cfg.BagKey + ", " +
                      _catalogue.Count + " item(s), " + _vendors.Count + " vendor(s).");
 
             if (!_cfg.Enabled)
@@ -118,7 +131,7 @@ namespace BareMinimum
                 // control-suppression cannot block it the way it blocks the game's own inputs
                 // -- without this, pressing F7 at a till draws both menus on top of each other
                 // and every arrow press drives both of them at once.
-                _settings.Update(_sleeping.Busy || _shop.IsOpen || _vendors.MenuOpen);
+                _settings.Update(_sleeping.Busy || _shop.IsOpen || _vendors.MenuOpen || _bag.IsOpen);
 
                 if (!_cfg.Enabled) return;
 
@@ -135,7 +148,12 @@ namespace BareMinimum
                 // A menu owns the interact key while it is up, so nothing else may read it.
                 // Without this, pressing E to buy a sandwich at a counter next to a bed would
                 // also be pressing E to go to sleep.
-                var menuOpen = _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen;
+                var menuOpen = _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen || _bag.IsOpen;
+
+                // The pocket stands down for every other menu for the same reason the settings
+                // panel does: its key is RAW, so control suppression cannot keep it out of a
+                // menu that is already up.
+                _bag.Update(_sleeping.Busy || _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen);
 
                 if (!menuOpen && !_vendors.Offering) _sleeping.Update();
 
@@ -152,6 +170,8 @@ namespace BareMinimum
                 //
                 // It is also what stops Needs reading OUR OWN clock jump as somebody else's.
                 var suspended = _sleeping.Busy;
+
+                _pantry.Update(dt);
 
                 _needs.Update(dt, suspended);
                 _effects.Update(_needs, suspended);

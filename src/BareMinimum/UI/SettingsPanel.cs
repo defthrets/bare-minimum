@@ -363,6 +363,8 @@ namespace BareMinimum.UI
             { "Bed hours",                "s_bed.png"    },
             { "Car hours",                "s_car.png"    },
 
+            { "Buy to pocket",            "s_cart.png"   },
+            { "Pocket size",              "s_cart.png"   },
             { "Prices",                   "s_cart.png"   },
             { "Shop map markers",         "s_pin.png"    },
             { "Marker range",             "s_pin.png"    },
@@ -517,6 +519,14 @@ namespace BareMinimum.UI
 
             Group("SHOPS");
 
+            Bool("Buy to pocket", "Money", "BuyToPantry",
+                 () => _cfg.BuyToPantry, v => _cfg.BuyToPantry = v,
+                 "Buying puts it in your pocket to eat later. Off eats it on the spot.");
+
+            Float("Pocket size", "Money", "PantrySlots",
+                  () => _cfg.PantrySlots, v => _cfg.PantrySlots = (int)Math.Round(v),
+                  2f, 1f, 200f, "0",
+                  "How many items you can carry at once, all kinds counted together.");
 
             Float("Prices", "Money", "PriceMultiplier",
                   () => _cfg.PriceMultiplier, v => _cfg.PriceMultiplier = v,

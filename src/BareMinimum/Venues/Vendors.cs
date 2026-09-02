@@ -282,6 +282,7 @@ namespace BareMinimum.Venues
         private readonly Core.Settings _cfg;
         private readonly Catalogue _menu;
         private readonly Eating _eating;
+        private readonly Pantry _pantry;
         private readonly Needs.Needs _needs;
 
         /// <summary>
@@ -327,10 +328,11 @@ namespace BareMinimum.Venues
         private float _sinceScan;
 
         public Vendors(Core.Settings cfg, Catalogue menu, Eating eating, Needs.Needs needs,
-                       Social.Socials socials)
+                       Social.Socials socials, Pantry pantry)
         {
             _cfg = cfg;
             _menu = menu;
+            _pantry = pantry;
             _eating = eating;
             _needs = needs;
             _socials = socials;
@@ -1563,6 +1565,23 @@ namespace BareMinimum.Venues
             }
 
             _socials.About(v.Id, Social.Chirp.Bought, item.Name, v.Name);
+
+            // Into the pocket, unless the player has asked for the old instant meal back.
+            if (_cfg.BuyToPantry)
+            {
+                if (_pantry.Add(item.Id))
+                {
+                    Notify("~g~" + item.Name + "~s~ - in your pocket. " +
+                           _pantry.Total + " of " + _pantry.Slots + ".");
+                    return;
+                }
+
+                try { Game.Player.Money += price; }
+                catch (Exception ex) { Log.Error("Could not refund " + price, ex); }
+
+                Notify("~y~Your pockets are full - refunded.");
+                return;
+            }
 
             if (_eating.Begin(item)) return;
 
