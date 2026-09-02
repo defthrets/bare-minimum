@@ -611,23 +611,29 @@ namespace BareMinimum.UI
             //
             // Twenty-two seconds and thirty-one, and the bow is now the slowest thing in
             // either bar. It is a stomach settling, not a pulse.
-            // NINETY SECONDS AND A HUNDRED AND THIRTY -- THE FOOD BAR'S OWN, and no longer
-            // the pair the sleep bar uses.
+            // THIRTY SECONDS AND FORTY-THREE -- THE FOOD BAR'S OWN, and no longer the pair
+            // the sleep bar uses. Three times the rate of the 90/130 before it, and 4.8x the
+            // 144/208 both bars started on.
             //
             // The two ran identical periods in opposite directions, which was the point when
             // the sleep surface was built out of this one. It is not the point any more: a
             // stomach and a night's rest are not the same tempo, and asking for the food side
             // to move more is a reasonable thing to want without dragging sleep along with it.
             //
-            // 1.6x the old rate, and the RATIO between the two is kept exactly -- 144:208 and
-            // 90:130 are the same 0.692 -- because that ratio is what stops the bow and the
+            // THE RATIO IS KEPT EXACTLY through every one of those steps -- 144:208, 90:130
+            // and 30:43.3 are all 0.692 -- because that ratio is what stops the bow and the
             // drift ever lining up into a single obvious pulse. Speeding them by different
             // amounts would have given the surface a beat.
             //
+            // Worth knowing where the limit now is: the TRAVEL is about one to two pixels at
+            // 1080p, so even at this rate the crest moves well under a pixel a second. If it
+            // still reads as too still, the thing that is short is the distance and not the
+            // clock -- [HUD] BarWave, currently 0.6, is the one to raise.
+            //
             // [HUD] BarPace lifts the whole instrument in one number, and [HUD] BarWave the
             // distance. Neither is in the settings menu yet.
-            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 90.0)) * swing;
-            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 130.0)) * swing * 0.40f;
+            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 30.0)) * swing;
+            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 43.3)) * swing * 0.40f;
 
             var crest = Mix(body, Color.FromArgb(body.A, 255, 240, 205), 0.55f);
 
