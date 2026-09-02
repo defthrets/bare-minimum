@@ -301,17 +301,26 @@ namespace BareMinimum.UI
             var plateW = barW + edge * 2f;
             var plateH = plateW * Aspect();
 
-            // THE PLATE BUTTS THE BAR. It sat a couple of edges below and read as a separate
-            // object parked under the gauge; the pump in Fumes is part of its gauge, and these
-            // should be part of theirs.
-            var breath = 0f;
+            // THE PLATE STARTS WHERE THE SURROUND ENDS, not where the BAR ends.
+            //
+            // Those are not the same line and that was the bug. The bar's black frame hangs
+            // edge * Aspect() below the foot of the bar itself -- about two pixels -- so a
+            // plate placed at the foot sat ON that overhang. Two rectangles at alpha 205
+            // stacked in the same two pixels, and 205 over 205 is far darker than either, so
+            // the join read as a black bruise across both gauges.
+            //
+            // Butting them was still the right call and this keeps it: the plate begins at the
+            // exact pixel the surround stops, so there is no seam and no gap either. It is the
+            // same lesson as the tiling rectangles in Fumes -- adjacent alpha has to be
+            // computed from one expression, not from two that look like they agree.
+            var breath = edge * Aspect();
 
             // BARLENGTH IS THE WHOLE THING, PLATE INCLUDED -- which is what makes it directly
             // comparable to the fuel gauge's Height, where the pump lives inside the same
             // figure. It used to be the bar alone, so an identical number gave a taller
             // instrument here than there and the two would not line up however carefully
             // either was set.
-            var barH = Math.Max(0.004f, _cfg.HudBarLength - plateH);
+            var barH = Math.Max(0.004f, _cfg.HudBarLength - plateH - breath);
 
             // ANCHORED TO THE FOOT, and to nothing else. It used to be reconstructed as
             // top + side * 2 + gap, which is the same number in auto position and is NOT in
@@ -531,7 +540,7 @@ namespace BareMinimum.UI
             //
             // 0.0062 puts the travel at four to eight pixels, which is enough rows for the
             // sine to glide through instead of stepping between. [HUD] BarWave scales it.
-            var swing = 0.0062f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
+            var swing = 0.0062f * Clamp01(_cfg.HudBarWave) * (0.75f + 0.25f * empty);
 
             // Still answerable to the bar it is drawn in. An absolute travel on a gauge
             // shrunk to a sliver would be a surface taller than its own column.
@@ -603,7 +612,20 @@ namespace BareMinimum.UI
             // Still climbs as the meter empties. Hunger drains faster while you sprint
             // (Needs.Exertion), so running yourself hungry makes this visibly livelier --
             // the one part of the timing that is meant to move.
-            var hurry = 1f + 0.85f * empty;
+            // THE CALM END WAS THE PROBLEM, not the busy end.
+            //
+            // Everything about this animation was tuned by watching a bar that was low, and
+            // both dials fell away to nothing as it filled: the swing dropped to 35% of its
+            // size and the rate to its slowest, at the same time. A full stomach therefore got
+            // the smallest movement AND the longest period, which is most of what "barely an
+            // animation any more" was -- the bar is usually full, and full was the one state
+            // nobody was looking at while tuning.
+            //
+            // It still quickens and grows as the meter empties, which is the link worth
+            // keeping -- hunger drains faster while you sprint (Needs.Exertion), so running
+            // yourself hungry makes this visibly livelier. The range is just narrower now:
+            // from lively to livelier, rather than from invisible to lively.
+            var hurry = 1.7f + 0.6f * empty;
 
             // A MENISCUS THAT BREATHES, NOT A PLANE THAT TILTS.
             //
