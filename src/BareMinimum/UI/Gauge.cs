@@ -523,7 +523,15 @@ namespace BareMinimum.UI
             // motion is unchanged there and now stays put at every other height too. One
             // thing, one effect: BarLength sets how big the gauge is and HudBarWave sets how
             // much the surface moves, and neither reaches into the other any more.
-            var swing = 0.00273f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
+            // ROOM TO MOVE. At 0.00273 the crest travelled about 1.2 to 1.8 pixels, so it
+            // could only ever occupy two or three pixel rows -- it held still, snapped a
+            // pixel, held still. That reads as broken however fast the clock runs, and no
+            // amount of shortening the period fixes it, which is why three rounds of doing
+            // exactly that did not help.
+            //
+            // 0.0062 puts the travel at four to eight pixels, which is enough rows for the
+            // sine to glide through instead of stepping between. [HUD] BarWave scales it.
+            var swing = 0.0062f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
 
             // Still answerable to the bar it is drawn in. An absolute travel on a gauge
             // shrunk to a sliver would be a surface taller than its own column.
@@ -746,9 +754,28 @@ namespace BareMinimum.UI
             }
 
             var px = w * _screenW;
-            var n = (int)(px / 2f);
 
-            if (n < 8) n = 8;
+            // ONE COLUMN PER SIX PIXELS, AND NEVER FEWER THAN THE BAR CAN SHOW.
+            //
+            // This had a FLOOR of eight, which is where the flicker came from. The bar is
+            // about nine pixels wide, so eight columns made every strip 1.1px -- and the
+            // comment above already says sub-pixel rectangles are a lottery with the
+            // rasteriser. Each one rounded to 1px or 2px independently, every frame, at
+            // slightly different heights, and the surface boiled instead of moving. Speeding
+            // the wave up made it re-roll that lottery more often, which is why it got worse
+            // rather than better.
+            //
+            // A floor is the wrong shape of guard here. It was there to keep the curve smooth,
+            // and on a narrow bar it guaranteed the opposite: more columns than there are
+            // pixels to put them in. One column is not a degraded curve, it is the honest
+            // answer -- at nine pixels across, a parabola whose ends differ from its middle by
+            // under a pixel is not a curve anybody can see, and drawing it as a single strip
+            // that moves up and down is exactly what that width can express.
+            //
+            // Wide bars keep the curve, which is what the six is for.
+            var n = (int)(px / 6f);
+
+            if (n < 1) n = 1;
             if (n > 40) n = 40;
 
             return n;
@@ -808,7 +835,15 @@ namespace BareMinimum.UI
             // motion is unchanged there and now stays put at every other height too. One
             // thing, one effect: BarLength sets how big the gauge is and HudBarWave sets how
             // much the surface moves, and neither reaches into the other any more.
-            var swing = 0.00273f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
+            // ROOM TO MOVE. At 0.00273 the crest travelled about 1.2 to 1.8 pixels, so it
+            // could only ever occupy two or three pixel rows -- it held still, snapped a
+            // pixel, held still. That reads as broken however fast the clock runs, and no
+            // amount of shortening the period fixes it, which is why three rounds of doing
+            // exactly that did not help.
+            //
+            // 0.0062 puts the travel at four to eight pixels, which is enough rows for the
+            // sine to glide through instead of stepping between. [HUD] BarWave scales it.
+            var swing = 0.0062f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
 
             // Still answerable to the bar it is drawn in. An absolute travel on a gauge
             // shrunk to a sliver would be a surface taller than its own column.
@@ -986,10 +1021,39 @@ namespace BareMinimum.UI
         /// swell, the tilt, the breath, the bands and the specks together and none of them
         /// can be left behind when the others are slowed.
         /// </summary>
+        /// <summary>
+        /// Seconds since the HUD first drew, not seconds since the machine booted.
+        ///
+        /// MEASURED FROM AN EPOCH BECAUSE A FLOAT RUNS OUT OF DIGITS. TickCount is
+        /// milliseconds since boot, and dividing it into a float gives a number with only
+        /// about seven digits to spend: at two days of uptime the smallest step it can
+        /// represent is already 0.016s, at ten days 0.06s, and at twenty-five 0.25s. The
+        /// animation would then advance four times a second however smooth the maths above
+        /// it -- a stutter that arrives gradually, on machines nobody reboots, and never
+        /// reproduces on a freshly started one.
+        ///
+        /// Not the cause of anything seen so far -- this was found while looking for a
+        /// stutter that turned out to be sub-pixel columns, on a machine three hours up,
+        /// where the step is a thousandth of a second. It is a fault waiting for a long
+        /// uptime, and it costs one subtraction to never have.
+        ///
+        /// The wrap is handled for the same reason the mask exists: TickCount turns over
+        /// every 24.9 days, and a session running across that would otherwise see the clock
+        /// jump backwards.
+        /// </summary>
         private float Clock()
         {
-            return (Environment.TickCount & int.MaxValue) / 1000f * PaceOf();
+            var now = Environment.TickCount & int.MaxValue;
+
+            if (_epoch == 0) _epoch = now;
+
+            var ms = now - _epoch;
+            if (ms < 0) ms += int.MaxValue;
+
+            return ms / 1000f * PaceOf();
         }
+
+        private int _epoch;
 
         private float PaceOf()
         {
