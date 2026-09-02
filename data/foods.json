@@ -103,7 +103,7 @@
       "hunger": 0.28,
       "prop": "prop_cs_burger_01",
       "seconds": 4.5,
-      "icon": "bowl",
+      "icon": "cupnoodle",
       "tint": "#e4cf8f",
       "desc": "Add water and low expectations."
     },
@@ -291,7 +291,7 @@
         "prop_sandwich_01"
       ],
       "seconds": 4.5,
-      "icon": "wrap",
+      "icon": "burrito",
       "tint": "#d99a55",
       "desc": "Foil-wrapped and structurally ambitious."
     },
@@ -404,7 +404,7 @@
         "prop_ecola_can"
       ],
       "seconds": 4.0,
-      "icon": "bottle",
+      "icon": "beer",
       "tint": "#c9a24a",
       "desc": "Pisswasser. The name is the review."
     },
@@ -424,7 +424,7 @@
         "prop_ecola_can"
       ],
       "seconds": 4.0,
-      "icon": "bottle",
+      "icon": "beer",
       "tint": "#b8863f",
       "desc": "Logger. Chops down a man twice your size."
     },
@@ -515,7 +515,7 @@
         "prop_ld_flow_bottle"
       ],
       "seconds": 4.5,
-      "icon": "bottle",
+      "icon": "wine",
       "tint": "#8e4a6b",
       "desc": "Wine from a shop with a security grille. Bold choice."
     },
@@ -569,7 +569,7 @@
       "combo": true,
       "seconds": 5.5,
       "vehicleSeconds": 55,
-      "icon": "taco",
+      "icon": "platter",
       "tint": "#dd8f4a",
       "desc": "Eat your heart out. Their words."
     },
@@ -597,7 +597,7 @@
       "combo": true,
       "seconds": 5.5,
       "vehicleSeconds": 55,
-      "icon": "taco",
+      "icon": "platter",
       "tint": "#dc9a52",
       "desc": "Heavy shells, choose sides. A war has broken out in your mouth."
     },
@@ -715,7 +715,7 @@
       "drink": true,
       "prop": "prop_ld_flow_bottle",
       "seconds": 3.5,
-      "icon": "bottle",
+      "icon": "water",
       "tint": "#8fc4dd",
       "desc": "Water, in a bottle, for money."
     },
@@ -749,7 +749,7 @@
       "drink": true,
       "prop": "prop_energy_drink",
       "seconds": 3.5,
-      "icon": "can",
+      "icon": "energy",
       "tint": "#c8d84a",
       "desc": "Legally a drink. Spiritually a dare."
     },
@@ -796,7 +796,7 @@
       "wake": 0.05,
       "shop": false,
       "smoke": true,
-      "icon": "pack",
+      "icon": "cigbox",
       "tint": "#7a8fb0",
       "desc": "For the discerning gentleman who wants a cough with class.",
       "prop": [
@@ -871,7 +871,7 @@
       "wake": 0.06,
       "drink": true,
       "shop": false,
-      "icon": "cup",
+      "icon": "slush",
       "tint": "#6fb8e0",
       "desc": "Brain freeze, sold by the cup. Legally a drink.",
       "prop": [
@@ -940,7 +940,7 @@
       "price": 11,
       "hunger": 0.55,
       "shop": false,
-      "icon": "noodles",
+      "icon": "noodleplate",
       "tint": "#e0c184",
       "desc": "The same food, before three, for less money. Nobody knows why.",
       "prop": [
@@ -973,7 +973,7 @@
       "hunger": 0.26,
       "wake": 0.04,
       "shop": false,
-      "icon": "bowl",
+      "icon": "ramen",
       "tint": "#e6cf9a",
       "desc": "Mostly broth. Two wontons, if the ladle likes you.",
       "prop": [
@@ -1063,7 +1063,7 @@
       "wake": 0.22,
       "drink": true,
       "shop": false,
-      "icon": "cup",
+      "icon": "espresso",
       "tint": "#7a4a2c",
       "desc": "Small, black, and rude about it. You will feel it in the teeth.",
       "prop": [
@@ -1140,7 +1140,7 @@
       "price": 10,
       "hunger": 0.58,
       "shop": false,
-      "icon": "sandwich",
+      "icon": "sub",
       "tint": "#e0cb96",
       "desc": "A foot of it. Measured generously, by them, in their favour.",
       "prop": [
@@ -1194,7 +1194,7 @@
       "price": 5,
       "hunger": 0.26,
       "shop": false,
-      "icon": "hotdog",
+      "icon": "corndog",
       "tint": "#e3bd63",
       "desc": "On a stick, which makes it street food and therefore fine.",
       "prop": [
@@ -1237,7 +1237,7 @@
       "wake": 0.07,
       "shop": false,
       "smoke": true,
-      "icon": "cigar",
+      "icon": "pipe",
       "tint": "#6f4a2e",
       "desc": "Buying this is a personality decision and you have made it.",
       "prop": [
@@ -1311,7 +1311,7 @@
       "hunger": 0.54,
       "wake": 0.03,
       "shop": false,
-      "icon": "sandwich",
+      "icon": "toastie",
       "tint": "#d9a862",
       "desc": "Pressed flat under something heavy. Ground, and then pounded.",
       "prop": [
@@ -1330,7 +1330,7 @@
       "wake": 0.11,
       "drink": true,
       "shop": false,
-      "icon": "cup",
+      "icon": "teapot",
       "tint": "#c08a4e",
       "desc": "A whole pot, for one person, with a little strainer. Very civil.",
       "prop": [
@@ -1351,7 +1351,7 @@
       "wake": 0.06,
       "drink": true,
       "shop": false,
-      "icon": "cup",
+      "icon": "mug",
       "tint": "#8a5433",
       "desc": "More of a dessert than a drink, and nobody here is pretending otherwise.",
       "prop": [
@@ -1410,7 +1410,7 @@
       "hunger": 0.85,
       "wake": 0.12,
       "shop": false,
-      "icon": "box",
+      "icon": "donutbox",
       "tint": "#e5a04a",
       "desc": "For the office, obviously. Obviously for the office.",
       "prop": [
@@ -1487,7 +1487,7 @@
       "wake": 0.08,
       "drink": true,
       "shop": false,
-      "icon": "shake",
+      "icon": "smoothie",
       "tint": "#d4738f",
       "desc": "Fruit, blended, priced as though that were difficult.",
       "prop": [
@@ -1541,7 +1541,7 @@
       "price": 12,
       "hunger": 0.58,
       "shop": false,
-      "icon": "taco",
+      "icon": "calzone",
       "tint": "#dcb478",
       "desc": "A pizza that has folded in on itself. Relatable.",
       "prop": [
@@ -1559,7 +1559,7 @@
       "price": 5,
       "hunger": 0.24,
       "shop": false,
-      "icon": "loaf",
+      "icon": "baguette",
       "tint": "#e2c069",
       "desc": "Comes with the meal. Ordered separately anyway.",
       "prop": [
@@ -1578,7 +1578,7 @@
       "hunger": 0.62,
       "wake": 0.05,
       "shop": false,
-      "icon": "bowl",
+      "icon": "ramen",
       "tint": "#dcb069",
       "desc": "Egg, pork, and a broth somebody has clearly been simmering since Tuesday.",
       "prop": [
@@ -1595,7 +1595,7 @@
       "price": 12,
       "hunger": 0.56,
       "shop": false,
-      "icon": "noodles",
+      "icon": "noodleplate",
       "tint": "#e0a552",
       "desc": "Peanuts on top, lime on the side, no notes.",
       "prop": [
@@ -1631,7 +1631,7 @@
       "wake": 0.09,
       "drink": true,
       "shop": false,
-      "icon": "shake",
+      "icon": "bubbletea",
       "tint": "#c98fa8",
       "desc": "Comes with a straw wide enough to be a weapon.",
       "prop": [
@@ -1730,7 +1730,7 @@
       "wake": 0.09,
       "drink": true,
       "shop": false,
-      "icon": "cup",
+      "icon": "juice",
       "tint": "#e8963a",
       "desc": "Squeezed in front of you, loudly, by a machine that has seen things.",
       "prop": [
@@ -1750,7 +1750,7 @@
       "wake": 0.14,
       "drink": true,
       "shop": false,
-      "icon": "cup",
+      "icon": "juice",
       "tint": "#7fbe4a",
       "desc": "Kale, celery, and the distinct feeling of being told off.",
       "prop": [
@@ -1770,7 +1770,7 @@
       "wake": 0.07,
       "drink": true,
       "shop": false,
-      "icon": "shake",
+      "icon": "smoothie",
       "tint": "#c05a86",
       "desc": "Squeeze one out. Their slogan. On the window. Twice.",
       "prop": [
@@ -1844,7 +1844,7 @@
       "price": 7,
       "hunger": 0.4,
       "shop": false,
-      "icon": "plate",
+      "icon": "readymeal",
       "tint": "#c4b48f",
       "desc": "Pierce film. Do not pierce film. Nobody has ever known which.",
       "prop": [
@@ -2006,7 +2006,7 @@
       "price": 6,
       "hunger": 0.36,
       "shop": false,
-      "icon": "taco",
+      "icon": "calzone",
       "tint": "#e0a640",
       "desc": "Yellow pastry, serious filling. Hold it in the paper bag or lose a shirt.",
       "prop": [

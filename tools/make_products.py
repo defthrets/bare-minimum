@@ -678,28 +678,22 @@ def pie():
 
 def chicken():
     """
-    A bird on a spit. The SKEWER is what makes it rotisserie rather than poultry.
+    THE HUD'S OWN DRUMSTICK, not a second drawing of one.
 
-    The first version stood two legs up off a plump body and read as an animal's head with
-    ears -- at icon size a symmetrical pair of anything on top of a blob is a face, and once
-    seen it cannot be unseen. A horizontal bar through the middle cannot be read that way.
+    Three attempts at drawing a piece of chicken here failed in three different ways -- two
+    legs on a body became a face with ears, a bird on a spit became a bird, and a hand-rolled
+    drumstick came out as a dumbbell because a fat blob with a knuckle at each end IS a bone
+    unless the meat tapers into it properly.
+
+    make_icons already solved this. Its drumstick has a meat circle tapering through a neck
+    into the shaft, the taper drawn as a quad between two circles so there is no join to
+    hide, and the whole thing rotated so the meat sits upper-right. It took its own two goes
+    to get there and the comments in it record why the obvious collar cut had to come out.
+
+    Calling it is not laziness, it is the correct answer twice: one drawing to maintain, and
+    the meter and the meat on the shelf agree about what chicken looks like.
     """
-    img, d = canvas()
-
-    # The spit, ends showing well clear of the bird on both sides.
-    rr(d, (14, 118, 242, 140), 10)
-
-    el(d, (52, 62, 204, 196))                 # body
-
-    # One leg, tucked down and back. Asymmetric on purpose -- see above.
-    d.polygon([(s(150), s(168)), (s(186), s(150)), (s(216), s(206)), (s(184), s(222))], fill=WHITE)
-    el(d, (196, 190, 232, 226))
-
-    # Trussing, cut across the breast so the body is not a flat lump.
-    for x in (96, 132):
-        rr(d, (x - 5, 74, x + 5, 184), 5, CLEAR)
-
-    return img
+    return base.drumstick()
 
 
 def bag():
@@ -831,6 +825,321 @@ def egg():
     return img
 
 
+# ===========================================================================
+# The second pass: splitting the shapes that were carrying too much
+#
+# Twenty-seven drinks were sharing four pictures, and a pot of tea, a can of energy drink and
+# a bubble tea are not the same object however generous you are being.
+#
+# The rule at the top of this file has NOT changed. eCola and Sprunk are still one can,
+# because a can is a can and the colour and the name carry the rest. What changed is that
+# "a cup" had been asked to mean espresso, teapot, slush and orange juice all at once, and
+# that is not generality, it is a shrug.
+# ===========================================================================
+
+
+def teapot():
+    """A pot: round body, spout, handle, lid with a knob."""
+    img, d = canvas()
+    el(d, (60, 96, 196, 214))
+    d.polygon([(s(56), s(122)), (s(16), s(166)), (s(30), s(188)), (s(64), s(152))], fill=WHITE)
+    d.arc([s(174), s(112), s(242), s(186)], 300, 120, fill=WHITE, width=s(15))
+    rr(d, (86, 76, 170, 102), 10)
+    rr(d, (116, 54, 140, 82), 8)
+    return img
+
+
+def mug():
+    """A handled mug with steam. Sits down, unlike the takeaway cup."""
+    img, d = canvas()
+    rr(d, (54, 92, 180, 224), 18)
+    d.arc([s(158), s(112), s(230), s(192)], 300, 120, fill=WHITE, width=s(16))
+    for x in (84, 122, 160):
+        d.arc([s(x - 16), s(26), s(x + 16), s(80)], 200, 20, fill=WHITE, width=s(7))
+    return img
+
+
+def espresso():
+    """A small cup on a saucer. The SAUCER is the read -- nothing else in the set has one."""
+    img, d = canvas()
+    rr(d, (78, 92, 172, 174), 12)
+    d.arc([s(152), s(104), s(208), s(164)], 300, 120, fill=WHITE, width=s(12))
+    el(d, (30, 178, 226, 224))
+    return img
+
+
+def juice():
+    """A tall glass, a wedge of fruit on the rim, and a straw."""
+    img, d = canvas()
+    d.polygon([(s(76), s(76)), (s(178), s(76)), (s(166), s(230)), (s(88), s(230))], fill=WHITE)
+    d.line([s(150), s(70), s(198), s(16)], fill=WHITE, width=s(11))
+    d.pieslice([s(20), s(36), s(106), s(122)], 20, 200, fill=WHITE)
+    d.pieslice([s(36), s(52), s(90), s(106)], 20, 200, fill=CLEAR)
+    d.polygon([(s(88), s(104)), (s(167), s(104)), (s(163), s(128)), (s(92), s(128))], fill=CLEAR)
+    return img
+
+
+def slush():
+    """A domed lid and a fat straw: a frozen drink, not a coffee."""
+    img, d = canvas()
+    d.polygon([(s(78), s(104)), (s(178), s(104)), (s(164), s(234)), (s(92), s(234))], fill=WHITE)
+    d.pieslice([s(62), s(52), s(194), s(150)], 180, 360, fill=WHITE)
+    rr(d, (58, 94, 198, 118), 8)
+    d.polygon([(s(140), s(58)), (s(166), s(58)), (s(192), s(8)), (s(166), s(2))], fill=WHITE)
+    return img
+
+
+def bubbletea():
+    """A sealed cup, a fat straw, and pearls in the bottom."""
+    img, d = canvas()
+    d.polygon([(s(74), s(74)), (s(182), s(74)), (s(168), s(234)), (s(88), s(234))], fill=WHITE)
+    rr(d, (64, 60, 192, 84), 6)
+    rr(d, (124, 4, 158, 72), 8)
+    for cx, cy in ((104, 194), (134, 204), (160, 192), (118, 218), (148, 220)):
+        el(d, (cx - 13, cy - 13, cx + 13, cy + 13), CLEAR)
+    return img
+
+
+def smoothie():
+    """A short tumbler, a fruit half on the rim, a straw."""
+    img, d = canvas()
+    rr(d, (70, 96, 186, 232), 14)
+    d.line([s(156), s(92), s(198), s(28)], fill=WHITE, width=s(11))
+    el(d, (26, 40, 120, 128))
+    el(d, (50, 64, 96, 104), CLEAR)
+    d.polygon([(s(78), s(132)), (s(180), s(132)), (s(176), s(154)), (s(82), s(154))], fill=CLEAR)
+    return img
+
+
+def beer():
+    """A stubby with a label band. Shorter neck than the wine bottle, on purpose."""
+    img, d = canvas()
+    rr(d, (110, 18, 146, 78), 8)
+    d.polygon([(s(110), s(70)), (s(146), s(70)), (s(180), s(118)), (s(76), s(118))], fill=WHITE)
+    rr(d, (76, 108, 180, 238), 14)
+    rr(d, (70, 142, 186, 196), 6, CLEAR)
+    return img
+
+
+def wine():
+    """A long neck, a sloped shoulder, and a capsule at the top."""
+    img, d = canvas()
+    rr(d, (112, 6, 144, 42), 6)
+    rr(d, (116, 34, 140, 98), 4)
+    d.polygon([(s(116), s(90)), (s(140), s(90)), (s(180), s(152)), (s(76), s(152))], fill=WHITE)
+    rr(d, (76, 144, 180, 242), 12)
+    rr(d, (70, 172, 186, 216), 6, CLEAR)
+    return img
+
+
+def water():
+    """A ribbed bottle with a screw cap. The RIBS say water rather than beer."""
+    img, d = canvas()
+    rr(d, (104, 8, 152, 46), 8)
+    rr(d, (112, 42, 144, 80), 4)
+    d.polygon([(s(112), s(74)), (s(144), s(74)), (s(176), s(114)), (s(80), s(114))], fill=WHITE)
+    rr(d, (80, 106, 176, 242), 14)
+    for y in (142, 170, 198):
+        rr(d, (74, y, 182, y + 11), 5, CLEAR)
+    return img
+
+
+def energy():
+    """A tall slim can with a bolt on it. Narrower than the soda can, which is the difference."""
+    img, d = canvas()
+    rr(d, (92, 20, 164, 242), 16)
+    rr(d, (86, 12, 170, 40), 8)
+    d.polygon([(s(114), s(80)), (s(150), s(122)), (s(124), s(122)), (s(146), s(180)),
+               (s(106), s(138)), (s(134), s(138))], fill=CLEAR)
+    return img
+
+
+def sub():
+    """A long roll split down its length, filling showing. Not the round sandwich."""
+    img, d = canvas()
+    rr(d, (14, 94, 242, 178), 42)
+    d.polygon([(s(30), s(130)), (s(226), s(130)), (s(214), s(152)), (s(42), s(152))], fill=CLEAR)
+    for x in (74, 128, 182):
+        el(d, (x - 17, 102, x + 17, 126), CLEAR)
+    return img
+
+
+def toastie():
+    """Two triangles leaning together, with grill bars across them."""
+    img, d = canvas()
+    d.polygon([(s(18), s(198)), (s(126), s(198)), (s(72), s(70))], fill=WHITE)
+    d.polygon([(s(124), s(214)), (s(240), s(214)), (s(182), s(82))], fill=WHITE)
+    for i in range(3):
+        d.line([s(38 + i * 13), s(192 - i * 6), s(94 + i * 13), s(120 - i * 8)],
+               fill=CLEAR, width=s(7))
+    return img
+
+
+def calzone():
+    """A folded half-moon, crimped along the straight edge, two vents. Also does the patty."""
+    img, d = canvas()
+    d.pieslice([s(22), s(58), s(234), s(254)], 180, 360, fill=WHITE)
+    rr(d, (22, 184, 234, 218), 14)
+    for i in range(8):
+        x = 40 + i * 25
+        el(d, (x - 11, 188, x + 11, 216), CLEAR)
+    for x, y in ((102, 122), (152, 136)):
+        rr(d, (x - 6, y, x + 6, y + 32), 6, CLEAR)
+    return img
+
+
+def platter():
+    """
+    A loaded plate: food ON the plate rather than merging into it.
+
+    The first version drew three ellipses over a solid plate and they welded into one lump --
+    at this size two white shapes touching are one white shape. Each piece now gets a slightly
+    larger CLEAR shape punched behind it first, which leaves a hairline of plate showing round
+    every one. That gap is the only reason the pile reads as separate things.
+    """
+    img, d = canvas()
+
+    el(d, (10, 128, 246, 240))                       # the plate
+    el(d, (30, 142, 226, 226), CLEAR)                # rim line
+    el(d, (34, 146, 222, 222))
+
+    for cx, cy, rx, ry in ((74, 150, 42, 40), (150, 136, 48, 44), (128, 190, 52, 30)):
+        el(d, (cx - rx - 7, cy - ry - 7, cx + rx + 7, cy + ry + 7), CLEAR)
+        el(d, (cx - rx, cy - ry, cx + rx, cy + ry))
+
+    return img
+
+
+def ramen():
+    """A bowl with chopsticks standing in it and a tangle above the rim."""
+    img, d = canvas()
+    d.polygon([(s(142), s(16)), (s(160), s(20)), (s(132), s(128)), (s(116), s(124))], fill=WHITE)
+    d.polygon([(s(176), s(24)), (s(194), s(30)), (s(148), s(132)), (s(132), s(126))], fill=WHITE)
+    for i in range(2):
+        d.arc([s(64 + i * 12), s(92 + i * 8), s(192 - i * 12), s(150 + i * 4)],
+              200, 340, fill=WHITE, width=s(9))
+    d.pieslice([s(26), s(100), s(230), s(248)], 0, 180, fill=WHITE)
+    rr(d, (20, 106, 236, 134), 10)
+    return img
+
+
+def cupnoodle():
+    """A pot noodle: straight tub, foil lid peeled back, fork standing in it."""
+    img, d = canvas()
+    d.polygon([(s(72), s(88)), (s(184), s(88)), (s(170), s(240)), (s(86), s(240))], fill=WHITE)
+    rr(d, (62, 74, 194, 100), 8)
+    d.polygon([(s(182), s(84)), (s(244), s(38)), (s(228), s(16)), (s(166), s(68))], fill=WHITE)
+    rr(d, (112, 16, 132, 86), 6)
+    return img
+
+
+def readymeal():
+    """A tray with compartments and a film lid pulled part way back."""
+    img, d = canvas()
+    rr(d, (22, 86, 234, 222), 16)
+    rr(d, (44, 108, 122, 200), 8, CLEAR)
+    rr(d, (136, 108, 212, 148), 8, CLEAR)
+    rr(d, (136, 160, 212, 200), 8, CLEAR)
+    d.polygon([(s(22), s(86)), (s(234), s(86)), (s(212), s(48)), (s(44), s(48))], fill=WHITE)
+    return img
+
+
+def corndog():
+    """A battered dog on a STICK. The stick is all that separates it from a hot dog."""
+    img, d = canvas()
+    rr(d, (94, 18, 164, 178), 34)
+    rr(d, (118, 162, 140, 248), 9)
+    for y in (62, 102, 142):
+        d.line([s(90), s(y), s(168), s(y - 18)], fill=CLEAR, width=s(6))
+    return img
+
+
+def donutbox():
+    """A flat box with a window, and rings showing through it."""
+    img, d = canvas()
+    rr(d, (16, 94, 240, 218), 12)
+    rr(d, (38, 112, 218, 180), 8, CLEAR)
+    for cx in (78, 128, 178):
+        el(d, (cx - 27, 118, cx + 27, 172))
+        el(d, (cx - 11, 136, cx + 11, 156), CLEAR)
+    d.polygon([(s(16), s(94)), (s(240), s(94)), (s(216), s(56)), (s(40), s(56))], fill=WHITE)
+    return img
+
+
+def baguette():
+    """A long stick loaf, slashed on the diagonal."""
+    img, d = canvas()
+    d.polygon([(s(26), s(202)), (s(76), s(242)), (s(234), s(68)), (s(188), s(28))], fill=WHITE)
+    el(d, (14, 188, 86, 250))
+    el(d, (178, 18, 248, 84))
+    for i in range(4):
+        d.line([s(78 + i * 36), s(194 - i * 36), s(116 + i * 36), s(164 - i * 36)],
+               fill=CLEAR, width=s(8))
+    return img
+
+
+def pipe():
+    """A briar pipe: a bowl, and a stem curving away from it. Not the cigar."""
+    img, d = canvas()
+    d.polygon([(s(38), s(94)), (s(122), s(94)), (s(110), s(200)), (s(54), s(200))], fill=WHITE)
+    el(d, (32, 78, 128, 114))
+    el(d, (52, 90, 108, 106), CLEAR)
+    d.arc([s(96), s(146), s(246), s(222)], 180, 330, fill=WHITE, width=s(18))
+    rr(d, (214, 146, 250, 174), 8)
+    return img
+
+
+def cigbox():
+    """A flip-top box, lid open, foil folded back. The soft pack keeps p_pack."""
+    img, d = canvas()
+    rr(d, (72, 84, 188, 242), 10)
+    d.polygon([(s(72), s(94)), (s(188), s(94)), (s(204), s(44)), (s(88), s(44))], fill=WHITE)
+    d.polygon([(s(98), s(88)), (s(178), s(88)), (s(188), s(58)), (s(108), s(58))], fill=CLEAR)
+    rr(d, (66, 142, 194, 172), 6, CLEAR)
+    return img
+
+
+def noodleplate():
+    """
+    A plate of noodles with a fork standing in them.
+
+    Same trap as the platter and the same fix: solid arcs laid straight onto a solid plate
+    came out as one paddle-shaped blob. The noodles and the fork are each punched clear of
+    their surroundings first, so every stroke has an edge.
+    """
+    img, d = canvas()
+
+    el(d, (10, 130, 246, 240))                       # plate
+    el(d, (30, 144, 226, 226), CLEAR)
+    el(d, (34, 148, 222, 222))
+
+    # A nest of noodles, cut out of the plate then drawn back in, so it sits ON it.
+    el(d, (44, 108, 212, 208), CLEAR)
+    for i in range(3):
+        d.arc([s(52 + i * 16), s(116 + i * 12), s(204 - i * 16), s(196 - i * 8)],
+              195, 345, fill=WHITE, width=s(11))
+
+    # The fork, with its own clearance so it is not swallowed by the tangle.
+    d.polygon([(s(168), s(24)), (s(206), s(30)), (s(174), s(166)), (s(146), s(160))], fill=CLEAR)
+    d.polygon([(s(174), s(34)), (s(198), s(38)), (s(170), s(156)), (s(152), s(152))], fill=WHITE)
+    for i in range(3):
+        rr(d, (168 + i * 13, 14, 178 + i * 13, 48), 4)
+
+    return img
+
+
+def burrito():
+    """A foil-wrapped cylinder with the paper peeled down one end."""
+    img, d = canvas()
+    d.polygon([(s(50), s(212)), (s(98), s(246)), (s(232), s(64)), (s(184), s(30))], fill=WHITE)
+    el(d, (36, 190, 112, 252))
+    d.polygon([(s(148), s(116)), (s(198), s(152)), (s(118), s(252)), (s(62), s(224))], fill=WHITE)
+    for i in range(3):
+        d.line([s(92 + i * 27), s(234 - i * 5), s(138 + i * 27), s(168 - i * 5)],
+               fill=CLEAR, width=s(6))
+    return img
+
+
 SHAPES = {
     "can": can,
     "bottle": bottle,
@@ -874,6 +1183,32 @@ SHAPES = {
     "dumpling": dumpling,
     "shot": shot,
     "egg": egg,
+
+    "teapot": teapot,
+    "mug": mug,
+    "espresso": espresso,
+    "juice": juice,
+    "slush": slush,
+    "bubbletea": bubbletea,
+    "smoothie": smoothie,
+    "beer": beer,
+    "wine": wine,
+    "water": water,
+    "energy": energy,
+    "sub": sub,
+    "toastie": toastie,
+    "calzone": calzone,
+    "platter": platter,
+    "ramen": ramen,
+    "cupnoodle": cupnoodle,
+    "readymeal": readymeal,
+    "corndog": corndog,
+    "donutbox": donutbox,
+    "baguette": baguette,
+    "pipe": pipe,
+    "cigbox": cigbox,
+    "noodleplate": noodleplate,
+    "burrito": burrito,
 }
 
 
