@@ -623,6 +623,214 @@ def fruit():
 
 # ===========================================================================
 
+# ===========================================================================
+# Shapes added when the catalogue outgrew the first set
+#
+# The rule at the top of this file still holds -- one shape serves many items, and a can is
+# a can whatever is in it. These are not exceptions to that; they are the cases where the
+# shared shape was simply WRONG rather than merely general. A whole pizza drawn as a
+# takeaway box, a roast chicken drawn as a bucket and a slice of apple pie drawn as a wedge
+# of pepperoni pizza are not items sharing a silhouette, they are items wearing somebody
+# else's.
+# ===========================================================================
+
+
+def pizza():
+    """A whole pizza seen from above: rim, cut lines, pepperoni. Not the single wedge."""
+    img, d = canvas()
+
+    el(d, (24, 24, 232, 232))
+    el(d, (44, 44, 212, 212), CLEAR)          # rim
+    el(d, (52, 52, 204, 204))                 # the pizza itself
+
+    # Cut into six, which reads as a whole pizza where four reads as a target.
+    for i in range(6):
+        a = math.radians(i * 60.0)
+        d.line([s(128), s(128),
+                s(128 + math.cos(a) * 76), s(128 + math.sin(a) * 76)],
+               fill=CLEAR, width=s(6))
+
+    for cx, cy in ((96, 96), (160, 104), (112, 160), (168, 158)):
+        el(d, (cx - 13, cy - 13, cx + 13, cy + 13), CLEAR)
+
+    return img
+
+
+def pie():
+    """A round pie: crimped rim, domed lid, two steam vents cut into the top."""
+    img, d = canvas()
+
+    # The dish, then the lid sitting proud of it.
+    rr(d, (34, 150, 222, 206), 16)
+    el(d, (40, 78, 216, 186))
+
+    # Crimping, as notches taken out of the rim rather than added to it -- added scallops
+    # close up into a blob at icon size, cut ones stay legible.
+    for i in range(9):
+        x = 46 + i * 21
+        el(d, (x - 9, 138, x + 9, 162), CLEAR)
+
+    for x in (108, 148):
+        rr(d, (x - 6, 100, x + 6, 126), 6, CLEAR)
+
+    return img
+
+
+def chicken():
+    """
+    A bird on a spit. The SKEWER is what makes it rotisserie rather than poultry.
+
+    The first version stood two legs up off a plump body and read as an animal's head with
+    ears -- at icon size a symmetrical pair of anything on top of a blob is a face, and once
+    seen it cannot be unseen. A horizontal bar through the middle cannot be read that way.
+    """
+    img, d = canvas()
+
+    # The spit, ends showing well clear of the bird on both sides.
+    rr(d, (14, 118, 242, 140), 10)
+
+    el(d, (52, 62, 204, 196))                 # body
+
+    # One leg, tucked down and back. Asymmetric on purpose -- see above.
+    d.polygon([(s(150), s(168)), (s(186), s(150)), (s(216), s(206)), (s(184), s(222))], fill=WHITE)
+    el(d, (196, 190, 232, 226))
+
+    # Trussing, cut across the breast so the body is not a flat lump.
+    for x in (96, 132):
+        rr(d, (x - 5, 74, x + 5, 184), 5, CLEAR)
+
+    return img
+
+
+def bag():
+    """
+    A paper grocery bag, handles CUT OUT of the fold rather than arcing over it.
+
+    Drawn arcs above the bag came out as a ribbon and the whole thing read as a wrapped
+    present. A die-cut handle is a hole, and a hole cannot be mistaken for a bow.
+    """
+    img, d = canvas()
+
+    d.polygon([(s(46), s(62)), (s(210), s(62)), (s(198), s(236)), (s(58), s(236))], fill=WHITE)
+
+    rr(d, (40, 54, 216, 96), 8)               # the folded top
+
+    # The two handle holes, in the fold.
+    for x in (98, 158):
+        rr(d, (x - 22, 64, x + 22, 86), 10, CLEAR)
+
+    # A crease down the face, so it reads as paper and not as a block.
+    d.line([s(128), s(104), s(128), s(228)], fill=CLEAR, width=s(5))
+
+    return img
+
+
+def jerky():
+    """Three strips of dried meat, overlapping, with torn ends."""
+    img, d = canvas()
+
+    for i, (x, y, lean) in enumerate(((58, 60, 8), (96, 108, -6), (74, 156, 10))):
+        d.polygon([
+            (s(x), s(y)), (s(x + 118), s(y + lean)),
+            (s(x + 118), s(y + lean + 40)), (s(x), s(y + 40)),
+        ], fill=WHITE)
+
+        # A couple of bites out of each edge. Dried meat is never a clean rectangle.
+        el(d, (x + 26 + i * 8, y - 7, x + 50 + i * 8, y + 9), CLEAR)
+        el(d, (x + 62 - i * 6, y + lean + 32, x + 88 - i * 6, y + lean + 48), CLEAR)
+
+    return img
+
+
+def sundae():
+    """A footed glass with two scoops and a cherry. The GLASS is what separates it from a cone."""
+    img, d = canvas()
+
+    el(d, (66, 40, 138, 108))                 # scoops
+    el(d, (120, 34, 194, 104))
+
+    el(d, (150, 12, 184, 46))                 # cherry
+    d.line([s(167), s(20), s(186), s(2)], fill=WHITE, width=s(6))
+
+    d.polygon([(s(62), s(96)), (s(194), s(96)), (s(150), s(190)), (s(106), s(190))], fill=WHITE)
+    rr(d, (118, 186, 138, 220), 4)            # stem
+    rr(d, (78, 216, 178, 238), 10)            # foot
+
+    return img
+
+
+def cake():
+    """
+    A slice of cake from the SIDE: flat on the plate, tall at the back, tapering forward.
+
+    Pointing the wedge downward made it a cone -- a triangle narrowing to the bottom of the
+    frame is an ice cream every time, and there is already a cone in this set for that. Laid
+    on its base with the layers running across it, it can only be cake.
+    """
+    img, d = canvas()
+
+    d.polygon([(s(44), s(76)), (s(196), s(76)), (s(212), s(212)), (s(44), s(212))], fill=WHITE)
+
+    rr(d, (38, 64, 202, 92), 10)              # icing along the top
+
+    # Two layer lines, cut out so they hold at any tint.
+    for y in (128, 168):
+        d.polygon([(s(52), s(y)), (s(206), s(y + 2)), (s(206), s(y + 15)), (s(52), s(y + 13))],
+                  fill=CLEAR)
+
+    el(d, (58, 34, 94, 70))                   # cherry
+    d.line([s(76), s(42), s(96), s(20)], fill=WHITE, width=s(6))
+
+    return img
+
+
+def dumpling():
+    """Three pleated dumplings in a huddle. The pleats are the whole read."""
+    img, d = canvas()
+
+    for cx, cy, r in ((80, 150, 52), (176, 150, 52), (128, 92, 54)):
+        el(d, (cx - r, cy - r * 0.86, cx + r, cy + r))
+
+        # Pleats along the crown, cut out. Three each is enough at icon size.
+        for k in (-1, 0, 1):
+            px = cx + k * (r * 0.44)
+            rr(d, (px - 5, cy - r * 0.86, px + 5, cy - r * 0.30), 5, CLEAR)
+
+    # A steamer line under them so they are sitting in something.
+    rr(d, (36, 206, 220, 226), 9)
+
+    return img
+
+
+def shot():
+    """A shot glass: thick base, straight sides, filled near the top."""
+    img, d = canvas()
+
+    d.polygon([(s(80), s(72)), (s(176), s(72)), (s(166), s(214)), (s(90), s(214))], fill=WHITE)
+    rr(d, (74, 62, 182, 84), 8)               # rim
+    rr(d, (72, 208, 184, 232), 8)             # base
+
+    # The level, cut out, which is what makes it a shot rather than an empty glass.
+    d.polygon([(s(92), s(96)), (s(164), s(96)), (s(160), s(126)), (s(96), s(126))], fill=CLEAR)
+
+    return img
+
+
+def egg():
+    """A fried egg: white spread wide, yolk cut out of it."""
+    img, d = canvas()
+
+    # Two overlapping ellipses and a lobe, so the white is not a circle.
+    el(d, (30, 66, 190, 196))
+    el(d, (96, 44, 226, 168))
+    el(d, (76, 130, 200, 216))
+
+    el(d, (104, 96, 168, 160), CLEAR)         # yolk
+    el(d, (112, 104, 160, 152))               # and the yolk itself, standing proud
+
+    return img
+
+
 SHAPES = {
     "can": can,
     "bottle": bottle,
@@ -655,6 +863,17 @@ SHAPES = {
     "sweetjar": sweetjar,
     "wrap": wrap,
     "cookie": cookie,
+
+    "pizza": pizza,
+    "pie": pie,
+    "chicken": chicken,
+    "bag": bag,
+    "jerky": jerky,
+    "sundae": sundae,
+    "cake": cake,
+    "dumpling": dumpling,
+    "shot": shot,
+    "egg": egg,
 }
 
 

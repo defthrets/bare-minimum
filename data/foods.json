@@ -91,7 +91,7 @@
       "hunger": 0.36,
       "prop": "prop_cs_burger_01",
       "seconds": 4.0,
-      "icon": "plate",
+      "icon": "pie",
       "tint": "#d8a765",
       "desc": "Meat is on the label. That is as far as the label goes."
     },
@@ -152,7 +152,7 @@
       "combo": true,
       "seconds": 5.5,
       "vehicleSeconds": 55,
-      "icon": "taco",
+      "icon": "plate",
       "tint": "#d59a3e",
       "desc": "Carne asada, rice, beans and a cup the size of your forearm."
     },
@@ -291,7 +291,7 @@
         "prop_sandwich_01"
       ],
       "seconds": 4.5,
-      "icon": "taco",
+      "icon": "wrap",
       "tint": "#d99a55",
       "desc": "Foil-wrapped and structurally ambitious."
     },
@@ -471,7 +471,7 @@
       "combo": true,
       "seconds": 5.5,
       "vehicleSeconds": 50,
-      "icon": "plate",
+      "icon": "egg",
       "tint": "#e6c073",
       "desc": "Two eggs, hash browns and a coffee. Served at a reasonable hour."
     },
@@ -657,7 +657,7 @@
       "hunger": 0.2,
       "prop": "prop_food_bs_chips",
       "seconds": 3.5,
-      "icon": "tin",
+      "icon": "jerky",
       "tint": "#a9663f",
       "desc": "Chewing it counts as exercise."
     },
@@ -1505,7 +1505,7 @@
       "price": 24,
       "hunger": 0.95,
       "shop": false,
-      "icon": "box",
+      "icon": "pizza",
       "tint": "#d4552f",
       "desc": "A whole one. To yourself. Nobody is here to judge, and yet.",
       "prop": [
@@ -1612,7 +1612,7 @@
       "price": 9,
       "hunger": 0.38,
       "shop": false,
-      "icon": "plate",
+      "icon": "dumpling",
       "tint": "#e8ddbe",
       "desc": "Eight of them. You will want twelve. Everybody wants twelve.",
       "prop": [
@@ -1790,7 +1790,7 @@
       "wake": 0.24,
       "drink": true,
       "shop": false,
-      "icon": "flask",
+      "icon": "shot",
       "tint": "#6fb03a",
       "desc": "Tastes like a lawn. Works like a slap.",
       "prop": [
@@ -1809,7 +1809,7 @@
       "price": 28,
       "hunger": 0.98,
       "shop": false,
-      "icon": "box",
+      "icon": "bag",
       "tint": "#c9a267",
       "desc": "A proper shop. You will be eating out of this bag for a while.",
       "prop": [
@@ -1827,7 +1827,7 @@
       "price": 13,
       "hunger": 0.72,
       "shop": false,
-      "icon": "bucket",
+      "icon": "chicken",
       "tint": "#d9994a",
       "desc": "Off the hot spinner by the door. The best thing in any supermarket.",
       "prop": [
@@ -1861,7 +1861,7 @@
       "price": 9,
       "hunger": 0.36,
       "shop": false,
-      "icon": "fruit",
+      "icon": "bag",
       "tint": "#8ec96f",
       "desc": "Bought with the best intentions. Half of it will go off.",
       "prop": [
@@ -1915,7 +1915,7 @@
       "price": 5,
       "hunger": 0.26,
       "shop": false,
-      "icon": "slice",
+      "icon": "pie",
       "tint": "#e0b25e",
       "desc": "There is a whole one behind the counter and she will notice if you stare.",
       "prop": [
@@ -1950,7 +1950,7 @@
       "price": 6,
       "hunger": 0.24,
       "shop": false,
-      "icon": "bowl",
+      "icon": "sundae",
       "tint": "#e8d2b0",
       "desc": "Three scoops, sauce, a wafer stuck in at an angle. Correct.",
       "prop": [
@@ -2043,7 +2043,7 @@
       "hunger": 0.24,
       "booze": 0.04,
       "shop": false,
-      "icon": "slice",
+      "icon": "cake",
       "tint": "#a86e3c",
       "desc": "There is more rum in this than anybody admits at eleven in the morning.",
       "prop": [
