@@ -540,11 +540,8 @@ namespace BareMinimum.UI
             //
             // 0.0062 puts the travel at four to eight pixels, which is enough rows for the
             // sine to glide through instead of stepping between. [HUD] BarWave scales it.
-            var swing = 0.0085f * Clamp01(_cfg.HudBarWave) * (0.75f + 0.25f * empty);
+            var swing = h * 0.018f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
 
-            // Still answerable to the bar it is drawn in. An absolute travel on a gauge
-            // shrunk to a sliver would be a surface taller than its own column.
-            if (swing > h * 0.20f) swing = h * 0.20f;
 
             var floor = y + h;
 
@@ -625,7 +622,7 @@ namespace BareMinimum.UI
             // keeping -- hunger drains faster while you sprint (Needs.Exertion), so running
             // yourself hungry makes this visibly livelier. The range is just narrower now:
             // from lively to livelier, rather than from invisible to lively.
-            var hurry = 1.7f + 0.6f * empty;
+            var hurry = 1f + 0.85f * empty;
 
             // A MENISCUS THAT BREATHES, NOT A PLANE THAT TILTS.
             //
@@ -673,8 +670,8 @@ namespace BareMinimum.UI
             //
             // [HUD] BarPace lifts the whole instrument in one number, and [HUD] BarWave the
             // distance. Neither is in the settings menu yet.
-            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 8.0)) * swing;
-            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 11.56)) * swing * 0.40f;
+            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 144.0)) * swing;
+            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 208.0)) * swing * 0.40f;
 
             var crest = Mix(body, Color.FromArgb(body.A, 255, 240, 205), 0.55f);
 
@@ -806,9 +803,9 @@ namespace BareMinimum.UI
             // that moves up and down is exactly what that width can express.
             //
             // Wide bars keep the curve, which is what the six is for.
-            var n = (int)(px / 6f);
+            var n = (int)(px / 2f);
 
-            if (n < 1) n = 1;
+            if (n < 8) n = 8;
             if (n > 40) n = 40;
 
             return n;
@@ -876,11 +873,8 @@ namespace BareMinimum.UI
             //
             // 0.0062 puts the travel at four to eight pixels, which is enough rows for the
             // sine to glide through instead of stepping between. [HUD] BarWave scales it.
-            var swing = 0.0062f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
+            var swing = h * 0.018f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
 
-            // Still answerable to the bar it is drawn in. An absolute travel on a gauge
-            // shrunk to a sliver would be a surface taller than its own column.
-            if (swing > h * 0.20f) swing = h * 0.20f;
 
             // Below the lowest the surface can reach: the bow and the drift can push down
             // together, so the body has to start under both or the columns above it draw over
