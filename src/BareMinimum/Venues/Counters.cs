@@ -67,6 +67,91 @@ namespace BareMinimum.Venues
         // prop_vend_water_01, prop_vend_coffe_01, prop_vend_snak_01, prop_vend_snak_01_tu,
         // prop_vend_fridge01 -- all seven of which exist in this build.
 
+        /// <summary>
+        /// Shops that are NOT food shops. While one of these is running, there is no counter.
+        ///
+        /// THE PROP LIST CANNOT TELL THESE APART AND NEVER COULD. Of the eight till models
+        /// above, this build has three -- prop_till_01, 02 and 03 -- and the five that were
+        /// specific to somewhere (v_ret_247_till, v_ret_gc_till and the rest) do not exist at
+        /// all. So every counter the mod finds is a generic register, and a generic register
+        /// sits behind the desk at Ammu-Nation exactly as readily as in a 24/7. Deleting the
+        /// three would not fix it, it would turn the feature off.
+        ///
+        /// So the discriminator is the SHOP'S OWN SCRIPT. GTA launches one when you walk into
+        /// a shop and stops it when you leave, which makes "is gunclub_shop running" a direct
+        /// answer to "am I standing in an Ammu-Nation" -- far better than a coordinate list
+        /// and immune to map mods moving things around.
+        ///
+        /// Taken from a log rather than guessed. The counter that opened over the pistol case
+        /// had gunclub_shop, clothes_shop_sp and launcher_Range in its script list; the three
+        /// legitimate shop counters in the same log had none of them.
+        /// </summary>
+        private static readonly string[] NotFood =
+        {
+            "gunclub_shop",       // Ammu-Nation
+            "clothes_shop_sp",    // Binco, Suburban, Ponsonbys, Discount
+            "barber_shop",        // Bob Mulet, Herr Kutz
+            "tattoo_shop",        // the tattooists
+            "carmod_shop"         // Los Santos Customs, Benny's
+        };
+
+        private int _nextShopCheck;
+        private bool _inNotFood;
+
+        /// <summary>
+        /// Whether a non-food shop's script is running, cached for a fifth of a second.
+        ///
+        /// Cached because this is asked every frame the player is near a till and the native
+        /// is not free. A fifth of a second is far quicker than anybody can walk from a gun
+        /// counter to a food one.
+        /// </summary>
+        private bool InNotFoodShop()
+        {
+            var now = Game.GameTime;
+            if (now < _nextShopCheck) return _inNotFood;
+
+            _nextShopCheck = now + 200;
+            _inNotFood = false;
+
+            // WALKED WITH THE THREAD ITERATOR, not asked about by name.
+            //
+            // GET_NUMBER_OF_INSTANCES_OF_STREAMED_SCRIPT is the obvious native and this build's
+            // SHVDN does not expose it. The iterator is what the shop already uses to list the
+            // running scripts into the log, so it is known to work here rather than hoped to.
+            try
+            {
+                Function.Call(Hash.SCRIPT_THREAD_ITERATOR_RESET);
+
+                // Bounded for the same reason the shop's own walk is: an iterator that never
+                // returns 0 would otherwise hang the frame. Sixty-odd scripts run at a counter,
+                // so 400 is generous.
+                for (var i = 0; i < 400; i++)
+                {
+                    var id = Function.Call<int>(Hash.SCRIPT_THREAD_ITERATOR_GET_NEXT_THREAD_ID);
+                    if (id == 0) break;
+
+                    var name = Function.Call<string>(Hash.GET_NAME_OF_SCRIPT_WITH_THIS_ID, id);
+                    if (string.IsNullOrEmpty(name)) continue;
+
+                    foreach (var shop in NotFood)
+                    {
+                        if (!string.Equals(name, shop, StringComparison.OrdinalIgnoreCase)) continue;
+
+                        _inNotFood = true;
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // A counter that opens in a gun shop is a smaller fault than one that never
+                // opens anywhere, so a failure here says "not a gun shop" and carries on.
+                Log.Once("counter-shopcheck", "Could not read the running scripts: " + ex.Message);
+            }
+
+            return false;
+        }
+
         private int[] _tills;
 
         private int _nextScan;
@@ -188,6 +273,12 @@ namespace BareMinimum.Venues
             _nextScan = now + 200;
             _found = null;
             _kind = Counter.None;
+
+            // NOT IN A GUN SHOP, A CLOTHES SHOP OR A BARBER'S. Checked before the prop scan
+            // rather than after, because the answer does not depend on which register is
+            // nearest -- if you are inside one of those, there is no food counter anywhere in
+            // the building.
+            if (InNotFoodShop()) return Counter.None;
 
             try
             {
