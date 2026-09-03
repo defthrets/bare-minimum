@@ -670,8 +670,8 @@ namespace BareMinimum.UI
             //
             // [HUD] BarPace lifts the whole instrument in one number, and [HUD] BarWave the
             // distance. Neither is in the settings menu yet.
-            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 144.0)) * swing;
-            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 208.0)) * swing * 0.40f;
+            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / (144.0 * SurfaceSlow))) * swing;
+            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / (208.0 * SurfaceSlow))) * swing * 0.40f;
 
             var crest = Mix(body, Color.FromArgb(body.A, 255, 240, 205), 0.55f);
 
@@ -918,8 +918,8 @@ namespace BareMinimum.UI
             // The food bar's meniscus, negated: a parabola pinned at both walls and pushed the
             // opposite way, which cannot have a corner in it at any amplitude. Same periods, so
             // the two bars share a rhythm without ever being in step.
-            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 144.0)) * swing;
-            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 208.0)) * swing * 0.40f;
+            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / (144.0 * SurfaceSlow))) * swing;
+            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / (208.0 * SurfaceSlow))) * swing * 0.40f;
 
             var columns = Columns(w);
 
@@ -1068,6 +1068,24 @@ namespace BareMinimum.UI
         /// every 24.9 days, and a session running across that would otherwise see the clock
         /// jump backwards.
         /// </summary>
+        /// <summary>
+        /// How much slower the SURFACE runs than everything else in the bar.
+        ///
+        /// The contents -- the drift through the fill, the sediment, the stars -- and the
+        /// surface had always shared one clock, so BarPace moved them together and there was
+        /// no way to like one rate and not the other. At 30x the contents were right and the
+        /// waterline was slopping about like a bucket in a van.
+        ///
+        /// A RATIO RATHER THAN A SECOND DIAL. One number in the menu that speeds the whole
+        /// gauge up is worth keeping; two that have to be balanced against each other is a
+        /// worse thing to own. This fixes the relationship between them instead, so BarPace
+        /// still means "faster" and the surface stays a fifth of it whatever it is set to.
+        ///
+        /// Five, so that the shipped BarPace of 30 puts the contents at 30x and the surface at
+        /// 6x, which is where they were asked to land.
+        /// </summary>
+        private const double SurfaceSlow = 5.0;
+
         private float Clock()
         {
             var now = Environment.TickCount & int.MaxValue;
