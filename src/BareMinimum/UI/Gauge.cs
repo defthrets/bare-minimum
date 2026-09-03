@@ -540,7 +540,7 @@ namespace BareMinimum.UI
             //
             // 0.0062 puts the travel at four to eight pixels, which is enough rows for the
             // sine to glide through instead of stepping between. [HUD] BarWave scales it.
-            var swing = 0.0062f * Clamp01(_cfg.HudBarWave) * (0.75f + 0.25f * empty);
+            var swing = 0.0085f * Clamp01(_cfg.HudBarWave) * (0.75f + 0.25f * empty);
 
             // Still answerable to the bar it is drawn in. An absolute travel on a gauge
             // shrunk to a sliver would be a surface taller than its own column.
@@ -641,9 +641,20 @@ namespace BareMinimum.UI
             //
             // Twenty-two seconds and thirty-one, and the bow is now the slowest thing in
             // either bar. It is a stomach settling, not a pulse.
-            // THIRTY SECONDS AND FORTY-THREE -- THE FOOD BAR'S OWN, and no longer the pair
-            // the sleep bar uses. Three times the rate of the 90/130 before it, and 4.8x the
-            // 144/208 both bars started on.
+            // EIGHT SECONDS AND ELEVEN AND A HALF -- the food bar's own, and nothing like the
+            // pair the sleep bar still uses.
+            //
+            // MEASURED RATHER THAN NUDGED, because nudging is what went wrong. This started at
+            // 144/208 with a travel of about two pixels, which works out at UNDER TWO PIXELS A
+            // SECOND at a full bar -- imperceptible, and correctly reported as such. It was
+            // then made 1.6x faster, then 3x faster again, and every one of those was a
+            // multiplication of something already invisible: 4.8x of nothing is still nothing.
+            //
+            // At 8 seconds and a travel of fourteen pixels the crest moves about 9 px/s at a
+            // full bar and 17 at an empty one, which is a surface moving rather than a surface
+            // that has to be watched for. The RATIO survives every step -- 144:208, 90:130,
+            // 30:43.3 and 8:11.56 are all 0.692 -- so the bow and the drift still never line
+            // up into one obvious pulse.
             //
             // The two ran identical periods in opposite directions, which was the point when
             // the sleep surface was built out of this one. It is not the point any more: a
@@ -662,8 +673,8 @@ namespace BareMinimum.UI
             //
             // [HUD] BarPace lifts the whole instrument in one number, and [HUD] BarWave the
             // distance. Neither is in the settings menu yet.
-            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 30.0)) * swing;
-            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 43.3)) * swing * 0.40f;
+            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 8.0)) * swing;
+            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 11.56)) * swing * 0.40f;
 
             var crest = Mix(body, Color.FromArgb(body.A, 255, 240, 205), 0.55f);
 
