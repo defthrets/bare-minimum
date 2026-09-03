@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using GTA;
@@ -168,8 +168,28 @@ namespace BareMinimum.Needs
         /// over the ceiling it is a fast travel or a trainer, and crediting those would make
         /// the sleep half of this mod free to anybody with a time-of-day slider.
         /// </summary>
+        /// <summary>
+        /// Set by another mod that is about to move the clock and knows it was not rest.
+        /// See Api.Pantry.NotSleep, which is the only thing that sets it.
+        /// </summary>
+        internal static bool NotSleepNext;
+
         private void Outside(float hours, bool suspended)
         {
+            // SOMEBODY TOLD US. The jump is real and the hours passed -- they were simply not
+            // spent asleep, so they drain like any other waking hours rather than crediting a
+            // night's rest. The step has already been applied by the caller; all this has to
+            // do is not hand back the sleep.
+            if (NotSleepNext)
+            {
+                NotSleepNext = false;
+
+                Log.Info("Something else advanced the clock " + hours.ToString("0.#") +
+                         "h and says it was not rest. Counted as time awake.");
+
+                return;
+            }
+
             // Our own sleep never reaches here -- Sleeping calls Slept() and re-primes the
             // clock inside the same tick -- but a fade we are staging is not the moment to be
             // interpreting the clock either.

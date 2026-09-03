@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace BareMinimum.Api
@@ -231,6 +231,35 @@ namespace BareMinimum.Api
                 return false;
             }
             catch { return false; }
+        }
+
+        // ======================================================================
+        // Time that was not rest
+        // ======================================================================
+
+        /// <summary>
+        /// The next big jump in the clock was NOT sleep.
+        ///
+        /// WHY ANOTHER MOD NEEDS TO BE ABLE TO SAY THIS. This one watches the game clock and
+        /// treats a jump it did not cause as somebody having slept -- which is right nearly
+        /// every time, because the things that move the clock in hours are beds. It is wrong
+        /// exactly when the hours were not restful, and the mod that moved them is the only
+        /// thing in the world that knows which it was.
+        ///
+        /// The case that found it: Posted Up knocks you out on an overdose and skips six
+        /// hours. Waking up hungry from that is correct and waking up FULLY RESTED is not --
+        /// passing out on four drugs was quietly the most efficient way to sleep in the game.
+        ///
+        /// A LATCH RATHER THAN AN ARGUMENT, because the caller does not know how many hours
+        /// this mod will decide it saw, and should not have to. Set it, move the clock, and
+        /// the jump that follows is counted as time spent awake -- which drains, rather than
+        /// as time spent asleep, which fills.
+        ///
+        /// Consumed once. A latch that stayed set would make every later bed useless.
+        /// </summary>
+        public static void NotSleep()
+        {
+            Needs.Needs.NotSleepNext = true;
         }
 
         /// <summary>Puts one in, if there is room. For a mod that wants to GIVE you food.</summary>
