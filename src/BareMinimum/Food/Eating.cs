@@ -191,6 +191,30 @@ namespace BareMinimum.Food
                     }
                 }
 
+                // AND KEEP TRYING TO PUT IT IN HIS HAND, for exactly the same reason.
+                //
+                // Give asks for the model and returns empty-handed rather than spinning on it
+                // -- the comment in there is right that blocking would freeze the frame -- and
+                // it leans on Preload having warmed the model first. Only the two SHELF menus
+                // preload, as the cursor moves over a row. The pocket screen does not, and
+                // Hoodrich's phone cannot, so the first of anything eaten from either was
+                // always mimed: request, return, and by the time the model landed nobody was
+                // asking any more. The SECOND one worked, because the model was resident by
+                // then -- which is exactly the shape this was reported in.
+                //
+                // One retry a frame costs nothing and the meal lasts seconds, so the prop
+                // appears a frame or two in and nobody can see the difference.
+                if (_held == null || !_held.Exists())
+                {
+                    var him = Game.Player.Character;
+
+                    if (him != null && him.Exists() && !him.IsDead)
+                    {
+                        _held = null;
+                        Give(him, _item, _drinking);
+                    }
+                }
+
                 // Halfway through a stretch, put down the sandwich and pick up the cup, or
                 // the other way about. The need is untouched until the whole thing is done.
                 if (_swapAt != 0 && now >= _swapAt) Swap();

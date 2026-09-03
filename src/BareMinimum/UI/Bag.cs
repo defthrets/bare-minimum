@@ -133,6 +133,8 @@ namespace BareMinimum.UI
 
             if (_index >= _ids.Count) _index = Math.Max(0, _ids.Count - 1);
 
+            Warm();
+
             var perPage = Columns * Rows;
             _page = perPage <= 0 ? 0 : _index / perPage;
         }
@@ -196,7 +198,28 @@ namespace BareMinimum.UI
             var perPage = Columns * Rows;
             _page = perPage <= 0 ? 0 : _index / perPage;
 
+            Warm();
+
             Sound("NAV_UP_DOWN");
+        }
+
+        /// <summary>
+        /// Asks for the selected item's prop and animation ahead of time.
+        ///
+        /// The same thing the shop shelf does as the cursor moves over a row, and for the same
+        /// reason: a model that is not resident cannot be put in his hand, and the mod will not
+        /// block a frame waiting for one. Eating retries every frame now so nothing is ever
+        /// mimed for long -- but a prop that is already there when the key is pressed appears
+        /// on the first frame rather than the third, and that is the difference between right
+        /// and nearly right.
+        /// </summary>
+        private void Warm()
+        {
+            if (_ids.Count == 0) return;
+
+            var id = _ids[Clamp(_index, 0, _ids.Count - 1)];
+
+            _eating.Preload(_menu.Find(id));
         }
 
         private void Eat()
