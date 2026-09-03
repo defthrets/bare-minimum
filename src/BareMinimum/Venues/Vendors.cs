@@ -1566,8 +1566,34 @@ namespace BareMinimum.Venues
 
             _socials.About(v.Id, Social.Chirp.Bought, item.Name, v.Name);
 
-            // Into the pocket, unless the player has asked for the old instant meal back.
-            if (_cfg.BuyToPantry)
+            // ---- a meal at the window is eaten at the wheel ----
+            //
+            // NO POCKET FROM A CAR, at any drive-through. Ordering at a window and being told
+            // your pockets are full is the wrong answer to the wrong question: the food is
+            // being handed through the window into your lap, and the reason the pocket exists
+            // at all -- carrying something to eat later -- is already satisfied by the fact
+            // that you are sitting in the thing you would have carried it to.
+            //
+            // Keyed on BEING IN THE VEHICLE rather than on the vendor's fromVehicle flag,
+            // which is the wider and more honest test. fromVehicle says a window CAN be used
+            // from a car; it does not say you did. Walk up to the same hatch on foot and the
+            // food goes in your pocket like anywhere else, which is right -- you have somewhere
+            // to put it and nowhere to sit.
+            //
+            // Eating.Begin already knows what to do from here: it swaps to VehicleSeconds, so
+            // a meal at the wheel is picked at between junctions rather than put away in four
+            // seconds at a serving hatch.
+            var atTheWheel = false;
+            try
+            {
+                var me = Game.Player.Character;
+                atTheWheel = me != null && me.Exists() && me.IsInVehicle();
+            }
+            catch { /* on foot, as far as anyone can tell */ }
+
+            // Into the pocket, unless the player has asked for the old instant meal back --
+            // or unless he is sitting in a car with it.
+            if (_cfg.BuyToPantry && !atTheWheel)
             {
                 if (_pantry.Add(item.Id))
                 {
