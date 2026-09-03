@@ -568,7 +568,7 @@ namespace BareMinimum.Core
         /// care whether that is twenty tacos or one of everything, and a player who runs out of
         /// room wants to know how many MORE THINGS they can carry, not how many kinds.
         /// </summary>
-        public int PantrySlots = 20;
+        public int PantrySlots = 3;
 
         public Keys MenuKey = Keys.F7;
 
