@@ -666,8 +666,8 @@ namespace BareMinimum.UI
 
             Float("Animation speed", "HUD", "BarPace",
                   () => _cfg.HudBarPace, v => _cfg.HudBarPace = v,
-                  0.25f, 0.15f, 8f, "0.00",
-                  "How fast everything in both bars moves - surface, fill and all. 3.00 is normal.");
+                  2.5f, 0.15f, 120f, "0.00",
+                  "How fast everything in both bars moves - surface, fill and all. 30 is normal.");
 
             Float("Surface movement", "HUD", "BarWave",
                   () => _cfg.HudBarWave, v => _cfg.HudBarWave = v,

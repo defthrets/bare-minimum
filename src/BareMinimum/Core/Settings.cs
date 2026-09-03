@@ -491,10 +491,19 @@ namespace BareMinimum.Core
         /// up cannot do that: every relationship inside the gauge is preserved exactly and only
         /// the rate changes.
         ///
-        /// Defaults to 3 because 1 was the rate a nearly-still bar was tuned at, and the whole
-        /// set reads as sluggish at it.
+        /// Defaults to 30. Not a typo, and not arrived at by taste either -- the periods
+        /// underneath are 144 and 208 SECONDS, which were tuned across about six rounds of
+        /// somebody saying it was too fast and are now agreed to be far too slow. Thirty turns
+        /// those into a bow of 4.8s and a drift of 6.9s, which is a surface visibly moving.
+        ///
+        /// The number looks absurd because it is compensating for periods that were never
+        /// re-tuned after the verdict flipped. Turning the clock up is still the right lever --
+        /// it is the only one that changes the rate without changing the shape, which three
+        /// reverted attempts established the hard way -- but the honest reading of a 30x
+        /// multiplier is that the constants under it belong somewhere else, and rewriting them
+        /// would break the one thing that has been signed off.
         /// </summary>
-        public float HudBarPace = 3f;
+        public float HudBarPace = 30f;
 
         /// <summary>
         /// How quickly the specks inside the bars move, 0 to 1. 0 stops them dead.
@@ -699,7 +708,7 @@ namespace BareMinimum.Core
                                                    cfg.HudBarIconScale, 0.2f, 1f);
                 cfg.HudBarWave = ini.GetFloat("HUD", "BarWave", cfg.HudBarWave, 0f, 1f);
                 cfg.HudBarDrift = ini.GetFloat("HUD", "BarDrift", cfg.HudBarDrift, 0f, 1f);
-                cfg.HudBarPace = ini.GetFloat("HUD", "BarPace", cfg.HudBarPace, 0.15f, 8f);
+                cfg.HudBarPace = ini.GetFloat("HUD", "BarPace", cfg.HudBarPace, 0.15f, 120f);
 
                 cfg.HudAnimate = ini.GetBool("HUD", "Animate", cfg.HudAnimate);
                 cfg.HudShimmer = ini.GetFloat("HUD", "Shimmer", cfg.HudShimmer, 0f, 1f);
