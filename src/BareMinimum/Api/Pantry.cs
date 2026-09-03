@@ -155,6 +155,30 @@ namespace BareMinimum.Api
             catch { return ""; }
         }
 
+        /// <summary>
+        /// The mod's own mark, as a full path: "food" for the drumstick, "moon" for the
+        /// crescent. "" if it is not there.
+        ///
+        /// ADDED WITHOUT BUMPING ApiVersion, which is safe in this one direction: a caller
+        /// written against v1 never asks for a method it does not know about, and a caller
+        /// that does ask is by definition newer than the surface it is asking of. Removing or
+        /// re-signing anything above is what the version number is for.
+        /// </summary>
+        public static string Mark(string which)
+        {
+            try
+            {
+                var file = string.Equals(which, "moon", StringComparison.OrdinalIgnoreCase)
+                    ? "moon0.png"
+                    : "food0.png";
+
+                var path = System.IO.Path.Combine(Core.Paths.Icons, file);
+
+                return System.IO.File.Exists(path) ? path : "";
+            }
+            catch { return ""; }
+        }
+
         /// <summary>The item's tint, packed ARGB. Colour cannot cross, an int can.</summary>
         public static int TintOf(string id)
         {
