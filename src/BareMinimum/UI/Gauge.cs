@@ -1012,8 +1012,27 @@ namespace BareMinimum.UI
                 // each other, so no star settles into a rhythm you could tap along to. Held
                 // above a third rather than allowed to reach nothing: a star that goes fully
                 // out mid-life is not twinkling, it is a dead pixel.
-                var fast = 0.5f + 0.5f * (float)Math.Sin(t * 7.3f + i * 2.1f);
-                var slow = 0.5f + 0.5f * (float)Math.Sin(t * 4.6f - i * 1.7f);
+                // ---- how fast a star twinkles ----
+                //
+                // A SIXTH OF THE CONTENTS CLOCK, which is a sixth of a fifth of BarPace. The
+                // raw terms were sized when the whole gauge ran at 1x; carried up to 30 and
+                // then divided by five for the contents, they came out at 7.0 Hz and 4.4 Hz.
+                // That is candle-flicker territory -- a real star twinkles about once a
+                // second, and anything much past two reads as a fault in the panel rather
+                // than as light.
+                //
+                // Divided rather than rewritten, so the two terms keep their ratio: 7.3 and
+                // 4.6 do not divide into each other, which is what stops the pair beating
+                // together into one obvious pulse. At a sixth they land near 1.2 Hz and
+                // 0.7 Hz.
+                //
+                // Only the twinkle. Each star's LIFE -- coming up, sitting lit, going out
+                // somewhere else -- still runs on the contents clock, because that is the
+                // sky filling and emptying rather than any one star flickering.
+                var twinkleT = t / StarSlow;
+
+                var fast = 0.5f + 0.5f * (float)Math.Sin(twinkleT * 7.3f + i * 2.1f);
+                var slow = 0.5f + 0.5f * (float)Math.Sin(twinkleT * 4.6f - i * 1.7f);
 
                 var twinkle = 0.34f + 0.66f * (fast * 0.62f + slow * 0.38f);
 
@@ -1092,6 +1111,15 @@ namespace BareMinimum.UI
         /// contents at 6x.
         /// </summary>
         private const float InsideSlow = 5f;
+
+        /// <summary>
+        /// How much slower a star's TWINKLE runs than the rest of the contents.
+        ///
+        /// Stacked on top of InsideSlow rather than replacing it, so BarPace still moves
+        /// everything and the stars keep their place in the order: waterline fastest, contents
+        /// a fifth of that, a star's flicker a sixth of THAT again.
+        /// </summary>
+        private const float StarSlow = 6f;
 
         private float Clock()
         {
