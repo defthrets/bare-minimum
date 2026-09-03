@@ -500,6 +500,10 @@ namespace BareMinimum.UI
         {
             var t = Clock();
 
+            // The waterline reads the clock straight; everything inside the fill reads it
+            // slowed, so one dial still drives both and the ratio between them is fixed.
+            var inside = t / InsideSlow;
+
             var level = h * fraction;
             var surfaceY = y + h - level;
 
@@ -573,8 +577,8 @@ namespace BareMinimum.UI
                 // going somewhere. Which is the point -- this is the fifth halving, and the
                 // brief the whole way has been that a bar beside the minimap should reward a
                 // second look and do nothing at all to the first.
-                var a = Pulse(u - t * 0.00138f, 0.58f);
-                var b = Pulse(u - t * 0.00085f + 0.5f, 0.76f);
+                var a = Pulse(u - inside * 0.00138f, 0.58f);
+                var b = Pulse(u - inside * 0.00085f + 0.5f, 0.76f);
 
                 var warm = (a * 0.6f + b * 0.4f) * (0.09f + 0.13f * empty);
 
@@ -670,8 +674,8 @@ namespace BareMinimum.UI
             //
             // [HUD] BarPace lifts the whole instrument in one number, and [HUD] BarWave the
             // distance. Neither is in the settings menu yet.
-            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / (144.0 * SurfaceSlow))) * swing;
-            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / (208.0 * SurfaceSlow))) * swing * 0.40f;
+            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 144.0)) * swing;
+            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 208.0)) * swing * 0.40f;
 
             var crest = Mix(body, Color.FromArgb(body.A, 255, 240, 205), 0.55f);
 
@@ -699,7 +703,7 @@ namespace BareMinimum.UI
                 Hud.Bar(left, topY, right - left, h * 0.007f, crest);
             }
 
-            Sediment(x, y, w, h, surfaceY + lift, t, empty);
+            Sediment(x, y, w, h, surfaceY + lift, inside, empty);
         }
 
         /// <summary>
@@ -843,6 +847,10 @@ namespace BareMinimum.UI
 
             var t = Clock();
 
+            // The waterline reads the clock straight; everything inside the fill reads it
+            // slowed, so one dial still drives both and the ratio between them is fixed.
+            var inside = t / InsideSlow;
+
             var level = h * fraction;
             var surfaceY = y + h - level;
             var floor = y + h;
@@ -909,7 +917,7 @@ namespace BareMinimum.UI
             }
 
             // ---- the sky ----
-            if (level > h * 0.06f) Stars(x, y, w, h, surfaceY, t, tired);
+            if (level > h * 0.06f) Stars(x, y, w, h, surfaceY, inside, tired);
 
             if (level <= 0.002f) return;
 
@@ -918,8 +926,8 @@ namespace BareMinimum.UI
             // The food bar's meniscus, negated: a parabola pinned at both walls and pushed the
             // opposite way, which cannot have a corner in it at any amplitude. Same periods, so
             // the two bars share a rhythm without ever being in step.
-            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / (144.0 * SurfaceSlow))) * swing;
-            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / (208.0 * SurfaceSlow))) * swing * 0.40f;
+            var bow = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 144.0)) * swing;
+            var lift = (float)Math.Sin(t * hurry * (2.0 * Math.PI / 208.0)) * swing * 0.40f;
 
             var columns = Columns(w);
 
@@ -1069,22 +1077,21 @@ namespace BareMinimum.UI
         /// jump backwards.
         /// </summary>
         /// <summary>
-        /// How much slower the SURFACE runs than everything else in the bar.
+        /// How much slower the CONTENTS run than the waterline.
         ///
-        /// The contents -- the drift through the fill, the sediment, the stars -- and the
-        /// surface had always shared one clock, so BarPace moved them together and there was
-        /// no way to like one rate and not the other. At 30x the contents were right and the
-        /// waterline was slopping about like a bucket in a van.
+        /// The level -- the waterline and its bow and drift -- and the stuff moving through
+        /// the fill had always shared one clock, so BarPace moved them together and there was
+        /// no way to like one rate and not the other.
         ///
         /// A RATIO RATHER THAN A SECOND DIAL. One number in the menu that speeds the whole
-        /// gauge up is worth keeping; two that have to be balanced against each other is a
-        /// worse thing to own. This fixes the relationship between them instead, so BarPace
-        /// still means "faster" and the surface stays a fifth of it whatever it is set to.
+        /// gauge up is worth owning; two that have to be balanced against each other is not.
+        /// This fixes the relationship instead, so BarPace still means "faster" and the
+        /// contents stay a fifth of it whatever it is set to.
         ///
-        /// Five, so that the shipped BarPace of 30 puts the contents at 30x and the surface at
-        /// 6x, which is where they were asked to land.
+        /// Five, so the shipped BarPace of 30 leaves the waterline at 30x and puts the
+        /// contents at 6x.
         /// </summary>
-        private const double SurfaceSlow = 5.0;
+        private const float InsideSlow = 5f;
 
         private float Clock()
         {
