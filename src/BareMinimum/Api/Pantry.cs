@@ -58,15 +58,20 @@ namespace BareMinimum.Api
         private static Food.Catalogue _menu;
         private static Food.Eating _eating;
 
+        /// <summary>The meters, for Drain. Nothing else out here reads them.</summary>
+        private static Needs.Needs _needs;
+
         /// <summary>
         /// Called by Main once the real objects exist. Not part of the public contract -- the
         /// other side never calls this, it only ever reads.
         /// </summary>
-        internal static void Wire(Food.Pantry bag, Food.Catalogue menu, Food.Eating eating)
+        internal static void Wire(Food.Pantry bag, Food.Catalogue menu, Food.Eating eating,
+                                  Needs.Needs needs)
         {
             _bag = bag;
             _menu = menu;
             _eating = eating;
+            _needs = needs;
         }
 
         /// <summary>
@@ -260,6 +265,33 @@ namespace BareMinimum.Api
         public static void NotSleep()
         {
             Needs.Needs.NotSleepNext = true;
+        }
+
+        /// <summary>
+        /// Take some hunger and some sleep off him. Fractions of the whole meter, 0 to 1.
+        ///
+        /// FOR THINGS THAT HAPPEN TO A BODY. NotSleep above says "those hours were not rest",
+        /// which stops a jump crediting a night -- it does not say the hours were BAD for him,
+        /// and some of them are. Six hours face down in a gutter after an overdose is not
+        /// neutral time: you come round wrecked, and the ordinary drain for six hours on an
+        /// eighty-hour meter is seven per cent, which is not wrecked, it is Tuesday afternoon.
+        ///
+        /// SUBTRACTED RATHER THAN SET, so two things can do it in the same minute and the
+        /// second does not undo the first. Clamped at zero, and the caller is trusted to pick
+        /// numbers that leave him standing -- an empty hunger meter in this mod takes health,
+        /// so a caller that drains a full one to nothing has decided to hurt him.
+        /// </summary>
+        public static void Drain(float hunger, float sleep)
+        {
+            try
+            {
+                if (_needs == null) return;
+
+                _needs.Drain(hunger, sleep);
+            }
+            catch
+            {
+            }
         }
 
         /// <summary>Puts one in, if there is room. For a mod that wants to GIVE you food.</summary>

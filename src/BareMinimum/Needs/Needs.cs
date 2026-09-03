@@ -169,6 +169,30 @@ namespace BareMinimum.Needs
         /// the sleep half of this mod free to anybody with a time-of-day slider.
         /// </summary>
         /// <summary>
+        /// Take some off both, as fractions of the whole meter.
+        ///
+        /// FOR THINGS THAT HAPPEN TO A BODY rather than for time passing. The drain in Tick is
+        /// the clock doing its work at a rate; this is an event -- a beating, a bender, six
+        /// hours face down after an overdose -- and an event does not have a rate, it has a
+        /// cost. Subtracted rather than set so two of them in the same minute both land.
+        ///
+        /// Written straight to the meters and marked dirty, so it is on the disk with
+        /// everything else at the next save rather than being a number that vanishes on a
+        /// reload.
+        /// </summary>
+        public void Drain(float hunger, float sleep)
+        {
+            if (hunger > 0f) Hunger.Value = Hunger.Value - hunger;
+            if (sleep > 0f) Sleep.Value = Sleep.Value - sleep;
+
+            _dirty = true;
+
+            Log.Info("Drained by something: Hunger " +
+                     ((int)Math.Round(Hunger.Value * 100f)) + "%, Sleep " +
+                     ((int)Math.Round(Sleep.Value * 100f)) + "%.");
+        }
+
+        /// <summary>
         /// Set by another mod that is about to move the clock and knows it was not rest.
         /// See Api.Pantry.NotSleep, which is the only thing that sets it.
         /// </summary>

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using GTA;
 using BareMinimum.Core;
 using BareMinimum.Food;
@@ -88,7 +88,7 @@ namespace BareMinimum
             // The bridge other mods reach by reflection. Wired LAST, so anything that finds
             // the type finds a working one behind it -- Api.Pantry.Ready is false until this
             // line runs, and the caller is expected to keep asking rather than resolve once.
-            Api.Pantry.Wire(_pantry, _catalogue, _eating);
+            Api.Pantry.Wire(_pantry, _catalogue, _eating, _needs);
 
             _settings = new SettingsPanel(_cfg, _needs);
             _gauge = new Gauge(_cfg);
