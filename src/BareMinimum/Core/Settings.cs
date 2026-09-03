@@ -575,15 +575,6 @@ namespace BareMinimum.Core
         /// <summary>Opens the pocket: what you have bought and not eaten yet.</summary>
         public Keys BagKey = Keys.F11;
 
-        /// <summary>
-        /// Writes where you are standing into captured.json, for adding new places.
-        ///
-        /// A TOOL RATHER THAN A FEATURE, and it is here because adding a location has always
-        /// meant transcribing four numbers off a screenshot -- fine once, and a silent
-        /// mistyping risk twenty-three times over.
-        /// </summary>
-        public Keys CaptureKey = Keys.F8;
-
         // ======================================================================
 
         /// <summary>
@@ -730,7 +721,6 @@ namespace BareMinimum.Core
                 cfg.InteractKey = ini.GetKey("Keys", "Interact", cfg.InteractKey);
                 cfg.MenuKey = ini.GetKey("Keys", "Menu", cfg.MenuKey);
                 cfg.BagKey = ini.GetKey("Keys", "Bag", cfg.BagKey);
-                cfg.CaptureKey = ini.GetKey("Keys", "Capture", cfg.CaptureKey);
 
                 cfg.BuyToPantry = ini.GetBool("Money", "BuyToPantry", cfg.BuyToPantry);
                 cfg.PantrySlots = (int)ini.GetFloat("Money", "PantrySlots", cfg.PantrySlots, 1f, 200f);

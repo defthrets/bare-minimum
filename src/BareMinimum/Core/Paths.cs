@@ -236,9 +236,6 @@ namespace BareMinimum.Core
         /// <summary>What each character is carrying. Beside needs.json, and saved like it.</summary>
         public static string PantryFile => Path.Combine(Writable, "pantry.json");
 
-        /// <summary>Spots written down with the capture key, ready to paste into vendors.json.</summary>
-        public static string CapturedFile => Path.Combine(Writable, "captured.json");
-
         private static void EnsureDir(string path)
         {
             try

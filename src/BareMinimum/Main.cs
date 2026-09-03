@@ -49,7 +49,6 @@ namespace BareMinimum
         private readonly Gauge _gauge;
         private readonly Pantry _pantry;
         private readonly Bag _bag;
-        private readonly Capture _capture;
 
         private int _failures;
         private bool _parked;
@@ -85,7 +84,6 @@ namespace BareMinimum
             _shop = new Shop(_cfg, _catalogue, _counters, _eating, _needs, _pantry);
 
             _bag = new Bag(_cfg, _catalogue, _pantry, _eating);
-            _capture = new Capture(_cfg);
 
             // The bridge other mods reach by reflection. Wired LAST, so anything that finds
             // the type finds a working one behind it -- Api.Pantry.Ready is false until this
@@ -174,12 +172,6 @@ namespace BareMinimum
                 var suspended = _sleeping.Busy;
 
                 _pantry.Update(dt);
-
-                // Runs whatever else is happening -- writing a spot down is a note to
-                // self, not an interaction, and the doors worth noting are often ones you
-                // are standing at with a menu already up.
-                _capture.Update();
-
 
                 _needs.Update(dt, suspended);
                 _effects.Update(_needs, suspended);
