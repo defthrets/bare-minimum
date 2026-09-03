@@ -476,7 +476,25 @@ namespace BareMinimum.Core
         /// Below 1 is slower. The base numbers have already been slowed nearly twice over
         /// underneath it, so 1 is not where it started.
         /// </summary>
-        public float HudBarPace = 1f;
+        /// <summary>
+        /// How fast EVERYTHING in both bars moves. 1 is the rate they were drawn at.
+        ///
+        /// One number rather than a dial per animation, because it multiplies the clock the
+        /// whole gauge reads: the surface, the drift inside the fill, the sediment and the
+        /// stars all come out of Clock(), so this is the only knob that means "faster" without
+        /// meaning anything else as well.
+        ///
+        /// THAT IS THE POINT, and it was learned the hard way. Three separate attempts to make
+        /// this livelier reached for the periods and the travel instead, and each one changed
+        /// the SHAPE of the animation while chasing its speed -- a faster wave with a bigger
+        /// swing is a different animation, not the same one hurried along. Turning the clock
+        /// up cannot do that: every relationship inside the gauge is preserved exactly and only
+        /// the rate changes.
+        ///
+        /// Defaults to 3 because 1 was the rate a nearly-still bar was tuned at, and the whole
+        /// set reads as sluggish at it.
+        /// </summary>
+        public float HudBarPace = 3f;
 
         /// <summary>
         /// How quickly the specks inside the bars move, 0 to 1. 0 stops them dead.
@@ -681,7 +699,7 @@ namespace BareMinimum.Core
                                                    cfg.HudBarIconScale, 0.2f, 1f);
                 cfg.HudBarWave = ini.GetFloat("HUD", "BarWave", cfg.HudBarWave, 0f, 1f);
                 cfg.HudBarDrift = ini.GetFloat("HUD", "BarDrift", cfg.HudBarDrift, 0f, 1f);
-                cfg.HudBarPace = ini.GetFloat("HUD", "BarPace", cfg.HudBarPace, 0.15f, 2f);
+                cfg.HudBarPace = ini.GetFloat("HUD", "BarPace", cfg.HudBarPace, 0.15f, 8f);
 
                 cfg.HudAnimate = ini.GetBool("HUD", "Animate", cfg.HudAnimate);
                 cfg.HudShimmer = ini.GetFloat("HUD", "Shimmer", cfg.HudShimmer, 0f, 1f);

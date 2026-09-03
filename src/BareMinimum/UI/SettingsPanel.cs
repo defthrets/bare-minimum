@@ -385,7 +385,7 @@ namespace BareMinimum.UI
 
             { "Bar height",               "s_bars.png"   },
             { "Bar width",                "s_bars.png"   },
-            { "Surface speed",            "s_wave.png"   },
+            { "Animation speed",          "s_wave.png"   },
             { "Surface movement",         "s_wave.png"   },
             { "Bar drift speed",          "s_wave.png"   },
             { "Bar mark size",            "s_bars.png"   },
@@ -664,10 +664,10 @@ namespace BareMinimum.UI
                   "How wide the bars are. The fuel gauge in Fumes uses 0.0046.",
                   () => _cfg.Style == HudStyle.Bars, "Bars only.");
 
-            Float("Surface speed", "HUD", "BarPace",
+            Float("Animation speed", "HUD", "BarPace",
                   () => _cfg.HudBarPace, v => _cfg.HudBarPace = v,
-                  0.05f, 0.15f, 2f, "0.00",
-                  "How fast both bars' surfaces move. 1.00 is normal.");
+                  0.25f, 0.15f, 8f, "0.00",
+                  "How fast everything in both bars moves - surface, fill and all. 3.00 is normal.");
 
             Float("Surface movement", "HUD", "BarWave",
                   () => _cfg.HudBarWave, v => _cfg.HudBarWave = v,
