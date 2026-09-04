@@ -151,9 +151,98 @@ namespace BareMinimum.Needs
                 return false;
             }
 
-            // Not every time, even in the worst spot. Something that happens on every single
-            // kerbside nap stops being a hazard and becomes a cutscene you learn to avoid.
-            return _dice.NextDouble() < Clamp01(_cfg.PoliceWakeChance);
+            return _dice.NextDouble() < Odds(car);
+        }
+
+        /// <summary>
+        /// How likely they are to turn up here, from how main the road is.
+        ///
+        /// A BACK STREET IS A COIN FLIP AND A MAIN ROAD IS NEARLY CERTAIN. Something that
+        /// happens on every single kerbside nap stops being a hazard and becomes a cutscene
+        /// you learn to avoid; something that never happens on a dual carriageway is not
+        /// modelling anything. The setting is the floor, not the answer.
+        ///
+        /// TWO SIGNALS, AND THEY ARE DIFFERENT KINDS OF THING. Width is structural: a road is
+        /// four lanes wide whether or not anything is on it at four in the morning, so it says
+        /// what KIND of road this is. Busyness is situational and says who is around to notice
+        /// right now. Weighted toward the width, because the width is the thing that does not
+        /// change between one nap and the next -- a player should be able to learn that the
+        /// boulevard is a bad idea and the side street is a gamble.
+        /// </summary>
+        private float Odds(Vehicle car)
+        {
+            var floor = Clamp01(_cfg.PoliceWakeChance);
+
+            try
+            {
+                var wide = Across(car);
+                var busy = Busyness(car);
+
+                // Seven metres is about two lanes and a bit of kerb -- an ordinary street.
+                // Eighteen is a boulevard.
+                var byWidth = Clamp01((wide - 7f) / 11f);
+
+                // And however far past the qualifying threshold the traffic is.
+                var span = Math.Max(1f, _cfg.PoliceWakeNeighbours * 2f);
+                var byTraffic = Clamp01((busy - _cfg.PoliceWakeNeighbours) / span);
+
+                var main = byWidth * 0.65f + byTraffic * 0.35f;
+
+                // Never quite one. A guaranteed event is a rule, and this is meant to be a
+                // risk you take.
+                var odds = floor + (0.97f - floor) * main;
+
+                Log.Debug("Kerbside nap: " + wide.ToString("0.#") + "m across, " + busy +
+                          " about, odds " + odds.ToString("0.00") + ".");
+
+                return odds < floor ? floor : odds;
+            }
+            catch
+            {
+                return floor;
+            }
+        }
+
+        /// <summary>
+        /// How many metres of road there are across the car, kerb to kerb.
+        ///
+        /// SAMPLED SIDEWAYS WITH IS_POINT_ON_ROAD, in steps out from the car in both
+        /// directions until it stops answering yes. That is a real measurement of the
+        /// carriageway and it needs nothing the build cannot compile -- the lane counts the
+        /// game keeps come back through out-parameters, which would mean turning on /unsafe.
+        ///
+        /// Stepping a metre at a time and stopping at the first miss, rather than sampling the
+        /// whole span and counting hits: a road is continuous, so the first no IS the kerb,
+        /// and a junction mouth twenty metres away should not be read as this road being wide.
+        /// </summary>
+        private static float Across(Vehicle car)
+        {
+            var total = 0f;
+
+            try
+            {
+                var p = car.Position;
+                var side = car.RightVector;
+
+                foreach (var way in new[] { 1f, -1f })
+                {
+                    for (var m = 1f; m <= 14f; m += 1f)
+                    {
+                        var at = p + side * (m * way);
+
+                        if (!Function.Call<bool>(Hash.IS_POINT_ON_ROAD,
+                                                 at.X, at.Y, at.Z, car.Handle))
+                        {
+                            break;
+                        }
+
+                        total += 1f;
+                    }
+                }
+            }
+            catch { /* whatever was measured stands */ }
+
+            return total;
         }
 
         /// <summary>
