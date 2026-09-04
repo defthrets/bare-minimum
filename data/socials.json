@@ -374,6 +374,14 @@
       "gender": "none",
       "verified": false,
       "kind": "market"
+    },
+    {
+      "handle": "onthebone_ls",
+      "name": "On The Bone",
+      "vendor": "on_the_bone",
+      "gender": "none",
+      "verified": false,
+      "kind": "market"
     }
   ],
   "posts": {
