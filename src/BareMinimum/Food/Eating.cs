@@ -69,12 +69,8 @@ namespace BareMinimum.Food
         /// <summary>What he says about it. Never null; silent when switched off.</summary>
         private readonly Speech _speech;
 
-        /// <summary>For the food spin. Read every frame the prop is in his hand.</summary>
+        /// <summary>For the food spin.</summary>
         private readonly Core.Settings _cfg;
-
-        /// <summary>The bone the prop is on and the turn it was attached with, for Reattach.</summary>
-        private int _heldBone;
-        private Vector3 _heldSpin;
 
         public Eating(Core.Settings cfg, Catalogue menu, Needs.Needs needs, Speech speech)
         {
@@ -220,24 +216,6 @@ namespace BareMinimum.Food
                     {
                         _held = null;
                         Give(him, _item, _drinking);
-                    }
-                }
-
-                // TURN IT WHILE HE HOLDS IT. The spin is a dial in the settings menu, and a
-                // dial you can only judge four seconds after every change -- by buying another
-                // hot dog -- is not a dial. So while the prop is in his hand the angles are
-                // compared every frame, and the moment one moves the prop is attached again
-                // with the new turn. ATTACH_ENTITY_TO_ENTITY on something already attached
-                // moves it rather than refusing, which is what makes this one call.
-                if (_held != null && _held.Exists())
-                {
-                    var want = SpinFor(_item, _drinking);
-
-                    if (want != _heldSpin)
-                    {
-                        var him = Game.Player.Character;
-
-                        if (him != null && him.Exists()) Reattach(him, want);
                     }
                 }
 
@@ -432,9 +410,6 @@ namespace BareMinimum.Food
                 Function.Call(Hash.ATTACH_ENTITY_TO_ENTITY, _held.Handle, me.Handle, bone,
                               0f, 0f, 0f, spin.X, spin.Y, spin.Z, false, false, false, false, 2, true);
 
-                _heldBone = bone;
-                _heldSpin = spin;
-
                 // The model is released as soon as the object exists; holding the request open
                 // pins it in memory for the rest of the session for no reason.
                 model.MarkAsNoLongerNeeded();
@@ -453,24 +428,6 @@ namespace BareMinimum.Food
             if (item == null || item.Smoke || item.Drink || drinking) return Vector3.Zero;
 
             return new Vector3(_cfg.FoodSpinX, _cfg.FoodSpinY, _cfg.FoodSpinZ);
-        }
-
-        /// <summary>Puts the held prop back on the same bone with a different turn.</summary>
-        private void Reattach(Ped me, Vector3 spin)
-        {
-            try
-            {
-                Function.Call(Hash.ATTACH_ENTITY_TO_ENTITY, _held.Handle, me.Handle, _heldBone,
-                              0f, 0f, 0f, spin.X, spin.Y, spin.Z, false, false, false, false, 2, true);
-
-                _heldSpin = spin;
-            }
-            catch (Exception ex)
-            {
-                // Remembered as applied so this does not throw sixty times a second.
-                _heldSpin = spin;
-                Log.Once("prop-spin", "Could not turn the food in his hand: " + ex.Message);
-            }
         }
 
         // ======================================================================

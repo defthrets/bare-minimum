@@ -548,24 +548,6 @@ namespace BareMinimum.UI
                   2f, 1f, 200f, "0",
                   "How many items you can carry at once, all kinds counted together.");
 
-            // THE FOOD SPIN. Three axes because nobody knows in advance which one a given
-            // model needs; the note tells the player to turn them while he is eating, which
-            // is when the prop re-attaches live and the answer is on screen.
-            Float("Food spin X", "Eating", "FoodSpinX",
-                  () => _cfg.FoodSpinX, v => _cfg.FoodSpinX = v,
-                  10f, -180f, 180f, "0",
-                  "Turns food in his hand, in degrees. Change it WHILE he is eating to see it move.");
-
-            Float("Food spin Y", "Eating", "FoodSpinY",
-                  () => _cfg.FoodSpinY, v => _cfg.FoodSpinY = v,
-                  10f, -180f, 180f, "0",
-                  "Second axis. A drive-through meal lasts a minute, long enough to find the angle.");
-
-            Float("Food spin Z", "Eating", "FoodSpinZ",
-                  () => _cfg.FoodSpinZ, v => _cfg.FoodSpinZ = v,
-                  10f, -180f, 180f, "0",
-                  "Third axis. 90 here is what turns a sideways hot dog to point into his mouth.");
-
             Float("Prices", "Money", "PriceMultiplier",
                   () => _cfg.PriceMultiplier, v => _cfg.PriceMultiplier = v,
                   0.1f, 0f, 10f, "0.0",

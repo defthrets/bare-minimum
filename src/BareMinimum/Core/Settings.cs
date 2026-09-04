@@ -592,13 +592,12 @@ namespace BareMinimum.Core
         /// <summary>
         /// How food is turned in his hand, in degrees about the prop's own three axes.
         ///
-        /// WHY THIS IS A SETTING AND NOT A NUMBER IN THE CODE. A prop attached to the hand bone
-        /// with no rotation takes the model's own idea of which way is forward, and the food
-        /// models were not built for a hand: the hot dog lay ACROSS the mouth like a cob of
-        /// corn, every bite taken from its side. The right turn depends on how each model was
-        /// authored, which is not knowable from here, and on the bone's frame, which is barely
-        /// documented -- so it is a dial with three axes, changed while he is eating (the prop
-        /// re-attaches the moment a value moves), rather than a guess compiled in.
+        /// A prop attached to the hand bone with no rotation takes the model's own idea of
+        /// which way is forward, and the food models were not built for a hand: the hot dog
+        /// lay ACROSS the mouth like a cob of corn, every bite taken from its side. A quarter
+        /// turn about Z is what points it into the mouth -- found in play, with these three
+        /// as live dials in the menu, and confirmed. The dials came out again once it was
+        /// settled; the numbers stay in the ini for anybody with a model that wants otherwise.
         ///
         /// Food only. Drinks and the cigarette sit right as they are; turning those with the
         /// same numbers would break two things to fix one.
