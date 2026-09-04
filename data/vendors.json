@@ -56,7 +56,12 @@
       "id": "hotdog_vespucci",
       "name": "Hot Dog Stand",
       "label": "hot dog",
-      "item": "hotdog",
+      "item": [
+        "hotdog",
+        "sprunk",
+        "ecola",
+        "water"
+      ],
       "x": -3.925,
       "y": -1539.631,
       "z": 29.479,
@@ -98,7 +103,8 @@
         "seconds": 45,
         "back": 4.0,
         "scenario": "WORLD_HUMAN_SMOKING"
-      }
+      },
+      "ui": true
     },
     {
       "_note": "THE TACO FARMER, walk-up hatch on the north side. The hatch and the menu",
@@ -109,7 +115,12 @@
       "id": "tacos_vespucci",
       "name": "The Taco Farmer",
       "label": "taco",
-      "item": "farmer_taco",
+      "item": [
+        "farmer_taco",
+        "farmer_plate",
+        "ecola",
+        "sprunk"
+      ],
       "x": 11.368,
       "y": -1605.872,
       "z": 29.394,
@@ -118,7 +129,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "THE TACO FARMER DRIVE-THROUGH, the hatch under the painted menu board on the",
@@ -128,7 +140,12 @@
       "id": "taco_farmer_drivethru",
       "name": "The Taco Farmer",
       "label": "carne asada plate",
-      "item": "farmer_plate",
+      "item": [
+        "farmer_plate",
+        "farmer_taco",
+        "ecola",
+        "sprunk"
+      ],
       "x": 15.516,
       "y": -1595.442,
       "z": 29.283,
@@ -136,7 +153,8 @@
       "fromVehicle": true,
       "spawnRange": 90.0,
       "reach": 5.5,
-      "blip": false
+      "blip": false,
+      "ui": true
     },
     {
       "_note": "La Vaca Loca Burger Shack DRIVE-THROUGH. Order without getting out.",
@@ -144,7 +162,13 @@
       "id": "lavacaloca_drivethru",
       "name": "La Vaca Loca",
       "label": "pastrami combo",
-      "item": "pastrami_combo",
+      "item": [
+        "pastrami_combo",
+        "burger",
+        "coop_shake",
+        "ecola",
+        "sprunk"
+      ],
       "x": 143.477,
       "y": -1540.561,
       "z": 28.628,
@@ -154,11 +178,14 @@
       "reach": 5.5,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
-      "_note": "Gabrielle's Market. Three possible items, ONE of them on offer per visit --",
-      "_note2": "a stall that has what it has today, rather than a menu.",
+      "_note": "Gabrielle's Market. A small shelf -- a bagel, fruit, a deli sandwich and",
+      "_note2": "cigarettes -- shown whole now rather than one item drawn per visit. It was a",
+      "_note3": "stall that had what it had today; with a pocket to carry things in, that",
+      "_note4": "reads as a shop refusing to sell you the rest of its stock.",
       "id": "gabrielles_market",
       "name": "Gabrielle's Market",
       "item": [
@@ -177,14 +204,19 @@
       "blip": true,
       "blipSprite": 52,
       "blipColour": 5,
-      "ui": false
+      "ui": true
     },
     {
       "_note": "Aguila Burrito. The shopfront is part of the map; nothing is spawned.",
       "id": "aguila_burrito",
       "name": "Aguila Burrito",
       "label": "burrito",
-      "item": "burrito",
+      "item": [
+        "burrito",
+        "ecola",
+        "sprunk",
+        "water"
+      ],
       "x": 99.166,
       "y": -1419.544,
       "z": 29.421,
@@ -193,14 +225,20 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Ring of Fire Chilli House. Shopfront is part of the map; nothing is spawned.",
       "id": "ring_of_fire",
       "name": "Ring of Fire",
       "label": "bowl of chilli",
-      "item": "chilli",
+      "item": [
+        "chilli",
+        "crisps",
+        "ecola",
+        "sprunk"
+      ],
       "x": 166.049,
       "y": -1451.697,
       "z": 29.242,
@@ -209,7 +247,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Lucky Plucker, the walk-up door. Blipped -- the drive-through beside it is",
@@ -217,7 +256,11 @@
       "id": "lucky_plucker",
       "name": "Lucky Plucker",
       "label": "Plucker box",
-      "item": "plucker_box",
+      "item": [
+        "plucker_box",
+        "ecola",
+        "sprunk"
+      ],
       "x": 132.134,
       "y": -1462.064,
       "z": 29.357,
@@ -226,7 +269,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Lucky Plucker, the drive-through lane. Same food, ordered from the car.",
@@ -234,7 +278,11 @@
       "id": "lucky_plucker_drivethru",
       "name": "Lucky Plucker",
       "label": "Plucker box",
-      "item": "plucker_box",
+      "item": [
+        "plucker_box",
+        "ecola",
+        "sprunk"
+      ],
       "x": 144.209,
       "y": -1461.475,
       "z": 28.643,
@@ -242,12 +290,13 @@
       "fromVehicle": true,
       "spawnRange": 90.0,
       "reach": 5.0,
-      "blip": false
+      "blip": false,
+      "ui": true
     },
     {
-      "_note": "Cosas Baratas. A dollar store: whatever is on the shelf today, one thing",
-      "_note2": "at a time. Reuses the junk the 24/7 counters already stock, plus two off",
-      "_note3": "its own wall -- junk food IS sold in both places, so it is not duplicated.",
+      "_note": "Cosas Baratas. A dollar store: the whole shelf, in a menu. Reuses the junk",
+      "_note2": "the 24/7 counters already stock, plus two off its own wall -- junk food IS",
+      "_note3": "sold in both places, so it is not duplicated.",
       "id": "cosas_baratas",
       "name": "Cosas Baratas",
       "item": [
@@ -270,12 +319,12 @@
       "blip": true,
       "blipSprite": 52,
       "blipColour": 5,
-      "ui": false
+      "ui": true
     },
     {
-      "_note": "Save-a-Cent. The other dollar store. Same idea as Cosas Baratas: whatever",
-      "_note2": "is on the shelf today, one thing at a time. Cheap drinks in the mix here,",
-      "_note3": "since 99c stores sell them and it gives the two shops different shelves.",
+      "_note": "Save-a-Cent. The other dollar store. Same idea as Cosas Baratas, whole shelf",
+      "_note2": "in a menu, but cheap drinks in the mix here, since 99c stores sell them and",
+      "_note3": "it gives the two shops different shelves.",
       "id": "save_a_cent",
       "name": "Save-a-Cent",
       "item": [
@@ -299,7 +348,7 @@
       "blip": true,
       "blipSprite": 52,
       "blipColour": 5,
-      "ui": false
+      "ui": true
     },
     {
       "_note": "Del-Hi Liquor. The sign says LIQUOR, DELICATESSEN and SUNDRIES, so the",
@@ -326,7 +375,7 @@
       "blip": true,
       "blipSprite": 52,
       "blipColour": 5,
-      "ui": false
+      "ui": true
     },
     {
       "_note": "The 24-hour Mexican and American diner. Breakfast 5-11, plate otherwise.",
@@ -342,6 +391,12 @@
         },
         {
           "id": "diner_plate"
+        },
+        {
+          "id": "rb_coffee"
+        },
+        {
+          "id": "ecola"
         }
       ],
       "x": 174.303,
@@ -352,7 +407,8 @@
       "reach": 2.4,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Del Perro corner store: liquor and junk, whatever is on the shelf.",
@@ -379,7 +435,7 @@
       "blip": true,
       "blipSprite": 52,
       "blipColour": 5,
-      "ui": false
+      "ui": true
     },
     {
       "_note": "Rancho corner store: same idea, different shelf.",
@@ -405,7 +461,7 @@
       "blip": true,
       "blipSprite": 52,
       "blipColour": 5,
-      "ui": false
+      "ui": true
     },
     {
       "_note": "Liquor store 1, now live. Spirits and beer, plus something to eat.",
@@ -429,7 +485,7 @@
       "blip": true,
       "blipSprite": 52,
       "blipColour": 5,
-      "ui": false
+      "ui": true
     },
     {
       "_note": "Liquor store 2. Mount Whiskey is on its own door, so it always has it.",
@@ -453,7 +509,7 @@
       "blip": true,
       "blipSprite": 52,
       "blipColour": 5,
-      "ui": false
+      "ui": true
     },
     {
       "_note": "Liquor store 3. Mount Whiskey on the door again.",
@@ -478,7 +534,7 @@
       "blip": true,
       "blipSprite": 52,
       "blipColour": 5,
-      "ui": false
+      "ui": true
     },
     {
       "_note": "Long Pig Mini Market and Fast Foods. Its own awning lists ATM, TACOS,",
@@ -506,7 +562,7 @@
       "blip": true,
       "blipSprite": 52,
       "blipColour": 5,
-      "ui": false
+      "ui": true
     },
     {
       "_note": "Liquor store 4, Rancho. BEER & WINE over the door, Mount Whiskey on it.",
@@ -531,14 +587,18 @@
       "blip": true,
       "blipSprite": 52,
       "blipColour": 5,
-      "ui": false
+      "ui": true
     },
     {
       "_note": "Fowl Mouthed Fried Chicken. Shopfront is part of the map; nothing spawned.",
       "id": "fowl_mouthed",
       "name": "Fowl Mouthed",
       "label": "bucket",
-      "item": "fowl_bucket",
+      "item": [
+        "fowl_bucket",
+        "ecola",
+        "sprunk"
+      ],
       "x": 224.73,
       "y": -1511.094,
       "z": 29.292,
@@ -547,7 +607,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Second hot dog stand, Davis. Same rig as the Vespucci one: it SPAWNS a",
@@ -558,7 +619,12 @@
       "id": "hotdog_davis",
       "name": "Hot Dog Stand",
       "label": "hot dog",
-      "item": "hotdog",
+      "item": [
+        "hotdog",
+        "sprunk",
+        "ecola",
+        "water"
+      ],
       "x": 282.563,
       "y": -1515.14,
       "z": 29.292,
@@ -596,7 +662,8 @@
         "seconds": 40,
         "back": 4.0,
         "scenario": "WORLD_HUMAN_SMOKING"
-      }
+      },
+      "ui": true
     },
     {
       "_note": "Hearty Taco. Coordinate is the DOOR from the first screenshot, not the",
@@ -604,7 +671,12 @@
       "id": "hearty_taco",
       "name": "Hearty Taco",
       "label": "taco plate",
-      "item": "hearty_plate",
+      "item": [
+        "hearty_plate",
+        "ecola",
+        "sprunk",
+        "water"
+      ],
       "x": 438.238,
       "y": -1465.944,
       "z": 29.292,
@@ -613,7 +685,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Attack-A-Taco, Kill That Hunger. Coordinate is the DOOR from the first",
@@ -621,7 +694,11 @@
       "id": "attack_a_taco",
       "name": "Attack-A-Taco",
       "label": "plate of heavy shells",
-      "item": "heavy_shells",
+      "item": [
+        "heavy_shells",
+        "ecola",
+        "sprunk"
+      ],
       "x": 445.963,
       "y": -1241.779,
       "z": 30.28,
@@ -630,7 +707,8 @@
       "reach": 2.4,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Xero 24, the garage shop. Open all hours, and the widest shelf on the map:",
@@ -671,7 +749,11 @@
       "id": "bishops_chicken",
       "name": "Bishop's Chicken",
       "label": "Old Yeller",
-      "item": "old_yeller",
+      "item": [
+        "old_yeller",
+        "ecola",
+        "sprunk"
+      ],
       "x": 169.351,
       "y": -1633.514,
       "z": 29.292,
@@ -680,7 +762,8 @@
       "reach": 2.4,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "24-hour store at the gas station. Garage shelf: hot food, snacks, the fridge.",
@@ -714,10 +797,10 @@
       "blipColour": 5
     },
     {
-      "_note": "The Coop -- Cluckin' Bell's walk-up burger and ice cream kiosk. The",
-      "_note2": "board lists burgers, milkshakes, donuts, Sludgie, ice cream, pizza,",
-      "_note3": "hot dogs, Sprunk and eCola. A hatch, not a shop, so it is one prompt",
-      "_note4": "and whatever they are serving when you walk up.",
+      "_note": "The Coop -- Cluckin' Bell's walk-up burger and ice cream kiosk. The board",
+      "_note2": "lists burgers, milkshakes, donuts, Sludgie, ice cream, pizza, hot dogs,",
+      "_note3": "Sprunk and eCola, and the menu is that board: every line on it, not whatever",
+      "_note4": "they happened to be serving when you walked up.",
       "id": "the_coop",
       "name": "The Coop",
       "item": [
@@ -739,7 +822,8 @@
       "reach": 2.4,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Wok It Off, the China buffet on Innocence. The window says ALL YOU CAN",
@@ -771,7 +855,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "The corner store that is going under. Every window is papered with BIG",
@@ -802,7 +887,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Bean's Market, 10112. The awning says GROCERIES and SUPPLIES and there",
@@ -827,7 +913,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Bean Machine on Alta. The coffee shop, and the only place on this list",
@@ -862,7 +949,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Downtown liquor.deli. Every window carries REPOSSESSION SALE and GOING",
@@ -891,7 +979,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Chihuahua Hot Dogs. A shopfront, not a cart, so it gets its own dogs",
@@ -914,7 +1003,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Bean Machine, second branch. SAME ITEM LIST AS ALTA on purpose --",
@@ -949,7 +1039,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Pipe Down. The sign says Tobacconist, Pipe, Confectioners and CIGARS,",
@@ -974,7 +1065,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Downtown liquor.deli, the eastern branch. SAME STOCK as the other one --",
@@ -1003,7 +1095,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Ground & Pound. A sandwich bar with hot drinks and nothing else --",
@@ -1026,7 +1119,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Rusty Brown's Ring Donuts. Rings singly or by the dozen, and the",
@@ -1049,7 +1143,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "BITE! it's big. A wrap shop, and the only one -- the taco places and",
@@ -1071,7 +1166,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Pizza This... the pizzeria. Its window promises HAVE IT YOUR WAY,",
@@ -1093,7 +1189,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Bean Machine, third branch -- the one next door to Pizza This. Same",
@@ -1127,7 +1224,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Noodle Exchange, the corner door. THE SHOP HAS TWO -- see",
@@ -1150,7 +1248,8 @@
       "blip": true,
       "blipSprite": 52,
       "blipColour": 5,
-      "_note4": "the pavement between them and half of Cool Beans next door."
+      "_note4": "the pavement between them and half of Cool Beans next door.",
+      "ui": true
     },
     {
       "_note": "Cool Beans, next door to Noodle Exchange. Pavement tables, pink",
@@ -1171,7 +1270,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Noodle Exchange, the side door on the same unit. Same stock, same",
@@ -1190,7 +1290,8 @@
       "heading": 254.13,
       "spawnRange": 90.0,
       "reach": 2.2,
-      "blip": false
+      "blip": false,
+      "ui": true
     },
     {
       "_note": "Limey's Juice & Smoothies. The wheatgrass shot is the strongest single",
@@ -1212,7 +1313,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Food Market. The supermarket -- the bag of groceries is the single",
@@ -1234,7 +1336,8 @@
       "reach": 2.4,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Mama's Grocery. A family grocer with a hot counter, which is what",
@@ -1255,7 +1358,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "The market kiosk on the corner -- juice, sludgies, ice cream and a",
@@ -1322,7 +1426,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     },
     {
       "_note": "Crucial Fix Coffee House -- Jamaican Roast since 1983, corner unit",
@@ -1344,7 +1449,8 @@
       "reach": 2.2,
       "blip": true,
       "blipSprite": 52,
-      "blipColour": 5
+      "blipColour": 5,
+      "ui": true
     }
   ]
 }

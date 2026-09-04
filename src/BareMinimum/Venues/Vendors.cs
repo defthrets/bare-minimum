@@ -1434,7 +1434,16 @@ namespace BareMinimum.Venues
                 if (item != null && !_eating.Busy)
                 {
                     Buy(_shopping, item);
-                    Close();
+
+                    // STAYS OPEN WHEN THE THING WENT INTO YOUR POCKET. A shelf that shuts after
+                    // one item is the old one-key stall wearing a menu, and it makes buying
+                    // three things three visits. It only closes when a meal actually STARTED
+                    // -- at the wheel, or with the pocket switched off -- because then the
+                    // animation is the point and a menu over it is in the way. Same rule the
+                    // till counter follows.
+                    if (_eating.Busy) { Close(); return; }
+
+                    Refill();
                     return;
                 }
             }
