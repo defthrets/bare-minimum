@@ -69,8 +69,16 @@ namespace BareMinimum.Food
         /// <summary>What he says about it. Never null; silent when switched off.</summary>
         private readonly Speech _speech;
 
-        public Eating(Catalogue menu, Needs.Needs needs, Speech speech)
+        /// <summary>For the food spin. Read every frame the prop is in his hand.</summary>
+        private readonly Core.Settings _cfg;
+
+        /// <summary>The bone the prop is on and the turn it was attached with, for Reattach.</summary>
+        private int _heldBone;
+        private Vector3 _heldSpin;
+
+        public Eating(Core.Settings cfg, Catalogue menu, Needs.Needs needs, Speech speech)
         {
+            _cfg = cfg;
             _menu = menu;
             _needs = needs;
             _speech = speech;
@@ -212,6 +220,24 @@ namespace BareMinimum.Food
                     {
                         _held = null;
                         Give(him, _item, _drinking);
+                    }
+                }
+
+                // TURN IT WHILE HE HOLDS IT. The spin is a dial in the settings menu, and a
+                // dial you can only judge four seconds after every change -- by buying another
+                // hot dog -- is not a dial. So while the prop is in his hand the angles are
+                // compared every frame, and the moment one moves the prop is attached again
+                // with the new turn. ATTACH_ENTITY_TO_ENTITY on something already attached
+                // moves it rather than refusing, which is what makes this one call.
+                if (_held != null && _held.Exists())
+                {
+                    var want = SpinFor(_item, _drinking);
+
+                    if (want != _heldSpin)
+                    {
+                        var him = Game.Player.Character;
+
+                        if (him != null && him.Exists()) Reattach(him, want);
                     }
                 }
 
@@ -398,8 +424,16 @@ namespace BareMinimum.Food
                 // no soft pinning, no collision, not treated as a ped, vertex 2, fixed
                 // rotation. The version here used to pass a different combination copied from
                 // a general-purpose example, which is not what a held object wants.
+                //
+                // The three angles are the food spin -- see Settings.FoodSpinX. Zero for a
+                // drink or a smoke, which sit right without it.
+                var spin = SpinFor(item, drinking);
+
                 Function.Call(Hash.ATTACH_ENTITY_TO_ENTITY, _held.Handle, me.Handle, bone,
-                              0f, 0f, 0f, 0f, 0f, 0f, false, false, false, false, 2, true);
+                              0f, 0f, 0f, spin.X, spin.Y, spin.Z, false, false, false, false, 2, true);
+
+                _heldBone = bone;
+                _heldSpin = spin;
 
                 // The model is released as soon as the object exists; holding the request open
                 // pins it in memory for the rest of the session for no reason.
@@ -410,6 +444,32 @@ namespace BareMinimum.Food
                 Log.Once("prop-" + name, "Could not put " + name + " in hand: " +
                                          ex.Message + " - eaten empty-handed.");
                 _held = null;
+            }
+        }
+
+        /// <summary>The turn this item gets in the hand. Food is turned; drink and smoke are not.</summary>
+        private Vector3 SpinFor(Item item, bool drinking)
+        {
+            if (item == null || item.Smoke || item.Drink || drinking) return Vector3.Zero;
+
+            return new Vector3(_cfg.FoodSpinX, _cfg.FoodSpinY, _cfg.FoodSpinZ);
+        }
+
+        /// <summary>Puts the held prop back on the same bone with a different turn.</summary>
+        private void Reattach(Ped me, Vector3 spin)
+        {
+            try
+            {
+                Function.Call(Hash.ATTACH_ENTITY_TO_ENTITY, _held.Handle, me.Handle, _heldBone,
+                              0f, 0f, 0f, spin.X, spin.Y, spin.Z, false, false, false, false, 2, true);
+
+                _heldSpin = spin;
+            }
+            catch (Exception ex)
+            {
+                // Remembered as applied so this does not throw sixty times a second.
+                _heldSpin = spin;
+                Log.Once("prop-spin", "Could not turn the food in his hand: " + ex.Message);
             }
         }
 

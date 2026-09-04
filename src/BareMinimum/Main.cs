@@ -73,7 +73,7 @@ namespace BareMinimum
             _speech = new Speech(_cfg);
             _speech.Load(_catalogue.Lines);
 
-            _eating = new Eating(_catalogue, _needs, _speech);
+            _eating = new Eating(_cfg, _catalogue, _needs, _speech);
 
             // AFTER the catalogue, because the pantry drops anything it is carrying that
             // foods.json no longer defines, and it cannot know that until the list is read.
