@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using GTA;
 using GTA.Chrono;
 using GTA.Math;
@@ -117,6 +117,16 @@ namespace BareMinimum.Needs
         }
 
         public bool Busy => _stage != Stage.Off;
+
+        /// <summary>
+        /// Whether the scene is built and safe to look at.
+        ///
+        /// FALSE WHILE STAGING, WHICH IS THE POINT. Staging is asking the streamer for two ped
+        /// models and a car and coming back next frame until they arrive -- and until they do
+        /// there is nothing in the road. Anybody fading a screen in has to wait for this or
+        /// the player watches the scene assemble itself.
+        /// </summary>
+        public bool Staged => _stage == Stage.Looking || _stage == Stage.Talking;
 
         // ======================================================================
 
@@ -375,6 +385,42 @@ namespace BareMinimum.Needs
         }
 
         /// <summary>Builds it, once the models are actually here. False until they are.</summary>
+        /// <summary>
+        /// Puts one thing on the ground under it, if the ground is known yet.
+        ///
+        /// GET_GROUND_Z_FOR_3D_COORD answers false where the map has not streamed in, which is
+        /// possible on the frame after a long sleep -- so a failure leaves the entity where it
+        /// was rather than dropping it to zero, which would put it under the world.
+        /// </summary>
+        private static void Settle(Entity what)
+        {
+            if (what == null || !what.Exists()) return;
+
+            try
+            {
+                var at = what.Position;
+                var z = new OutputArgument();
+
+                if (!Function.Call<bool>(Hash.GET_GROUND_Z_FOR_3D_COORD,
+                                         at.X, at.Y, at.Z + 1.5f, z, false))
+                {
+                    return;
+                }
+
+                var ground = z.GetResult<float>();
+
+                if (ground <= 0f) return;
+
+                what.Position = new Vector3(at.X, at.Y, ground + 1.0f);
+
+                Function.Call(Hash.SET_ENTITY_COLLISION, what.Handle, true, true);
+            }
+            catch
+            {
+                // Where it is will do.
+            }
+        }
+
         private bool Stage_()
         {
             var car = _yours;
@@ -395,6 +441,15 @@ namespace BareMinimum.Needs
                 // or they spawn inside the panel and get shoved out by the physics.
                 _left = MakeCop(car, -1.6f);
                 _right = MakeCop(car, 1.6f);
+
+                // ON THE GROUND, NOT ABOVE IT. A ped created at a coordinate worked out from
+                // the car's own position starts at the CAR's height, which on any kerb, ramp
+                // or crowned road is above the tarmac -- and what you see is two officers
+                // dropping the last few inches as the physics catches them. Reported as
+                // exactly that. The car gets the same treatment for the same reason.
+                Settle(_theirCar);
+                Settle(_left);
+                Settle(_right);
 
                 if (_left == null && _right == null)
                 {

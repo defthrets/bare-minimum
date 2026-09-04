@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using GTA;
 using GTA.Chrono;
 using GTA.Native;
@@ -34,6 +34,15 @@ namespace BareMinimum.Needs
             Idle,
             FadingOut,
             Resting,
+
+            /// <summary>
+            /// Still black, building whoever is waiting outside the car.
+            ///
+            /// The one phase that exists purely so the player never sees the work. See
+            /// Phase.Staging in Advance.
+            /// </summary>
+            Staging,
+
             FadingIn
         }
 
@@ -49,6 +58,16 @@ namespace BareMinimum.Needs
         /// game time is just a longer wait for the same thing.
         /// </summary>
         private const int RestMs = 2200;
+
+        /// <summary>
+        /// The longest the screen stays black waiting for the wake-up scene to build.
+        ///
+        /// A ceiling rather than a wait, because a model that never streams would otherwise
+        /// hold somebody on a black screen for ever. Two seconds is more than the streamer
+        /// needs for two peds and a car it has almost certainly got already, and waking up to
+        /// an empty road is a far smaller failure than not waking up at all.
+        /// </summary>
+        private const int StageMs = 2000;
 
         private readonly Core.Settings _cfg;
         private readonly Needs _needs;
@@ -347,6 +366,32 @@ namespace BareMinimum.Needs
                 case Phase.Resting:
                     if (now < _phaseUntil) return;
 
+                    // ---- WHO IS AT THE WINDOW IS BUILT BEHIND THE BLACK ----
+                    //
+                    // This used to happen in Finish, which runs after the fade-in has already
+                    // finished -- so the screen came up on an empty road, and a second later
+                    // two officers and a squad car appeared in it and dropped onto the tarmac.
+                    // Reported as exactly that, and it is the right complaint: a scene you
+                    // watch being assembled is not a scene.
+                    //
+                    // Asked for here instead, then the fade waits for it. Knock's Staging is a
+                    // streamer request that comes back next frame, which is precisely the kind
+                    // of work a black screen is FOR.
+                    Waking();
+
+                    _phase = Phase.Staging;
+                    _phaseUntil = now + StageMs;
+                    return;
+
+                case Phase.Staging:
+                    // Ready, or long enough. THE CEILING IS NOT OPTIONAL: a model that never
+                    // streams would otherwise hold the player on a black screen for ever, and
+                    // waking up with nobody there is a far smaller failure than that.
+                    if (_knock != null && _knock.Busy && !_knock.Staged && now < _phaseUntil)
+                    {
+                        return;
+                    }
+
                     try { Function.Call(Hash.DO_SCREEN_FADE_IN, FadeMs); }
                     catch { /* the finish below still runs */ }
 
@@ -409,10 +454,6 @@ namespace BareMinimum.Needs
 
         private void Finish()
         {
-            // READ BEFORE IT IS CLEARED. Two lines down _bunk is None again, and whether this
-            // was a car matters to everything after it.
-            var inACar = _bunk == Bunk.Car;
-
             HandBackControl();
 
             _phase = Phase.Idle;
@@ -429,12 +470,18 @@ namespace BareMinimum.Needs
                 // Not worth failing a wake-up over.
             }
 
-            // ---- and who is at the window ----
-            //
-            // AFTER the control is handed back and the ticker has posted, so a failure to
-            // stage the scene leaves an ordinary wake-up rather than a frozen one. Knock
-            // decides for itself whether the spot deserves it -- see Exposed.
-            if (!inACar) return;
+            // Who is at the window was built before the fade -- see Phase.Staging.
+        }
+
+        /// <summary>
+        /// Stages whoever is waiting outside, while the screen is still black.
+        ///
+        /// Knock decides for itself whether the spot deserves it -- see Exposed. A failure
+        /// here is an ordinary wake-up, which is why none of it throws upward.
+        /// </summary>
+        private void Waking()
+        {
+            if (_bunk != Bunk.Car) return;
 
             // LOUD, NOT SILENT. This read `if (!inACar || _knock == null) return;` and the
             // constructor had gained the parameter without ever assigning the field -- so
