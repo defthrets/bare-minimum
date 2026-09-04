@@ -1600,9 +1600,21 @@ namespace BareMinimum.Venues
             }
             catch { /* on foot, as far as anyone can tell */ }
 
+            // ---- and a hot dog from a cart is eaten at the cart ----
+            //
+            // A ONE-KEY STALL IS NOT A SHOP. There is no shelf to choose from and nothing to
+            // carry away: you pressed one key for one thing, the man handed it to you, and you
+            // are standing in front of him with it in your hand. Putting that in a pocket "for
+            // later" is a supermarket habit applied to a street cart, and it made the cart the
+            // only place in the game where buying a hot dog did not involve eating one.
+            //
+            // So the pocket is for SHELVES ON FOOT -- somewhere you picked one thing out of many
+            // and have somewhere to be. A cart, like a window, hands it to you and you eat it.
+            var onTheSpot = atTheWheel || !v.UseMenu;
+
             // Into the pocket, unless the player has asked for the old instant meal back --
-            // or unless he is sitting in a car with it.
-            if (_cfg.BuyToPantry && !atTheWheel)
+            // or unless it is being eaten where it was bought.
+            if (_cfg.BuyToPantry && !onTheSpot)
             {
                 if (_pantry.Add(item.Id))
                 {
