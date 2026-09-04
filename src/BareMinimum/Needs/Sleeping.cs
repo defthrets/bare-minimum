@@ -79,6 +79,7 @@ namespace BareMinimum.Needs
             _cfg = cfg;
             _needs = needs;
             _beds = beds;
+            _knock = knock;
         }
 
         /// <summary>True while the sequence owns the screen. The HUD and effects stand down.</summary>
@@ -433,7 +434,18 @@ namespace BareMinimum.Needs
             // AFTER the control is handed back and the ticker has posted, so a failure to
             // stage the scene leaves an ordinary wake-up rather than a frozen one. Knock
             // decides for itself whether the spot deserves it -- see Exposed.
-            if (!inACar || _knock == null) return;
+            if (!inACar) return;
+
+            // LOUD, NOT SILENT. This read `if (!inACar || _knock == null) return;` and the
+            // constructor had gained the parameter without ever assigning the field -- so
+            // every car nap took the null branch and said nothing, and the feature looked
+            // like it was choosing not to fire. A guard against something that should never
+            // be null has to say so when it is.
+            if (_knock == null)
+            {
+                Log.Once("sleep-knock-null", "No wake-up scene is wired in. That is a bug.");
+                return;
+            }
 
             try
             {
