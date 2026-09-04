@@ -491,10 +491,10 @@ namespace BareMinimum.Core
         /// up cannot do that: every relationship inside the gauge is preserved exactly and only
         /// the rate changes.
         ///
-        /// Defaults to 30. Not a typo, and not arrived at by taste either -- the periods
+        /// Defaults to 42. Not a typo, and not arrived at by taste either -- the periods
         /// underneath are 144 and 208 SECONDS, which were tuned across about six rounds of
-        /// somebody saying it was too fast and are now agreed to be far too slow. Thirty turns
-        /// those into a bow of 4.8s and a drift of 6.9s, which is a surface visibly moving.
+        /// somebody saying it was too fast and are now agreed to be far too slow. Forty-two turns
+        /// those into a bow of 3.4s and a drift of 5.0s, which is a surface visibly moving.
         ///
         /// The number looks absurd because it is compensating for periods that were never
         /// re-tuned after the verdict flipped. Turning the clock up is still the right lever --
@@ -503,7 +503,7 @@ namespace BareMinimum.Core
         /// multiplier is that the constants under it belong somewhere else, and rewriting them
         /// would break the one thing that has been signed off.
         /// </summary>
-        public float HudBarPace = 30f;
+        public float HudBarPace = 42f;
 
         /// <summary>
         /// How quickly the specks inside the bars move, 0 to 1. 0 stops them dead.

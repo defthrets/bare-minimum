@@ -1107,10 +1107,13 @@ namespace BareMinimum.UI
         /// This fixes the relationship instead, so BarPace still means "faster" and the
         /// contents stay a fifth of it whatever it is set to.
         ///
-        /// Five, so the shipped BarPace of 30 leaves the waterline at 30x and puts the
-        /// contents at 6x.
+        /// Seven, so the shipped BarPace of 42 leaves the waterline at 42x and puts the
+        /// contents at 6x -- which is where they were wanted, and where they were before
+        /// the waterline was asked to move. RAISED IN STEP WITH BarPace on purpose: the
+        /// one dial drives both, so speeding the level up without touching this would have
+        /// dragged the contents along with it.
         /// </summary>
-        private const float InsideSlow = 5f;
+        private const float InsideSlow = 7f;
 
         /// <summary>
         /// How much slower a star's TWINKLE runs than the rest of the contents.
