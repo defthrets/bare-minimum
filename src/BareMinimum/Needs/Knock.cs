@@ -33,6 +33,19 @@ namespace BareMinimum.Needs
         {
             Off,
 
+            /// <summary>
+            /// Models asked for, waiting on the streamer.
+            ///
+            /// THIS STAGE EXISTS BECAUSE THE FIRST VERSION HAD NO IT AND NOTHING EVER
+            /// SPAWNED. Request() does not load a model, it asks for one, and IsLoaded is
+            /// false on the line after it every time -- so a Begin that requested and then
+            /// immediately built found no model, returned false, and left no trace. Waiting
+            /// in a loop is not the answer either: the timer that loop would watch only moves
+            /// when a frame renders, and a script tick is part of the frame, so it freezes the
+            /// game outright. The only way is to come back next frame, which means a stage.
+            /// </summary>
+            Staging,
+
             /// <summary>They are at the windows and nothing has happened yet.</summary>
             Looking,
 
@@ -91,6 +104,8 @@ namespace BareMinimum.Needs
         private Ped _left;
         private Ped _right;
 
+        private Vehicle _yours;
+
         private Vector3 _wokeAt;
         private int _until;
         private int _hardStop;
@@ -135,15 +150,33 @@ namespace BareMinimum.Needs
             {
                 var p = car.Position;
 
+                // EVERY REFUSAL SAYS WHICH ONE IT WAS. Four tests that all return the same
+                // false is a feature you cannot tell from a broken one, which is exactly how
+                // the first go was debugged -- by guessing.
                 if (!Function.Call<bool>(Hash.IS_POINT_ON_ROAD, p.X, p.Y, p.Z, car.Handle))
                 {
+                    Log.Info("Kerbside nap: not on a road. No police.");
                     return false;
                 }
 
                 var street = World.GetNextPositionOnStreet(p);
-                if (street.DistanceTo(p) > 6f) return false;
+                var off = street.DistanceTo(p);
 
-                if (Busyness(car) < _cfg.PoliceWakeNeighbours) return false;
+                if (off > 6f)
+                {
+                    Log.Info("Kerbside nap: " + off.ToString("0.#") +
+                             "m off the carriageway. No police.");
+                    return false;
+                }
+
+                var about = Busyness(car);
+
+                if (about < _cfg.PoliceWakeNeighbours)
+                {
+                    Log.Info("Kerbside nap: only " + about + " about, needs " +
+                             _cfg.PoliceWakeNeighbours + ". No police.");
+                    return false;
+                }
             }
             catch (Exception ex)
             {
@@ -151,7 +184,17 @@ namespace BareMinimum.Needs
                 return false;
             }
 
-            return _dice.NextDouble() < Odds(car);
+            var odds = Odds(car);
+            var rolled = _dice.NextDouble();
+
+            if (rolled >= odds)
+            {
+                Log.Info("Kerbside nap: rolled " + rolled.ToString("0.00") +
+                         " against " + odds.ToString("0.00") + ". Lucky this time.");
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -192,8 +235,11 @@ namespace BareMinimum.Needs
                 // risk you take.
                 var odds = floor + (0.97f - floor) * main;
 
-                Log.Debug("Kerbside nap: " + wide.ToString("0.#") + "m across, " + busy +
-                          " about, odds " + odds.ToString("0.00") + ".");
+                // AT INFO, NOT DEBUG. One line per car nap is not noise, and without it the
+                // only way to tell "the spot did not qualify" from "the spot qualified and
+                // the scene failed" is to guess -- which is exactly where an evening went.
+                Log.Info("Kerbside nap: " + wide.ToString("0.#") + "m across, " + busy +
+                         " about, odds " + odds.ToString("0.00") + ".");
 
                 return odds < floor ? floor : odds;
             }
@@ -279,7 +325,7 @@ namespace BareMinimum.Needs
 
         // ======================================================================
 
-        /// <summary>Puts the car and the two of them there. False if it could not.</summary>
+        /// <summary>Asks for what the scene needs. It is built a frame or two later.</summary>
         public bool Begin(Vehicle car)
         {
             if (Busy) return false;
@@ -287,6 +333,40 @@ namespace BareMinimum.Needs
 
             var me = Game.Player.Character;
             if (me == null || !me.Exists()) return false;
+
+            _yours = car;
+            _wokeAt = car.Position;
+
+            _stage = Stage.Staging;
+
+            var start = Game.GameTime;
+            _until = start + 5000;
+            _hardStop = start + NeverLongerThanMs;
+
+            // Ask for everything now so the streamer has the whole list in flight at once
+            // rather than discovering it one model at a time.
+            foreach (var name in CarModels) Ask(name);
+            foreach (var name in CopModels) Ask(name);
+
+            Log.Info("Woken in the road - waiting on the models for the squad car.");
+            return true;
+        }
+
+        private static void Ask(string name)
+        {
+            try
+            {
+                var m = new Model(name);
+                if (!m.IsLoaded) m.Request();
+            }
+            catch { /* the next frame will try again */ }
+        }
+
+        /// <summary>Builds it, once the models are actually here. False until they are.</summary>
+        private bool Stage_()
+        {
+            var car = _yours;
+            if (car == null || !car.Exists()) return false;
 
             try
             {
@@ -312,17 +392,14 @@ namespace BareMinimum.Needs
 
                 _wokeAt = car.Position;
                 _stage = Stage.Looking;
+                _until = Game.GameTime + PatienceMs;
 
-                var now = Game.GameTime;
-                _until = now + PatienceMs;
-                _hardStop = now + NeverLongerThanMs;
-
-                Log.Info("Woken by the police in the road.");
+                Log.Info("Squad car and two officers placed.");
                 return true;
             }
             catch (Exception ex)
             {
-                Log.Once("knock-begin", "Could not stage the wake-up: " + ex.Message);
+                Log.Once("knock-stage", "Could not stage the wake-up: " + ex.Message);
                 Clean();
                 return false;
             }
@@ -341,6 +418,23 @@ namespace BareMinimum.Needs
 
                 switch (_stage)
                 {
+                    case Stage.Staging:
+
+                        if (Stage_()) return;
+
+                        // Still not here. Keep asking -- a request can be dropped when the
+                        // streamer is busy, and re-asking is free.
+                        foreach (var name in CarModels) Ask(name);
+                        foreach (var name in CopModels) Ask(name);
+
+                        if (now > _until)
+                        {
+                            Log.Info("The squad car's models never loaded - no wake-up.");
+                            Clean();
+                        }
+
+                        return;
+
                     case Stage.Looking:
 
                         // ---- you drove off ----
