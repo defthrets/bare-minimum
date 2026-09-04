@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GTA;
 using BareMinimum.Core;
 using BareMinimum.Food;
@@ -34,6 +34,7 @@ namespace BareMinimum
         private readonly Effects _effects;
         private readonly Beds _beds;
         private readonly Sleeping _sleeping;
+        private readonly Knock _knock;
         private readonly Catalogue _catalogue;
         private readonly Eating _eating;
         private readonly Counters _counters;
@@ -61,7 +62,8 @@ namespace BareMinimum
             _needs = new Needs.Needs(_cfg);
             _effects = new Effects(_cfg);
             _beds = new Beds();
-            _sleeping = new Sleeping(_cfg, _needs, _beds);
+            _knock = new Knock(_cfg);
+            _sleeping = new Sleeping(_cfg, _needs, _beds, _knock);
 
             _catalogue = new Catalogue(_cfg);
 
@@ -173,6 +175,10 @@ namespace BareMinimum
 
                 _pantry.Update(dt);
 
+                // The officers at the window run their own little scene, and it must tick
+                // whatever else is happening -- it is watching for you to drive off.
+                _knock.Update();
+
                 _needs.Update(dt, suspended);
                 _effects.Update(_needs, suspended);
                 _gauge.Draw(_needs, suspended);
@@ -255,6 +261,7 @@ namespace BareMinimum
             try { _vendors.Shutdown(); } catch (Exception ex) { Log.Error("Vendor shutdown", ex); }
             try { _eating.Shutdown(); } catch (Exception ex) { Log.Error("Eating shutdown", ex); }
             try { _sleeping.Shutdown(); } catch (Exception ex) { Log.Error("Sleep shutdown", ex); }
+            try { _knock.Shutdown(); } catch (Exception ex) { Log.Error("Knock shutdown", ex); }
             try { _effects.Clear(); } catch (Exception ex) { Log.Error("Clearing effects", ex); }
             try { _needs.SaveNow(); } catch (Exception ex) { Log.Error("Final save", ex); }
 

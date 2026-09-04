@@ -360,6 +360,9 @@ namespace BareMinimum.UI
             { "Sleep in beds",            "s_bed.png"    },
             { "Sleep in cars",            "s_car.png"    },
             { "Count other mods' sleep",  "moon0.png"    },
+            { "Police wake-up",           "s_car.png"    },
+            { "Police wake-up chance",    "s_car.png"    },
+            { "How busy the street must be", "s_pin.png" },
             { "Bed hours",                "s_bed.png"    },
             { "Car hours",                "s_car.png"    },
 
@@ -509,6 +512,22 @@ namespace BareMinimum.UI
                  () => _cfg.CreditOutsideSleep, v => _cfg.CreditOutsideSleep = v,
                  "Credits rest when anything else skips the clock a few hours -- another " +
                  "mod's bed, or a mission that skips a night.");
+
+            Bool("Police wake-up", "Sleeping", "PoliceWake",
+                 () => _cfg.PoliceWake, v => _cfg.PoliceWake = v,
+                 "Sleep in a car in the road and you may wake to two officers at the windows.");
+
+            Float("Police wake-up chance", "Sleeping", "PoliceWakeChance",
+                  () => _cfg.PoliceWakeChance, v => _cfg.PoliceWakeChance = v,
+                  0.05f, 0f, 1f, "0.00",
+                  "How often it happens when the spot qualifies. Car parks never qualify.",
+                  () => _cfg.PoliceWake, "Turn the police wake-up on first.");
+
+            Float("How busy the street must be", "Sleeping", "PoliceWakeNeighbours",
+                  () => _cfg.PoliceWakeNeighbours, v => _cfg.PoliceWakeNeighbours = (int)Math.Round(v),
+                  1f, 0f, 60f, "0",
+                  "People and cars within seventy metres. Higher means only busy streets.",
+                  () => _cfg.PoliceWake, "Turn the police wake-up on first.");
 
             Float("Bed hours", "Sleeping", "BedHours",
                   () => _cfg.BedHours, v => _cfg.BedHours = v,

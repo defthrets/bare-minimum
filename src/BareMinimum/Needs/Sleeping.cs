@@ -72,7 +72,9 @@ namespace BareMinimum.Needs
         /// </summary>
         private const SetPlayerControlFlags ControlFlags = SetPlayerControlFlags.None;
 
-        public Sleeping(Core.Settings cfg, Needs needs, Beds beds)
+        private readonly Knock _knock;
+
+        public Sleeping(Core.Settings cfg, Needs needs, Beds beds, Knock knock)
         {
             _cfg = cfg;
             _needs = needs;
@@ -406,6 +408,10 @@ namespace BareMinimum.Needs
 
         private void Finish()
         {
+            // READ BEFORE IT IS CLEARED. Two lines down _bunk is None again, and whether this
+            // was a car matters to everything after it.
+            var inACar = _bunk == Bunk.Car;
+
             HandBackControl();
 
             _phase = Phase.Idle;
@@ -420,6 +426,28 @@ namespace BareMinimum.Needs
             catch
             {
                 // Not worth failing a wake-up over.
+            }
+
+            // ---- and who is at the window ----
+            //
+            // AFTER the control is handed back and the ticker has posted, so a failure to
+            // stage the scene leaves an ordinary wake-up rather than a frozen one. Knock
+            // decides for itself whether the spot deserves it -- see Exposed.
+            if (!inACar || _knock == null) return;
+
+            try
+            {
+                var me = Game.Player.Character;
+                if (me == null || !me.Exists() || !me.IsInVehicle()) return;
+
+                var car = me.CurrentVehicle;
+                if (car == null || !car.Exists()) return;
+
+                if (_knock.Exposed(car)) _knock.Begin(car);
+            }
+            catch (Exception ex)
+            {
+                Log.Once("sleep-knock", "Could not stage the wake-up: " + ex.Message);
             }
         }
 

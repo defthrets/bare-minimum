@@ -203,6 +203,25 @@ namespace BareMinimum.Core
         /// A car is a worse night's sleep, and this is the only place that says so -- the
         /// hours alone would make it merely a shorter one.
         /// </summary>
+        /// <summary>
+        /// Waking up in the road with two officers at the windows.
+        ///
+        /// ONLY IN THE ROAD -- see Knock.Exposed. A car park, a driveway or the back of a
+        /// building is nobody's business and nothing happens there.
+        /// </summary>
+        public bool PoliceWake = true;
+
+        /// <summary>How often it happens when the spot does qualify. 0 never, 1 every time.</summary>
+        public float PoliceWakeChance = 0.6f;
+
+        /// <summary>
+        /// How many people and cars have to be about for the street to count as public.
+        ///
+        /// Counted within seventy metres, pedestrians and vehicles together. Six is a normal
+        /// city street and more than an empty country road will ever manage.
+        /// </summary>
+        public int PoliceWakeNeighbours = 6;
+
         public float CarRestoreFraction = 0.55f;
 
         /// <summary>How close to a bed you have to stand before it offers.</summary>
@@ -658,6 +677,12 @@ namespace BareMinimum.Core
                 cfg.CarRestoreFraction = ini.GetFloat("Sleeping", "CarRestoreFraction",
                                                       cfg.CarRestoreFraction, 0.05f, 1f);
                 cfg.BedReach = ini.GetFloat("Sleeping", "BedReach", cfg.BedReach, 0.5f, 6f);
+
+                cfg.PoliceWake = ini.GetBool("Sleeping", "PoliceWake", cfg.PoliceWake);
+                cfg.PoliceWakeChance = ini.GetFloat("Sleeping", "PoliceWakeChance",
+                                                    cfg.PoliceWakeChance, 0f, 1f);
+                cfg.PoliceWakeNeighbours = (int)ini.GetFloat("Sleeping", "PoliceWakeNeighbours",
+                                                             cfg.PoliceWakeNeighbours, 0f, 60f);
 
                 cfg.CreditOutsideSleep = ini.GetBool("Sleeping", "CreditOutsideSleep",
                                                      cfg.CreditOutsideSleep);
