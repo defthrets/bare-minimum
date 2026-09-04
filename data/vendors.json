@@ -56,12 +56,7 @@
       "id": "hotdog_vespucci",
       "name": "Hot Dog Stand",
       "label": "hot dog",
-      "item": [
-        "hotdog",
-        "sprunk",
-        "ecola",
-        "water"
-      ],
+      "item": "hotdog",
       "x": -3.925,
       "y": -1539.631,
       "z": 29.479,
@@ -104,7 +99,7 @@
         "back": 4.0,
         "scenario": "WORLD_HUMAN_SMOKING"
       },
-      "ui": true
+      "ui": false
     },
     {
       "_note": "THE TACO FARMER, walk-up hatch on the north side. The hatch and the menu",
@@ -619,12 +614,7 @@
       "id": "hotdog_davis",
       "name": "Hot Dog Stand",
       "label": "hot dog",
-      "item": [
-        "hotdog",
-        "sprunk",
-        "ecola",
-        "water"
-      ],
+      "item": "hotdog",
       "x": 282.563,
       "y": -1515.14,
       "z": 29.292,
@@ -663,7 +653,7 @@
         "back": 4.0,
         "scenario": "WORLD_HUMAN_SMOKING"
       },
-      "ui": true
+      "ui": false
     },
     {
       "_note": "Hearty Taco. Coordinate is the DOOR from the first screenshot, not the",
