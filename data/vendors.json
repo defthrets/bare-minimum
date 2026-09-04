@@ -585,6 +585,36 @@
       "ui": true
     },
     {
+      "_note": "Liquor store 5, the Forum Drive corner by the hot dog stand. BEER - WINE over",
+      "_note2": "the door, Redwood ads in every window, and the usual COPIES / ATM / PHONE CARDS",
+      "_note3": "sundries -- so: the drink, the smokes, and the junk food a corner store keeps by",
+      "_note4": "the till. Door coordinate.",
+      "id": "liquor_5",
+      "name": "Beer and Wine",
+      "item": [
+        "beer",
+        "beer_logger",
+        "wine",
+        "whiskey",
+        "crisps",
+        "jerky",
+        "candybox",
+        "sardines",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "x": -20.503,
+      "y": -1472.66,
+      "z": 30.72,
+      "heading": 179.17,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5,
+      "ui": true
+    },
+    {
       "_note": "Fowl Mouthed Fried Chicken. Shopfront is part of the map; nothing spawned.",
       "id": "fowl_mouthed",
       "name": "Fowl Mouthed",
