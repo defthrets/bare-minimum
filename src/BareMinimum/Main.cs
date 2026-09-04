@@ -159,11 +159,18 @@ namespace BareMinimum
 
                 if (!menuOpen && !_vendors.Offering) _sleeping.Update();
 
+                // EVERY OTHER MENU, NEVER ITS OWN. A pass that is told it is suspended closes
+                // whatever it has open -- that is what suspended means -- so handing one the
+                // combined flag hands it its own shelf, and it shuts that shelf on the frame
+                // after opening it, before a single Draw. Every shop with a shelf did exactly
+                // this from the pocket commit on: prompt, press, nothing. The counters were
+                // never affected only because their line below was never given _shop.IsOpen.
+                //
                 // Street vendors BEFORE the shop, so a stand standing next to a vending
                 // machine wins the interact key rather than both reading it on one frame.
-                _vendors.Update(dt, _sleeping.Busy || menuOpen);
+                _vendors.Update(dt, _sleeping.Busy || _shop.IsOpen || _settings.IsOpen || _bag.IsOpen);
 
-                _shop.Update(_sleeping.Busy || _settings.IsOpen || _vendors.Offering);
+                _shop.Update(_sleeping.Busy || _settings.IsOpen || _bag.IsOpen || _vendors.Offering);
                 _eating.Update();
 
                 // While the sleep sequence owns the screen, the effects and the HUD stand
