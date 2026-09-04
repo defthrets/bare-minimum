@@ -59,6 +59,15 @@ namespace BareMinimum.Needs
         /// <summary>How far in front of your bonnet their car sits.</summary>
         private const float Ahead = 7.5f;
 
+        /// <summary>
+        /// How far forward of the car's middle an officer stands.
+        ///
+        /// A vehicle coordinate is its centre, which on a saloon is level with the back of the
+        /// front seats -- so a man placed straight out to the side of it is at the rear door
+        /// looking in at nothing. Half a metre forward puts him at the driver's glass.
+        /// </summary>
+        private const float WindowForward = 0.55f;
+
         /// <summary>How far you have to move before it counts as driving off.</summary>
         private const float BoltedMetres = 9f;
 
@@ -386,39 +395,55 @@ namespace BareMinimum.Needs
 
         /// <summary>Builds it, once the models are actually here. False until they are.</summary>
         /// <summary>
-        /// Puts one thing on the ground under it, if the ground is known yet.
+        /// The same spot, with its height taken off the road instead of off the car.
+        ///
+        /// EVERY POSITION IN THIS FILE IS WORKED OUT FROM THE CAR'S OWN COORDINATE, and that
+        /// coordinate is the car's middle -- most of a metre above the tarmac it is sitting on.
+        /// A ped created there is created in the air and falls, which is what was reported, and
+        /// it is why this is used BEFORE anything is spawned rather than as a correction after.
+        /// A thing put down in the right place never drops; a thing moved to the right place
+        /// has already been seen in the wrong one.
+        ///
+        /// The first attempt added a metre to the ground height, on the reasoning that a ped
+        /// coordinate is somewhere around its middle. It is not -- SET_ENTITY_COORDS puts a
+        /// ped's FEET where it is told -- so that was a one metre drop written down as a fix.
         ///
         /// GET_GROUND_Z_FOR_3D_COORD answers false where the map has not streamed in, which is
-        /// possible on the frame after a long sleep -- so a failure leaves the entity where it
-        /// was rather than dropping it to zero, which would put it under the world.
+        /// possible on the frame after a long sleep. A failure hands back the spot untouched
+        /// rather than a zero, which would be under the world.
         /// </summary>
-        private static void Settle(Entity what)
+        private static Vector3 OnRoad(Vector3 at)
         {
-            if (what == null || !what.Exists()) return;
-
             try
             {
-                var at = what.Position;
                 var z = new OutputArgument();
 
+                // Asked from above head height, because the probe searches DOWN from the
+                // coordinate it is given -- starting at the car's own middle can miss a kerb
+                // the car is parked against.
                 if (!Function.Call<bool>(Hash.GET_GROUND_Z_FOR_3D_COORD,
-                                         at.X, at.Y, at.Z + 1.5f, z, false))
+                                         at.X, at.Y, at.Z + 2f, z, false))
                 {
-                    return;
+                    return at;
                 }
 
                 var ground = z.GetResult<float>();
 
-                if (ground <= 0f) return;
-
-                what.Position = new Vector3(at.X, at.Y, ground + 1.0f);
-
-                Function.Call(Hash.SET_ENTITY_COLLISION, what.Handle, true, true);
+                return ground <= 0f ? at : new Vector3(at.X, at.Y, ground);
             }
             catch
             {
-                // Where it is will do.
+                return at;
             }
+        }
+
+        /// <summary>Hands one back to the physics, once it is standing where it belongs.</summary>
+        private static void Loose(Ped who)
+        {
+            if (who == null || !who.Exists()) return;
+
+            try { Function.Call(Hash.FREEZE_ENTITY_POSITION, who.Handle, false); }
+            catch { /* he stands there, which is the point of him */ }
         }
 
         private bool Stage_()
@@ -432,8 +457,12 @@ namespace BareMinimum.Needs
                 // mean the first thing you see on waking is an empty road.
                 var infront = car.Position + car.ForwardVector * Ahead;
 
-                _theirCar = Make(CarModels, infront, car.Heading + 180f);
+                _theirCar = Make(CarModels, OnRoad(infront), car.Heading + 180f);
                 if (_theirCar == null) return false;
+
+                // The native written for exactly this. A car dropped at a coordinate sits on
+                // its springs and bounces; this puts it down on its wheels.
+                Function.Call(Hash.SET_VEHICLE_ON_GROUND_PROPERLY, _theirCar.Handle);
 
                 Lights(_theirCar);
 
@@ -442,14 +471,10 @@ namespace BareMinimum.Needs
                 _left = MakeCop(car, -1.6f);
                 _right = MakeCop(car, 1.6f);
 
-                // ON THE GROUND, NOT ABOVE IT. A ped created at a coordinate worked out from
-                // the car's own position starts at the CAR's height, which on any kerb, ramp
-                // or crowned road is above the tarmac -- and what you see is two officers
-                // dropping the last few inches as the physics catches them. Reported as
-                // exactly that. The car gets the same treatment for the same reason.
-                Settle(_theirCar);
-                Settle(_left);
-                Settle(_right);
+                // Let go now the scene is built. They were frozen for their first frame so
+                // the settling happened behind the fade -- see MakeCop.
+                Loose(_left);
+                Loose(_right);
 
                 if (_left == null && _right == null)
                 {
@@ -699,7 +724,12 @@ namespace BareMinimum.Needs
                 var model = new Model(name);
                 if (!Stream(model)) continue;
 
-                var at = yours.Position + yours.RightVector * sideways;
+                // AT THE WINDOW AND ON THE ROAD. Sideways puts him beside the door and
+                // OnRoad takes the height off the tarmac rather than off the middle of the
+                // car, so he is standing the moment he exists instead of falling into place.
+                var at = OnRoad(yours.Position
+                                + yours.RightVector * sideways
+                                + yours.ForwardVector * WindowForward);
 
                 var ped = World.CreatePed(model, at);
                 model.MarkAsNoLongerNeeded();
@@ -730,6 +760,14 @@ namespace BareMinimum.Needs
 
                     // Facing in through the glass, and staying that way.
                     ped.Heading = Heading(at, yours.Position);
+
+                    // AND NOT FALLING THE LAST INCH EITHER. A ped settles onto its collision
+                    // on the first frame it exists; frozen for that frame and let go on the
+                    // next, the settling happens while the screen is still black. Collision is
+                    // asserted for the same reason -- a ped spawned into a chunk that is still
+                    // streaming has nothing to stand on until it arrives.
+                    Function.Call(Hash.SET_ENTITY_COLLISION, ped.Handle, true, true);
+                    Function.Call(Hash.FREEZE_ENTITY_POSITION, ped.Handle, true);
 
                     Function.Call(Hash.TASK_LOOK_AT_ENTITY, ped.Handle, yours.Handle,
                                   -1, 2048, 3);
