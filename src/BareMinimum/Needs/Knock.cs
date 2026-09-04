@@ -159,13 +159,25 @@ namespace BareMinimum.Needs
                     return false;
                 }
 
-                var street = World.GetNextPositionOnStreet(p);
-                var off = street.DistanceTo(p);
+                // THE WIDTH IS THE SECOND TEST, not the distance to a road node.
+                //
+                // This used to measure how far GetNextPositionOnStreet was and refuse
+                // anything past six metres, which rejected two naps taken dead in the middle
+                // of the road at 7.2m and 6.0m. That native returns the next position ALONG
+                // the street -- a node on the centreline, and nodes are spaced ten to twenty
+                // metres apart -- so its distance says nothing about whether you are on the
+                // carriageway. It was measuring the spacing of a grid.
+                //
+                // Across() measures the road itself, sideways, and it was already here for
+                // the odds. A forecourt or a slip of verge comes back a couple of metres; a
+                // lane comes back four or more. It answers the question the node distance was
+                // being asked and cannot answer.
+                var wide = Across(car);
 
-                if (off > 6f)
+                if (wide < 4f)
                 {
-                    Log.Info("Kerbside nap: " + off.ToString("0.#") +
-                             "m off the carriageway. No police.");
+                    Log.Info("Kerbside nap: only " + wide.ToString("0.#") +
+                             "m of road across - not a carriageway. No police.");
                     return false;
                 }
 
