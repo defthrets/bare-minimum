@@ -66,11 +66,15 @@ namespace BareMinimum.UI
     {
         // ---- layout, all fractions of the screen ------------------------------
         private const float PanelX = 0.5f;      // centre
-        private const float PanelW = 0.30f;
+        private const float PanelW = 0.34f;
         private const float Top = 0.180f;
 
-        private const float HeaderH = 0.052f;
+        /// <summary>Air between the panel's edge and anything in it.</summary>
+        private const float Pad = 0.012f;
+
+        private const float SubH = 0.022f;
         private const float TabsH = 0.030f;
+
         /// <summary>
         /// Row height. Taller than a plain list needs, to leave room for a product picture.
         ///
@@ -79,13 +83,15 @@ namespace BareMinimum.UI
         /// beside it.
         /// </summary>
         private const float RowH = 0.046f;
-        private const float NoteH = 0.044f;
+
+        private const float CountH = 0.020f;
+
+        private const float NoteScale = 0.26f;
+        private const float NoteLine = 0.017f;
+        private const float NotePad = 0.010f;
 
         /// <summary>Rows on screen at once. More than this scrolls.</summary>
         private const int Window = 7;
-
-        /// <summary>Chalet Comprime Cologne, the game's own block font.</summary>
-        private const int Plain = 4;
 
         public string Title = "";
         public string Subtitle = "";
@@ -116,9 +122,6 @@ namespace BareMinimum.UI
         /// </summary>
         public float TitleImageRatio = 3.2f;
 
-        /// <summary>Tint for those marks. The header's accent colour.</summary>
-        private static readonly Color Accent = Color.FromArgb(255, 240, 170, 56);
-
         public readonly List<string> Tabs = new List<string>();
         public readonly List<Row> Rows = new List<Row>();
 
@@ -147,6 +150,12 @@ namespace BareMinimum.UI
         public bool LeftRightAdjusts;
 
         /// <summary>
+        /// What the accept key does here, for the key cap in the footer: BUY at a counter, SET
+        /// in the settings. Set by whoever builds the menu -- this class draws rows.
+        /// </summary>
+        public string ConfirmWord = "CHOOSE";
+
+        /// <summary>
         /// How strongly the row pictures and the title marks catch the light. 0 is off.
         ///
         /// Set by whoever builds the menu, from the same ini dial the HUD uses, because this
@@ -169,6 +178,13 @@ namespace BareMinimum.UI
         private float _glide;
         private float _tabGlide;
         private int _lastFrame;
+
+        /// <summary>The cursor frame that glides between rows. See UI.Glide.</summary>
+        private readonly Glide _frame = new Glide();
+
+        /// <summary>When the menu opened and when the selection last moved, for the entrance and the caption.</summary>
+        private int _shownAt;
+        private int _pickedAt;
 
         /// <summary>The row nudged this frame, or null. Read it after Update.</summary>
         public Row Adjusted { get; private set; }
@@ -199,6 +215,11 @@ namespace BareMinimum.UI
             IsOpen = true;
             Index = 0;
             _scroll = 0;
+
+            _shownAt = Game.GameTime;
+            _pickedAt = _shownAt;
+            _frame.Reset();
+
             Sound("SELECT");
         }
 
@@ -406,7 +427,11 @@ namespace BareMinimum.UI
 
         private void Move(int by)
         {
+            var was = Index;
+
             Index = NextSelectable(Index, by);
+
+            if (Index != was) _pickedAt = Game.GameTime;
 
             // Keep the selection inside the visible window, scrolling only as far as it must.
             if (Index < _scroll) _scroll = Index;
@@ -501,6 +526,11 @@ namespace BareMinimum.UI
             Index = 0;
             _scroll = 0;
             TabChanged = true;
+
+            // The rows are about to be rebuilt, so the frame lands on the new list rather
+            // than gliding across from a row that no longer exists.
+            _pickedAt = Game.GameTime;
+            _frame.Reset();
             Sound("NAV_LEFT_RIGHT");
         }
 
@@ -563,6 +593,13 @@ namespace BareMinimum.UI
             // A paused game, a loading screen or a wrapped clock can hand back nonsense.
             if (dt < 0 || dt > 200) dt = 16;
 
+            if (!Theme.Motion)
+            {
+                _glide = Index;
+                _tabGlide = Tab;
+                return;
+            }
+
             _glide = Chase(_glide, Index, dt, 3f);
             _tabGlide = Chase(_tabGlide, Tab, dt, 2f);
         }
@@ -580,31 +617,69 @@ namespace BareMinimum.UI
             return at + gap * k;
         }
 
+        /// <summary>
+        /// The panel, built the way every panel in Hoodrich is built and in this mod's amber:
+        /// ONE ROUNDED BLACK with a warm wash under its top, a head with a rule under it, the
+        /// list, a note, a rule and a row of key caps.
+        ///
+        /// MEASURED FIRST AND DRAWN SECOND. The panel is the ground under everything and has
+        /// to know how tall it is before the first row goes down, so every part's height is
+        /// worked out up front -- including how many lines the selected row's note wraps to.
+        /// </summary>
         public void Draw()
         {
             if (!IsOpen) return;
 
             try
             {
-                var left = PanelX - PanelW / 2f;
-                var y = Top;
-
-                // The header reports how tall it actually came out rather than being assumed
-                // to be HeaderH. Its height depends on the MEASURED height of the title text,
-                // and a fixed constant is what let the title and the subtitle overlap.
                 Ease();
 
-                y += Header(left, y);
+                var arrive = Theme.Arrive(_shownAt, Theme.EnterMs);
+
+                var left = PanelX - PanelW / 2f;
+                var top = Top + Theme.EnterRise * (1f - arrive);
+
+                var x = left + Pad;
+                var right = left + PanelW - Pad;
+                var wide = right - x;
+
+                var shown = Rows.Count == 0 ? 1 : Math.Min(Window, Rows.Count);
+                var subH = string.IsNullOrEmpty(Subtitle) ? 0f : SubH;
+                var tabsH = Tabs.Count > 0 ? TabsH : 0f;
+                var countH = Rows.Count > Window ? CountH : 0f;
+
+                var note = NoteLines(wide);
+                var noteH = note.Count == 0 ? 0f : NotePad * 2f + note.Count * NoteLine;
+
+                var height = Kit.HeadH + subH + tabsH + shown * RowH + countH + noteH + Kit.FootH;
+
+                Theme.Panel(left, top, PanelW, height, arrive);
+
+                var y = Head(left, top, arrive);
+
+                if (subH > 0f)
+                {
+                    Hud.Text(Subtitle, x, y + 0.001f, 0.25f,
+                             Palette.Alpha(Palette.TextDim, (int)(210f * arrive)), Hud.FontBody);
+                    y += subH;
+                }
 
                 if (Tabs.Count > 0)
                 {
-                    TabStrip(left, y);
+                    TabStrip(x, y, wide, arrive);
                     y += TabsH;
                 }
 
-                y = List(left, y);
+                _frame.Begin();
 
-                Note(left, y);
+                y = List(x, y, wide, arrive);
+
+                Note(x, y, wide, note, arrive);
+
+                Foot(x, right, top + height - Kit.FootH, arrive);
+
+                // Last, so it rides over the row it is pointing at.
+                _frame.Draw(arrive);
             }
             catch (Exception ex)
             {
@@ -612,204 +687,77 @@ namespace BareMinimum.UI
             }
         }
 
-        /// <summary>
-        /// The header, and how tall it came out.
-        ///
-        /// THE SUBTITLE IS PLACED BELOW THE MEASURED HEIGHT OF THE TITLE, not at a constant
-        /// offset. It used to be drawn at a fixed y + 0.032 under a title at y + 0.008, and a
-        /// title at scale 0.58 is taller than the 0.024 that leaves it -- so the two lines
-        /// touched. GET_RENDERED_CHARACTER_HEIGHT knows the real figure, so it gets asked
-        /// rather than guessed at; the same argument as Draw.Height carries.
-        /// </summary>
-        private float Header(float left, float y)
+        /// <summary>The head: a shop's own sign if it has one, otherwise the title between its two marks.</summary>
+        private float Head(float left, float top, float arrive)
         {
-            const float titleScale = 0.58f;
-            const float subScale = 0.28f;
-            const float padTop = 0.007f;
-            const float gap = 0.005f;          // clear air between the two lines
-            const float padBottom = 0.008f;
-
-            var titleH = Hud.Height(titleScale, Plain);
-            var subH = string.IsNullOrEmpty(Subtitle) ? 0f : Hud.Height(subScale, Plain);
-
-            // THE LOGO IS SIZED OFF THE PANEL, NOT OFF THE TEXT. A brand mark should take
-            // up the same share of the header whatever the title scale happens to be, and
-            // sizing it off a line of type it is replacing made it a small sticker in a wide
-            // empty bar. Forty per cent of the panel reads as a sign over a counter.
-            //
-            // Height comes back out of the width through the artwork's own ratio and the
-            // screen's, so the mark is never stretched: a sprite given equal width and height
-            // fractions comes out as wide as the screen is, which on a 21:9 is half again.
-            var logoW = 0f;
-            var logoH = 0f;
-
             if (TitleImage != null)
             {
-                logoW = PanelW * 0.40f;
-                logoH = logoW * Aspect() / Math.Max(0.1f, TitleImageRatio);
+                return Kit.HeadLogo(left, top, PanelW, Pad, TitleImage, TitleImageRatio, null, arrive);
             }
 
-            // The taller of the two, so a logo cannot spill out of its own header.
-            var headLine = Math.Max(titleH, logoH);
+            var mark = TitleLeft == null ? null : TitleLeft.Current;
+            var tail = TitleRight == null ? null : TitleRight.Current;
 
-            var height = padTop + headLine + (subH > 0f ? gap + subH : 0f) + padBottom;
-
-            Hud.Bar(left, y, PanelW, height, Color.FromArgb(238, 12, 12, 15));
-
-            // A thin accent along the bottom, which separates the header from the tab strip
-            // without spending a whole row of height on a gap.
-            Hud.Bar(left, y + height - 0.0022f, PanelW, 0.0022f, Accent);
-
-            if (TitleImage != null)
-            {
-                // Tinted WHITE, which is the identity for a sprite: CustomSprite multiplies
-                // its colour with the texture, so white leaves the brand's own reds and greys
-                // exactly as they were painted. Every other icon in this mod relies on the
-                // opposite -- white art taking a tint -- so this is the one deliberate
-                // exception and it is worth the sentence.
-                TitleImage.DrawSized(PanelX, y + padTop + headLine / 2f, logoW, logoH,
-                                     Color.FromArgb(255, 255, 255, 255));
-            }
-            else
-            {
-                Hud.Text(Title, PanelX, y + padTop, titleScale,
-                         Color.FromArgb(245, 245, 245, 248), Plain, true);
-
-                Marks(y + padTop, titleH, titleScale);
-            }
-
-            if (subH > 0f)
-            {
-                Hud.Text(Subtitle, PanelX, y + padTop + headLine + gap, subScale,
-                         Color.FromArgb(210, 190, 190, 198), Plain, true);
-            }
-
-            return height;
+            return Kit.Head(left, top, PanelW, Pad, mark, Title, null, tail, null, arrive, Shimmer);
         }
 
         /// <summary>
-        /// The two icons flanking the title.
-        ///
-        /// Placed off the MEASURED width of the title so they sit against the text rather than
-        /// at fixed positions -- "COUNTER" and "BARE MINIMUM" are very different widths, and a
-        /// constant offset would leave one pair crowding the letters and the other adrift.
+        /// The category tabs, split evenly across the panel, with ONE amber marker that slides.
+        /// Evenly rather than sized to their text: a strip whose cells move as the labels change
+        /// is a strip where the marker appears to jump sideways when you switch.
         /// </summary>
-        private void Marks(float titleTop, float titleH, float titleScale)
+        private void TabStrip(float x, float y, float wide, float arrive)
         {
-            if (TitleLeft == null && TitleRight == null) return;
+            var w = wide / Tabs.Count;
 
-            var half = Hud.Width(Title, titleScale, Plain) / 2f;
+            var markX = x + _tabGlide * w;
+            var markY = y + 0.004f;
+            var markH = TabsH - 0.008f;
 
-            // Square ON SCREEN: a sprite given equal width and height fractions comes out as
-            // much wider than it is tall as the screen is, which on a 21:9 is half again.
-            var tall = titleH * 0.92f;
-            var wide = tall / Aspect();
+            Theme.Fill(markX, markY, w, markH, arrive);
+            Theme.Sweep(markX, markY, w, markH, arrive);
 
-            var centreY = titleTop + titleH / 2f;
-            var offset = half + wide * 0.85f;
-
-            // A third of a cycle apart, so the pair never brightens together -- in step they
-            // read as one wide ornament rather than as two marks.
-            if (TitleLeft != null)
-            {
-                var left = TitleLeft.Current;
-                if (left != null)
-                {
-                    left.DrawSized(PanelX - offset, centreY, wide, tall,
-                                   Sheen.On(Accent, 0f, Shimmer));
-                }
-            }
-
-            if (TitleRight != null)
-            {
-                var right = TitleRight.Current;
-                if (right != null)
-                {
-                    right.DrawSized(PanelX + offset, centreY, wide, tall,
-                                    Sheen.On(Accent, 0.33f, Shimmer));
-                }
-            }
-        }
-
-        private static float Aspect()
-        {
-            try
-            {
-                var a = GTA.UI.Screen.AspectRatio;
-                if (a > 0.5f && a < 6f) return a;
-            }
-            catch
-            {
-                // Fall through to the safe default.
-            }
-
-            return 16f / 9f;
-        }
-
-        /// <summary>
-        /// The category tabs, split evenly across the panel.
-        ///
-        /// Evenly rather than sized to their text: a tab strip whose cells move as the labels
-        /// change is a strip where the selected cell appears to jump sideways when you switch,
-        /// and these labels are short enough that the even split never crowds them.
-        /// </summary>
-        private void TabStrip(float left, float y)
-        {
-            Hud.Bar(left, y, PanelW, TabsH, Color.FromArgb(230, 22, 22, 27));
-
-            var w = PanelW / Tabs.Count;
-
-            // ONE MARKER THAT SLIDES, drawn before the labels rather than a filled cell drawn
-            // per tab. Sliding is what says which way you just went round the strip, and with
-            // six tabs on a narrow panel that is the difference between paging confidently
-            // and counting the cells each time.
-            Hud.Bar(left + _tabGlide * w, y, w, TabsH, Color.FromArgb(240, 240, 170, 56));
-
-            // Six labels do not fit at the size four do. Measured off the panel rather than
-            // stepped by hand so it stays right if the tabs are ever regrouped.
-            var scale = Tabs.Count <= 4 ? 0.30f : Tabs.Count <= 6 ? 0.26f : 0.23f;
+            var scale = Tabs.Count <= 4 ? 0.28f : Tabs.Count <= 6 ? 0.25f : 0.22f;
 
             for (var i = 0; i < Tabs.Count; i++)
             {
-                var x = left + i * w;
-
                 // How much of the marker is under THIS label, so the ink crosses over with
-                // the bar instead of flicking to black a frame early or late.
+                // the marker instead of flicking to black a frame early or late.
                 var under = 1f - Math.Min(1f, Math.Abs(_tabGlide - i));
 
-                var ink = Blend(Color.FromArgb(210, 200, 200, 208),
-                                Color.FromArgb(255, 16, 16, 18), under);
+                var ink = Theme.Ink(Palette.Alpha(Palette.TextDim, (int)(230f * arrive)), under);
 
-                Hud.Text(Tabs[i], x + w / 2f, y + 0.005f + (0.30f - scale) * 0.012f, scale,
-                         ink, Plain, true, false, under < 0.5f);
+                Hud.Text(Tabs[i], x + i * w + w / 2f, y + 0.004f + (0.28f - scale) * 0.012f, scale,
+                         ink, Hud.FontLabel, true, false, Theme.Outline(under));
             }
         }
 
         /// <summary>Draws the visible slice of rows and returns the y below them.</summary>
-        private float List(float left, float y)
+        private float List(float x, float y, float wide, float arrive)
         {
-            var shown = Math.Min(Window, Rows.Count);
-
             if (Rows.Count == 0)
             {
-                Hud.Bar(left, y, PanelW, RowH, Color.FromArgb(225, 20, 20, 24));
-                Hud.Text("Nothing here.", PanelX, y + 0.008f, 0.32f,
-                         Color.FromArgb(190, 180, 180, 188), Plain, true);
+                Hud.Text("Nothing here.", x + wide / 2f, y + 0.012f, 0.30f,
+                         Palette.Alpha(Palette.TextDim, (int)(200f * arrive)), Hud.FontBody, true);
                 return y + RowH;
             }
 
+            var shown = Math.Min(Window, Rows.Count);
+
             _scroll = Clamp(_scroll, 0, Math.Max(0, Rows.Count - shown));
 
-            // ONE HIGHLIGHT, DRAWN UNDER EVERYTHING, at the eased position rather than on
-            // the selected row's own rectangle. Each row painting its own highlight is what
-            // makes a list teleport: the bar can only ever be in one of seven places. Lifted
-            // out, it can be between two of them, which is what a slide is.
+            // ONE PLATE, DRAWN UNDER EVERYTHING, at the eased position rather than on the
+            // selected row's own rectangle. Each row painting its own highlight is what makes a
+            // list teleport: the plate can only ever be in one of seven places. Lifted out, it
+            // can be between two of them, which is what a slide is.
             var slot = _glide - _scroll;
 
             if (slot > -1f && slot < shown)
             {
-                Hud.Bar(left, y + slot * RowH, PanelW, RowH,
-                        Color.FromArgb(242, 240, 170, 56));
+                var plateY = y + slot * RowH;
+
+                Theme.Fill(x, plateY, wide, RowH, arrive);
+                Theme.Sweep(x, plateY, wide, RowH, arrive);
             }
 
             for (var i = 0; i < shown; i++)
@@ -817,12 +765,12 @@ namespace BareMinimum.UI
                 var at = _scroll + i;
                 if (at >= Rows.Count) break;
 
-                // How much of the bar is under this row, which is what the ink follows. A
-                // row half covered gets half-way ink, so the text crosses over WITH the bar
-                // instead of every row flicking to black on the frame the index changed.
                 var lit = 1f - Math.Min(1f, Math.Abs(_glide - at));
+                var rowY = y + i * RowH;
 
-                DrawRow(Rows[at], left, y + i * RowH, lit, i);
+                DrawRow(Rows[at], x, rowY, wide, lit, i, arrive);
+
+                if (at == Index && !Rows[at].Header) _frame.Target(x, rowY, wide, RowH);
             }
 
             y += shown * RowH;
@@ -831,55 +779,43 @@ namespace BareMinimum.UI
             // is a line of furniture saying "4 of 4".
             if (Rows.Count > Window)
             {
-                Hud.Bar(left, y, PanelW, 0.020f, Color.FromArgb(230, 16, 16, 20));
-                Hud.Text((Index + 1) + " of " + Rows.Count, left + PanelW - 0.008f, y + 0.0015f,
-                         0.26f, Color.FromArgb(200, 190, 190, 198), Plain, false, true);
-                y += 0.020f;
+                Hud.TextRight((Index + 1) + " of " + Rows.Count, x + wide, y + 0.002f, 0.24f,
+                              Palette.Alpha(Palette.TextDim, (int)(200f * arrive)), Hud.FontLabel);
+                y += CountH;
             }
 
             return y;
         }
 
-        private void DrawRow(Row row, float left, float y, float lit, int slot)
+        private void DrawRow(Row row, float x, float y, float wide, float lit, int slot, float arrive)
         {
             if (row.Header)
             {
-                // Darker than a row and shorter than one, with the name in the accent colour
-                // and a rule under it. It has to read as a break in the list rather than as
-                // another entry, or it is just a setting you cannot change.
-                Hud.Bar(left, y, PanelW, RowH, Color.FromArgb(238, 14, 14, 17));
+                // The name in the brand colour with a rule under it. It has to read as a break
+                // in the list rather than as another entry, or it is a setting you cannot change.
+                Hud.Text(row.Left, x + 0.004f, y + (RowH - Hud.Height(0.30f, Hud.FontLabel)) / 2f, 0.30f,
+                         Palette.Alpha(Palette.Brand, (int)(235f * arrive)), Hud.FontLabel);
 
-                Hud.Text(row.Left, left + 0.010f,
-                         y + (RowH - Hud.Height(0.30f, Plain)) / 2f, 0.30f,
-                         Color.FromArgb(235, 240, 170, 56), Plain, false, false, true);
-
-                Hud.Bar(left + 0.010f, y + RowH - 0.0018f, PanelW - 0.020f, 0.0012f,
-                        Color.FromArgb(150, 240, 170, 56));
+                Theme.Rule(x, y + RowH - 0.004f, wide, arrive);
                 return;
             }
 
-            // The dark row plate, painted only where the highlight is NOT. Drawn with the
-            // remaining alpha so the amber underneath shows through exactly as far as the
-            // bar has slid onto this row.
-            Hud.Bar(left, y, PanelW, RowH,
-                    Color.FromArgb((int)(222 * (1f - lit)), 20, 20, 24));
+            var plain = row.Enabled ? Palette.Text : Palette.TextDisabled;
 
-            // Black ink on the amber highlight, light ink on the dark rows. The outline is
-            // turned OFF for the dark-on-light case: both of GTA's text decorations draw in
-            // BLACK, so an outline round black text fills in the holes in 8, 9 and 0 until
-            // they are one blob. Learned on Fumes' gauge.
-            var ink = Blend(row.Enabled ? Color.FromArgb(235, 232, 232, 238)
-                                        : Color.FromArgb(160, 150, 150, 158),
-                            Color.FromArgb(255, 14, 14, 16), lit);
+            // Light ink on the dark panel, the warm near-black on the amber plate, and every
+            // shade between as the plate slides onto the row -- so the words cross over WITH
+            // the plate instead of flicking on the frame the index changed.
+            var ink = Theme.Ink(Palette.Alpha(plain, (int)(plain.A * arrive)), lit);
+            var outline = Theme.Outline(lit);
 
-            var textLeft = left + 0.010f;
+            var textLeft = x + 0.006f;
 
             var icon = IconCache.Get(row.IconFile);
 
             if (icon != null && !icon.Missing)
             {
-                var tall = RowH * 0.80f;
-                var wide = tall / Aspect();          // square on screen, not in the canvas
+                var tall = RowH * 0.78f;
+                var wideIcon = Hud.ToX(tall);
 
                 // A greyed row's picture greys with it, or an item you cannot afford still
                 // looks available at a glance and only the text says otherwise.
@@ -888,61 +824,93 @@ namespace BareMinimum.UI
                     : Color.FromArgb(120, row.IconTint.R / 2 + 60,
                                      row.IconTint.G / 2 + 60, row.IconTint.B / 2 + 60);
 
-                // STAGGERED DOWN THE LIST. A shop shelf of eight pictures all brightening on
-                // the same beat reads as the whole panel throbbing; an eighth of a cycle
-                // between them reads as eight separate things catching the light as you
-                // scroll past. Off the row's place in the list rather than its index in the
-                // data, so the wave stays put while the selection moves.
-                //
-                // The SELECTED row is left alone: it is already sitting on a full-strength
-                // amber bar, and a picture breathing against that is two brightnesses
-                // arguing in the same forty pixels.
+                // STAGGERED DOWN THE LIST, off the row's place rather than its index in the
+                // data, so the wave stays put while the selection moves. The lit row is left
+                // alone: it is on its way to near-black and does not need to breathe as well.
                 if (lit < 0.5f && row.Enabled)
                 {
                     tint = Sheen.On(tint, slot * 0.125f, Shimmer * 0.7f);
                 }
 
-                icon.DrawSized(textLeft + wide / 2f, y + RowH / 2f, wide, tall, tint);
+                // Toward the near-black on the plate, the way the words go: a taco's own brown
+                // over full amber is mud, and the pocket learned that first.
+                tint = Theme.Ink(Palette.Alpha(tint, (int)(tint.A * arrive)), lit);
 
-                textLeft += wide + 0.006f;
+                icon.DrawSized(textLeft + wideIcon / 2f, y + RowH / 2f, wideIcon, tall, tint);
+
+                textLeft += wideIcon + 0.006f;
             }
 
-            // Vertically centred against the row rather than pinned near its top, now that a
-            // row is half again taller than the line of text in it.
-            var textY = y + (RowH - Hud.Height(0.34f, Plain)) / 2f;
+            var textY = y + (RowH - Hud.Height(0.30f, Hud.FontBody)) / 2f;
 
-            Hud.Text(row.Left, textLeft, textY, 0.34f, ink, Plain, false, false, lit < 0.5f);
+            Hud.Text(row.Left, textLeft, textY, 0.30f, ink, Hud.FontBody, false, false, outline);
 
             if (string.IsNullOrEmpty(row.Right)) return;
 
-            Hud.Text(row.Right, left + PanelW - 0.010f, textY, 0.34f, ink,
-                     Plain, false, true, lit < 0.5f);
+            Hud.Text(row.Right, x + wide - 0.004f, textY + 0.001f, 0.28f, ink, Hud.FontBody,
+                     false, true, outline);
         }
 
-        /// <summary>The description strip: whatever the selected row wants to say.</summary>
-        private void Note(float left, float y)
+        /// <summary>What the selected row has to say, wrapped to the panel. Empty when it says nothing.</summary>
+        private List<string> NoteLines(float wide)
         {
-            if (Rows.Count == 0) return;
+            if (Rows.Count == 0) return new List<string>();
 
             var row = Rows[Clamp(Index, 0, Rows.Count - 1)];
-            if (string.IsNullOrEmpty(row.Note)) return;
+            if (string.IsNullOrEmpty(row.Note)) return new List<string>();
 
-            // WRAPPED BY HAND, over two lines. GTA's own text wrapping needs a wrap window
-            // set and then applies it to every subsequent draw call until something else
-            // changes it, which is a trap for anything drawn afterwards. Splitting on spaces
-            // and drawing two lines is local, and cannot leak into the next thing on screen.
-            var lines = Wrap(row.Note, 0.28f, PanelW - 0.020f, 2);
+            return Wrap(row.Note, NoteScale, wide - 0.004f, 2);
+        }
 
-            var height = NoteH + (lines.Count > 1 ? 0.016f : 0f);
+        /// <summary>
+        /// The description: a rule, then the lines, the first sliding in with the plate the way
+        /// every caption under a chosen thing does, so the words arrive with the cursor rather
+        /// than swapping under it.
+        /// </summary>
+        private void Note(float x, float y, float wide, List<string> lines, float arrive)
+        {
+            if (lines.Count == 0) return;
 
-            Hud.Bar(left, y, PanelW, height, Color.FromArgb(236, 12, 12, 15));
-            Hud.Bar(left, y, PanelW, 0.0018f, Color.FromArgb(190, 240, 170, 56));
+            Theme.Rule(x, y + 0.003f, wide, arrive);
+
+            var grown = Theme.Grown(_pickedAt);
 
             for (var i = 0; i < lines.Count; i++)
             {
-                Hud.Text(lines[i], left + 0.010f, y + 0.009f + i * 0.016f, 0.28f,
-                         Color.FromArgb(220, 205, 205, 212), Plain);
+                var slide = i == 0 ? Hud.ToX(0.008f) * (1f - grown) : 0f;
+
+                Hud.Text(lines[i], x + slide, y + NotePad + i * NoteLine, NoteScale,
+                         Palette.Alpha(Palette.TextDim, (int)((120f + 100f * grown) * arrive)),
+                         Hud.FontBody);
             }
+        }
+
+        /// <summary>
+        /// The footer: a rule and the keys as caps, with the way out in the same corner as
+        /// every other screen. Only the keys that would do something here.
+        /// </summary>
+        private void Foot(float x, float right, float y, float arrive)
+        {
+            Theme.Rule(x, y, right - x, arrive);
+
+            var ky = y + 0.011f;
+
+            Kit.KeyRight(right, ky, Kit.Back, "DONE", arrive);
+
+            var kx = Kit.Key(x, ky, null, "arrow_updown.png", "PICK", arrive);
+
+            if (LeftRightAdjusts)
+            {
+                kx = Kit.Key(kx, ky, null, "arrow_leftright.png", "ADJUST", arrive);
+
+                if (Tabs.Count > 1) kx = Kit.Key(kx, ky, Kit.Pages, null, "TABS", arrive);
+            }
+            else if (Tabs.Count > 1)
+            {
+                kx = Kit.Key(kx, ky, null, "arrow_leftright.png", "TABS", arrive);
+            }
+
+            if (Rows.Count > 0) Kit.Key(kx, ky, Kit.Confirm, null, ConfirmWord, arrive);
         }
 
         // ======================================================================
@@ -965,7 +933,7 @@ namespace BareMinimum.UI
             {
                 var candidate = current.Length == 0 ? word : current + " " + word;
 
-                if (Hud.Width(candidate, scale, Plain) <= width)
+                if (Hud.Width(candidate, scale, Hud.FontBody) <= width)
                 {
                     current = candidate;
                     continue;
@@ -994,19 +962,6 @@ namespace BareMinimum.UI
         }
 
         /// <summary>Wraps round the ends, so holding down past the last row returns to the first.</summary>
-        /// <summary>One colour toward another. Straight lerp, alpha included.</summary>
-        private static Color Blend(Color a, Color b, float t)
-        {
-            if (t <= 0f) return a;
-            if (t >= 1f) return b;
-
-            return Color.FromArgb(
-                (int)(a.A + (b.A - a.A) * t),
-                (int)(a.R + (b.R - a.R) * t),
-                (int)(a.G + (b.G - a.G) * t),
-                (int)(a.B + (b.B - a.B) * t));
-        }
-
         private static int Wrap(int v, int count)
         {
             if (count <= 0) return 0;

@@ -1422,6 +1422,7 @@ namespace BareMinimum.Venues
             _shopping = v;
 
             _ui.Title = v.Name.ToUpperInvariant();
+            _ui.ConfirmWord = "BUY";
             _ui.Tabs.Clear();
             _ui.Open();
 

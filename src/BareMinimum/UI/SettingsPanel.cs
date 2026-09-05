@@ -91,6 +91,7 @@ namespace BareMinimum.UI
 
             _ui.Title = "BARE MINIMUM";
             _ui.LeftRightAdjusts = true;
+            _ui.ConfirmWord = "SET";
             // THE BLINK WENT WITH THE EYE. It was the one place in the mod with room for a
             // moving mark -- a menu is looked AT, so something that stirs every few seconds
             // reads as character rather than as movement in the corner of your vision. A moon

@@ -136,6 +136,10 @@ namespace BareMinimum
                 // menu that has ALREADY closed, and its whole job is the frames after.
                 UI.Menu.Cooldown();
 
+                // Whether the panels move at all: the same switch the HUD icons obey, read
+                // every tick so flipping it in the settings menu takes effect in that menu.
+                UI.Theme.Motion = _cfg.HudAnimate;
+
                 // THE SETTINGS MENU RUNS EVEN WHEN THE MOD IS SWITCHED OFF, and it has to:
                 // "Mod enabled" is a row inside it, so gating it behind that flag would make
                 // turning the mod off a one-way trip that could only be undone by editing the

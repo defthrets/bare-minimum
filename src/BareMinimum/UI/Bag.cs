@@ -36,17 +36,23 @@ namespace BareMinimum.UI
         private const float PanelW = 0.34f;
         private const float Top = 0.170f;
 
-        private const float HeaderH = 0.052f;
-        private const float NoteH = 0.062f;
+        /// <summary>Air between the panel's edge and anything in it, and above and below the grid.</summary>
+        private const float Pad = 0.012f;
+        private const float GridPad = 0.006f;
+
+        /// <summary>The card under the grid: the chosen thing, said properly.</summary>
+        private const float CardH = 0.052f;
+
+        /// <summary>The gap between tiles, as an x fraction. Turned into y through the aspect.</summary>
+        private const float Gap = 0.0018f;
+
+        /// <summary>How much the chosen picture swells as its plate comes up.</summary>
+        private const float PickGrow = 0.10f;
 
         private const int Columns = 5;
 
         /// <summary>Rows on screen. Twenty tiles, which is the default pocket exactly.</summary>
         private const int Rows = 4;
-
-        private const int Plain = 4;
-
-        private static readonly Color Accent = Color.FromArgb(255, 240, 170, 56);
 
         private readonly Core.Settings _cfg;
         private readonly Catalogue _menu;
@@ -61,7 +67,13 @@ namespace BareMinimum.UI
         private bool _down;
         private int _quietUntil;
 
-        private float _aspect;
+        /// <summary>The cursor frame that glides between tiles. See UI.Glide.</summary>
+        private readonly Glide _frame = new Glide();
+
+        /// <summary>When the pocket opened, when the cursor last moved, and where it moved from.</summary>
+        private int _shownAt;
+        private int _pickedAt;
+        private int _last = -1;
 
         public bool IsOpen { get; private set; }
 
@@ -111,6 +123,11 @@ namespace BareMinimum.UI
 
             _index = 0;
             _page = 0;
+
+            _shownAt = Game.GameTime;
+            _pickedAt = _shownAt;
+            _last = -1;
+            _frame.Reset();
 
             IsOpen = true;
             Sound("SELECT");
@@ -193,7 +210,9 @@ namespace BareMinimum.UI
             var to = _index + by;
             if (to < 0 || to >= _ids.Count) return;
 
+            _last = _index;
             _index = to;
+            _pickedAt = Game.GameTime;
 
             var perPage = Columns * Rows;
             _page = perPage <= 0 ? 0 : _index / perPage;
@@ -295,148 +314,209 @@ namespace BareMinimum.UI
         // Drawing
         // ======================================================================
 
-        private float Aspect()
-        {
-            if (_aspect > 0f) return _aspect;
-
-            try
-            {
-                var res = GTA.UI.Screen.Resolution;
-                if (res.Height > 0) _aspect = res.Width / (float)res.Height;
-            }
-            catch { /* fall through */ }
-
-            if (_aspect <= 0f) _aspect = 16f / 9f;
-
-            return _aspect;
-        }
-
+        /// <summary>
+        /// The panel: the rounded black every panel in this mod and in Hoodrich is, a head with
+        /// the pocket's mark and its count, the tiles, a card naming the chosen thing, and the
+        /// keys as caps. Measured first, drawn second, because the panel is the ground.
+        /// </summary>
         private void Paint()
         {
+            var arrive = Theme.Arrive(_shownAt, Theme.EnterMs);
+
             var left = 0.5f - PanelW / 2f;
-            var y = Top;
+            var top = Top + Theme.EnterRise * (1f - arrive);
 
-            // ---- header ----
-            Hud.Bar(left, y, PanelW, HeaderH, Color.FromArgb(238, 12, 12, 15));
+            var x = left + Pad;
+            var right = left + PanelW - Pad;
+            var wide = right - x;
 
-            Hud.Text("POCKET", 0.5f, y + 0.006f, 0.52f,
-                     Color.FromArgb(255, 240, 240, 246), Plain, true);
-
-            var carried = _pantry.Total + " of " + _pantry.Slots;
-
-            Hud.Text(carried, 0.5f, y + 0.030f, 0.28f,
-                     Color.FromArgb(210, 196, 196, 204), Plain, true);
-
-            Hud.Bar(left, y + HeaderH - 0.0022f, PanelW, 0.0022f, Accent);
-
-            y += HeaderH;
-
-            // ---- the tiles ----
-            var tileW = PanelW / Columns;
-            var tileH = tileW * Aspect();
-
-            if (_ids.Count == 0)
-            {
-                Hud.Bar(left, y, PanelW, tileH, Color.FromArgb(228, 18, 18, 22));
-
-                Hud.Text("Nothing on you.", 0.5f, y + tileH / 2f - 0.012f, 0.34f,
-                         Color.FromArgb(190, 180, 180, 188), Plain, true);
-
-                y += tileH;
-                Footer(left, y, null);
-                return;
-            }
+            var tileW = wide / Columns;
+            var tileH = tileW * Hud.Aspect;
 
             var perPage = Columns * Rows;
             var first = _page * perPage;
 
-            var shownRows = (int)Math.Ceiling(Math.Min(perPage, _ids.Count - first) / (float)Columns);
-            if (shownRows < 1) shownRows = 1;
+            var onPage = Math.Max(0, Math.Min(perPage, _ids.Count - first));
+            var shownRows = onPage == 0 ? 1 : (onPage + Columns - 1) / Columns;
 
-            Hud.Bar(left, y, PanelW, shownRows * tileH, Color.FromArgb(228, 18, 18, 22));
+            var height = Kit.HeadH + GridPad + shownRows * tileH + GridPad + CardH + Kit.FootH;
 
-            for (var i = 0; i < perPage; i++)
+            Theme.Panel(left, top, PanelW, height, arrive);
+
+            var y = Kit.Head(left, top, PanelW, Pad, IconCache.Get("p_bag.png"), "POCKET",
+                             "what you are carrying", null, _pantry.Total + " of " + _pantry.Slots,
+                             arrive, 0f);
+
+            y += GridPad;
+
+            _frame.Begin();
+
+            Item item = null;
+
+            if (onPage == 0)
             {
-                var at = first + i;
-                if (at >= _ids.Count) break;
+                Hud.Text("Nothing on you.", x + wide / 2f, y + tileH / 2f - 0.012f, 0.30f,
+                         Palette.Alpha(Palette.TextDim, (int)(200f * arrive)), Hud.FontBody, true);
+            }
+            else
+            {
+                var age = Game.GameTime - _shownAt;
+                var grown = Theme.Grown(_pickedAt);
 
-                var col = i % Columns;
-                var row = i / Columns;
+                for (var i = 0; i < onPage; i++)
+                {
+                    var at = first + i;
 
-                Tile(_ids[at], left + col * tileW, y + row * tileH, tileW, tileH, at == _index, i);
+                    var col = i % Columns;
+                    var row = i / Columns;
+
+                    // Staggered a frame or two apart, so the pocket is unpacked rather than
+                    // switched on.
+                    var land = Kit.Landed(age, i * 35, Theme.EnterMs);
+
+                    var show = arrive * land;
+                    if (show <= 0.01f) continue;
+
+                    var tx = x + col * tileW;
+                    var ty = y + row * tileH + Theme.EnterRise * 0.5f * (1f - land);
+
+                    var picked = at == _index;
+                    var lit = Theme.Lit(at, _index, _last, grown);
+
+                    Tile(_ids[at], tx, ty, tileW, tileH, lit, show, i, picked, grown);
+
+                    if (picked)
+                    {
+                        _frame.Target(tx + Gap, ty + Gap * Hud.Aspect,
+                                      tileW - Gap * 2f, tileH - Gap * 2f * Hud.Aspect);
+                    }
+                }
+
+                item = _menu.Find(_ids[Clamp(_index, 0, _ids.Count - 1)]);
             }
 
-            y += shownRows * tileH;
+            y += shownRows * tileH + GridPad;
 
-            Footer(left, y, _menu.Find(_ids[Clamp(_index, 0, _ids.Count - 1)]));
+            Card(x, y, wide, item, arrive);
+
+            Foot(x, right, top + height - Kit.FootH, item, arrive);
+
+            // Last, so it rides over the tile it is pointing at.
+            _frame.Draw(arrive);
         }
 
-        private void Tile(string id, float x, float y, float w, float h, bool selected, int slot)
+        /// <summary>
+        /// One square: the dark ground with a hairline along its top, the amber coming up under
+        /// the cursor and going down where it left, the light crossing the lit one. The same
+        /// tile Hoodrich draws, in this mod's colour.
+        /// </summary>
+        private void Tile(string id, float x, float y, float w, float h, float lit, float show,
+                          int slot, bool picked, float grown)
         {
+            var gx = Gap;
+            var gy = Gap * Hud.Aspect;
+
+            var tx = x + gx;
+            var ty = y + gy;
+            var tw = w - gx * 2f;
+            var th = h - gy * 2f;
+
+            Hud.Bar(tx, ty, tw, th, Color.FromArgb((int)(34f * show), 255, 255, 255));
+            Hud.Bar(tx, ty, tw, 0.0012f, Color.FromArgb((int)(64f * (1f - lit) * show), 255, 255, 255));
+
+            Theme.Fill(tx, ty, tw, th, lit * show);
+            Theme.Sweep(tx, ty, tw, th, lit * show);
+
             var item = _menu.Find(id);
-
-            Hud.Bar(x + 0.0016f, y + 0.0016f * Aspect(), w - 0.0032f, h - 0.0032f * Aspect(),
-                    selected ? Color.FromArgb(242, 240, 170, 56)
-                             : Color.FromArgb(215, 30, 30, 36));
-
             if (item == null) return;
 
             var icon = IconCache.Get("p_" + item.Icon + ".png");
 
             if (icon != null && !icon.Missing)
             {
-                var tall = h * 0.56f;
-                var wide = tall / Aspect();
+                var swell = picked ? 1f + PickGrow * grown : 1f;
 
-                // ITEM TINT ON A DARK TILE, NEAR-BLACK ON THE AMBER ONE. The art is white and
-                // CustomSprite MULTIPLIES, so the same file does both -- and a taco's own warm
-                // brown over a full-strength amber highlight is mud, which is the whole reason
-                // the selected tile ignores the tint.
-                var ink = selected
-                    ? Color.FromArgb(255, 20, 18, 14)
-                    : Sheen.On(item.Tint, slot * 0.11f, _cfg.HudAnimate ? _cfg.HudShimmer * 0.6f : 0f);
+                var tall = th * 0.56f * swell;
+                var wideIcon = Hud.ToX(tall);
 
-                icon.DrawSized(x + w / 2f, y + h * 0.44f, wide, tall, ink);
+                // ITEM TINT ON A DARK TILE, NEAR-BLACK ON THE AMBER ONE, and every shade
+                // between while the plate is on its way. The art is white and CustomSprite
+                // MULTIPLIES, so the same file does both -- and a taco's own warm brown over
+                // full-strength amber is mud.
+                var tint = Sheen.On(item.Tint, slot * 0.11f, lit < 0.5f ? Shimmer() : 0f);
+
+                var ink = Theme.Ink(Palette.Alpha(tint, (int)(238f * show)), lit);
+
+                icon.DrawSized(tx + tw / 2f, ty + th * 0.46f, wideIcon, tall, ink);
             }
 
-            // ---- how many ----
-            //
-            // Drawn for every stack including a single one. "1" is information -- it says this
-            // is the last taco -- and a badge that appears only at two reads as an error state
-            // the first time it shows up.
+            // How many, on a chip in the corner. Drawn for every stack including a single one:
+            // "1" says this is the last taco, and a badge that appears only at two reads as an
+            // error state the first time it shows up.
             var n = _pantry.CountOf(id);
 
-            Hud.Text(n.ToString(), x + w - 0.006f, y + h - 0.021f, 0.30f,
-                     selected ? Color.FromArgb(255, 26, 22, 16)
-                              : Color.FromArgb(235, 238, 238, 244),
-                     Plain, false, true, !selected);
+            var chipW = Hud.ToX(0.013f);
+            const float chipH = 0.013f;
+
+            Hud.Bar(tx + tw - chipW, ty + th - chipH, chipW, chipH,
+                    Color.FromArgb((int)(215f * show), 12, 12, 15));
+
+            Hud.TextRight(n.ToString(), tx + tw - 0.0015f, ty + th - chipH + 0.0005f, 0.22f,
+                          Palette.Alpha(Palette.Text, (int)(255f * show)), Hud.FontLabel, false);
         }
 
-        private void Footer(float left, float y, Item item)
+        private float Shimmer()
         {
-            Hud.Bar(left, y, PanelW, NoteH, Color.FromArgb(236, 12, 12, 15));
-            Hud.Bar(left, y, PanelW, 0.0018f, Color.FromArgb(190, 240, 170, 56));
+            return _cfg.HudAnimate ? _cfg.HudShimmer * 0.6f : 0f;
+        }
 
-            if (item != null)
+        /// <summary>
+        /// The card under the tiles: a tile is a glance, this is where it becomes words. The
+        /// name slides in from the left as the plate comes up under the new tile, so the word
+        /// arrives with the cursor rather than swapping under it.
+        /// </summary>
+        private void Card(float x, float y, float wide, Item item, float arrive)
+        {
+            Theme.Rule(x, y, wide, arrive);
+
+            if (item == null)
             {
-                Hud.Text(item.Name, left + 0.010f, y + 0.006f, 0.36f,
-                         Color.FromArgb(245, 240, 240, 246), Plain);
-
-                var says = item.Smoke ? "Enter to smoke it."
-                         : item.Drink ? "Enter to drink it."
-                                      : "Enter to eat it.";
-
-                Hud.Text(says, left + 0.010f, y + 0.030f, 0.28f,
-                         Color.FromArgb(200, 190, 190, 198), Plain);
-            }
-            else
-            {
-                Hud.Text("Buy something and it turns up here.", left + 0.010f, y + 0.006f, 0.30f,
-                         Color.FromArgb(200, 190, 190, 198), Plain);
+                Hud.Text("Buy something and it turns up here.", x, y + 0.010f, 0.27f,
+                         Palette.Alpha(Palette.TextDim, (int)(190f * arrive)), Hud.FontBody);
+                return;
             }
 
-            Hud.Text("BACKSPACE to close", left + PanelW - 0.010f, y + 0.030f, 0.26f,
-                     Color.FromArgb(170, 170, 170, 180), Plain, false, true);
+            var grown = Theme.Grown(_pickedAt);
+
+            Theme.Caption(item.Name, x, y + 0.008f, grown, 0.32f);
+
+            if (!string.IsNullOrEmpty(item.Desc))
+            {
+                Hud.Text(Kit.Fit(item.Desc, wide, 0.25f, Hud.FontBody), x, y + 0.031f, 0.25f,
+                         Palette.Alpha(Palette.TextDim, (int)((110f + 90f * grown) * arrive)),
+                         Hud.FontBody);
+            }
+        }
+
+        /// <summary>The keys as caps, with the way out in the same corner as every other screen.</summary>
+        private void Foot(float x, float right, float y, Item item, float arrive)
+        {
+            Theme.Rule(x, y, right - x, arrive);
+
+            var ky = y + 0.011f;
+
+            Kit.KeyRight(right, ky, Kit.Back, "DONE", arrive);
+
+            if (_ids.Count == 0) return;
+
+            var kx = Kit.Key(x, ky, null, "arrow_leftright.png", "PICK", arrive);
+
+            var verb = item == null ? "EAT IT"
+                     : item.Smoke ? "SMOKE IT"
+                     : item.Drink ? "DRINK IT"
+                                  : "EAT IT";
+
+            Kit.Key(kx, ky, Kit.Confirm, null, verb, arrive);
         }
 
         private static int Clamp(int v, int lo, int hi)
