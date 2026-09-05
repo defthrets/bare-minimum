@@ -183,8 +183,49 @@ namespace BareMinimum.Core
         /// <summary>Whether an empty stomach slowly costs health.</summary>
         public bool StarvingCostsHealth = true;
 
-        /// <summary>Health points per game hour, once hunger is at zero.</summary>
-        public float StarvingHealthPerHour = 4f;
+        /// <summary>
+        /// Health points per game hour, once hunger is at zero.
+        ///
+        /// RAISED FROM 4, WHICH WAS INVISIBLE. Four an hour on a two-hundred point bar with
+        /// the floor a sixth of the way up is forty-two game hours to go from full health to
+        /// the floor -- an hour and a half of real play, which nobody was ever going to
+        /// notice happening. Fifteen gets there in about twenty real minutes: slow enough
+        /// that it is a warning rather than a punishment, fast enough to be a warning at all.
+        /// </summary>
+        public float StarvingHealthPerHour = 15f;
+
+        // ---- running out of sleep entirely -----------------------------------
+
+        /// <summary>
+        /// Whether an empty sleep meter eventually puts him on the floor.
+        ///
+        /// The meter had no bottom before this: it emptied, the walk got loose, the camera
+        /// swayed, and then nothing else ever happened however long you stayed up. A need
+        /// with no consequence at the end of it is a dial, not a need.
+        /// </summary>
+        public bool SleepCollapse = true;
+
+        /// <summary>How long he is out for, in game hours.</summary>
+        public float SleepCollapseHours = 4f;
+
+        /// <summary>
+        /// How much of a rest that is, against a proper night. Sleeping rough on a pavement,
+        /// so the car's figure rather than the bed's -- and four hours at that comes back at
+        /// about a fifth of the meter, which is enough that he does not simply drop again.
+        /// </summary>
+        public float SleepCollapseQuality = 0.55f;
+
+        /// <summary>
+        /// Real seconds between the meter hitting zero and him going down.
+        ///
+        /// A window rather than an instant, because being taken off your feet with no warning
+        /// reads as the mod crashing. He gets told, the screen starts to swim, and then he
+        /// goes -- which is long enough to pull over, and short enough to mean something.
+        /// </summary>
+        public float SleepCollapseAfterSeconds = 30f;
+
+        /// <summary>Whether an empty sleep meter makes the picture swim.</summary>
+        public bool SleepWobble = true;
 
         // ---- Sleeping --------------------------------------------------------
 
@@ -686,6 +727,15 @@ namespace BareMinimum.Core
                                                       cfg.StarvingCostsHealth);
                 cfg.StarvingHealthPerHour = ini.GetFloat("Effects", "StarvingHealthPerHour",
                                                          cfg.StarvingHealthPerHour, 0f, 100f);
+
+                cfg.SleepCollapse = ini.GetBool("Sleep", "Collapse", cfg.SleepCollapse);
+                cfg.SleepCollapseHours = ini.GetFloat("Sleep", "CollapseHours",
+                                                      cfg.SleepCollapseHours, 0.5f, 24f);
+                cfg.SleepCollapseQuality = ini.GetFloat("Sleep", "CollapseQuality",
+                                                        cfg.SleepCollapseQuality, 0f, 1f);
+                cfg.SleepCollapseAfterSeconds = ini.GetFloat("Sleep", "CollapseAfterSeconds",
+                                                             cfg.SleepCollapseAfterSeconds, 0f, 600f);
+                cfg.SleepWobble = ini.GetBool("Sleep", "Wobble", cfg.SleepWobble);
 
                 cfg.SleepInBeds = ini.GetBool("Sleeping", "InBeds", cfg.SleepInBeds);
                 cfg.SleepInCars = ini.GetBool("Sleeping", "InCars", cfg.SleepInCars);

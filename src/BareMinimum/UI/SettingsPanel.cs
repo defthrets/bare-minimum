@@ -356,6 +356,10 @@ namespace BareMinimum.UI
             { "Well-fed speed bonus",     "s_run.png"    },
             { "Bonus starts above",       "s_run.png"    },
             { "Starving costs health",    "s_heart.png"  },
+            { "Pass out when exhausted",  "s_bed.png"    },
+            { "Hours out",                "s_clock.png"  },
+            { "Warning before it",        "s_clock.png"  },
+            { "Wavy vision when empty",   "s_eye.png"    },
 
             { "Sleep in beds",            "s_bed.png"    },
             { "Sleep in cars",            "s_car.png"    },
@@ -496,6 +500,28 @@ namespace BareMinimum.UI
             Bool("Starving costs health", "Effects", "StarvingCostsHealth",
                  () => _cfg.StarvingCostsHealth, v => _cfg.StarvingCostsHealth = v,
                  "Slowly, and it stops at a sixth of your health. It will not kill you.");
+
+            Bool("Pass out when exhausted", "Sleep", "Collapse",
+                 () => _cfg.SleepCollapse, v => _cfg.SleepCollapse = v,
+                 "An empty sleep meter eventually puts you on the floor where you stand.");
+
+            Float("Hours out", "Sleep", "CollapseHours",
+                  () => _cfg.SleepCollapseHours, v => _cfg.SleepCollapseHours = v,
+                  0.5f, 0.5f, 24f, "0.#",
+                  "How long you are out for when you pass out.",
+                  () => _cfg.SleepCollapse,
+                  "~y~Turn passing out ON first.");
+
+            Float("Warning before it", "Sleep", "CollapseAfterSeconds",
+                  () => _cfg.SleepCollapseAfterSeconds, v => _cfg.SleepCollapseAfterSeconds = v,
+                  5f, 0f, 600f, "0",
+                  "Seconds between the meter emptying and you going down. Real seconds.",
+                  () => _cfg.SleepCollapse,
+                  "~y~Turn passing out ON first.");
+
+            Bool("Wavy vision when empty", "Sleep", "Wobble",
+                 () => _cfg.SleepWobble, v => _cfg.SleepWobble = v,
+                 "The picture swims once the sleep meter is completely gone.");
 
             Group("SLEEP");
 

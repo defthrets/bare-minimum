@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GTA;
 using GTA.Chrono;
 using GTA.Native;
@@ -14,7 +14,13 @@ namespace BareMinimum.Needs
     {
         None,
         Bed,
-        Car
+        Car,
+
+        /// <summary>
+        /// Not a bunk at all: wherever he was standing when he stopped being able to stay
+        /// awake. Same sequence, worse rest, and nobody chose it.
+        /// </summary>
+        Collapse
     }
 
     /// <summary>
@@ -32,6 +38,14 @@ namespace BareMinimum.Needs
         private enum Phase
         {
             Idle,
+
+            /// <summary>
+            /// On the floor, still watching. The one phase that happens BEFORE the fade --
+            /// a screen that goes black the instant somebody keels over reads as a bug, and
+            /// the second and a bit of him actually dropping is the whole point of the beat.
+            /// </summary>
+            Dropping,
+
             FadingOut,
             Resting,
 
@@ -93,6 +107,15 @@ namespace BareMinimum.Needs
 
         private readonly Knock _knock;
 
+        /// <summary>How long he lies there before the screen goes, and when it is due.</summary>
+        private const int DropMs = 1400;
+
+        /// <summary>When the sleep meter emptied, so the warning has a length. 0 = not empty.</summary>
+        private int _emptyAt;
+
+        /// <summary>Whether he has been warned about this spell of it.</summary>
+        private bool _warned;
+
         public Sleeping(Core.Settings cfg, Needs needs, Beds beds, Knock knock)
         {
             _cfg = cfg;
@@ -116,6 +139,8 @@ namespace BareMinimum.Needs
 
                 var me = Game.Player.Character;
                 if (me == null || !me.Exists() || me.IsDead) return;
+
+                if (Exhausted(me)) return;
 
                 var where = Offer(me);
 
@@ -313,28 +338,39 @@ namespace BareMinimum.Needs
 
             Hud.ClearHelp();
 
+            if (!FadeOutNow("sleep-begin")) return;
+
+            Log.Info("Sleeping " + _hours.ToString("0.#") + "h in a " +
+                     (where == Bunk.Bed ? "bed" : "car") + ".");
+        }
+
+        /// <summary>
+        /// Takes the screen and the controls, and starts the fade.
+        ///
+        /// SHARED BY THE SLEEP AND THE COLLAPSE, because the two differ in everything EXCEPT
+        /// this -- and the one part that must never be got wrong twice is the control flags.
+        ///
+        /// SetControlState, NOT the CanControlCharacter setter. That setter is obsolete in
+        /// SHVDN 3.9 for precisely the failure this sequence must never have: it can fail to
+        /// switch the controls back ON if the ambient-script flag was set when they were
+        /// disabled, which leaves the player frozen behind a screen that has already faded
+        /// back in with nothing left to undo it. The flags are passed IDENTICALLY here and in
+        /// HandBackControl; asymmetric flags are the whole cause of that bug.
+        /// </summary>
+        private bool FadeOutNow(string logKey)
+        {
             try
             {
                 Function.Call(Hash.DO_SCREEN_FADE_OUT, FadeMs);
 
-                // SetControlState, NOT the CanControlCharacter setter.
-                //
-                // That setter is obsolete in SHVDN 3.9 for a reason that is precisely the
-                // failure this sequence must never have: it can fail to switch the controls
-                // back ON if the ambient-script flag was set when they were disabled -- which
-                // leaves the player frozen behind a screen that has already faded back in,
-                // with nothing left to undo it.
-                //
-                // The flags are passed IDENTICALLY here and in HandBackControl. Asymmetric
-                // flags are the whole cause of that bug.
                 Game.Player.SetControlState(false, ControlFlags);
                 _tookControl = true;
             }
             catch (Exception ex)
             {
-                Log.Once("sleep-begin", "Could not start the sleep: " + ex.Message);
+                Log.Once(logKey, "Could not start the sleep: " + ex.Message);
                 Abandon();
-                return;
+                return false;
             }
 
             _phase = Phase.FadingOut;
@@ -343,9 +379,117 @@ namespace BareMinimum.Needs
             // done; this is only here so a fade that never completes cannot wedge the mod with
             // the player's control taken away.
             _phaseUntil = Game.GameTime + FadeMs + 1500;
+            return true;
+        }
 
-            Log.Info("Sleeping " + _hours.ToString("0.#") + "h in a " +
-                     (where == Bunk.Bed ? "bed" : "car") + ".");
+        // ======================================================================
+        // Running out of sleep altogether
+        // ======================================================================
+
+        /// <summary>
+        /// Watches an empty sleep meter, warns, and eventually puts him on the floor.
+        /// Returns true once it has taken over, so the ordinary bed prompt stands down.
+        ///
+        /// A WINDOW RATHER THAN AN INSTANT. Being dropped the frame the meter hits zero reads
+        /// as the mod crashing; a warning, then the picture starting to swim -- see
+        /// Effects.Wobble -- then going down is long enough to pull the car over and short
+        /// enough to still be a consequence.
+        ///
+        /// IT REFUSES IN THE PLACES WHERE IT WOULD BE A DEATH RATHER THAN A NUISANCE: in the
+        /// air, in the water, and with the police already after you. This mod does not kill
+        /// you over a meter -- see the floor in Needs.Starve for the same rule.
+        /// </summary>
+        private bool Exhausted(Ped me)
+        {
+            if (!_cfg.SleepCollapse || !_needs.Sleep.Empty)
+            {
+                _emptyAt = 0;
+                _warned = false;
+                return false;
+            }
+
+            var now = Game.GameTime;
+
+            if (_emptyAt == 0) _emptyAt = now;
+
+            if (!_warned)
+            {
+                _warned = true;
+
+                try
+                {
+                    GTA.UI.Notification.PostTicker(
+                        "~y~You can barely keep your eyes open.~s~ Find somewhere to sleep.",
+                        false, false);
+                }
+                catch
+                {
+                    // He will find out the other way.
+                }
+            }
+
+            if (now - _emptyAt < (int)(_cfg.SleepCollapseAfterSeconds * 1000f)) return false;
+
+            // Not here. The clock keeps running, so he goes down as soon as he is somewhere
+            // that going down is survivable.
+            if (!CanDropHere(me)) return false;
+
+            Collapse(me);
+            return true;
+        }
+
+        /// <summary>Whether passing out where he is standing would be a nuisance rather than a death.</summary>
+        private static bool CanDropHere(Ped me)
+        {
+            try
+            {
+                if (me.IsInAir || me.IsSwimming || me.IsClimbing || me.IsFalling) return false;
+                if (me.IsRagdoll) return false;
+
+                // Unconscious and wanted is an arrest, which is a far bigger punishment than
+                // this is meant to be.
+                if (Game.Player.Wanted.WantedLevel > 0) return false;
+
+                // In a car is allowed -- he slumps at the wheel, and that is the one place the
+                // wake-up scene already knows what to do about. See Waking.
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>Puts him on the floor, then runs the ordinary sequence over the top of it.</summary>
+        private void Collapse(Ped me)
+        {
+            _bunk = Bunk.Collapse;
+            _hours = _cfg.SleepCollapseHours;
+
+            Hud.ClearHelp();
+
+            _emptyAt = 0;
+            _warned = false;
+
+            // ON THE FLOOR FIRST, THEN THE FADE. He is only ragdolled on foot: there is no
+            // falling over in a driver's seat, and asking for it there does nothing useful.
+            try
+            {
+                if (!me.IsInVehicle())
+                {
+                    Function.Call(Hash.SET_PED_TO_RAGDOLL, me.Handle, 4000, 5000, 0, true, true, false);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Once("sleep-collapse-ragdoll", "Could not drop him: " + ex.Message);
+            }
+
+            _phase = Phase.Dropping;
+            _phaseUntil = Game.GameTime + DropMs;
+
+            Log.Info("Passed out on an empty sleep meter, out for " +
+                     _hours.ToString("0.#") + "h.");
         }
 
         private void Advance()
@@ -354,6 +498,14 @@ namespace BareMinimum.Needs
 
             switch (_phase)
             {
+                case Phase.Dropping:
+                    if (now < _phaseUntil) return;
+
+                    // The controls were his the whole way down -- that is what makes it read
+                    // as him falling rather than as a cutscene starting.
+                    FadeOutNow("sleep-collapse");
+                    return;
+
                 case Phase.FadingOut:
                     if (!FadedOut() && now < _phaseUntil) return;
 
@@ -430,7 +582,9 @@ namespace BareMinimum.Needs
                                         " - the rest still counts.");
             }
 
-            var quality = _bunk == Bunk.Bed ? 1f : _cfg.CarRestoreFraction;
+            var quality = _bunk == Bunk.Bed ? 1f
+                        : _bunk == Bunk.Collapse ? _cfg.SleepCollapseQuality
+                        : _cfg.CarRestoreFraction;
             _needs.Slept(_hours, quality);
 
             // Waking up rested is also waking up with your wind back. Free, and it is the
@@ -462,8 +616,10 @@ namespace BareMinimum.Needs
             try
             {
                 var pct = (int)Math.Round(_needs.Sleep.Value * 100f);
+
                 GTA.UI.Notification.PostTicker(
-                    "~b~Slept~s~ " + _hours.ToString("0.#") + "h.  Rested " + pct + "%.", false, false);
+                    (_bunk == Bunk.Collapse ? "~r~Passed out~s~ for " : "~b~Slept~s~ ") +
+                    _hours.ToString("0.#") + "h.  Rested " + pct + "%.", false, false);
             }
             catch
             {
@@ -481,7 +637,11 @@ namespace BareMinimum.Needs
         /// </summary>
         private void Waking()
         {
-            if (_bunk != Bunk.Car) return;
+            // A COLLAPSE IN A CAR COUNTS TOO. It is the same picture from the outside -- a
+            // man asleep at the wheel where he stopped -- and it is the situation the wake-up
+            // scene was written for. Knock still decides for itself whether the spot deserves
+            // it; the method re-checks he is actually in a vehicle either way.
+            if (_bunk != Bunk.Car && _bunk != Bunk.Collapse) return;
 
             // LOUD, NOT SILENT. This read `if (!inACar || _knock == null) return;` and the
             // constructor had gained the parameter without ever assigning the field -- so

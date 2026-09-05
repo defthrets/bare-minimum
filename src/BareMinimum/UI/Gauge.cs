@@ -387,6 +387,18 @@ namespace BareMinimum.UI
 
             Hud.Bar(x, top, w, h, Fade(Color.FromArgb(165, 28, 28, 32)));
 
+            // THE MARK IS DRAWN HERE, BEFORE THE LEVEL, AND UNCONDITIONALLY.
+            //
+            // It used to be the last line of this method, past two early returns -- so the
+            // badge disappeared whenever the bar was EMPTY, and whenever the animation was
+            // switched off. Both are exactly when it is most needed: an empty bar with no
+            // mark under it is a black column that could be either meter, and the one thing
+            // a player at zero needs to know is which of the two just ran out.
+            //
+            // It sits BELOW the bar -- plateY is footY + breath -- so it cannot overlap the
+            // level however full that is, and drawing it first costs nothing.
+            Badge(flat, centreX, top + h, plateW, plateH, breath);
+
             var fraction = Clamp01(need.Value);
             if (fraction <= 0.002f) return;
 
@@ -399,8 +411,6 @@ namespace BareMinimum.UI
 
             if (sleep) Night(x, top, w, h, fraction, body);
             else Churn(x, top, w, h, fraction, body);
-
-            Badge(flat, centreX, top + h, plateW, plateH, breath);
         }
 
         /// <summary>

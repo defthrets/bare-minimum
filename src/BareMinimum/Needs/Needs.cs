@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using GTA;
@@ -264,7 +264,16 @@ namespace BareMinimum.Needs
 
             Sober(hours);
 
-            if (_cfg.StarvingCostsHealth && Hunger.Empty) Starve(hours);
+            if (_cfg.StarvingCostsHealth && Hunger.Empty)
+            {
+                Starve(hours);
+            }
+            else
+            {
+                // Off zero again: the debt is forgiven and he will be told afresh next time.
+                _healthDebt = 0f;
+                _toldStarving = false;
+            }
 
             _dirty = true;
         }
@@ -342,10 +351,33 @@ namespace BareMinimum.Needs
         /// the player may not have noticed is the fastest way for a mod like this to be
         /// uninstalled. It takes you to the edge and leaves you there.
         /// </summary>
+        /// <summary>Whether he has already been told, this spell of it. Reset when he eats.</summary>
+        private bool _toldStarving;
+
         private void Starve(float hours)
         {
             _healthDebt += _cfg.StarvingHealthPerHour * hours;
             if (_healthDebt < 1f) return;
+
+            // SAID ONCE, THE FIRST TIME IT ACTUALLY COSTS A POINT -- not when the meter hits
+            // zero. Health going down with no explanation is the mod looking broken, and the
+            // moment it starts is the moment worth saying it. The latch clears in Eat, so a
+            // second spell is announced again.
+            if (!_toldStarving)
+            {
+                _toldStarving = true;
+
+                try
+                {
+                    GTA.UI.Notification.PostTicker(
+                        "~r~You are starving.~s~ It is costing you health. Eat something.",
+                        false, false);
+                }
+                catch
+                {
+                    // The health still goes.
+                }
+            }
 
             try
             {

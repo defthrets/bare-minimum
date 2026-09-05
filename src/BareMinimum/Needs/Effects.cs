@@ -36,6 +36,9 @@ namespace BareMinimum.Needs
 
         private bool _drunkFlagged;
 
+        /// <summary>Whether we are the ones bending the picture. See Wobble.</summary>
+        private bool _wobbling;
+
         /// <summary>Clipsets already asked for, so the request is not spammed every frame.</summary>
         private readonly System.Collections.Generic.HashSet<string> _requested =
             new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -67,6 +70,7 @@ namespace BareMinimum.Needs
                 MoveRate(me, hunger, sleep);
                 Clipset(me, hunger, sleep, drunk);
                 Unsteady(me, sleep, drunk);
+                Wobble(sleep);
             }
             catch (Exception ex)
             {
@@ -344,6 +348,68 @@ namespace BareMinimum.Needs
             }
         }
 
+        // ======================================================================
+        // The picture swimming
+        // ======================================================================
+
+        /// <summary>
+        /// The wave over everything once the sleep meter is actually empty.
+        ///
+        /// A TIMECYCLE MODIFIER, not a camera shake -- the shake is already spent on the sway
+        /// and adding more of it just makes the camera louder. drug_wobbly is the game's own
+        /// "Wobbly" modifier: the picture breathes and bends at the edges, which is what being
+        /// unable to keep your eyes open looks like from the inside.
+        ///
+        /// THE NAME IS CHECKED, NOT GUESSED. It is in menyooStuff\TimecycModifiers.xml on this
+        /// machine, captioned "Wobbly". A timecycle name the game does not know is accepted in
+        /// silence and does nothing, so the only way to be sure is to look it up first.
+        ///
+        /// SET AS A TRANSITION so it swims in over a couple of seconds rather than snapping
+        /// on, and its strength breathes on a slow sine -- a constant wobble is a filter, one
+        /// that comes and goes is somebody fighting to stay awake.
+        /// </summary>
+        private void Wobble(float sleep)
+        {
+            var want = _cfg.SleepEnabled && _cfg.SleepWobble && sleep <= 0.0001f;
+
+            if (!want)
+            {
+                ClearWobble();
+                return;
+            }
+
+            try
+            {
+                if (!_wobbling)
+                {
+                    Function.Call(Hash.SET_TRANSITION_TIMECYCLE_MODIFIER, WobbleCycle, 2.0f);
+                    _wobbling = true;
+                }
+
+                // Between a bit over half and full, about once every three seconds.
+                var swell = 0.5f + 0.5f * (float)Math.Sin(Game.GameTime / 3000.0 * Math.PI * 2.0);
+
+                Function.Call(Hash.SET_TIMECYCLE_MODIFIER_STRENGTH, 0.55f + 0.45f * swell);
+            }
+            catch (Exception ex)
+            {
+                Log.Once("effects-wobble", "Could not make the picture swim: " + ex.Message);
+                _wobbling = false;
+            }
+        }
+
+        private void ClearWobble()
+        {
+            if (!_wobbling) return;
+            _wobbling = false;
+
+            try { Function.Call(Hash.CLEAR_TIMECYCLE_MODIFIER); }
+            catch { /* nothing to do about it */ }
+        }
+
+        /// <summary>The game's own "Wobbly". See Wobble for why this is not a guess.</summary>
+        private const string WobbleCycle = "drug_wobbly";
+
         private void StopShaking()
         {
             if (!_shaking) return;
@@ -391,6 +457,12 @@ namespace BareMinimum.Needs
             _applied = null;
             _drunkFlagged = false;
             StopShaking();
+            ClearWobble();
+
+            // Unconditionally, for the same reason the drunk flag is: a session that reloaded
+            // mid-wobble left the modifier on with nobody tracking it.
+            try { Function.Call(Hash.CLEAR_TIMECYCLE_MODIFIER); }
+            catch { /* nothing further to try */ }
         }
     }
 }
