@@ -53,6 +53,15 @@ namespace BareMinimum.Core
         /// <summary>Multiplier on the drain while sprinting, swimming or otherwise working.</summary>
         public float HungerExertionMultiplier = 2.2f;
 
+        /// <summary>
+        /// How much faster SLEEP goes while he is working, at a full sprint.
+        ///
+        /// SMALLER THAN THE FOOD ONE ON PURPOSE. Running the length of the city makes you
+        /// hungry long before it makes you sleepy, and a number as big as hunger's would have
+        /// a jog across Vinewood costing most of a night's rest.
+        /// </summary>
+        public float SleepExertionMultiplier = 1.5f;
+
         /// <summary>Multiplier on the drain while asleep. Low, but not nothing.</summary>
         public float HungerSleepMultiplier = 0.45f;
 
@@ -566,6 +575,21 @@ namespace BareMinimum.Core
         public float HudBarPace = 42f;
 
         /// <summary>
+        /// How much faster the whole gauge runs at a full sprint.
+        ///
+        /// A MULTIPLIER ON BarPace RATHER THAN A SECOND PACE, so it rides on top of the one
+        /// speed dial instead of arguing with it. The waterline, the contents and the stars
+        /// keep their ratios exactly and the entire instrument simply winds up -- which is the
+        /// same argument BarPace itself is built on and the reason it is the only lever here
+        /// that changes the rate without changing the shape.
+        ///
+        /// It reads the SAME Effort the drains do, and that is the whole point of it: the bars
+        /// quicken for precisely the reason they are emptying quicker, so the two of them say
+        /// one thing rather than two. A jog is 0.45 of the way there; a sprint is all of it.
+        /// </summary>
+        public float HudBarEffort = 2f;
+
+        /// <summary>
         /// How quickly the specks inside the bars move, 0 to 1. 0 stops them dead.
         ///
         /// A DIAL FOR THE SAME REASON BarWave IS ONE: pace is feel, and feel does not survive
@@ -702,6 +726,8 @@ namespace BareMinimum.Core
                                                       cfg.HungerHoursToEmpty, 0.5f, 500f);
                 cfg.HungerExertionMultiplier = ini.GetFloat("Hunger", "ExertionMultiplier",
                                                             cfg.HungerExertionMultiplier, 1f, 10f);
+                cfg.SleepExertionMultiplier = ini.GetFloat("Sleep", "ExertionMultiplier",
+                                                           cfg.SleepExertionMultiplier, 1f, 10f);
                 cfg.HungerSleepMultiplier = ini.GetFloat("Hunger", "SleepMultiplier",
                                                          cfg.HungerSleepMultiplier, 0f, 4f);
 
@@ -820,6 +846,7 @@ namespace BareMinimum.Core
                 cfg.HudBarWave = ini.GetFloat("HUD", "BarWave", cfg.HudBarWave, 0f, 1f);
                 cfg.HudBarDrift = ini.GetFloat("HUD", "BarDrift", cfg.HudBarDrift, 0f, 1f);
                 cfg.HudBarPace = ini.GetFloat("HUD", "BarPace", cfg.HudBarPace, 0.15f, 120f);
+                cfg.HudBarEffort = ini.GetFloat("HUD", "BarEffort", cfg.HudBarEffort, 1f, 6f);
 
                 cfg.HudAnimate = ini.GetBool("HUD", "Animate", cfg.HudAnimate);
                 cfg.HudShimmer = ini.GetFloat("HUD", "Shimmer", cfg.HudShimmer, 0f, 1f);

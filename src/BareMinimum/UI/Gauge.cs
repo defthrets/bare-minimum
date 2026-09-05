@@ -222,6 +222,9 @@ namespace BareMinimum.UI
 
             try
             {
+                // ONCE A FRAME, BEFORE ANYTHING READS THE CLOCK. See Clock.
+                Advance(needs);
+
                 var side = _cfg.HudSize;
 
                 // Square ON SCREEN. Sizes are fractions of the screen's own width and height,
@@ -1134,19 +1137,76 @@ namespace BareMinimum.UI
         /// </summary>
         private const float StarSlow = 6f;
 
+        /// <summary>
+        /// The animation clock: A PHASE THAT ACCUMULATES, not elapsed time times a rate.
+        ///
+        /// It used to be `ms / 1000 * pace`, which is correct only for as long as the pace
+        /// never changes -- and the instant it does, the whole accumulated phase is rescaled
+        /// with it. Going from 42 to 84 does not make the surface speed up, it teleports it to
+        /// twice as far along as it was. That was invisible while the only way to change the
+        /// pace was a settings row you could not see a bar from. It stopped being invisible
+        /// the moment the pace started tracking his feet.
+        ///
+        /// Integrating the rate instead makes a change of pace continuous by construction: the
+        /// phase never jumps, only the speed at which it is growing.
+        ///
+        /// READ-ONLY, AND ADVANCED ONCE A FRAME FROM Draw. Both bars call this and neither may
+        /// move the clock, or the second would be drawn a frame further on than the first and
+        /// the two would drift apart over a session.
+        /// </summary>
         private float Clock()
+        {
+            return _phase;
+        }
+
+        /// <summary>Moves the clock on. Called exactly once a frame, at the top of Draw.</summary>
+        private void Advance(Needs.Needs needs)
         {
             var now = Environment.TickCount & int.MaxValue;
 
-            if (_epoch == 0) _epoch = now;
+            if (!_ticking) { _ticking = true; _last = now; }
 
-            var ms = now - _epoch;
-            if (ms < 0) ms += int.MaxValue;
+            var step = now - _last;
 
-            return ms / 1000f * PaceOf();
+            // TickCount wraps to negative every 24.9 days, and a session running across that
+            // would otherwise see the clock jump backwards.
+            if (step < 0) step += int.MaxValue;
+
+            // A hitch, a loading screen, a pause or a suspended HUD is not animation. Anything
+            // past a quarter second is thrown away rather than fast-forwarded through.
+            if (step > 250) step = 250;
+
+            _last = now;
+
+            // ---- how hard he is working, eased ----
+            //
+            // The RATE is what changes here, so nothing can jump -- but a rate that snaps from
+            // one to two still reads as a switch being thrown. Chased instead, so the gauge
+            // winds up as he breaks into a run and winds back down as he stops, which is the
+            // shape the movement itself has.
+            var want = needs == null ? 0f : Clamp01(needs.Effort);
+
+            _effort += (want - _effort) * (1f - (float)Math.Pow(0.12, step / 1000.0));
+
+            if (Math.Abs(want - _effort) < 0.002f) _effort = want;
+
+            var lift = 1f + _effort * (Clamp(_cfg.HudBarEffort, 1f, 6f) - 1f);
+
+            _phase += step / 1000f * PaceOf() * lift;
+
+            // Kept bounded. Every period in here divides into a whole number of seconds far
+            // short of this, so the wrap is invisible -- and a float grown past a million has
+            // lost the precision the shortest of them need.
+            if (_phase > 1000000f) _phase -= 1000000f;
         }
 
-        private int _epoch;
+        /// <summary>Where the animation has got to, and when it was last moved on.</summary>
+        private float _phase;
+        private int _last;
+        private bool _ticking;
+
+        /// <summary>The eased effort the gauge is currently running at. See Advance.</summary>
+        private float _effort;
 
         private float PaceOf()
         {

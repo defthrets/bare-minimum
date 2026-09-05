@@ -91,6 +91,12 @@ namespace BareMinimum.Needs
             {
                 SwitchCharacterIfNeeded();
 
+                // EVERY TICK, NOT ONLY ON A CLOCK STEP. The drains are charged in game hours
+                // and two of those may be several frames apart, but the HUD reads this every
+                // frame -- and a value that only moved when the clock did would have the bars
+                // winding up a beat behind his feet.
+                Effort = Working();
+
                 bool jumped;
                 var hours = Step(out jumped);
 
@@ -259,7 +265,11 @@ namespace BareMinimum.Needs
                 // DRINK MAKES YOU TIRED FASTER. Not a separate timer -- it scales the sleep
                 // drain itself, so one beer barely registers and a session of them costs most
                 // of a day's rest without any new meter to read.
-                Sleep.Drain(hours, _cfg.SleepHoursToEmpty, Sober());
+                // AND WORKING MAKES YOU TIRED, WHICH IT DID NOT UNTIL NOW. Sprinting cost
+                // food and nothing else, so running the length of the city left him starving
+                // and perfectly well rested. Stacked on the drink multiplier rather than
+                // replacing it: a drunk sprint is worse than either on its own.
+                Sleep.Drain(hours, _cfg.SleepHoursToEmpty, Sober() * Tiring());
             }
 
             Sober(hours);
@@ -272,10 +282,52 @@ namespace BareMinimum.Needs
             {
                 // Off zero again: the debt is forgiven and he will be told afresh next time.
                 _healthDebt = 0f;
+
+                // AND ANY PAIN LINE STILL RUNNING IS CUT OFF, ONCE, ON THE WAY OUT OF IT.
+                // This is the frame he stopped starving, so it is the last chance to end a
+                // sound we caused -- and the game has no reason of its own to stop one, which
+                // is how it came to be still going long after the sandwich.
+                if (_toldStarving) Hush();
+
                 _toldStarving = false;
             }
 
             _dirty = true;
+        }
+
+        /// <summary>
+        /// How hard he is working right now, nought to one. Read every tick.
+        ///
+        /// ONE READING, THREE CONSUMERS: it makes hunger go faster, it makes sleep go faster,
+        /// and it winds the gauge up -- see Settings.HudBarEffort. Each of the three scales it
+        /// by a dial of its own, which is exactly why this is a bare fraction and not any one
+        /// of their multipliers. It used to BE the hunger multiplier, so anything else wanting
+        /// to know how hard he was working would have been reading a hunger setting to decide
+        /// how fast to draw.
+        /// </summary>
+        public float Effort { get; private set; }
+
+        /// <summary>What he is actually doing, as a fraction. See Effort.</summary>
+        private static float Working()
+        {
+            try
+            {
+                var me = Game.Player.Character;
+                if (me == null || !me.Exists()) return 0f;
+
+                // Swimming and climbing are all of it: there is no gentle version of either.
+                if (me.IsSprinting || me.IsSwimming || me.IsClimbing) return 1f;
+
+                // A jog is not half a sprint -- it is a day's walking done faster -- and 0.45
+                // is where the hunger drain has had it since that was written.
+                if (me.IsRunning) return 0.45f;
+            }
+            catch
+            {
+                // Treat an unreadable ped as standing still.
+            }
+
+            return 0f;
         }
 
         /// <summary>How much faster tiredness comes on, given how drunk they are.</summary>
@@ -314,55 +366,67 @@ namespace BareMinimum.Needs
         }
 
         /// <summary>
-        /// How much harder than standing about the player is currently working.
+        /// How much harder than standing about he is working, as a HUNGER multiplier.
         ///
-        /// Sitting in a car is NOT exertion and is not treated as rest either -- a long drive
-        /// should still make you hungry, just no faster than walking would.
+        /// A reading of Effort on hunger's own dial. Sitting in a car is not exertion and is
+        /// not treated as rest either -- a long drive should still make you hungry, just no
+        /// faster than walking would.
         /// </summary>
         private float Exertion()
         {
-            try
-            {
-                var me = Game.Player.Character;
-                if (me == null || !me.Exists()) return 1f;
+            return 1f + Effort * (_cfg.HungerExertionMultiplier - 1f);
+        }
 
-                if (me.IsSprinting || me.IsSwimming || me.IsClimbing)
-                    return _cfg.HungerExertionMultiplier;
-
-                if (me.IsRunning) return 1f + (_cfg.HungerExertionMultiplier - 1f) * 0.45f;
-            }
-            catch
-            {
-                // Treat an unreadable ped as standing still.
-            }
-
-            return 1f;
+        /// <summary>The same reading on SLEEP's dial, which is a gentler one.</summary>
+        private float Tiring()
+        {
+            return 1f + Effort * (_cfg.SleepExertionMultiplier - 1f);
         }
 
         /// <summary>
         /// An empty stomach costing health, slowly.
         ///
         /// ACCUMULATED RATHER THAN APPLIED PER TICK. A frame is worth a few thousandths of a
-        /// health point, and Ped.Health is an integer -- so rounding every frame either loses
-        /// the lot to truncation or costs a whole point sixty times a second. The debt is kept
-        /// as a float and spent only once it is worth a point.
+        /// health point and Ped.Health is an integer, so rounding every frame either loses the
+        /// lot to truncation or costs a whole point sixty times a second. The debt is kept as
+        /// a float and spent in bites.
         ///
-        /// It will never kill: the floor is deliberately above zero, because dying of a meter
-        /// the player may not have noticed is the fastest way for a mod like this to be
+        /// It will never kill: the floor is deliberately well above zero, because dying of a
+        /// meter the player may not have noticed is the fastest way for a mod like this to be
         /// uninstalled. It takes you to the edge and leaves you there.
         /// </summary>
         /// <summary>Whether he has already been told, this spell of it. Reset when he eats.</summary>
         private bool _toldStarving;
 
+        /// <summary>
+        /// How big a bite it takes, and how far down it is willing to go.
+        ///
+        /// BOTH OF THESE ARE ABOUT THE SOUND, not the arithmetic.
+        ///
+        /// Writing a ped's health is a damage event as far as the game is concerned, and it
+        /// answers with a pain grunt. Spending the debt the moment it was worth a SINGLE point
+        /// therefore had him wincing every eight seconds for as long as he was hungry, which
+        /// nobody heard as a health system -- they heard a sound stuck on. Five at a time is
+        /// the same damage a fifth as often.
+        ///
+        /// The floor was a sixth of full health, which parks him inside the band where the
+        /// game plays its own laboured breathing -- permanently, because starving holds him
+        /// exactly there and nothing else moves him off it. That is the loop that would not
+        /// end. A third of the way up is above the band and still plainly dangerous: it is one
+        /// gunfight from dying, which is what "the edge" was always meant to mean.
+        /// </summary>
+        private const float StarveBite = 5f;
+        private const float StarveFloor = 0.35f;
+
         private void Starve(float hours)
         {
             _healthDebt += _cfg.StarvingHealthPerHour * hours;
-            if (_healthDebt < 1f) return;
+            if (_healthDebt < StarveBite) return;
 
-            // SAID ONCE, THE FIRST TIME IT ACTUALLY COSTS A POINT -- not when the meter hits
+            // SAID ONCE, THE FIRST TIME IT ACTUALLY COSTS ANYTHING -- not when the meter hits
             // zero. Health going down with no explanation is the mod looking broken, and the
-            // moment it starts is the moment worth saying it. The latch clears in Eat, so a
-            // second spell is announced again.
+            // moment it starts is the moment worth saying it. The latch clears above, so a
+            // second spell of it is announced afresh.
             if (!_toldStarving)
             {
                 _toldStarving = true;
@@ -384,18 +448,46 @@ namespace BareMinimum.Needs
                 var me = Game.Player.Character;
                 if (me == null || !me.Exists()) return;
 
-                var floor = Math.Max(20, me.MaxHealth / 6);
+                var floor = (int)Math.Max(20f, me.MaxHealth * StarveFloor);
                 if (me.Health <= floor) { _healthDebt = 0f; return; }
 
                 var take = (int)_healthDebt;
                 _healthDebt -= take;
 
                 me.Health = Math.Max(floor, me.Health - take);
+
+                // AND THE GRUNT THAT CAUSED IS CUT OFF BEHIND US. We asked for the damage, so
+                // we clean up after it rather than leaving him wincing at nothing: from the
+                // player's side that sound has no event to belong to, and one that keeps
+                // arriving out of nowhere is precisely the one that reads as broken.
+                Hush();
             }
             catch (Exception ex)
             {
                 _healthDebt = 0f;
                 Log.Once("needs-starve", "Could not apply starvation damage: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Stops whatever the player is saying this instant.
+        ///
+        /// Only ever used to end a line WE caused. It is not a general mute -- it kills the
+        /// one speech playing right now and nothing after it, so anything the game has a real
+        /// reason to say next still gets said.
+        /// </summary>
+        private static void Hush()
+        {
+            try
+            {
+                var me = Game.Player.Character;
+                if (me == null || !me.Exists()) return;
+
+                Function.Call(Hash.STOP_CURRENT_PLAYING_AMBIENT_SPEECH, me.Handle);
+            }
+            catch
+            {
+                // A grunt too many is not worth an exception.
             }
         }
 
