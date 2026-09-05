@@ -236,6 +236,9 @@ namespace BareMinimum.Core
         /// <summary>What each character is carrying. Beside needs.json, and saved like it.</summary>
         public static string PantryFile => Path.Combine(Writable, "pantry.json");
 
+        /// <summary>What is in the fridge, per character. Written by the mod, never shipped.</summary>
+        public static string FridgeFile => Path.Combine(Writable, "fridge.json");
+
         private static void EnsureDir(string path)
         {
             try

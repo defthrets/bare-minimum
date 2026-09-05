@@ -179,11 +179,21 @@ function Deploy-To([string]$gameDir, [string]$label) {
     $dataDst = Join-Path $scripts 'BareMinimum'
     New-Item -ItemType Directory -Force $dataDst | Out-Null
 
-    # THE ONE FILE THE MOD ITSELF WRITES. It is the player's saved fuel for every vehicle they
-    # own, it lives in the folder being managed here, and it looks exactly like a data file we
-    # stopped shipping. Anything else added to Paths that the mod WRITES has to be added to
-    # this list in the same change, or the next deploy destroys it and nothing says why.
+    # THE FILES THE MOD ITSELF WRITES: the needs, the pocket and the fridge. They live in the
+    # folder being managed here and they look exactly like data files we stopped shipping.
+    # Anything else added to Paths that the mod WRITES has to be added to this list in the
+    # same change, or the next deploy destroys it and nothing says why.
+    #
+    # (It read "the player's saved fuel for every vehicle they own" until now, which is Fumes'
+    # comment -- this script was started from that one and the sentence came along with it.)
+    #
+    # NOTHING PRUNES THE DEPLOY FOLDER TODAY, so this list is not load-bearing yet -- it is
+    # here so that whoever adds a prune inherits a list that is already right. Overspray lost
+    # somebody's graffiti to exactly that gap: a file the mod writes, in the folder the deploy
+    # manages, looking precisely like a data file that stopped shipping.
     $ours = @('needs.json', 'needs.json.bak',
+              'pantry.json', 'pantry.json.bak',
+              'fridge.json', 'fridge.json.bak',
               'BareMinimum.log', 'BareMinimum.log.1')
 
     Get-ChildItem $dataSrc -Recurse -File | ForEach-Object {

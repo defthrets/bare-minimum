@@ -51,6 +51,11 @@ namespace BareMinimum
         private readonly Pantry _pantry;
         private readonly Bag _bag;
 
+        /// <summary>The fridge: where it is, what is in it, and the screen over it.</summary>
+        private readonly Fridges _fridges;
+        private readonly Larder _larder;
+        private readonly FridgeScreen _fridge;
+
         private int _failures;
         private bool _parked;
         private bool _greeted;
@@ -78,6 +83,12 @@ namespace BareMinimum
             // AFTER the catalogue, because the pantry drops anything it is carrying that
             // foods.json no longer defines, and it cannot know that until the list is read.
             _pantry = new Pantry(_cfg, _catalogue);
+
+            // Same rule as the pantry: AFTER the catalogue, because the load drops anything
+            // foods.json no longer defines and it cannot know that until the list is read.
+            _larder = new Larder(_cfg, _catalogue);
+            _fridges = new Fridges();
+
             _counters = new Counters();
             _socials = new Social.Socials(_cfg);
             _socials.Load();
@@ -86,6 +97,7 @@ namespace BareMinimum
             _shop = new Shop(_cfg, _catalogue, _counters, _eating, _needs, _pantry);
 
             _bag = new Bag(_cfg, _catalogue, _pantry, _eating);
+            _fridge = new FridgeScreen(_cfg, _catalogue, _pantry, _larder, _eating, _fridges);
 
             // The bridge other mods reach by reflection. Wired LAST, so anything that finds
             // the type finds a working one behind it -- Api.Pantry.Ready is false until this
@@ -133,7 +145,8 @@ namespace BareMinimum
                 // control-suppression cannot block it the way it blocks the game's own inputs
                 // -- without this, pressing F7 at a till draws both menus on top of each other
                 // and every arrow press drives both of them at once.
-                _settings.Update(_sleeping.Busy || _shop.IsOpen || _vendors.MenuOpen || _bag.IsOpen);
+                _settings.Update(_sleeping.Busy || _shop.IsOpen || _vendors.MenuOpen ||
+                                 _bag.IsOpen || _fridge.IsOpen);
 
                 if (!_cfg.Enabled) return;
 
@@ -150,12 +163,20 @@ namespace BareMinimum
                 // A menu owns the interact key while it is up, so nothing else may read it.
                 // Without this, pressing E to buy a sandwich at a counter next to a bed would
                 // also be pressing E to go to sleep.
-                var menuOpen = _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen || _bag.IsOpen;
+                var menuOpen = _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen ||
+                               _bag.IsOpen || _fridge.IsOpen;
 
                 // The pocket stands down for every other menu for the same reason the settings
                 // panel does: its key is RAW, so control suppression cannot keep it out of a
                 // menu that is already up.
-                _bag.Update(_sleeping.Busy || _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen);
+                _bag.Update(_sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
+                            _vendors.MenuOpen || _fridge.IsOpen);
+
+                // THE FRIDGE STANDS DOWN FOR EVERY OTHER MENU AND FOR THE VENDORS' PROMPT.
+                // It reads the same interact key a stall does, so a fridge somehow within
+                // reach of one would otherwise have both of them answering the same press.
+                _fridge.Update(_sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
+                               _vendors.Offering || _bag.IsOpen);
 
                 if (!menuOpen && !_vendors.Offering) _sleeping.Update();
 
@@ -168,9 +189,11 @@ namespace BareMinimum
                 //
                 // Street vendors BEFORE the shop, so a stand standing next to a vending
                 // machine wins the interact key rather than both reading it on one frame.
-                _vendors.Update(dt, _sleeping.Busy || _shop.IsOpen || _settings.IsOpen || _bag.IsOpen);
+                _vendors.Update(dt, _sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
+                                    _bag.IsOpen || _fridge.IsOpen);
 
-                _shop.Update(_sleeping.Busy || _settings.IsOpen || _bag.IsOpen || _vendors.Offering);
+                _shop.Update(_sleeping.Busy || _settings.IsOpen || _bag.IsOpen ||
+                             _fridge.IsOpen || _vendors.Offering);
                 _eating.Update();
 
                 // While the sleep sequence owns the screen, the effects and the HUD stand
@@ -181,6 +204,7 @@ namespace BareMinimum
                 var suspended = _sleeping.Busy;
 
                 _pantry.Update(dt);
+                _larder.Update(dt);
 
                 // The officers at the window run their own little scene, and it must tick
                 // whatever else is happening -- it is watching for you to drive off.
@@ -270,6 +294,12 @@ namespace BareMinimum
             try { _sleeping.Shutdown(); } catch (Exception ex) { Log.Error("Sleep shutdown", ex); }
             try { _knock.Shutdown(); } catch (Exception ex) { Log.Error("Knock shutdown", ex); }
             try { _effects.Clear(); } catch (Exception ex) { Log.Error("Clearing effects", ex); }
+            // BOTH STORES, AND THE PANTRY WAS MISSING FROM HERE. They save on a ten second
+            // timer, so a reload -- which SHVDN does on a keypress -- could drop up to ten
+            // seconds of shopping. The needs were written down on the way out and the food
+            // was not.
+            try { _pantry.SaveNow(); } catch (Exception ex) { Log.Error("Pantry save", ex); }
+            try { _larder.SaveNow(); } catch (Exception ex) { Log.Error("Fridge save", ex); }
             try { _needs.SaveNow(); } catch (Exception ex) { Log.Error("Final save", ex); }
 
             Log.Info(Build.Name + " stopped cleanly.");

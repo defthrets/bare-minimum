@@ -371,6 +371,8 @@ namespace BareMinimum.UI
             { "Car hours",                "s_car.png"    },
 
             { "Buy to pocket",            "s_cart.png"   },
+            { "Fridge storage",           "s_layout.png" },
+            { "Fridge size",              "s_layout.png" },
             { "Pocket size",              "s_cart.png"   },
             { "Prices",                   "s_cart.png"   },
             { "Shop map markers",         "s_pin.png"    },
@@ -573,6 +575,17 @@ namespace BareMinimum.UI
                   () => _cfg.PantrySlots, v => _cfg.PantrySlots = (int)Math.Round(v),
                   2f, 1f, 200f, "0",
                   "How many items you can carry at once, all kinds counted together.");
+
+            Bool("Fridge storage", "Fridge", "Enabled",
+                 () => _cfg.FridgeEnabled, v => _cfg.FridgeEnabled = v,
+                 "The fridges in the safehouse kitchens hold food. Walk up to one and press E.");
+
+            Float("Fridge size", "Fridge", "Slots",
+                  () => _cfg.FridgeSlots, v => _cfg.FridgeSlots = (int)Math.Round(v),
+                  5f, 1f, 500f, "0",
+                  "How much a fridge holds. Far more than a pocket -- that is the point of it.",
+                  () => _cfg.FridgeEnabled,
+                  "~y~Turn fridge storage ON first.");
 
             Float("Prices", "Money", "PriceMultiplier",
                   () => _cfg.PriceMultiplier, v => _cfg.PriceMultiplier = v,

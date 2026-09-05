@@ -630,6 +630,25 @@ namespace BareMinimum.Core
         /// </summary>
         public int PantrySlots = 3;
 
+        // ---- the fridge ------------------------------------------------------
+
+        /// <summary>Whether the fridges in the safehouse kitchens open at all.</summary>
+        public bool FridgeEnabled = true;
+
+        /// <summary>
+        /// How much the fridge holds, all kinds counted together.
+        ///
+        /// DELIBERATELY MUCH LARGER THAN THE POCKET, because that is the whole point of it.
+        /// Three items is the right size for a pocket -- it is what makes a shop somewhere you
+        /// go back to rather than a warehouse you clear out once -- but it also left nowhere
+        /// to put a week's shopping, so the big items were pointless to buy. Forty is a
+        /// fridge: room enough that stocking up is worth the trip home.
+        /// </summary>
+        public int FridgeSlots = 40;
+
+        /// <summary>How close you have to be standing, in metres.</summary>
+        public float FridgeReach = 1.8f;
+
         /// <summary>
         /// How food is turned in his hand, in degrees about the prop's own three axes.
         ///
@@ -816,6 +835,10 @@ namespace BareMinimum.Core
 
                 cfg.BuyToPantry = ini.GetBool("Money", "BuyToPantry", cfg.BuyToPantry);
                 cfg.PantrySlots = (int)ini.GetFloat("Money", "PantrySlots", cfg.PantrySlots, 1f, 200f);
+
+                cfg.FridgeEnabled = ini.GetBool("Fridge", "Enabled", cfg.FridgeEnabled);
+                cfg.FridgeSlots = (int)ini.GetFloat("Fridge", "Slots", cfg.FridgeSlots, 1f, 500f);
+                cfg.FridgeReach = ini.GetFloat("Fridge", "Reach", cfg.FridgeReach, 0.5f, 6f);
 
                 cfg.FoodSpinX = ini.GetFloat("Eating", "FoodSpinX", cfg.FoodSpinX, -180f, 180f);
                 cfg.FoodSpinY = ini.GetFloat("Eating", "FoodSpinY", cfg.FoodSpinY, -180f, 180f);
