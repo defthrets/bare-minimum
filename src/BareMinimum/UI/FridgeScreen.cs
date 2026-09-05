@@ -446,18 +446,11 @@ namespace BareMinimum.UI
         /// </summary>
         private static void Suppress()
         {
-            GTA.Control[] blocked =
-            {
-                GTA.Control.Attack, GTA.Control.Attack2, GTA.Control.Aim,
-                GTA.Control.MeleeAttack1, GTA.Control.MeleeAttack2,
-                GTA.Control.Jump, GTA.Control.Enter, GTA.Control.Duck,
-                GTA.Control.SelectWeapon, GTA.Control.VehicleExit,
-                GTA.Control.Context, GTA.Control.ContextSecondary,
-                GTA.Control.Sprint, GTA.Control.Cover, GTA.Control.Reload,
-                GTA.Control.Detonate, GTA.Control.Phone
-            };
-
-            foreach (var c in blocked) Game.DisableControlThisFrame(c);
+            // ONE LIST, IN Menu. This used to be its own copy of the same seventeen controls,
+            // and all three copies were missing the melee inputs -- so closing this panel
+            // bare-handed threw a punch and no amount of fixing it here would have reached
+            // the till or the pocket.
+            Menu.Suppress();
         }
 
         private static bool Held(GTA.Control control)

@@ -1689,9 +1689,18 @@ namespace BareMinimum.Venues
         /// </summary>
         private bool Pressed()
         {
+            // NOT WHILE A MENU HAS JUST CLOSED. See UI.Menu.Quiet.
+            if (UI.Menu.Quiet) return false;
+
             try
             {
-                if (Game.IsControlJustPressed(GTA.Control.Context)) { _keyWasDown = true; return true; }
+                // The DISABLED variant: the counter pass holds Context down near a till so the
+                // game's own shop menu never hears it, and a stand parked outside a shop would
+                // otherwise go deaf along with it.
+                var pad = Function.Call<bool>(Hash.IS_DISABLED_CONTROL_JUST_PRESSED,
+                                              0, (int)GTA.Control.Context);
+
+                if (pad) { _keyWasDown = true; return true; }
             }
             catch
             {

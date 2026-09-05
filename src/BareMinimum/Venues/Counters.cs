@@ -307,6 +307,33 @@ namespace BareMinimum.Venues
             return Counter.None;
         }
 
+        /// <summary>
+        /// Is there a till within `radius`? Nothing is remembered and nothing is offered.
+        ///
+        /// SEPARATE FROM Nearest BECAUSE IT ASKS A DIFFERENT QUESTION. Nearest is "may the
+        /// player buy something here", which is a question about arm's reach and has to be
+        /// narrow. This is "is the game about to offer its own shop menu", which is a question
+        /// about the game's trigger volume and has to be wider -- and answering the second
+        /// with the first is why the vanilla list kept getting in.
+        ///
+        /// The not-a-food-shop check still applies: there is no reason to be shutting scripts
+        /// up inside Ammu-Nation, where we were never going to sell anything anyway.
+        /// </summary>
+        public bool AnyNear(Vector3 from, float radius)
+        {
+            try
+            {
+                if (InNotFoodShop()) return false;
+
+                return Closest(from, radius, Resolve(TillModels, "Tills", ref _tills)) != null;
+            }
+            catch (Exception ex)
+            {
+                Log.Once("counters-anynear", "Could not sweep for a till: " + ex.Message);
+                return false;
+            }
+        }
+
         private static Prop Closest(Vector3 from, float radius, int[] hashes)
         {
             Prop best = null;

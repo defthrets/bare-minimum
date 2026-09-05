@@ -217,6 +217,34 @@ namespace BareMinimum.UI
         private static int _quietUntil;
 
         /// <summary>
+        /// How long the block stays up after a close.
+        ///
+        /// Half a second rather than a frame or two: a key held down through a menu closing is
+        /// a human holding a key, and humans hold them for about that long. It was 300ms and
+        /// the punch got through anyway -- but that was the missing melee inputs, not the
+        /// window being short, so this is only the margin it always should have had.
+        /// </summary>
+        private const int QuietMs = 500;
+
+        /// <summary>
+        /// Whether a menu has only just closed.
+        ///
+        /// READ BY THE THINGS THAT OPEN MENUS, not by the menu. The interact key is read
+        /// through IS_DISABLED_CONTROL_JUST_PRESSED so that a pad still works while we are
+        /// holding the game's own controls down -- which means the press that just closed a
+        /// menu is still perfectly visible to whatever would open one, and without this it
+        /// would be answered by re-opening the thing that was just dismissed.
+        /// </summary>
+        public static bool Quiet
+        {
+            get
+            {
+                try { return Game.GameTime < _quietUntil; }
+                catch { return false; }
+            }
+        }
+
+        /// <summary>
         /// Keeps the block up for a few frames after any menu closes.
         ///
         /// Must be called EVERY TICK, from Main, not from Update: the whole point is the
@@ -231,9 +259,7 @@ namespace BareMinimum.UI
         {
             if (!IsOpen) return;
 
-            // 300ms rather than a frame or two: a key held down through a menu closing is a
-            // human holding a key, and humans hold them for about that long.
-            _quietUntil = Game.GameTime + 300;
+            _quietUntil = Game.GameTime + QuietMs;
 
             IsOpen = false;
             Activated = null;
@@ -268,30 +294,54 @@ namespace BareMinimum.UI
         }
 
         /// <summary>
-        /// Holds off everything the player would otherwise do while the menu is up.
+        /// Holds off everything the player would otherwise do while a menu is up.
+        ///
+        /// THE ONE LIST, AND EVERY SCREEN CALLS IT. It used to be copy-pasted into three
+        /// files, which is how it came to be missing the melee inputs in all three at once:
+        /// the fix for the pocket was never going to reach the till.
         ///
         /// DISABLED PER FRAME rather than switched off wholesale. DisableAllControlsThisFrame
-        /// would also kill the frontend controls this menu reads, so the navigation would have
+        /// would also kill the frontend controls the menu reads, so the navigation would have
         /// to be re-enabled one by one afterwards -- and it stops the camera, which makes the
         /// world behind the menu feel frozen rather than paused-over.
         ///
-        /// The aim and attack pair matter most: without them, opening a shop menu with a gun
-        /// out fires it.
+        /// THE MELEE FAMILY IS THE HALF THAT WAS MISSING. Attack and MeleeAttack1/2 were
+        /// blocked, which covers a trigger pull; MeleeAttackLight, Heavy, Alternate and Block
+        /// are separate inputs and they are the ones an unarmed Franklin punches and kicks on.
+        /// So closing a shop menu bare-handed swung at the cashier, which is exactly the thing
+        /// the quiet window below was written to stop and had never actually stopped.
+        ///
+        /// THE VEHICLE ATTACKS MATTER FOR THE DRIVE-THROUGHS, which are ordered from the
+        /// driver's seat with a menu on screen and a car full of controls underneath it.
         /// </summary>
-        private static void Suppress()
+        public static void Suppress()
         {
             GTA.Control[] blocked =
             {
+                // On foot
                 GTA.Control.Attack, GTA.Control.Attack2, GTA.Control.Aim,
+                GTA.Control.AccurateAim,
                 GTA.Control.MeleeAttack1, GTA.Control.MeleeAttack2,
+                GTA.Control.MeleeAttackLight, GTA.Control.MeleeAttackHeavy,
+                GTA.Control.MeleeAttackAlternate, GTA.Control.MeleeBlock,
                 GTA.Control.Jump, GTA.Control.Enter, GTA.Control.Duck,
-                GTA.Control.SelectWeapon, GTA.Control.VehicleExit,
+                GTA.Control.SelectWeapon, GTA.Control.SelectWeaponMelee,
+                GTA.Control.VehicleExit,
                 GTA.Control.Context, GTA.Control.ContextSecondary,
                 GTA.Control.Sprint, GTA.Control.Cover, GTA.Control.Reload,
-                GTA.Control.Detonate, GTA.Control.Phone
+                GTA.Control.Detonate, GTA.Control.Phone,
+
+                // In a car, for the drive-through windows
+                GTA.Control.VehicleAim, GTA.Control.VehicleAttack,
+                GTA.Control.VehicleAttack2,
+                GTA.Control.VehiclePassengerAim, GTA.Control.VehiclePassengerAttack
             };
 
-            foreach (var c in blocked) Game.DisableControlThisFrame(c);
+            foreach (var c in blocked)
+            {
+                try { Game.DisableControlThisFrame(c); }
+                catch { /* one control the build does not have is not worth the frame */ }
+            }
         }
 
         private void Navigate()

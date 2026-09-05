@@ -74,6 +74,13 @@ namespace BareMinimum.UI
         {
             try
             {
+                // FIRST, AND WHATEVER ELSE IS HAPPENING. The game's own counter menu has to
+                // be shut up before the player is close enough to be offered it, which means
+                // before we have decided whether we are offering anything ourselves -- and it
+                // has to keep being shut up while our menu is open, or dismissing ours hands
+                // the counter straight back to theirs.
+                Quieten();
+
                 if (suspended) { if (_ui.IsOpen) _ui.Close(); return; }
 
                 if (_ui.IsOpen) { Open(); return; }
@@ -101,7 +108,6 @@ namespace BareMinimum.UI
             if (_at == Counter.None) return;
 
             NameTheScripts();
-            Hush();
 
             Hud.Help("Press ~INPUT_CONTEXT~ to buy something.");
 
@@ -160,27 +166,72 @@ namespace BareMinimum.UI
         private bool _listedScripts;
 
         /// <summary>
-        /// Terminates whatever the ini names, while a counter is in reach.
+        /// Keeps the game's own counter menu off the screen.
         ///
-        /// BY NAME FROM THE INI, and empty by default. The one script anybody would guess --
-        /// shop_controller -- also runs Ammu-Nation and the clothing shops, so guessing costs
-        /// the player three shops to fix one menu. Once the log above has named the right one,
-        /// putting it in the ini is a one-line change and no rebuild.
+        /// TWO THINGS AT ONCE, because neither is enough on its own.
+        ///
+        /// It TERMINATES what the ini names -- ob_cashregister by default, which is the
+        /// vanilla store list with Shoplift and Select on it, named off a live counter rather
+        /// than guessed. Not shop_controller: that one also runs Ammu-Nation, the clothing
+        /// shops and the barbers, so guessing it costs the player three shops to fix one menu.
+        ///
+        /// And it HOLDS THE CONTEXT CONTROL DOWN, because terminating an object script is not
+        /// permanent -- the game starts it again the moment its register is near, and between
+        /// one sweep and the next there is a window where it is alive and listening. Our own
+        /// reads go through the disabled variant, so the key and the pad still reach us.
+        ///
+        /// AT CounterHushReach, NOT AT TillReach. This is the fix: it used to run inside our
+        /// own 1.9m prompt radius, and the game's trigger is wider than that, so the vanilla
+        /// list had already been offered and taken before we ever looked.
         /// </summary>
-        /// <summary>When the next sweep is due. Real milliseconds.</summary>
-        private int _nextHush;
+        private void Quieten()
+        {
+            var now = Game.GameTime;
 
-        private void Hush()
+            // FOUR TIMES A SECOND FOR THE SCAN, EVERY FRAME FOR THE CONTROL. The prop sweep is
+            // a native call per till model and does not need to be exact; the control block is
+            // a per-frame promise by definition, so it reads the answer the sweep left behind.
+            if (now >= _nextHush)
+            {
+                _nextHush = now + 250;
+                _tillNear = false;
+
+                try
+                {
+                    var me = Game.Player.Character;
+
+                    if (me != null && me.Exists() && !me.IsDead)
+                        _tillNear = _counters.AnyNear(me.Position, _cfg.CounterHushReach);
+                }
+                catch
+                {
+                    _tillNear = false;
+                }
+
+                if (_tillNear) Terminate();
+            }
+
+            if (!_tillNear || !_cfg.BlockVanillaCounter) return;
+
+            try
+            {
+                Game.DisableControlThisFrame(GTA.Control.Context);
+                Game.DisableControlThisFrame(GTA.Control.ContextSecondary);
+            }
+            catch
+            {
+                // The termination above is still doing most of the work.
+            }
+        }
+
+        /// <summary>When the next sweep is due, and what the last one found.</summary>
+        private int _nextHush;
+        private bool _tillNear;
+
+        /// <summary>Ends the scripts the ini names. Called only with a till actually near.</summary>
+        private void Terminate()
         {
             if (_cfg.SuppressScripts.Length == 0) return;
-
-            // FOUR TIMES A SECOND, NOT EVERY FRAME. The game restarts an object script the
-            // moment you are near its object again, so this is a standing argument rather
-            // than a one-off -- and having it out at sixty frames a second is a native call
-            // per name per frame to accomplish exactly what four of them do.
-            var now = Game.GameTime;
-            if (now < _nextHush) return;
-            _nextHush = now + 250;
 
             foreach (var name in _cfg.SuppressScripts)
             {
@@ -456,9 +507,20 @@ namespace BareMinimum.UI
         /// </summary>
         private bool Pressed()
         {
+            // NOT WHILE A MENU HAS JUST CLOSED. See Menu.Quiet: the pad read below goes
+            // through the disabled variant, so the press that dismissed a menu is still
+            // plainly visible here and would be answered by re-opening it.
+            if (Menu.Quiet) return false;
+
             try
             {
-                if (Game.IsControlJustPressed(GTA.Control.Context)) { _keyWasDown = true; return true; }
+                // THE DISABLED VARIANT, because we are the ones disabling it -- Quieten holds
+                // Context down near a till so the game's own menu never hears the press, and
+                // a plain read here would mean we could not hear it either.
+                var pad = Function.Call<bool>(Hash.IS_DISABLED_CONTROL_JUST_PRESSED,
+                                              0, (int)GTA.Control.Context);
+
+                if (pad) { _keyWasDown = true; return true; }
             }
             catch
             {

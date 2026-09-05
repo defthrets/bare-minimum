@@ -328,6 +328,28 @@ namespace BareMinimum.Core
         /// </summary>
         public string[] SuppressScripts = { "ob_cashregister" };
 
+        /// <summary>
+        /// How far from a till the vanilla counter menu gets shut up, in metres.
+        ///
+        /// WIDER THAN OUR OWN REACH ON PURPOSE, and that was the whole bug. The sweep used to
+        /// run only once the player was inside Counters.TillReach -- 1.9m, close enough to be
+        /// leaning on the counter -- but the game's own shop trigger is bigger than that, so
+        /// the vanilla list had already been offered and taken before we ever looked. Five
+        /// metres gets there first and is still small enough to be one shop's till.
+        /// </summary>
+        public float CounterHushReach = 5f;
+
+        /// <summary>
+        /// Also swallow the context press inside that radius.
+        ///
+        /// BELT AND BRACES, because terminating an object script is not permanent: the game
+        /// starts ob_cashregister again the moment its register is near, so between one sweep
+        /// and the next there is a window where it is alive and listening. Holding the control
+        /// down closes that window -- our own reads go through the disabled variant, so the
+        /// key and the pad still reach us while the game hears nothing.
+        /// </summary>
+        public bool BlockVanillaCounter = true;
+
         // ---- Speech ----------------------------------------------------------
 
         /// <summary>
@@ -816,6 +838,10 @@ namespace BareMinimum.Core
                 // behaviour somebody typing that would expect.
                 cfg.SuppressScripts = Split(ini.GetString("Counters", "SuppressScripts",
                                                           string.Join(",", cfg.SuppressScripts)));
+                cfg.CounterHushReach = ini.GetFloat("Counters", "HushReach",
+                                                    cfg.CounterHushReach, 1f, 25f);
+                cfg.BlockVanillaCounter = ini.GetBool("Counters", "BlockVanillaMenu",
+                                                      cfg.BlockVanillaCounter);
 
                 cfg.SpeechEnabled = ini.GetBool("Speech", "Enabled", cfg.SpeechEnabled);
                 cfg.SpeechChance = ini.GetInt("Speech", "ChancePercent", cfg.SpeechChance);

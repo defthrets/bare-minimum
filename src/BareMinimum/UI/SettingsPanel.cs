@@ -371,6 +371,7 @@ namespace BareMinimum.UI
             { "Car hours",                "s_car.png"    },
 
             { "Buy to pocket",            "s_cart.png"   },
+            { "Hide the game's shop",     "s_cart.png"   },
             { "Fridge storage",           "s_layout.png" },
             { "Fridge size",              "s_layout.png" },
             { "Pocket size",              "s_cart.png"   },
@@ -567,6 +568,10 @@ namespace BareMinimum.UI
                   1f, 1f, 24f, "0", "How long a doze in a car lasts.");
 
             Group("SHOPS");
+
+            Bool("Hide the game's shop", "Counters", "BlockVanillaMenu",
+                 () => _cfg.BlockVanillaCounter, v => _cfg.BlockVanillaCounter = v,
+                 "Keeps the game's own counter list off the screen. Turn off if E stops working in a shop.");
 
             Bool("Buy to pocket", "Money", "BuyToPantry",
                  () => _cfg.BuyToPantry, v => _cfg.BuyToPantry = v,
