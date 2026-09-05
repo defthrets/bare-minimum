@@ -379,6 +379,7 @@ namespace BareMinimum.UI
             { "Shop map markers",         "s_pin.png"    },
             { "Marker range",             "s_pin.png"    },
             { "Markers on pause map",     "s_pin.png"    },
+            { "One marker group",         "s_pin.png"    },
 
             { "Show HUD",                 "s_eye.png"    },
             { "HUD style",                "s_layout.png" },
@@ -612,6 +613,12 @@ namespace BareMinimum.UI
             Bool("Markers on pause map", "Map", "ShopBlipsOnMainMap",
                  () => _cfg.ShopBlipsOnMainMap, v => _cfg.ShopBlipsOnMainMap = v,
                  "Off keeps the big map clear and leaves them on the minimap only.",
+                 () => _cfg.ShowShopBlips,
+                 "~y~Turn shop map markers ON first.");
+
+            Bool("One marker group", "Map", "GroupShopBlips",
+                 () => _cfg.GroupShopBlips, v => _cfg.GroupShopBlips = v,
+                 "All shops share one row in the map legend. Left and right slide through them.",
                  () => _cfg.ShowShopBlips,
                  "~y~Turn shop map markers ON first.");
 

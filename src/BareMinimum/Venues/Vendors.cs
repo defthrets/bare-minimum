@@ -198,6 +198,16 @@ namespace BareMinimum.Venues
         /// </summary>
         public int Display;
 
+        /// <summary>
+        /// The name currently ON the blip, or null if it has never been set.
+        ///
+        /// EXACTLY THE SAME REASON AS Display, and the same bug avoided twice: a name applied
+        /// once at creation would leave every existing marker on the old text the moment the
+        /// grouping switch was flipped, and the player would see nothing happen until they
+        /// walked far enough away for the blip to be destroyed and rebuilt.
+        /// </summary>
+        public string Named;
+
         /// <summary>Resolved once the candidate lists have been checked against this build.</summary>
         public Model? PropModel;
         public Model? PedModel;
@@ -675,6 +685,11 @@ namespace BareMinimum.Venues
             //    kilometre away.
             var display = near ? (_cfg.ShopBlipsOnMainMap ? 2 : 5) : 3;
 
+            // ONE NAME FOR ALL OF THEM, OR EACH ITS OWN. See Settings.GroupShopBlips: the
+            // pause map's legend is built from the DISTINCT NAMES of the blips on it, so this
+            // is the difference between one row you can slide through and a hundred you scroll.
+            var label = _cfg.GroupShopBlips ? GroupName() : v.Name;
+
             if (v.Marker != null && v.Marker.Exists())
             {
                 // RE-APPLIED WHEN IT CHANGES, which is the second half of the same bug: the
@@ -695,6 +710,15 @@ namespace BareMinimum.Venues
                     }
                 }
 
+                // And the name, for the same reason and by the same rule: re-applied when it
+                // no longer matches, so flipping the switch takes effect on the markers that
+                // are already out there rather than only on the next ones built.
+                if (v.Named != label)
+                {
+                    Label(v.Marker, label);
+                    v.Named = label;
+                }
+
                 return;
             }
 
@@ -713,9 +737,8 @@ namespace BareMinimum.Venues
                 Function.Call(Hash.SET_BLIP_DISPLAY, blip.Handle, display);
                 v.Display = display;
 
-                Function.Call(Hash.BEGIN_TEXT_COMMAND_SET_BLIP_NAME, "STRING");
-                Function.Call(Hash.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME, v.Name);
-                Function.Call(Hash.END_TEXT_COMMAND_SET_BLIP_NAME, blip.Handle);
+                Label(blip, label);
+                v.Named = label;
 
                 v.Marker = blip;
             }
@@ -723,6 +746,36 @@ namespace BareMinimum.Venues
             {
                 Log.Once("vendor-blip-" + v.Id, "Could not blip " + v.Name + ": " + ex.Message);
                 v.Blip = false;
+            }
+        }
+
+        /// <summary>
+        /// The one name every shop marker shares while grouping is on.
+        ///
+        /// Falls back rather than trusting the ini: a blank name would give the legend a row
+        /// with no label on it, which is worse than the hundred rows this replaces.
+        /// </summary>
+        private string GroupName()
+        {
+            var name = _cfg.ShopBlipGroupName;
+
+            return string.IsNullOrEmpty(name) || name.Trim().Length == 0
+                ? "Food & Drink"
+                : name.Trim();
+        }
+
+        /// <summary>Writes a name onto a blip. The three calls are one operation.</summary>
+        private static void Label(Blip blip, string text)
+        {
+            try
+            {
+                Function.Call(Hash.BEGIN_TEXT_COMMAND_SET_BLIP_NAME, "STRING");
+                Function.Call(Hash.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME, text);
+                Function.Call(Hash.END_TEXT_COMMAND_SET_BLIP_NAME, blip.Handle);
+            }
+            catch
+            {
+                // An unnamed blip is still a blip in the right place.
             }
         }
 

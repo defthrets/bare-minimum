@@ -419,6 +419,33 @@ namespace BareMinimum.Core
         /// </summary>
         public bool ShopBlipsOnMainMap = false;
 
+        /// <summary>
+        /// Whether every shop marker carries the SAME name, so the map legend lists them once.
+        ///
+        /// THE LEGEND GROUPS BY NAME, and that is the whole mechanism. GTA builds the list on
+        /// the pause map from the distinct names of the blips on it, which is why six Bean
+        /// Machines have always been one row and not six -- they share a name already.
+        /// Everything else has its own, so a hundred shops is a hundred rows, and the legend
+        /// went past a hundred and forty entries with the game's own markers in among them.
+        ///
+        /// One shared name collapses the lot into a single row. Better than that, the legend's
+        /// left and right keys step through the blips WITHIN the selected row, so one row means
+        /// one place to stand and slide through every shop in the city.
+        ///
+        /// WHAT IT COSTS is the name on the marker when you highlight one: it will say the
+        /// group instead of the shop. That is why it is a switch and not a decision. The shop
+        /// still names itself when you walk up to the door, which is where it matters.
+        /// </summary>
+        public bool GroupShopBlips = true;
+
+        /// <summary>
+        /// What that one row is called. Also what a highlighted marker says.
+        ///
+        /// Kept as a setting because it is the single line of text this mod puts in a list the
+        /// player reads often, and one person's "Food &amp; Drink" is another's "Bare Minimum".
+        /// </summary>
+        public string ShopBlipGroupName = "Food & Drink";
+
         // ---- Money -----------------------------------------------------------
 
         /// <summary>Scales every price in foods.json at once, for anybody who finds them wrong.</summary>
@@ -856,6 +883,9 @@ namespace BareMinimum.Core
                                                  cfg.ShopBlipRange, 0f, 5000f);
                 cfg.ShopBlipsOnMainMap = ini.GetBool("Map", "ShopBlipsOnMainMap",
                                                      cfg.ShopBlipsOnMainMap);
+                cfg.GroupShopBlips = ini.GetBool("Map", "GroupShopBlips", cfg.GroupShopBlips);
+                cfg.ShopBlipGroupName = ini.GetString("Map", "ShopBlipGroupName",
+                                                      cfg.ShopBlipGroupName);
 
                 cfg.ShowHud = ini.GetBool("HUD", "Show", cfg.ShowHud);
                 cfg.HudAutoPosition = ini.GetBool("HUD", "AutoPosition", cfg.HudAutoPosition);
