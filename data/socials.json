@@ -24,6 +24,17 @@
     "              closing    they are shutting for the night.",
     "              opening    they are back on.",
     "              away       they have stepped off the pitch for a minute.",
+    "",
+    "              ANY OF THOSE CAN BE KEYED BY KIND: 'bought:liquor' is what a liquor store says",
+    "              about a sale and 'closing:cart' is a hot dog man packing up. The kind pool is",
+    "              tried first and the plain one is the fallback, so a kind with no lines of its",
+    "              own still speaks. Away only ever fires for a stall with a man on it, and open",
+    "              and close only for a vendor with hours, so those are written for the kinds",
+    "              that actually have them.",
+    "              {item} is the thing just bought, in lower case, and some of those are plural or",
+    "              carry a count -- write THE {item}, not A {item}.",
+    "              {weather} and {regular} are phrases, never a sentence start: 'in {weather}',",
+    "              'to {regular}'.",
     "  slots     {word} substitutions, picked at random. Same idea as Hoodrich's.",
     "",
     "{shop} is always the vendor's own name, so one line serves every stall without",
@@ -37,7 +48,11 @@
       "this weather",
       "a Tuesday",
       "lunch rush",
-      "the afternoon"
+      "the afternoon",
+      "half past six",
+      "the school run",
+      "the night shift",
+      "the first warm day"
     ],
     "complaint": [
       "the price of onions",
@@ -45,20 +60,62 @@
       "a man who wanted it well done",
       "somebody paying in coins",
       "the seagulls",
-      "the guy who parks across my pitch"
+      "the guy who parks across my pitch",
+      "the new parking meters",
+      "a man filming his lunch",
+      "people who say 'surprise me'",
+      "the wind",
+      "a delivery that came to the wrong door",
+      "somebody's dog",
+      "the price of everything, actually",
+      "a customer who wanted the manager. I am the manager",
+      "the card machine thinking about it",
+      "pigeons"
     ],
     "praise": [
       "the best in Los Santos",
       "criminally underrated",
       "an institution",
-      "worth the walk"
+      "worth the walk",
+      "a landmark",
+      "better than the one downtown",
+      "exactly as good as it needs to be",
+      "the reason people move here",
+      "not for everybody, which is the point",
+      "the only honest business on this street"
     ],
     "excuse": [
       "supplier problems",
       "the health inspector",
       "a small fire",
       "personal reasons",
-      "a family thing"
+      "a family thing",
+      "a power cut",
+      "the delivery not turning up",
+      "the fridge",
+      "reasons",
+      "a plumbing situation",
+      "the weather, obviously",
+      "a stocktake that got out of hand"
+    ],
+    "weather": [
+      "the rain",
+      "this wind",
+      "the sun",
+      "the humidity",
+      "the cold",
+      "the drizzle",
+      "the glare"
+    ],
+    "regular": [
+      "the man who orders the same thing every day",
+      "a woman with a very small dog",
+      "the runner who pays in exact change",
+      "the guy who reads every label",
+      "somebody's grandmother",
+      "a kid with a note from his mum",
+      "the couple who share one",
+      "a man on his phone the whole time"
     ]
   },
   "authors": [
@@ -692,7 +749,21 @@
       "We are here every day and somebody still asks if we are new.",
       "Somebody asked for the wifi password. There is no wifi. There is {shop}.",
       "If we are shut it is because we are shut, not because something has happened.",
-      "Come in, buy something, leave. It is not complicated and we like it that way."
+      "Come in, buy something, leave. It is not complicated and we like it that way.",
+      "Same place as yesterday. Same as tomorrow, all being well.",
+      "Out in {weather} again. The shop does not care and neither should you.",
+      "We got a review. It was fair, which is somehow worse.",
+      "Somebody asked if we deliver. We are a building.",
+      "The card machine has thought about it and said yes.",
+      "Open until we are not. Check the door, not the internet.",
+      "A man stood in the doorway for a full minute deciding. The door was open the whole time.",
+      "If you can see this, we can see you standing across the road.",
+      "Quiet for {timeofday}. Suspiciously quiet.",
+      "Somebody left a very good umbrella here. It is behind the counter. Describe it.",
+      "New prices. Old faces. Business as usual.",
+      "Sold something to {regular} today. We have a routine now.",
+      "Nothing has changed. That is the announcement.",
+      "Somebody asked what we recommend. Everything. That is why it is on the shelf."
     ],
     "bought": [
       "Another satisfied customer at {shop}. Probably.",
@@ -702,25 +773,56 @@
       "The {item} is moving today. Get in while it is still warm.",
       "Just served a guy who did not say a word. Respect.",
       "That is the last of the {item} for now. Come back later.",
-      "Somebody paid full price and did not complain. Framing the receipt."
+      "Somebody paid full price and did not complain. Framing the receipt.",
+      "The {item}, paid for and gone. That is a whole transaction.",
+      "Somebody just asked for the {item} by its full name. Respect.",
+      "The {item} has left the building.",
+      "Just sold the {item} to {regular}.",
+      "The {item}. Good choice. Correct choice, arguably.",
+      "The {item} is walking out the door faster than it is coming in.",
+      "The {item} at {timeofday}. No notes. Some people know what they want.",
+      "Somebody bought the {item} and said thank you. Twice. We are shaken.",
+      "Sold. Rang up. Bagged. Next.",
+      "That {item} did not last long on the shelf. Neither will the next one."
     ],
     "closing": [
       "That is me done. Back in the morning.",
-      "Shutting up. {excuse}. Back tomorrow.",
+      "Shutting up. Blame {excuse}. Back tomorrow.",
       "Grill is off. Go home.",
       "Closed. Yes, even for you.",
-      "Packing up. If you are running down the street right now, you are too late."
+      "Packing up. If you are running down the street right now, you are too late.",
+      "Lights off. Shutters down. Whatever you forgot, you forgot.",
+      "Closed for the night. If we are late tomorrow it will be {excuse}.",
+      "Done. If the sign says open, the sign is lying.",
+      "Last customer has gone. I am counting the float and not answering the door.",
+      "Shutting up early. Blame {excuse}.",
+      "That is us. Same time tomorrow, unless it is not.",
+      "Closed. The lights are on because I am cleaning, not because you can come in.",
+      "Home. Whatever it is can wait until the morning, and it will."
     ],
     "opening": [
       "Open. Early, even.",
       "Back on the corner. Missed you.",
       "Grill is on. Give it ten minutes.",
-      "We are open and I have already had an argument. Good start."
+      "We are open and I have already had an argument. Good start.",
+      "Open. Key turned, lights on, kettle on.",
+      "Shutters up. Come and see what survived the night.",
+      "We are open. Not even {weather} stopped us, and you will not either.",
+      "Back on. First one through the door gets a hello and nothing else.",
+      "Open, and the first customer of the day has already mentioned {complaint}.",
+      "Doors open. The stock is where it was. So am I.",
+      "Open at {timeofday}, which is earlier than anybody needs and exactly when somebody wants.",
+      "Right. Open. Let us see what today has in it."
     ],
     "away": [
       "Stepped away for two minutes. Two. Minutes.",
       "Having a cigarette. The cart is not going anywhere and neither am I.",
-      "Back in five. Do not touch anything."
+      "Back in five. Do not touch anything.",
+      "Popped out. The sign on the door is accurate for once.",
+      "Back in a minute. A real minute, not a shop minute.",
+      "Gone to the bank. Not for the reason you think.",
+      "Two minutes. If it is urgent, it is not that urgent.",
+      "Stepped out. Nothing is for sale that is not behind glass, so do not try."
     ],
     "ambient:cart": [
       "Cart is out. Come get one before I eat the stock myself.",
@@ -734,7 +836,15 @@
       "The umbrella is decorative. Stand where you like.",
       "Cash. I have said cash for eleven years.",
       "If the cart is here I am here. If it is not, I am not.",
-      "Somebody stole my mustard. My MUSTARD."
+      "Somebody stole my mustard. My MUSTARD.",
+      "The onions are caramelising and half the street knows it.",
+      "Somebody asked if I do a vegan option. I do a bun.",
+      "Out in {weather} today. The cart has a roof. You do not.",
+      "A pigeon has learned my schedule. I respect the pigeon.",
+      "Mustard, ketchup, both, neither. Those are the choices. Choose quickly.",
+      "Served {regular} without a word. Did not even have to ask. That is the dream.",
+      "The cart weighs more than I do and it has fewer complaints.",
+      "Eleven years on this corner and somebody asked me today where the nearest hot dog was."
     ],
     "ambient:fastfood": [
       "Fryers are hot and the queue is not long. Both of those change.",
@@ -746,7 +856,15 @@
       "One till, one of me, {timeofday}. Be patient or be quick.",
       "The heat lamp is doing its best.",
       "If it is on the board we have it. If it is not, we do not.",
-      "Napkins are behind the counter now. You know why."
+      "Napkins are behind the counter now. You know why.",
+      "The queue is the menu. If it is long, we are good. If it is short, we are quick.",
+      "Somebody sat in the window seat for an hour with a small drink. A small drink.",
+      "New special is on the board. The old special is also on the board. Read the board.",
+      "Out in {weather} and the queue is still out the door. That is not luck.",
+      "We do not do a loyalty card. Loyalty is you coming back.",
+      "The fryer timer went off and three people looked up. That is Pavlov.",
+      "Somebody asked for it without the sauce and then asked for sauce on the side. Correct, actually.",
+      "Trays go on the rack. The rack is the thing with 'trays' written on it."
     ],
     "ambient:burger": [
       "Grill is on. Has been since {timeofday}.",
@@ -758,7 +876,15 @@
       "Milkshake machine is working today. Do not ask about tomorrow.",
       "We do not do half portions. You will not need one.",
       "Every review says the same thing and every review is correct.",
-      "Pickles on the side if you ask. Ask at the counter, not after."
+      "Pickles on the side if you ask. Ask at the counter, not after.",
+      "The shake machine is working and I have never been so relieved by a machine.",
+      "Somebody said 'the usual' at the drive-through speaker. Through a speaker. To a stranger.",
+      "Lettuce is fresh, tomato is fresh, the argument about whether they belong on a burger is not.",
+      "Made the usual for {regular} before the speaker finished. That is a relationship.",
+      "A double is two patties. A triple is three. We do not know how to make this clearer.",
+      "The bun man was late so the bun man is now aware of how we feel about the bun man.",
+      "Somebody photographed the burger before eating it. It looked fine in real life too.",
+      "Fries are salted. You can ask for them unsalted and we will wonder about you."
     ],
     "ambient:chicken": [
       "Fresh batch out of the fryer. Come now or come later and be sad.",
@@ -770,7 +896,15 @@
       "Bones in the bin, not on the table. We are asking nicely.",
       "Family bucket feeds a family. A real one. Not one guy.",
       "The fryer does not care what time you turn up. I do, slightly.",
-      "If it is not crispy bring it back. Nobody ever brings it back."
+      "If it is not crispy bring it back. Nobody ever brings it back.",
+      "Two pieces, three pieces, the box. Everything else is a question about your day.",
+      "Somebody asked if the chicken was free range. It ranged. It was not free.",
+      "Out there is {weather} and in here is the fryer. Come in from one to the other.",
+      "The hot sauce is not a challenge. It is a condiment. Some people cannot hear this.",
+      "Coleslaw is a side, not a suggestion.",
+      "A man asked for it 'extra crispy'. It is already extra crispy. We went extra extra.",
+      "The bucket feeds a family. We have watched one person defeat it. Not angry, just impressed.",
+      "Fryer went down for ten minutes at {timeofday}. The queue did not move. Loyalty."
     ],
     "ambient:taco": [
       "Salsa is made this morning. Every morning.",
@@ -782,7 +916,15 @@
       "Limes are free. One. Not the bowl.",
       "Everything is fresh because we do not have anywhere to store anything.",
       "Corn or flour. That is the only argument worth having here.",
-      "We are busy at {timeofday} because we are good at {timeofday}."
+      "We are busy at {timeofday} because we are good at {timeofday}.",
+      "The salsa verde is hotter than the roja today and nobody believes us until it is too late.",
+      "Somebody asked for cheese on a taco. We gave them cheese. We are not monsters. We are tired.",
+      "Standing in {weather} does not close the window. Only the window closes the window.",
+      "The lengua is gone. Told you. Come earlier.",
+      "One person ordered ten and ate them at the counter. We did not stop them. We watched.",
+      "Corn tortillas are pressed here. Flour ones arrive. Both are correct. Fight elsewhere.",
+      "A tourist asked if it was authentic. We said yes and it was and he still looked unsure.",
+      "Somebody wanted a taco 'with everything'. Everything is what it comes with."
     ],
     "ambient:noodle": [
       "All you can eat means all YOU can eat. Not all your cousin can eat.",
@@ -794,7 +936,15 @@
       "One bowl, one price, and the bowl is a proper bowl.",
       "Takeaway containers cost us money now. That is not a complaint, it is context.",
       "The lunch rush is {timeofday} and it is not a rumour.",
-      "We do not do small. There is a size and it is the size."
+      "We do not do small. There is a size and it is the size.",
+      "The broth has been going since {timeofday}. That is not an exaggeration, it is a stock.",
+      "Somebody asked for the noodles 'not too soft'. The noodles are the noodles.",
+      "The buffet counter has been refilled four times and one man has been here for all four.",
+      "Out there is {weather}. In here is steam. Choose steam.",
+      "Bowls are hot. The sign says bowls are hot. Somebody touches the bowl every day.",
+      "We have soy sauce on every table and somebody still asks for soy sauce.",
+      "A family of six ordered as one person. It worked out. It always works out.",
+      "The dumplings are made in the morning and gone by {timeofday}. That is the schedule."
     ],
     "ambient:coffee": [
       "Beans came in {timeofday}. The good ones.",
@@ -806,7 +956,15 @@
       "We open before you are awake and we mean that literally.",
       "Milk of every kind, and one of them costs more, and it is not our fault.",
       "Loyalty card is real. Ten stamps. We have never not honoured it.",
-      "It is hot. It is coffee. Please do not sue us."
+      "It is hot. It is coffee. Please do not sue us.",
+      "The grinder is loud. The grinder is meant to be loud. Coffee is loud.",
+      "Somebody asked for a flat white with oat milk and then asked what a flat white was.",
+      "We have tables outside and outside has {weather} in it. Your choice.",
+      "The bathroom code is on the receipt. The receipt is the thing we gave you.",
+      "Got a tip from {regular}. In coins. We are still thinking about it.",
+      "Decaf exists. We stock it. We do not judge. We do not understand, but we do not judge.",
+      "Somebody asked if the wifi was fast. Faster than the coffee is strong? No.",
+      "The pastry case is full at {timeofday} and empty by lunch. This is a law, not a schedule."
     ],
     "ambient:donut": [
       "Rings are out. Singly or by the dozen, and the dozen is better value.",
@@ -818,7 +976,15 @@
       "Coffee and a ring is a breakfast. Two rings is a decision.",
       "Sprinkles are not a flavour but people order them like they are.",
       "Nothing here was made yesterday. Nothing.",
-      "The box is free. The handle on the box is also free."
+      "The box is free. The handle on the box is also free.",
+      "The glaze went on at four this morning and it has been a good day since.",
+      "Somebody asked for a donut 'without the hole'. That is a different product. We sell it too.",
+      "Out there is {weather}. In here is sugar. Weigh it up.",
+      "The dozen box has thirteen in it. If you count twelve, count again.",
+      "A child pointed at the sprinkles. The child was correct.",
+      "We are out of jam by ten every day and every day somebody is surprised.",
+      "The coffee here is fine. The donuts are why you are here. We know.",
+      "Somebody asked for a plain one. Bold. Honest. We respect it."
     ],
     "ambient:pizza": [
       "Have it your way. That is on the window and we meant it.",
@@ -830,7 +996,15 @@
       "Delivery goes as far as the sensible end of the neighbourhood.",
       "Somebody rang and asked if we do pizza.",
       "Extra cheese is a real option and not a personality.",
-      "It is ready when it is ready. Standing closer will not help."
+      "It is ready when it is ready. Standing closer will not help.",
+      "The oven is hotter than anything {weather} can do and it wins.",
+      "Somebody asked for a well done pizza. On purpose. It was well done.",
+      "Slices go until the pie is gone. Then there is a new pie. That is the cycle.",
+      "Delivery driver got stuck behind a parade. The pizza survived. The driver has stories.",
+      "Extra cheese is a choice. Extra extra cheese is a cry for help. We fulfil both.",
+      "A man ordered a whole pie and ate it at the counter at {timeofday}. Nobody stopped him. Nobody could.",
+      "We do not do stuffed crust. We have been asked. The answer is us not doing it.",
+      "The box says 'you have chosen wisely'. The box is right."
     ],
     "ambient:juice": [
       "Wheatgrass shot is on the counter and it will change your afternoon.",
@@ -842,7 +1016,15 @@
       "The blender is loud. That is how you know it is working.",
       "We do not do a small. The small was not doing anything for anybody.",
       "Detox is not a medical term but it does move product.",
-      "Straws are paper now and everybody has already made the joke."
+      "Straws are paper now and everybody has already made the joke.",
+      "The oranges come in at {timeofday}. They leave as juice by lunch.",
+      "Somebody asked if we do a smoothie without fruit. That is a milkshake. Go next door.",
+      "Out in {weather} and the cold-pressed is moving. Correlation, causation, sales.",
+      "The green one tastes like a lawn. It is meant to. That is the whole pitch.",
+      "A man asked for extra ginger and then made a face. Ginger does that.",
+      "We do not add sugar. The fruit did that already. Take it up with the fruit.",
+      "The cleanse programme is three days. Day two is where people email us.",
+      "Somebody asked if the wheatgrass was organic. It is grass. In a tray. We grew it."
     ],
     "ambient:tobacco": [
       "Tobacconist, pipes, confectioners and cigars. It is on the sign and it is all true.",
@@ -854,7 +1036,15 @@
       "Pipe tobacco smells better than it tastes and everybody finds out.",
       "The sweets are for the children of the men buying the cigars.",
       "Prices went up because the tax went up. Take it up with them.",
-      "Open late. This is a business built on people remembering at nine at night."
+      "Open late. This is a business built on people remembering at nine at night.",
+      "The humidor is at the right humidity. That is a sentence I say every day to nobody.",
+      "Somebody asked for a cigar 'like the one in the film'. We knew the film. We had the cigar.",
+      "Sweets by the door because that is where the children stop. That is not an accident.",
+      "Sold a pipe cleaner to {regular} and got half an hour of conversation. That is the shop.",
+      "Lighters are a dollar. The good ones are more. You can tell which is which by looking.",
+      "We do not sell papers to anybody who cannot say what they are for. That is a policy.",
+      "The cigar cutter on the counter is for the cigars. Not the parcel. We watched you.",
+      "Open late because nobody remembers they need us until they need us."
     ],
     "ambient:fuel": [
       "Pumps are open, shop is open, and the shop is the better half.",
@@ -868,7 +1058,15 @@
       "Pump four has been out since {timeofday}. Somebody is coming.",
       "The hot food case is stocked. It has been a long night for both of us.",
       "Wiper fluid is by the door because in this weather you will want it.",
-      "If the tap is running out front, tell me, do not just watch it."
+      "If the tap is running out front, tell me, do not just watch it.",
+      "Pump two is slow. It is not broken. It is slow. Like the rest of us at {timeofday}.",
+      "Somebody asked if we sell bread. We are a petrol station. We sell bread.",
+      "The car wash is working. It has never been working this many days in a row.",
+      "Out on the forecourt in {weather}. The wiper fluid is by the door. We planned this.",
+      "Somebody filled up, came in, bought a coffee, and forgot the fuel. We reminded them. We are nice.",
+      "The hot food case has been restocked with things that were, at some point, food.",
+      "Lorries at the back pumps only. It says it on the sign. It says it on the ground.",
+      "Night shift. Nobody buys anything sensible after two in the morning and we stock accordingly."
     ],
     "ambient:diner": [
       "Breakfast until eleven. After that it is the plate.",
@@ -880,7 +1078,15 @@
       "Refills are free. Ask, do not just hold the cup up.",
       "You can sit as long as you like. Most people find that out.",
       "Two eggs, any way, and we can genuinely do any way.",
-      "The night shift sees things. The night shift says nothing."
+      "The night shift sees things. The night shift says nothing.",
+      "The pie case has been rotating since {timeofday}. The pies are fine. Mesmerising, but fine.",
+      "Somebody ordered breakfast for dinner and dinner for breakfast at the same table. We managed.",
+      "Out there is {weather} and the booths are full. The weather is good for business.",
+      "The jukebox works. It only has six songs. Those are the songs.",
+      "The night cook has been here longer than the building. He does not comment on this.",
+      "Coffee is bottomless, and somebody tested that today. Eleven cups. He said he was fine.",
+      "A trucker fell asleep in the booth. We let him. That is the deal with the booths.",
+      "The special is meatloaf. The special is always meatloaf. Order the meatloaf."
     ],
     "ambient:liquor": [
       "Spirits, beer, and something to eat. That is the whole shop and it is enough.",
@@ -892,7 +1098,15 @@
       "The deli counter is a real deli counter. People do not believe it.",
       "Do not drink it outside the door. I am asking as a neighbour.",
       "Everything on the shelf is on the shelf. If it is not there, we are out.",
-      "Open late because that is when this shop makes sense."
+      "Open late because that is when this shop makes sense.",
+      "The back fridge is working, the front fridge is working, and I am not sure I trust either.",
+      "Somebody asked for a recommendation. For a Tuesday. We had one.",
+      "Out in {weather} and the beer is moving. It does not have to be hot for the beer to move.",
+      "We check ID. We checked yours. We will check it again tomorrow. That is not personal.",
+      "The lottery machine is working. Somebody won twelve dollars and told everybody.",
+      "The deli counter has fresh rolls. A liquor store with a deli counter. It is not complicated.",
+      "Somebody asked if we deliver. We are a shop with a grille on the window.",
+      "Cash only after midnight because the card machine goes home at midnight."
     ],
     "ambient:market": [
       "Shelves are stocked, which is not something we can say every week.",
@@ -906,7 +1120,173 @@
       "Bread comes in at {timeofday} and it goes by nine.",
       "The freezer is fixed. Everything in it is fine. Mostly fine.",
       "Yes we sell that. Ask, do not stand there looking.",
-      "Closing time is closing time. The door will be locked and I will be inside."
+      "Closing time is closing time. The door will be locked and I will be inside.",
+      "The bread is in. The milk is in. The rest of the delivery is a mystery for now.",
+      "Somebody asked if we had a loyalty card. We have a face. We remember faces.",
+      "Out there is {weather}. Everything you need to survive it is on the shelf by the door.",
+      "The trolley is back. Somebody returned it. We are not asking questions.",
+      "The freezer hums at a pitch that only some people can hear. Those people are unhappy.",
+      "A kid came in with a list from his mum. He got everything right. Star customer.",
+      "Prices are on the shelf edge. The shelf edge is the bit under the thing.",
+      "Closing time is on the door. The door is the thing you came in through."
+    ],
+    "away:cart": [
+      "Smoke break. The cart can look after itself for five minutes. It has before.",
+      "Round the corner for a minute. Touch the cart and I will know.",
+      "Sitting down. Eleven years and a man gets to sit down.",
+      "Back in five. The onions are fine, the dogs are fine, everything is fine.",
+      "Stepping off for a cigarette. Yes, next to the food. Move on.",
+      "Gone for a lean against a wall. Do not read anything into it."
+    ],
+    "closing:cart": [
+      "Cart is going in. If you can see me wheeling it, you are too late.",
+      "Packed up. Sold out of everything that matters and half of what does not.",
+      "That is the cart done. My back has been done since {timeofday}.",
+      "Wheeling it home. Same corner tomorrow, weather permitting, and the weather usually permits.",
+      "Umbrella down, grill off, cart away. That is the closing ceremony.",
+      "Done for the day. Whoever wanted one with everything at nine at night: no."
+    ],
+    "opening:cart": [
+      "Cart is out. Onions are going on. Come and stand in the smell.",
+      "Rolled out at {timeofday}. The grill takes ten minutes. I take longer.",
+      "Back on the corner. Somebody has already asked if I was here yesterday. I was.",
+      "Cart is where it always is. Which is here.",
+      "Open. The first dog of the day is always for me. The second one is yours.",
+      "Wheeled it out through {weather}. You can walk to it through {weather}."
+    ],
+    "closing:burger": [
+      "Grill is off and the fryers are draining. Nothing is coming out of here that is not already in a bag.",
+      "Drive-through closed. Yes, the lights are on. No, the speaker is not.",
+      "Last patty went out. Shutting the hatch.",
+      "Closed. If you are in the drive-through lane right now, you live there now.",
+      "That is the grill scraped and the shake machine cleaned, which is the worst part of the day."
+    ],
+    "opening:burger": [
+      "Grill is on. Buns are in. Somebody is already in the drive-through.",
+      "Open. The first burger of the day is the best burger of the day and nobody is here for it.",
+      "Fryers up to temperature. Everything after that is fast.",
+      "Drive-through is live. Speak clearly and know what you want.",
+      "Open at {timeofday}. The grill has no opinion about the hour and neither do I."
+    ],
+    "bought:cart": [
+      "The {item}, with everything. That is what everything is for.",
+      "Sold the {item} to a man who asked for no onions and then asked where the onions were.",
+      "The {item}, gone. Napkin given. Nobody uses the napkin.",
+      "Just handed over the {item} through {weather}. Dedication, from both of us.",
+      "The {item} from a cart. That is lunch. That has always been lunch.",
+      "Sold the {item}. Change given in coins because that is what the tin has."
+    ],
+    "bought:fastfood": [
+      "The {item}, bagged, gone. Under a minute. That is the job.",
+      "Somebody ordered the {item} and said 'the usual' first. We have never seen them.",
+      "The {item} at {timeofday}. The heat lamp did its part.",
+      "Sold the {item}. Sauce was asked about. Sauce was provided.",
+      "The {item} just went out the door with a straw it did not need.",
+      "The {item}. Eat in, then changed their mind, then takeaway. Fine."
+    ],
+    "bought:burger": [
+      "The {item}, medium, because nobody has ever said well done and meant it.",
+      "The {item} out of the hatch. The car did not even stop rolling.",
+      "Somebody just ordered the {item} with extra pickles. Finally, somebody who reads.",
+      "The {item} and a shake. That is a meal with a plan.",
+      "Sold the {item}. Asked if they wanted fries. They wanted fries. They always want fries.",
+      "The {item} left with a man who said he was 'not that hungry'. He was that hungry."
+    ],
+    "bought:chicken": [
+      "The {item}, out of the fryer and into a box. Thirty seconds, tops.",
+      "Somebody bought the {item} and asked for extra hot sauce. Then more. Then the bottle. No.",
+      "The {item}. Bones will be on the table in ten minutes. We have made peace with it.",
+      "The {item} at {timeofday}. Crispy, because it is always crispy, because we are us.",
+      "Sold the {item} to somebody who asked which bird. It is still chicken.",
+      "The {item} has left. Napkins have left with it. Good."
+    ],
+    "bought:taco": [
+      "The {item}, three of them. Three is correct. Three is always correct.",
+      "Somebody bought the {item} and asked for a fork. A fork was found. We are not proud.",
+      "The {item}, salsa on the side, lime on top. Textbook.",
+      "The {item} just went across the counter to somebody who ordered in Spanish. Small joy.",
+      "Sold the {item} at {timeofday}. The window is busiest when it is hottest and that is not a coincidence.",
+      "The {item}, eaten standing up in front of the window. That is how it is done."
+    ],
+    "bought:noodle": [
+      "The {item}. One bowl is the size. There is no other size.",
+      "Somebody bought the {item} and asked for a fork. Forks are by the door. Always have been.",
+      "The {item} went out steaming. It will still be steaming when they get home.",
+      "The {item} at {timeofday}, which is when the wok is at its best.",
+      "Sold the {item}. Chopsticks taken. Fork also taken. Hedging.",
+      "The {item} is going faster than the rice can keep up. The rice will catch up."
+    ],
+    "bought:coffee": [
+      "The {item}, no notes. A person who knows their order is a person we respect.",
+      "Sold the {item} with a name on the cup that we spelled correctly. Framing that one.",
+      "The {item}, to go, at {timeofday}. The whole city runs on this transaction.",
+      "Somebody ordered the {item} and then asked what was in it. After paying.",
+      "The {item} and a sit-down. Not a laptop in sight. Bliss.",
+      "The {item} is the drink of the day, which it is every day, which is why it is the drink of the day."
+    ],
+    "bought:donut": [
+      "The {item}. 'For the office.' Of course.",
+      "The {item}, eaten before the door closed behind them. That is the review.",
+      "Sold the {item} at {timeofday}. The glaze had set. Timing is everything.",
+      "Somebody bought the {item} and asked if it was fresh. We started at four. It is fresh.",
+      "The {item} is going faster than the jam ones today, which has never happened.",
+      "The {item}, in a box. The box is free. The box is always free."
+    ],
+    "bought:pizza": [
+      "The {item}, out of the oven and into the box in under a minute. That is the oven talking.",
+      "Sold the {item}. Folded lengthways at the door, which is correct.",
+      "Somebody bought the {item} and asked about pineapple. We did not respond.",
+      "The {item}, whole, for one person. We asked no questions. We are not the police.",
+      "The {item} is going by the slice at {timeofday} and whole after. The rhythm holds.",
+      "The {item}, extra cheese. A real option and not a personality, as discussed."
+    ],
+    "bought:juice": [
+      "The {item}. Pressed while they watched. They watched the whole time.",
+      "Sold the {item} to somebody who asked if it was healthy. It is fruit. Work it out.",
+      "The {item} at {timeofday}. The blender is loud. That is how you know.",
+      "Somebody bought the {item} and said the word detox. We let it go.",
+      "The {item} is the colour it is because that is the colour of the things in it.",
+      "The {item}, paper straw, the joke about the paper straw, and off they went."
+    ],
+    "bought:tobacco": [
+      "The {item}. ID checked. It is always checked. Do not make it a thing.",
+      "Sold the {item} to a man who came in for a lighter. That is how it starts.",
+      "The {item} at {timeofday}. This is a business built on people remembering late.",
+      "Somebody bought the {item} and asked how to cut it. There is a right way. We showed them.",
+      "The {item} went out with a bag of sweets for somebody's kid. Both halves of the sign.",
+      "The {item}. Smells better than it tastes and everybody finds out."
+    ],
+    "bought:fuel": [
+      "Somebody came in to pay for pump three and left with the {item}. The shop is the better half.",
+      "The {item} at {timeofday}. The night shift eats too.",
+      "Sold the {item} to a driver who did not buy fuel. The pumps are optional, the shop is not.",
+      "The {item} from the hot case. It has been a long night for both of us.",
+      "The {item} and a receipt they will not keep.",
+      "Somebody bought the {item} and asked where the toilets are. Round the side. Always round the side."
+    ],
+    "bought:diner": [
+      "The {item}, at the counter, alone, at {timeofday}. Every diner has this person and we are grateful.",
+      "Sold the {item} with a bottomless coffee. That is a warning as well as an offer.",
+      "Somebody ordered the {item} at four in the afternoon. We said yes. We always say yes.",
+      "The {item}. Booth for one. We allowed it. It is quiet.",
+      "The {item} went out with a refill nobody asked for. That is how we do it.",
+      "The {item} and no conversation. The night shift understands."
+    ],
+    "bought:liquor": [
+      "The {item}. Checked. Bagged. Do not drink it outside the door.",
+      "Sold the {item} at {timeofday}. This shop makes sense at this hour.",
+      "Somebody bought the {item} and asked what it pairs with. Sir. It is a liquor store.",
+      "The {item} and something from the deli counter. The deli counter is real. People do not believe it.",
+      "The {item} went out with a man who paid cash. After midnight it is always cash.",
+      "The {item}. We asked for ID and got a look. Every time. Every single time."
+    ],
+    "bought:market": [
+      "The {item}. Just the one. That is the format here.",
+      "Sold the {item} to somebody who asked for a substitution first. It is a corner store.",
+      "The {item} at {timeofday}, before the bread goes, which it does by nine.",
+      "Somebody bought the {item} and asked if the ATM was working. It was. That is news.",
+      "The {item} came off a shelf that was stocked this week, which is not nothing.",
+      "The {item}, paid in coins. The tin is heavier and the day is longer."
     ]
   }
 }
