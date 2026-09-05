@@ -2452,6 +2452,507 @@
       "icon": "cup",
       "tint": "#e8dcc4",
       "desc": "Cinnamon, rice and more sugar than either."
+    },
+    {
+      "_note": "THE GRAIN OF TRUTH -- the band under the logo says ORGANIC FOOD MARKET",
+      "_note2": "and the whole shopfront is a wheat sheaf. Its own items, because a shop",
+      "_note3": "whose entire brand IS what it sells cannot be stocked out of the generic",
+      "_note4": "shelf without the joke going missing.",
+      "id": "got_bowl",
+      "name": "Ancient Grain Bowl",
+      "category": "Food",
+      "price": 13,
+      "hunger": 0.55,
+      "shop": false,
+      "prop": [
+        "prop_cs_bowl_01",
+        "prop_food_bs_bowl",
+        "prop_bowl_01"
+      ],
+      "seconds": 6.0,
+      "icon": "bowl",
+      "tint": "#b6c081",
+      "desc": "Quinoa, kale, and a price that assumes you are sorry about something."
+    },
+    {
+      "id": "got_smoothie",
+      "name": "Wheatgrass Smoothie",
+      "category": "Drinks",
+      "price": 8,
+      "hunger": 0.18,
+      "wake": 0.1,
+      "drink": true,
+      "shop": false,
+      "prop": [
+        "prop_plastic_cup_02",
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup"
+      ],
+      "seconds": 4.5,
+      "icon": "smoothie",
+      "tint": "#7fbf5a",
+      "desc": "Tastes of a lawn. Sold as though that were the point."
+    },
+    {
+      "id": "got_box",
+      "name": "Organic Veg Box",
+      "category": "Snacks",
+      "price": 12,
+      "hunger": 0.4,
+      "shop": false,
+      "prop": [
+        "prop_food_bag1",
+        "prop_cs_shopping_bag",
+        "prop_pizza_box_01",
+        "prop_cs_burger_01"
+      ],
+      "seconds": 5.5,
+      "icon": "bag",
+      "tint": "#8ec96f",
+      "desc": "Muddy, misshapen, and dearer for both."
+    },
+    {
+      "_note": "THE DICKIES BAGELS & DELI -- the sign puts BAGELS above & DELI, so the",
+      "_note2": "bagel is the shop and the deli counter is the other half of it. Its own",
+      "_note3": "items for the same reason Bean Machine has its own: a named shop selling",
+      "_note4": "the generic bagel is the shortcut this file keeps refusing.",
+      "id": "dk_bagel",
+      "name": "Bagel and Schmear",
+      "category": "Food",
+      "price": 6,
+      "hunger": 0.32,
+      "shop": false,
+      "prop": [
+        "prop_food_bs_bagel",
+        "prop_sandwich_01",
+        "prop_cs_sandwich_01"
+      ],
+      "seconds": 4.5,
+      "icon": "bagel",
+      "tint": "#d8b06a",
+      "desc": "Toasted unless you say otherwise, and they will ask."
+    },
+    {
+      "id": "dk_reuben",
+      "name": "The Reuben",
+      "category": "Food",
+      "price": 12,
+      "hunger": 0.58,
+      "shop": false,
+      "prop": [
+        "prop_sandwich_01",
+        "prop_cs_sandwich_01",
+        "prop_food_bs_burger1"
+      ],
+      "seconds": 6.5,
+      "icon": "sandwich",
+      "tint": "#d6a05e",
+      "desc": "Stacked past the point of being a sandwich and held with a stick."
+    },
+    {
+      "id": "dk_dozen",
+      "name": "Baker's Dozen",
+      "category": "Snacks",
+      "price": 16,
+      "hunger": 0.8,
+      "shop": false,
+      "prop": [
+        "prop_pizza_box_01",
+        "prop_food_bag1",
+        "prop_cs_shopping_bag"
+      ],
+      "seconds": 8.5,
+      "icon": "box",
+      "tint": "#cfa768",
+      "desc": "Thirteen. They count it out in front of you, every time."
+    },
+    {
+      "_note": "WIGWAM. THE MENU IS PAINTED ON THE WINDOWS -- BISON BURGER, CRAZY HORSE",
+      "_note2": "SOUP, GERONIMO WINGS, RINGS OF FIRE -- and the board in the corner adds",
+      "_note3": "THE BIG CHIEF SPECIAL above the other four, so that is the combo and the",
+      "_note4": "rest are the parts of it. Nothing here is invented; it is all on the glass.",
+      "id": "wig_bigchief",
+      "name": "The Big Chief Special",
+      "category": "Food",
+      "price": 17,
+      "hunger": 0.75,
+      "shop": false,
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_cs_bowl_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 7.5,
+      "icon": "platter",
+      "tint": "#d08a3c",
+      "desc": "All four of the others, on one tray, for slightly less than four."
+    },
+    {
+      "id": "wig_bison",
+      "name": "Bison Burger",
+      "category": "Food",
+      "price": 12,
+      "hunger": 0.6,
+      "shop": false,
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burger1",
+        "ng_proc_food_burg01a"
+      ],
+      "seconds": 6.0,
+      "icon": "burger",
+      "tint": "#c07a44",
+      "desc": "Leaner than beef and priced as though that were an achievement."
+    },
+    {
+      "id": "wig_soup",
+      "name": "Crazy Horse Soup",
+      "category": "Food",
+      "price": 8,
+      "hunger": 0.44,
+      "shop": false,
+      "prop": [
+        "prop_cs_bowl_01",
+        "prop_food_bs_bowl",
+        "prop_bowl_01"
+      ],
+      "seconds": 6.0,
+      "icon": "bowl",
+      "tint": "#c2683a",
+      "desc": "Nobody at the counter will say what is in it."
+    },
+    {
+      "id": "wig_wings",
+      "name": "Geronimo Wings",
+      "category": "Food",
+      "price": 11,
+      "hunger": 0.54,
+      "shop": false,
+      "prop": [
+        "prop_food_bs_chick",
+        "prop_cs_burger_01",
+        "prop_food_bs_burger1"
+      ],
+      "seconds": 6.0,
+      "icon": "chicken",
+      "tint": "#d4913f",
+      "desc": "Ordered with confidence. Eaten with a stack of napkins."
+    },
+    {
+      "id": "wig_rings",
+      "name": "Rings of Fire",
+      "category": "Snacks",
+      "price": 6,
+      "hunger": 0.26,
+      "shop": false,
+      "prop": [
+        "prop_food_bs_chips",
+        "prop_food_bag1"
+      ],
+      "seconds": 4.5,
+      "icon": "chips",
+      "tint": "#e09a3e",
+      "desc": "Onion rings, and the name is a warning rather than a flourish."
+    },
+    {
+      "_note": "BITE!, Del Perro. The poster in THIS window is the Gut Buster -- ALL 8",
+      "_note2": "INCH MEAT STACKS ONLY $3.99 -- which the other two branches do not have",
+      "_note3": "up, so it goes on this shelf and not theirs. $3.99 rounds to 4: the file",
+      "_note4": "has no fractional prices and one cent is not worth inventing them for.",
+      "id": "bite_gutbuster",
+      "name": "Gut Buster",
+      "category": "Food",
+      "price": 4,
+      "hunger": 0.5,
+      "shop": false,
+      "prop": [
+        "prop_sandwich_01",
+        "prop_cs_sandwich_01",
+        "prop_food_bs_burger1"
+      ],
+      "seconds": 6.0,
+      "icon": "sub",
+      "tint": "#d99a52",
+      "desc": "Eight inches of meat stack for four dollars. Somebody did the sums wrong."
+    },
+    {
+      "_note": "LETTUCE BE -- VEGETARIAN CUISINE, on the sign, under a peace symbol. A",
+      "_note2": "SIT-DOWN RESTAURANT: white cloths, table lamps, a full room of covers, so",
+      "_note3": "it is priced with Haute rather than with the parade round the corner. NO",
+      "_note4": "MEAT ON THE SHELF, which is the one thing the sign actually promises.",
+      "id": "lb_plate",
+      "name": "Chef's Garden Plate",
+      "category": "Food",
+      "price": 19,
+      "hunger": 0.62,
+      "shop": false,
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_cs_bowl_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 7.0,
+      "icon": "plate",
+      "tint": "#a8bd7c",
+      "desc": "Nine things on it. Four of them are described as a foam."
+    },
+    {
+      "id": "lb_bowl",
+      "name": "Harvest Bowl",
+      "category": "Food",
+      "price": 14,
+      "hunger": 0.52,
+      "shop": false,
+      "prop": [
+        "prop_cs_bowl_01",
+        "prop_food_bs_bowl",
+        "prop_bowl_01"
+      ],
+      "seconds": 6.0,
+      "icon": "bowl",
+      "tint": "#9cb872",
+      "desc": "Filling, which surprises everybody who orders it to be polite."
+    },
+    {
+      "id": "lb_juice",
+      "name": "Cold-Pressed Juice",
+      "category": "Drinks",
+      "price": 7,
+      "hunger": 0.14,
+      "wake": 0.06,
+      "drink": true,
+      "shop": false,
+      "prop": [
+        "prop_plastic_cup_02",
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup"
+      ],
+      "seconds": 4.0,
+      "icon": "juice",
+      "tint": "#8fc94e",
+      "desc": "Pressed rather than squeezed, and the difference costs four dollars."
+    },
+    {
+      "_note": "BURGER SHOT -- and like Taco Bomb it has been in this file the whole time",
+      "_note2": "with nowhere to buy it: the generic burger is called BLEEDER BURGER, which",
+      "_note3": "is theirs. So the Bleeder stays generic and goes on their shelf, and these",
+      "_note4": "three are the rest of the board.",
+      "id": "bs_moneyshot",
+      "name": "Money Shot",
+      "category": "Food",
+      "price": 13,
+      "hunger": 0.62,
+      "shop": false,
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burger1",
+        "ng_proc_food_burg01a"
+      ],
+      "seconds": 6.0,
+      "icon": "burger",
+      "tint": "#dd9a48",
+      "desc": "Double everything. The name was focus-grouped by nobody at all."
+    },
+    {
+      "id": "bs_heartstopper",
+      "name": "Heart Stopper",
+      "category": "Food",
+      "price": 16,
+      "hunger": 0.78,
+      "shop": false,
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_cs_bowl_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 8.0,
+      "icon": "platter",
+      "tint": "#c9803c",
+      "desc": "Named by the legal department, who lost that argument."
+    },
+    {
+      "id": "bs_torpedo",
+      "name": "Torpedo",
+      "category": "Food",
+      "price": 11,
+      "hunger": 0.54,
+      "shop": false,
+      "prop": [
+        "prop_sandwich_01",
+        "prop_cs_sandwich_01",
+        "prop_food_bs_burger1"
+      ],
+      "seconds": 6.0,
+      "icon": "sub",
+      "tint": "#d99a52",
+      "desc": "Long, and it does go off in your hands eventually."
+    },
+    {
+      "_note": "GIOVANNI'S ITALIAN RESTAURANT, and the second line of the sign IS the",
+      "_note2": "menu: DELI PIZZA SANDWICHES SALADS. Four words, so four items, in that",
+      "_note3": "order -- the deli half is covered by the shared deli sandwich on the shelf",
+      "_note4": "rather than by a fifth of its own.",
+      "id": "gv_pizza",
+      "name": "Giovanni's Pizza",
+      "category": "Food",
+      "price": 16,
+      "hunger": 0.76,
+      "shop": false,
+      "prop": [
+        "prop_pizza_box_01",
+        "v_res_tt_pizzaplate",
+        "prop_cs_burger_01"
+      ],
+      "seconds": 8.0,
+      "icon": "pizza",
+      "tint": "#d98a44",
+      "desc": "Whole. Nobody has ever managed one alone and several have tried."
+    },
+    {
+      "id": "gv_slice",
+      "name": "Slice",
+      "category": "Food",
+      "price": 5,
+      "hunger": 0.3,
+      "shop": false,
+      "prop": [
+        "prop_pizza_box_01",
+        "v_res_tt_pizzaplate",
+        "prop_cs_burger_01"
+      ],
+      "seconds": 4.5,
+      "icon": "slice",
+      "tint": "#dd9448",
+      "desc": "Folded lengthways at the door, which is the correct way."
+    },
+    {
+      "id": "gv_sub",
+      "name": "Italian Sub",
+      "category": "Food",
+      "price": 11,
+      "hunger": 0.56,
+      "shop": false,
+      "prop": [
+        "prop_sandwich_01",
+        "prop_cs_sandwich_01",
+        "prop_food_bs_burger1"
+      ],
+      "seconds": 6.5,
+      "icon": "sub",
+      "tint": "#d8b070",
+      "desc": "Oil and vinegar whether or not you asked for them."
+    },
+    {
+      "id": "gv_salad",
+      "name": "Antipasto Salad",
+      "category": "Food",
+      "price": 10,
+      "hunger": 0.44,
+      "shop": false,
+      "prop": [
+        "prop_cs_bowl_01",
+        "prop_food_bs_bowl",
+        "prop_bowl_01"
+      ],
+      "seconds": 5.5,
+      "icon": "bowl",
+      "tint": "#b4c07a",
+      "desc": "A salad in the sense that there is lettuce under all of it."
+    },
+    {
+      "_note": "LES BIANCO, in Del Perro Plaza, two doors from Haute. Fine dining: no",
+      "_note2": "menu is legible from the street, so the shelf is a COURSE STRUCTURE rather",
+      "_note3": "than invented dishes -- primo and secondo is what the room is, and it says",
+      "_note4": "nothing the window does not. Priced with Haute, which it stands beside.",
+      "id": "lbi_primo",
+      "name": "Primo",
+      "category": "Food",
+      "price": 21,
+      "hunger": 0.5,
+      "shop": false,
+      "prop": [
+        "prop_cs_bowl_01",
+        "prop_food_bs_bowl",
+        "prop_bowl_01"
+      ],
+      "seconds": 7.0,
+      "icon": "bowl",
+      "tint": "#d8c9a0",
+      "desc": "The pasta course, and the one everybody says they came for."
+    },
+    {
+      "id": "lbi_secondo",
+      "name": "Secondo",
+      "category": "Food",
+      "price": 29,
+      "hunger": 0.72,
+      "shop": false,
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_cs_bowl_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 8.5,
+      "icon": "plate",
+      "tint": "#c9a06a",
+      "desc": "Arrives under a cloche. The cloche is lifted for you."
+    },
+    {
+      "_note": "SUMAC RESTAURANT -- the name is the spice, and the front is bougainvillea",
+      "_note2": "over a pergola, so it is read as Mediterranean. Same rule as Les Bianco:",
+      "_note3": "no menu is visible from the street, so the shelf is the SHAPE of the meal",
+      "_note4": "rather than dishes made up to fill it.",
+      "id": "sm_mezze",
+      "name": "Mezze Plate",
+      "category": "Food",
+      "price": 16,
+      "hunger": 0.55,
+      "shop": false,
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_cs_bowl_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 7.0,
+      "icon": "platter",
+      "tint": "#cfb87e",
+      "desc": "Eight small bowls. You will be full before the food arrives."
+    },
+    {
+      "id": "sm_grill",
+      "name": "Mixed Grill",
+      "category": "Food",
+      "price": 24,
+      "hunger": 0.74,
+      "shop": false,
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_cs_bowl_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 8.5,
+      "icon": "plate",
+      "tint": "#c48644",
+      "desc": "Brought to the table still going, which is most of the price."
+    },
+    {
+      "id": "sm_tea",
+      "name": "Mint Tea",
+      "category": "Drinks",
+      "price": 5,
+      "hunger": 0.08,
+      "wake": 0.05,
+      "drink": true,
+      "shop": false,
+      "prop": [
+        "prop_plastic_cup_02",
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup"
+      ],
+      "seconds": 4.0,
+      "icon": "teapot",
+      "tint": "#a8c47e",
+      "desc": "Poured from a height, for reasons nobody will explain."
     }
   ],
   "_animations": [

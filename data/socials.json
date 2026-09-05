@@ -201,7 +201,8 @@
         "bean_machine_downtown",
         "bean_machine_east",
         "bean_machine_market",
-        "bean_machine_vinewood"
+        "bean_machine_vinewood",
+        "bean_machine_delperro"
       ],
       "gender": "none",
       "verified": true,
@@ -221,7 +222,10 @@
     {
       "handle": "chihuahuadogs",
       "name": "Chihuahua Hot Dogs",
-      "vendor": "chihuahua_hotdogs",
+      "vendor": [
+        "chihuahua_hotdogs",
+        "chihuahua_hotdogs_delperro"
+      ],
       "gender": "none",
       "verified": false,
       "kind": "fastfood"
@@ -304,7 +308,10 @@
     {
       "handle": "bite_itsbig",
       "name": "BITE!",
-      "vendor": "bite_wraps",
+      "vendor": [
+        "bite_wraps",
+        "bite_delperro"
+      ],
       "gender": "none",
       "verified": false,
       "kind": "burger"
@@ -331,7 +338,10 @@
     {
       "handle": "coolbeans_ls",
       "name": "Cool Beans",
-      "vendor": "cool_beans",
+      "vendor": [
+        "cool_beans",
+        "cool_beans_vespucci"
+      ],
       "gender": "none",
       "verified": false,
       "kind": "coffee"
@@ -499,7 +509,11 @@
     {
       "handle": "upnatom_official",
       "name": "Up-n-Atom Burger",
-      "vendor": "upnatom",
+      "vendor": [
+        "upnatom",
+        "upnatom_delperro",
+        "upnatom_delperro_side"
+      ],
       "gender": "none",
       "verified": false,
       "kind": "burger"
@@ -515,7 +529,10 @@
     {
       "handle": "haute_ls",
       "name": "Haute",
-      "vendor": "haute",
+      "vendor": [
+        "haute",
+        "haute_delperro"
+      ],
       "gender": "none",
       "verified": false,
       "kind": "diner"
@@ -556,6 +573,103 @@
       "handle": "chido_taqueria",
       "name": "Chido!",
       "vendor": "chido",
+      "gender": "none",
+      "verified": false,
+      "kind": "taco"
+    },
+    {
+      "handle": "lascuadrasdeli",
+      "name": "Las Cuadras Deli",
+      "vendor": "las_cuadras_deli",
+      "gender": "none",
+      "verified": false,
+      "kind": "market"
+    },
+    {
+      "handle": "grainoftruth",
+      "name": "The Grain of Truth",
+      "vendor": "grain_of_truth",
+      "gender": "none",
+      "verified": false,
+      "kind": "market"
+    },
+    {
+      "handle": "dickiesbagels",
+      "name": "The Dickies Bagels & Deli",
+      "vendor": "dickies_bagels",
+      "gender": "none",
+      "verified": false,
+      "kind": "market"
+    },
+    {
+      "handle": "wigwam_ls",
+      "name": "Wigwam",
+      "vendor": "wigwam",
+      "gender": "none",
+      "verified": false,
+      "kind": "fastfood"
+    },
+    {
+      "handle": "robsliquor",
+      "name": "Rob's Liquor",
+      "vendor": [
+        "robs_liquor",
+        "robs_liquor_vespucci"
+      ],
+      "gender": "none",
+      "verified": false,
+      "kind": "liquor"
+    },
+    {
+      "handle": "burgershot_official",
+      "name": "Burger Shot",
+      "vendor": [
+        "burger_shot_vespucci",
+        "burger_shot_vespucci_side"
+      ],
+      "gender": "none",
+      "verified": false,
+      "kind": "burger"
+    },
+    {
+      "handle": "lettucebe",
+      "name": "Lettuce Be",
+      "vendor": "lettuce_be",
+      "gender": "none",
+      "verified": false,
+      "kind": "juice"
+    },
+    {
+      "handle": "giovannis_ls",
+      "name": "Giovanni's",
+      "vendor": "giovannis",
+      "gender": "none",
+      "verified": false,
+      "kind": "pizza"
+    },
+    {
+      "handle": "lesbianco",
+      "name": "Les Bianco",
+      "vendor": "les_bianco",
+      "gender": "none",
+      "verified": false,
+      "kind": "diner"
+    },
+    {
+      "handle": "sumac_ls",
+      "name": "Sumac",
+      "vendor": "sumac",
+      "gender": "none",
+      "verified": false,
+      "kind": "diner"
+    },
+    {
+      "handle": "tacobomb_official",
+      "name": "Taco Bomb",
+      "vendor": [
+        "taco_bomb_delperro",
+        "taco_bomb_vespucci"
+      ],
       "gender": "none",
       "verified": false,
       "kind": "taco"
