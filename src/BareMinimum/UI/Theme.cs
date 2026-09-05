@@ -20,13 +20,14 @@ namespace BareMinimum.UI
     /// left; and a frame with a breathing glow -- see Glide -- travels from the old place to
     /// the new one. Every screen gets all of that from here, which is why the screens agree.
     ///
-    /// WHY THE CHOSEN THING SITS ON A BRIGHT PLATE HERE AND A DARK ONE IN HOODRICH. That mod
-    /// moved to a dark slab with a rail when it went green, because a slab of bright green
-    /// under white words read as a tint rather than an accent. Its own note on the change says
-    /// the bright plate "worked in gold, which reads as an accent at any size" -- and amber is
-    /// the gold case. So the chosen row here is the full amber-to-ember Fill, exactly as these
-    /// panels have always highlighted, and the ink on it goes to the warm near-black rather
-    /// than to white.
+    /// THE CHOSEN THING SITS ON A DARK PLATE WITH THE AMBER ON ITS RAIL, as Hoodrich's does.
+    /// The first cut of this put it on the full amber-to-ember fill these panels had always
+    /// highlighted with, on the theory that a bright plate works in gold. It does on a row.
+    /// On a tile the size of a hand -- which is what a fifth of a panel a third of the screen
+    /// wide comes to on a 21:9 -- it was a striped orange block with a picture in the middle,
+    /// and the whole screen read as heavy. The plate is dark now, with a faint glaze of the
+    /// amber over it and the amber solid on a rail down its left, and the words on it go to
+    /// white. The colour is still the first thing you see; it is just not a wall of it.
     ///
     /// EVERYTHING HERE IS STATELESS except Glide, which is a class because a cursor has a
     /// position, and each screen owns one.
@@ -76,12 +77,12 @@ namespace BareMinimum.UI
         {
             // An accent with no alpha is Hud.Panel's way of being told there is no stripe.
             Hud.Panel(left, top, w, h,
-                      Color.FromArgb((int)(238f * arrive), Body.R, Body.G, Body.B),
+                      Color.FromArgb((int)(222f * arrive), Body.R, Body.G, Body.B),
                       Color.FromArgb(0, 0, 0, 0));
 
             // A hint of ember at the top, not an ember top. It is the only colour on the panel
             // that is not the cursor, so it has to stay under the threshold of notice.
-            Wash(left, top, w, WashDepth, (int)(18f * arrive));
+            Wash(left, top, w, WashDepth, (int)(12f * arrive));
         }
 
         /// <summary>
@@ -215,10 +216,10 @@ namespace BareMinimum.UI
         }
 
         /// <summary>
-        /// The brand as a fill, amber at the top running to ember at the bottom, in bands: the
-        /// plate under a chosen row, a chosen tile, the marker on a tab strip. Strength is how
-        /// lit it is, nought to one, which is what lets a plate come up as the cursor arrives
-        /// and go down as it leaves instead of snapping either way.
+        /// The brand as a fill, amber at the top running to ember at the bottom, in bands: for
+        /// a bar that MEASURES something. The plate under a chosen row and a chosen tile used
+        /// to be this and is not any more -- see Plate -- because at tile size the bands were
+        /// stripes and the block was the heaviest thing on the screen.
         /// </summary>
         public static void Fill(float x, float y, float w, float h, float strength)
         {
@@ -238,21 +239,27 @@ namespace BareMinimum.UI
         }
 
         /// <summary>
-        /// A dark slab a shade up from the panel with the amber on a rail down its left: for a
-        /// thing that is emphasised rather than chosen -- the card under a grid, a live pane.
-        /// Two rectangles.
+        /// The plate under a chosen thing: a warm dark slab a shade up from the panel, a faint
+        /// glaze of the amber over it, and the amber solid on a rail down its left. Strength is
+        /// how lit it is, nought to one, which is what lets it come up as the cursor arrives and
+        /// go down as it leaves instead of snapping either way. Three rectangles.
+        ///
+        /// The glaze is what keeps it in the scheme. Without it the slab is grey-brown and the
+        /// screen reads as a dark mod with an orange stripe on it; with it the plate is plainly
+        /// the same colour as the rail, only far back.
         /// </summary>
         public static void Plate(float x, float y, float w, float h, float strength)
         {
             if (strength <= 0.01f || w <= 0f || h <= 0f) return;
 
             Hud.Bar(x, y, w, h, Palette.Alpha(PlateBack, (int)(235f * strength)));
+            Hud.Bar(x, y, w, h, Palette.Alpha(Palette.Brand, (int)(28f * strength)));
 
             var rail = Math.Min(Hud.ToX(RailW), w);
             Hud.Bar(x, y, rail, h, Palette.Alpha(Palette.Brand, (int)(255f * strength)));
         }
 
-        private static readonly Color PlateBack = Color.FromArgb(255, 46, 38, 30);
+        private static readonly Color PlateBack = Color.FromArgb(255, 40, 34, 28);
         private const float RailW = 0.0045f;
 
         /// <summary>
@@ -280,26 +287,29 @@ namespace BareMinimum.UI
         }
 
         /// <summary>
-        /// What ink to use on a thing that is this lit: its ordinary colour on the dark, the
-        /// warm near-black on the amber, and every shade between while the plate is on its
-        /// way. The ordinary colour's alpha is kept.
+        /// What ink to use on a thing that is this lit: its ordinary colour on the dark, full
+        /// white on the plate, and every shade between while the plate is on its way. The
+        /// ordinary colour's alpha is kept.
+        ///
+        /// Brighter, not darker. This went to the warm near-black when the plate was a block of
+        /// amber; the plate is dark now, so the chosen word comes up to white instead.
         /// </summary>
         public static Color Ink(Color ordinary, float lit)
         {
             if (lit <= 0f) return ordinary;
 
-            return Lerp(ordinary, Color.FromArgb(ordinary.A, Dark.R, Dark.G, Dark.B), lit);
+            return Lerp(ordinary, Color.FromArgb(ordinary.A, 255, 255, 255), lit);
         }
 
         /// <summary>
-        /// Whether text this lit should carry the game's black outline. Both of GTA's text
-        /// decorations draw in BLACK, which is fine on light words over the dark panel and
-        /// ruinous on dark words over the amber plate: an outline round black digits fills
-        /// the holes in 8, 9 and 0 until all three are one blob.
+        /// Whether text this lit should carry the game's black outline. Always, now: every
+        /// word on these panels is light on dark, and the outline is what keeps it readable
+        /// over whatever the street is doing behind a translucent panel. Kept as a call so
+        /// the rule lives in one place if a bright plate ever comes back.
         /// </summary>
         public static bool Outline(float lit)
         {
-            return lit < 0.5f;
+            return true;
         }
 
         /// <summary>
@@ -310,6 +320,17 @@ namespace BareMinimum.UI
         {
             Hud.Text(words, x + Hud.ToX(0.010f) * (1f - grown), y, scale,
                      Palette.Alpha(Palette.Text, (int)(90f + 165f * grown)), Hud.FontBody);
+        }
+
+        /// <summary>
+        /// The marker on a tab strip: a short amber line under the chosen tab. One rectangle.
+        /// A block of amber under a word is a button; a line under it is a tab.
+        /// </summary>
+        public static void Underline(float x, float y, float w, float strength)
+        {
+            if (strength <= 0.01f || w <= 0f) return;
+
+            Hud.Bar(x, y, w, 0.0026f, Palette.Alpha(Palette.Brand, (int)(240f * strength)));
         }
 
         // ======================================================================
@@ -354,7 +375,7 @@ namespace BareMinimum.UI
     internal sealed class Glide
     {
         /// <summary>How thick the rim is, how far the glow reaches past it, one breath of that glow.</summary>
-        public const float Rule = 0.0022f;
+        public const float Rule = 0.0016f;
         public const float Glow = 0.0030f;
         public const int PulseMs = 1500;
 
@@ -442,10 +463,10 @@ namespace BareMinimum.UI
             var gX = Hud.ToX(Glow);
 
             Theme.Rim(_x - gX, _y - Glow, _w + gX * 2f, _h + Glow * 2f, Glow,
-                      Palette.Alpha(GlowInk, (int)((30f + 40f * pulse) * arrive)));
+                      Palette.Alpha(GlowInk, (int)((16f + 24f * pulse) * arrive)));
 
             Theme.Rim(_x, _y, _w, _h, Rule,
-                      Palette.Alpha(RimInk, (int)((205f + 50f * pulse) * arrive)));
+                      Palette.Alpha(RimInk, (int)((185f + 50f * pulse) * arrive)));
         }
     }
 }

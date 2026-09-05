@@ -37,8 +37,14 @@ namespace BareMinimum.UI
     /// </summary>
     internal sealed class FridgeScreen
     {
-        private const float PanelW = 0.46f;
         private const float Top = 0.150f;
+
+        /// <summary>
+        /// How tall a tile is, as a fraction of the screen's height; its width follows through
+        /// the aspect. Sized by height for the reason the pocket gives, and a touch smaller
+        /// than the pocket's because there are two panes of them side by side.
+        /// </summary>
+        private const float TileH = 0.095f;
 
         /// <summary>Air between the panel's edge and anything in it, and below the grids.</summary>
         private const float Pad = 0.012f;
@@ -527,24 +533,27 @@ namespace BareMinimum.UI
         {
             var arrive = Theme.Arrive(_shownAt, Theme.EnterMs);
 
-            var left = 0.5f - PanelW / 2f;
+            var rows = Shown();
+
+            var tileH = TileH;
+            var tileW = Hud.ToX(TileH);
+
+            // The panel is the width of its two panes, not the other way round.
+            var paneW = tileW * Columns;
+            var wide = paneW * 2f + Gutter;
+            var panelW = wide + Pad * 2f;
+
+            var left = 0.5f - panelW / 2f;
             var top = Top + Theme.EnterRise * (1f - arrive);
 
             var x = left + Pad;
-            var right = left + PanelW - Pad;
-            var wide = right - x;
-
-            var rows = Shown();
-
-            var paneW = (wide - Gutter) / 2f;
-            var tileW = paneW / Columns;
-            var tileH = tileW * Hud.Aspect;
+            var right = left + panelW - Pad;
 
             var height = Kit.HeadH + CapH + rows * tileH + GridPad + CardH + Kit.FootH;
 
-            Theme.Panel(left, top, PanelW, height, arrive);
+            Theme.Panel(left, top, panelW, height, arrive);
 
-            var y = Kit.Head(left, top, PanelW, Pad, IconCache.Get("s_layout.png"), "THE FRIDGE",
+            var y = Kit.Head(left, top, panelW, Pad, IconCache.Get("s_layout.png"), "THE FRIDGE",
                              "what you are carrying, and what is keeping cold", null, null, arrive, 0f);
 
             _frame.Begin();
@@ -667,11 +676,11 @@ namespace BareMinimum.UI
             var tw = w - gx * 2f;
             var th = h - gy * 2f;
 
-            Hud.Bar(tx, ty, tw, th, Color.FromArgb((int)(34f * show), 255, 255, 255));
-            Hud.Bar(tx, ty, tw, 0.0012f, Color.FromArgb((int)(64f * (1f - lit) * show), 255, 255, 255));
+            // The dark ground, and the plate coming up under the cursor. No hairline along the
+            // top and no light crossing it: at tile size those were chrome, not information.
+            Hud.Bar(tx, ty, tw, th, Color.FromArgb((int)(26f * show), 255, 255, 255));
 
-            Theme.Fill(tx, ty, tw, th, lit * show);
-            Theme.Sweep(tx, ty, tw, th, lit * show);
+            Theme.Plate(tx, ty, tw, th, lit * show);
 
             var item = _menu.Find(id);
             if (item == null) return;
@@ -685,8 +694,8 @@ namespace BareMinimum.UI
                 var tall = th * 0.56f * swell;
                 var wideIcon = Hud.ToX(tall);
 
-                // Item tint on the dark tile, the warm near-black on the amber one, and every
-                // shade between while the plate is on its way. One white file does all of it.
+                // The item's own colour on the dark tile, brightening toward white as the
+                // plate comes up. One white file does all of it.
                 var tint = Sheen.On(item.Tint, slot * 0.11f, lit < 0.5f ? Shimmer() : 0f);
 
                 var ink = Theme.Ink(Palette.Alpha(tint, (int)(238f * show)), lit);
@@ -716,28 +725,32 @@ namespace BareMinimum.UI
         /// <summary>The card under the grids: the chosen thing named, sliding in with its plate.</summary>
         private void Card(float x, float y, float wide, float arrive)
         {
-            Theme.Rule(x, y, wide, arrive);
+            // The same plate every chosen thing sits on, faint, so the name and the line under
+            // it read as one card rather than two lines of text loose on the panel.
+            Theme.Plate(x, y, wide, CardH - 0.006f, 0.55f * arrive);
+
+            var tx = x + 0.010f;
 
             var id = Picked();
             var item = id == null ? null : _menu.Find(id);
 
             if (item == null)
             {
-                Hud.Text("Nothing here to take.", x, y + 0.008f, 0.30f,
+                Hud.Text("Nothing here to take.", tx, y + 0.008f, 0.30f,
                          Palette.Alpha(Palette.TextDim, (int)(210f * arrive)), Hud.FontBody);
 
-                Hud.Text("Buy something and it turns up in your pocket.", x, y + 0.030f, 0.25f,
+                Hud.Text("Buy something and it turns up in your pocket.", tx, y + 0.030f, 0.25f,
                          Palette.Alpha(Palette.TextDim, (int)(170f * arrive)), Hud.FontBody);
                 return;
             }
 
             var grown = Theme.Grown(_pickedAt);
 
-            Theme.Caption(item.Name, x, y + 0.008f, grown, 0.32f);
+            Theme.Caption(item.Name, tx, y + 0.008f, grown, 0.32f);
 
             if (!string.IsNullOrEmpty(item.Desc))
             {
-                Hud.Text(Kit.Fit(item.Desc, wide, 0.25f, Hud.FontBody), x, y + 0.031f, 0.25f,
+                Hud.Text(Kit.Fit(item.Desc, wide - 0.014f, 0.25f, Hud.FontBody), tx, y + 0.031f, 0.25f,
                          Palette.Alpha(Palette.TextDim, (int)((110f + 90f * grown) * arrive)),
                          Hud.FontBody);
             }

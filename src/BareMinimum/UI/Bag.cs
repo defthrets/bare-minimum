@@ -33,8 +33,18 @@ namespace BareMinimum.UI
     /// </summary>
     internal sealed class Bag
     {
-        private const float PanelW = 0.34f;
         private const float Top = 0.170f;
+
+        /// <summary>
+        /// How tall a tile is, as a fraction of the screen's height. Its width follows through
+        /// the aspect, so it is square on screen.
+        ///
+        /// SIZED BY HEIGHT, NOT BY SHARE OF THE PANEL. A tile that was a fifth of a panel a
+        /// third of the screen wide was a fifth of a third of a 21:9 monitor, which is a tile
+        /// the size of a hand with a small picture lost in the middle of it. The panel is now
+        /// as wide as five of these plus its padding, and no wider.
+        /// </summary>
+        private const float TileH = 0.105f;
 
         /// <summary>Air between the panel's edge and anything in it, and above and below the grid.</summary>
         private const float Pad = 0.012f;
@@ -323,15 +333,18 @@ namespace BareMinimum.UI
         {
             var arrive = Theme.Arrive(_shownAt, Theme.EnterMs);
 
-            var left = 0.5f - PanelW / 2f;
+            var tileH = TileH;
+            var tileW = Hud.ToX(TileH);
+
+            // The panel is the width of its tiles, not the other way round.
+            var wide = tileW * Columns;
+            var panelW = wide + Pad * 2f;
+
+            var left = 0.5f - panelW / 2f;
             var top = Top + Theme.EnterRise * (1f - arrive);
 
             var x = left + Pad;
-            var right = left + PanelW - Pad;
-            var wide = right - x;
-
-            var tileW = wide / Columns;
-            var tileH = tileW * Hud.Aspect;
+            var right = left + panelW - Pad;
 
             var perPage = Columns * Rows;
             var first = _page * perPage;
@@ -341,9 +354,9 @@ namespace BareMinimum.UI
 
             var height = Kit.HeadH + GridPad + shownRows * tileH + GridPad + CardH + Kit.FootH;
 
-            Theme.Panel(left, top, PanelW, height, arrive);
+            Theme.Panel(left, top, panelW, height, arrive);
 
-            var y = Kit.Head(left, top, PanelW, Pad, IconCache.Get("p_bag.png"), "POCKET",
+            var y = Kit.Head(left, top, panelW, Pad, IconCache.Get("p_bag.png"), "POCKET",
                              "what you are carrying", null, _pantry.Total + " of " + _pantry.Slots,
                              arrive, 0f);
 
@@ -421,11 +434,11 @@ namespace BareMinimum.UI
             var tw = w - gx * 2f;
             var th = h - gy * 2f;
 
-            Hud.Bar(tx, ty, tw, th, Color.FromArgb((int)(34f * show), 255, 255, 255));
-            Hud.Bar(tx, ty, tw, 0.0012f, Color.FromArgb((int)(64f * (1f - lit) * show), 255, 255, 255));
+            // The dark ground, and the plate coming up under the cursor. No hairline along the
+            // top and no light crossing it: at tile size those were chrome, not information.
+            Hud.Bar(tx, ty, tw, th, Color.FromArgb((int)(26f * show), 255, 255, 255));
 
-            Theme.Fill(tx, ty, tw, th, lit * show);
-            Theme.Sweep(tx, ty, tw, th, lit * show);
+            Theme.Plate(tx, ty, tw, th, lit * show);
 
             var item = _menu.Find(id);
             if (item == null) return;
@@ -439,10 +452,9 @@ namespace BareMinimum.UI
                 var tall = th * 0.56f * swell;
                 var wideIcon = Hud.ToX(tall);
 
-                // ITEM TINT ON A DARK TILE, NEAR-BLACK ON THE AMBER ONE, and every shade
-                // between while the plate is on its way. The art is white and CustomSprite
-                // MULTIPLIES, so the same file does both -- and a taco's own warm brown over
-                // full-strength amber is mud.
+                // The item's own colour on the dark tile, brightening toward white as the
+                // plate comes up. The art is white and CustomSprite MULTIPLIES, so one file
+                // does all of it.
                 var tint = Sheen.On(item.Tint, slot * 0.11f, lit < 0.5f ? Shimmer() : 0f);
 
                 var ink = Theme.Ink(Palette.Alpha(tint, (int)(238f * show)), lit);
@@ -477,22 +489,26 @@ namespace BareMinimum.UI
         /// </summary>
         private void Card(float x, float y, float wide, Item item, float arrive)
         {
-            Theme.Rule(x, y, wide, arrive);
+            // The same plate every chosen thing sits on, faint, so the name and the line under
+            // it read as one card rather than two lines of text loose on the panel.
+            Theme.Plate(x, y, wide, CardH - 0.006f, 0.55f * arrive);
+
+            var tx = x + 0.010f;
 
             if (item == null)
             {
-                Hud.Text("Buy something and it turns up here.", x, y + 0.010f, 0.27f,
+                Hud.Text("Buy something and it turns up here.", tx, y + 0.010f, 0.27f,
                          Palette.Alpha(Palette.TextDim, (int)(190f * arrive)), Hud.FontBody);
                 return;
             }
 
             var grown = Theme.Grown(_pickedAt);
 
-            Theme.Caption(item.Name, x, y + 0.008f, grown, 0.32f);
+            Theme.Caption(item.Name, tx, y + 0.008f, grown, 0.32f);
 
             if (!string.IsNullOrEmpty(item.Desc))
             {
-                Hud.Text(Kit.Fit(item.Desc, wide, 0.25f, Hud.FontBody), x, y + 0.031f, 0.25f,
+                Hud.Text(Kit.Fit(item.Desc, wide - 0.014f, 0.25f, Hud.FontBody), tx, y + 0.031f, 0.25f,
                          Palette.Alpha(Palette.TextDim, (int)((110f + 90f * grown) * arrive)),
                          Hud.FontBody);
             }

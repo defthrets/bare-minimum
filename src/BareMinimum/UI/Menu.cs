@@ -66,8 +66,22 @@ namespace BareMinimum.UI
     {
         // ---- layout, all fractions of the screen ------------------------------
         private const float PanelX = 0.5f;      // centre
-        private const float PanelW = 0.34f;
         private const float Top = 0.180f;
+
+        /// <summary>
+        /// How wide the panel is, IN HEIGHT UNITS, turned into a width through the aspect.
+        ///
+        /// A width given as a share of the screen's width is a third again wider on a 21:9
+        /// than on a 16:9: a list that is a list on one monitor is a banner on the other, and
+        /// it was. Given in height units it is the same shape everywhere. 0.56 is the 0.315
+        /// of a 16:9 screen this panel was designed at.
+        /// </summary>
+        private const float PanelWH = 0.56f;
+
+        private static float PanelW
+        {
+            get { return Hud.ToX(PanelWH); }
+        }
 
         /// <summary>Air between the panel's edge and anything in it.</summary>
         private const float Pad = 0.012f;
@@ -710,12 +724,9 @@ namespace BareMinimum.UI
         {
             var w = wide / Tabs.Count;
 
-            var markX = x + _tabGlide * w;
-            var markY = y + 0.004f;
-            var markH = TabsH - 0.008f;
-
-            Theme.Fill(markX, markY, w, markH, arrive);
-            Theme.Sweep(markX, markY, w, markH, arrive);
+            // ONE UNDERLINE THAT SLIDES, rather than a filled cell. A block of amber under a
+            // word is a button; a line under it is a tab, which is what this is.
+            Theme.Underline(x + _tabGlide * w + 0.006f, y + TabsH - 0.007f, w - 0.012f, arrive);
 
             var scale = Tabs.Count <= 4 ? 0.28f : Tabs.Count <= 6 ? 0.25f : 0.22f;
 
@@ -756,8 +767,7 @@ namespace BareMinimum.UI
             {
                 var plateY = y + slot * RowH;
 
-                Theme.Fill(x, plateY, wide, RowH, arrive);
-                Theme.Sweep(x, plateY, wide, RowH, arrive);
+                Theme.Plate(x, plateY, wide, RowH, arrive);
             }
 
             for (var i = 0; i < shown; i++)
@@ -802,13 +812,14 @@ namespace BareMinimum.UI
 
             var plain = row.Enabled ? Palette.Text : Palette.TextDisabled;
 
-            // Light ink on the dark panel, the warm near-black on the amber plate, and every
-            // shade between as the plate slides onto the row -- so the words cross over WITH
-            // the plate instead of flicking on the frame the index changed.
+            // Dim ink on the dark panel, full white on the plate, and every shade between as
+            // the plate slides onto the row -- so the words cross over WITH the plate rather
+            // than flicking on the frame the index changed.
             var ink = Theme.Ink(Palette.Alpha(plain, (int)(plain.A * arrive)), lit);
             var outline = Theme.Outline(lit);
 
-            var textLeft = x + 0.006f;
+            // Past the plate's rail, so the picture never sits on the amber.
+            var textLeft = x + 0.010f;
 
             var icon = IconCache.Get(row.IconFile);
 
@@ -832,8 +843,7 @@ namespace BareMinimum.UI
                     tint = Sheen.On(tint, slot * 0.125f, Shimmer * 0.7f);
                 }
 
-                // Toward the near-black on the plate, the way the words go: a taco's own brown
-                // over full amber is mud, and the pocket learned that first.
+                // Brighter on the plate, the way the words go.
                 tint = Theme.Ink(Palette.Alpha(tint, (int)(tint.A * arrive)), lit);
 
                 icon.DrawSized(textLeft + wideIcon / 2f, y + RowH / 2f, wideIcon, tall, tint);
