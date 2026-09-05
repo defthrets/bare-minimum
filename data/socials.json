@@ -382,6 +382,166 @@
       "gender": "none",
       "verified": false,
       "kind": "market"
+    },
+    {
+      "handle": "heavenlytacos",
+      "name": "Heavenly Tacos",
+      "vendor": "heavenly_tacos",
+      "gender": "none",
+      "verified": false,
+      "kind": "taco"
+    },
+    {
+      "handle": "bite_mirrorpark",
+      "name": "BITE! Mirror Park",
+      "vendor": "bite_mirror",
+      "gender": "none",
+      "verified": false,
+      "kind": "fastfood"
+    },
+    {
+      "handle": "squeezeoneout",
+      "name": "Squeeze One Out",
+      "vendor": "squeeze_one_out",
+      "gender": "none",
+      "verified": false,
+      "kind": "juice"
+    },
+    {
+      "handle": "coolbeans_mirror",
+      "name": "Cool Beans Mirror Park",
+      "vendor": "cool_beans_mirror",
+      "gender": "none",
+      "verified": false,
+      "kind": "coffee"
+    },
+    {
+      "handle": "mirrorparktavern",
+      "name": "Mirror Park Tavern",
+      "vendor": "mirror_park_tavern",
+      "gender": "none",
+      "verified": false,
+      "kind": "liquor"
+    },
+    {
+      "handle": "pills_mirrorpark",
+      "name": "Pills",
+      "vendor": "mirror_pharmacy",
+      "gender": "none",
+      "verified": false,
+      "kind": "tobacco"
+    },
+    {
+      "handle": "hornys_ls",
+      "name": "Horny's",
+      "vendor": "hornys",
+      "gender": "none",
+      "verified": false,
+      "kind": "burger"
+    },
+    {
+      "handle": "chicoshyper",
+      "name": "Chico's Hypermarket",
+      "vendor": "chicos_hypermarket",
+      "gender": "male",
+      "verified": false,
+      "kind": "market"
+    },
+    {
+      "handle": "liquormarket_ls",
+      "name": "Liquor Market",
+      "vendor": "liquor_market_davis",
+      "gender": "none",
+      "verified": false,
+      "kind": "liquor"
+    },
+    {
+      "handle": "bjsmarket",
+      "name": "B.J.'s Market",
+      "vendor": "bjs_market",
+      "gender": "male",
+      "verified": false,
+      "kind": "market"
+    },
+    {
+      "handle": "jazz_ls",
+      "name": "Jazz",
+      "vendor": "jazz_desserts",
+      "gender": "none",
+      "verified": false,
+      "kind": "diner"
+    },
+    {
+      "handle": "vinewoodliquor",
+      "name": "Vinewood Liquor",
+      "vendor": "vinewood_liquor",
+      "gender": "none",
+      "verified": false,
+      "kind": "liquor"
+    },
+    {
+      "handle": "guidostakeout",
+      "name": "Guido's Take Out",
+      "vendor": "guidos_pizza",
+      "gender": "male",
+      "verified": false,
+      "kind": "pizza"
+    },
+    {
+      "handle": "fruitofthevine",
+      "name": "Fruit of the Vine",
+      "vendor": "fruit_of_the_vine",
+      "gender": "none",
+      "verified": false,
+      "kind": "liquor"
+    },
+    {
+      "handle": "upnatom_official",
+      "name": "Up-n-Atom Burger",
+      "vendor": "upnatom",
+      "gender": "none",
+      "verified": false,
+      "kind": "burger"
+    },
+    {
+      "handle": "vinewood_dogs",
+      "name": "Hot Dog Guy (Vinewood)",
+      "vendor": "hotdog_vinewood",
+      "gender": "male",
+      "verified": false,
+      "kind": "cart"
+    },
+    {
+      "handle": "haute_ls",
+      "name": "Haute",
+      "vendor": "haute",
+      "gender": "none",
+      "verified": false,
+      "kind": "diner"
+    },
+    {
+      "handle": "eclipselounge",
+      "name": "Eclipse Lounge",
+      "vendor": "eclipse_lounge",
+      "gender": "none",
+      "verified": false,
+      "kind": "liquor"
+    },
+    {
+      "handle": "spitroasters",
+      "name": "Spitroasters",
+      "vendor": "spitroasters",
+      "gender": "none",
+      "verified": false,
+      "kind": "diner"
+    },
+    {
+      "handle": "ellensliquor",
+      "name": "Ellen's Liquor Lover",
+      "vendor": "ellens_liquor",
+      "gender": "female",
+      "verified": false,
+      "kind": "liquor"
     }
   ],
   "posts": {

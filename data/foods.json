@@ -2052,6 +2052,332 @@
         "prop_food_bs_bagel"
       ],
       "seconds": 4.5
+    },
+    {
+      "_note": "Up-n-Atom's menu board is readable from the street, so these four are what",
+      "_note2": "it says, at this mod's prices rather than the board's 1980s ones.",
+      "id": "ua_triple",
+      "name": "Triple Burger",
+      "category": "Food",
+      "price": 9,
+      "hunger": 0.58,
+      "shop": false,
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burger1",
+        "ng_proc_food_burg01a"
+      ],
+      "drinkProp": [
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup",
+        "prop_ld_can_01"
+      ],
+      "combo": true,
+      "seconds": 5.5,
+      "vehicleSeconds": 55,
+      "icon": "burger",
+      "tint": "#e2a355",
+      "desc": "Three patties. The middle one is there on trust."
+    },
+    {
+      "id": "ua_baconmelt",
+      "name": "Bacon Triple Cheese Melt",
+      "category": "Food",
+      "price": 11,
+      "hunger": 0.62,
+      "shop": false,
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burger1",
+        "ng_proc_food_burg01a"
+      ],
+      "seconds": 6.0,
+      "icon": "burger",
+      "tint": "#d9954a",
+      "desc": "Ten slices of cheese, and the board is proud of that."
+    },
+    {
+      "id": "ua_fries",
+      "name": "French Fries",
+      "category": "Snacks",
+      "price": 4,
+      "hunger": 0.18,
+      "shop": false,
+      "prop": [
+        "prop_food_bs_chips",
+        "prop_food_bag1"
+      ],
+      "seconds": 4.5,
+      "icon": "chips",
+      "tint": "#e8c46a",
+      "desc": "Salt, mostly. Nobody is pretending otherwise."
+    },
+    {
+      "id": "ua_shake",
+      "name": "Jumbo Shake",
+      "category": "Drinks",
+      "price": 5,
+      "hunger": 0.16,
+      "wake": 0.02,
+      "drink": true,
+      "shop": false,
+      "prop": [
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup",
+        "prop_plastic_cup_02"
+      ],
+      "seconds": 4.5,
+      "icon": "shake",
+      "tint": "#efd6c0",
+      "desc": "Strawberry, chocolate or vanilla. Extra creamy, it insists."
+    },
+    {
+      "_note": "Horny's sign says BURGERS and 'the beef with the bone'; the window adds menudo,",
+      "_note2": "eggs benedict and two chicken tacos. Mexican-American, so the shelf is both.",
+      "id": "hornys_burger",
+      "name": "Bone-In Burger",
+      "category": "Food",
+      "price": 10,
+      "hunger": 0.56,
+      "shop": false,
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burger1",
+        "ng_proc_food_burg01a"
+      ],
+      "drinkProp": [
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup",
+        "prop_ld_can_01"
+      ],
+      "combo": true,
+      "seconds": 5.5,
+      "vehicleSeconds": 55,
+      "icon": "burger",
+      "tint": "#dd8f4b",
+      "desc": "The beef with the bone. You are asked not to think about it too hard."
+    },
+    {
+      "id": "hornys_menudo",
+      "name": "Bowl of Menudo",
+      "category": "Food",
+      "price": 9,
+      "hunger": 0.5,
+      "shop": false,
+      "prop": [
+        "prop_cs_bowl_01",
+        "prop_food_bs_bowl",
+        "prop_bowl_01"
+      ],
+      "seconds": 6.0,
+      "icon": "bowl",
+      "tint": "#c9543a",
+      "desc": "Daily. Cures whatever last night did to you."
+    },
+    {
+      "id": "hornys_tacos",
+      "name": "Two Chicken Tacos",
+      "category": "Food",
+      "price": 6,
+      "hunger": 0.38,
+      "shop": false,
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02",
+        "prop_food_bs_taco"
+      ],
+      "seconds": 5.0,
+      "icon": "taco",
+      "tint": "#e0b055",
+      "desc": "Two for the price the board has not changed in years."
+    },
+    {
+      "id": "hornys_benedict",
+      "name": "Eggs Benedict",
+      "category": "Food",
+      "price": 8,
+      "hunger": 0.45,
+      "shop": false,
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_cs_bowl_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 5.5,
+      "icon": "egg",
+      "tint": "#f0d79a",
+      "desc": "Or hash browns. The window offers you the choice and means it."
+    },
+    {
+      "_note": "SPITROASTERS MEAT HOUSE -- 'the Bigger the Beef the Bigger the Roasting'.",
+      "id": "spit_roast",
+      "name": "Spit-Roasted Beef",
+      "category": "Food",
+      "price": 14,
+      "hunger": 0.68,
+      "shop": false,
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_cs_bowl_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 6.0,
+      "icon": "platter",
+      "tint": "#b5622f",
+      "desc": "Off the spit, onto the plate, no step in between worth mentioning."
+    },
+    {
+      "id": "spit_ribs",
+      "name": "Rack of Ribs",
+      "category": "Food",
+      "price": 16,
+      "hunger": 0.72,
+      "shop": false,
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_cs_bowl_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 6.5,
+      "icon": "plate",
+      "tint": "#a8552c",
+      "desc": "Comes with a roll of paper towel and no cutlery."
+    },
+    {
+      "_note": "The board by Jazz's door lists appetizers, entrees, salads and soups, desserts.",
+      "id": "jazz_entree",
+      "name": "Seafood Linguine",
+      "category": "Food",
+      "price": 18,
+      "hunger": 0.62,
+      "shop": false,
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_cs_bowl_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 6.0,
+      "icon": "noodleplate",
+      "tint": "#e6d3a8",
+      "desc": "Off the entrees. The menu by the door has been there a while."
+    },
+    {
+      "id": "jazz_dessert",
+      "name": "Chocolate Torte",
+      "category": "Snacks",
+      "price": 9,
+      "hunger": 0.24,
+      "shop": false,
+      "prop": [
+        "prop_cs_slice_cake",
+        "prop_amb_donut"
+      ],
+      "seconds": 5.0,
+      "icon": "cake",
+      "tint": "#7a4a33",
+      "desc": "The word DESSERTS is bigger than the word JAZZ. They know."
+    },
+    {
+      "id": "haute_plate",
+      "name": "Tasting Plate",
+      "category": "Food",
+      "price": 26,
+      "hunger": 0.54,
+      "shop": false,
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_cs_bowl_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 6.5,
+      "icon": "plate",
+      "tint": "#dcd2c0",
+      "desc": "Small, arranged, and costs what a week of tacos costs."
+    },
+    {
+      "id": "eclipse_small",
+      "name": "Small Plates",
+      "category": "Food",
+      "price": 16,
+      "hunger": 0.4,
+      "shop": false,
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_cs_bowl_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 6.0,
+      "icon": "platter",
+      "tint": "#cfc4ad",
+      "desc": "Three of them and you have had a starter."
+    },
+    {
+      "_note": "LIBERTY STYLE PIZZA -- Guido's Take Out, open 24 hours, free delivery.",
+      "id": "guido_slice",
+      "name": "Liberty Style Slice",
+      "category": "Food",
+      "price": 6,
+      "hunger": 0.32,
+      "shop": false,
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_pizza_box_01"
+      ],
+      "seconds": 5.0,
+      "icon": "slice",
+      "tint": "#e0a24a",
+      "desc": "Folded lengthways, which is apparently the whole difference."
+    },
+    {
+      "id": "guido_pie",
+      "name": "Whole Liberty Pie",
+      "category": "Food",
+      "price": 22,
+      "hunger": 0.92,
+      "shop": false,
+      "prop": [
+        "prop_pizza_box_01",
+        "v_res_tt_pizzaplate"
+      ],
+      "seconds": 7.0,
+      "icon": "pizza",
+      "tint": "#d89440",
+      "desc": "Twenty-four hours a day, and free delivery he would rather you did not test."
+    },
+    {
+      "_note": "HEAVENLY TACOS, and the wall next to it says MEXICAN AND AMERICAN.",
+      "id": "hv_taco",
+      "name": "Heavenly Taco",
+      "category": "Food",
+      "price": 7,
+      "hunger": 0.34,
+      "shop": false,
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02",
+        "prop_food_bs_taco"
+      ],
+      "seconds": 5.0,
+      "icon": "taco",
+      "tint": "#dfa94e",
+      "desc": "Named optimistically. Not entirely without cause."
+    },
+    {
+      "id": "hv_combo",
+      "name": "Mexican-American Combo",
+      "category": "Food",
+      "price": 13,
+      "hunger": 0.64,
+      "shop": false,
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_cs_bowl_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 6.0,
+      "icon": "plate",
+      "tint": "#d2913f",
+      "desc": "Both halves of the sign, on one plate, at one price."
     }
   ],
   "_animations": [
