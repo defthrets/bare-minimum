@@ -200,7 +200,8 @@
         "bean_machine_alta",
         "bean_machine_downtown",
         "bean_machine_east",
-        "bean_machine_market"
+        "bean_machine_market",
+        "bean_machine_vinewood"
       ],
       "gender": "none",
       "verified": true,
@@ -540,6 +541,14 @@
       "name": "Ellen's Liquor Lover",
       "vendor": "ellens_liquor",
       "gender": "female",
+      "verified": false,
+      "kind": "liquor"
+    },
+    {
+      "handle": "eclipseliquor",
+      "name": "Eclipse Liquor & Deli",
+      "vendor": "eclipse_liquor_deli",
+      "gender": "none",
       "verified": false,
       "kind": "liquor"
     }

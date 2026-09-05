@@ -2402,6 +2402,71 @@
       "blipSprite": 52,
       "blipColour": 5,
       "ui": true
+    },
+    {
+      "_note": "ECLIPSE liqour.deli, named for the boulevard -- NOT the Eclipse Lounge",
+      "_note2": "half a kilometre west, which is a bar and sells small plates. Same sign",
+      "_note3": "as the two downtown liqour.delis, so the same stock. NO DISCOUNT: its",
+      "_note4": "windows say CASH CHECKS HERE, not the closing-down signage those two got.",
+      "id": "eclipse_liquor_deli",
+      "name": "Eclipse Liquor & Deli",
+      "item": [
+        "deli_sub",
+        "deli_sandwich",
+        "wine",
+        "whiskey",
+        "beer",
+        "beer_logger",
+        "jerky",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "x": -596.344,
+      "y": 277.647,
+      "z": 82.154,
+      "heading": 331.891,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5,
+      "ui": true
+    },
+    {
+      "_note": "Bean Machine on West Vinewood, the fifth branch and the first one",
+      "_note2": "north of the freeway. IDENTICAL STOCK to the other four: it is the same",
+      "_note3": "chain, and a coffee shop selling something different in one suburb would",
+      "_note4": "read as a mistake. The bm_ items sell the SLEEP meter, not the hunger one.",
+      "id": "bean_machine_vinewood",
+      "name": "Bean Machine",
+      "item": [
+        {
+          "id": "bm_croissant",
+          "from": 6,
+          "to": 12
+        },
+        {
+          "id": "bm_muffin",
+          "from": 6,
+          "to": 15
+        },
+        {
+          "id": "bm_espresso"
+        },
+        {
+          "id": "bm_latte"
+        }
+      ],
+      "x": -689.615,
+      "y": 315.421,
+      "z": 83.107,
+      "heading": 310.398,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5,
+      "ui": true
     }
   ]
 }
