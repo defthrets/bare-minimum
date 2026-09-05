@@ -551,6 +551,14 @@
       "gender": "none",
       "verified": false,
       "kind": "liquor"
+    },
+    {
+      "handle": "chido_taqueria",
+      "name": "Chido!",
+      "vendor": "chido",
+      "gender": "none",
+      "verified": false,
+      "kind": "taco"
     }
   ],
   "posts": {

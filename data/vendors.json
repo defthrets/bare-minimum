@@ -49,7 +49,10 @@
     "Places noted but NOT built yet. The loader only reads \"vendors\", so anything here",
     "is inert -- a parking space, not a disabled entry.",
     "",
-    "  (nothing pending -- the three liquor stores went live 2026-08-30)"
+    "  -1469.985, -134.949, 50.570  h195.772  -- Del Perro, one block up from Chido.",
+    "      A green awning reading \"...'s Redemption\" over a blue-and-white tiled arch.",
+    "      THE NAME IS CUT OFF at the left edge of the photo it came from, so neither",
+    "      the shop nor what it sells is known. Noted 2026-09-06, awaiting the full sign."
   ],
   "vendors": [
     {
@@ -2461,6 +2464,32 @@
       "y": 315.421,
       "z": 83.107,
       "heading": 310.398,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5,
+      "ui": true
+    },
+    {
+      "_note": "CHIDO!, Del Perro. The awning reads TAQUERIA MEXICANA under the name,",
+      "_note2": "and the tiled band along the bottom of the window is the same yellow and",
+      "_note3": "red as the sign. A sit-down taqueria rather than a hatch, so it carries a",
+      "_note4": "plate as well as the street tacos. Door coordinate.",
+      "id": "chido",
+      "name": "Chido!",
+      "item": [
+        "chido_tacos",
+        "chido_quesadilla",
+        "chido_plate",
+        "chido_horchata",
+        "ecola",
+        "sprunk"
+      ],
+      "x": -1498.964,
+      "y": -226.854,
+      "z": 50.44,
+      "heading": 321.354,
       "spawnRange": 90.0,
       "reach": 2.2,
       "blip": true,

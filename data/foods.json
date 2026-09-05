@@ -2378,6 +2378,80 @@
       "icon": "plate",
       "tint": "#d2913f",
       "desc": "Both halves of the sign, on one plate, at one price."
+    },
+    {
+      "_note": "CHIDO! -- the awning says TAQUERIA MEXICANA under the name, so it is a",
+      "_note2": "taqueria and not another Taco Bomb. Its own menu, like every other named",
+      "_note3": "shop here: a generic taco sold under a specific sign reads as a shortcut.",
+      "id": "chido_tacos",
+      "name": "Tacos al Pastor",
+      "category": "Food",
+      "price": 8,
+      "hunger": 0.4,
+      "shop": false,
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02",
+        "prop_food_bs_taco",
+        "ng_proc_food_taco1"
+      ],
+      "seconds": 5.0,
+      "icon": "taco",
+      "tint": "#e3a445",
+      "desc": "Three of them, off the spit, with the pineapple."
+    },
+    {
+      "id": "chido_quesadilla",
+      "name": "Quesadilla",
+      "category": "Food",
+      "price": 9,
+      "hunger": 0.44,
+      "shop": false,
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_sandwich_01",
+        "prop_cs_sandwich_01",
+        "prop_food_bs_burger1"
+      ],
+      "seconds": 5.5,
+      "icon": "wrap",
+      "tint": "#d9b063",
+      "desc": "Folded, pressed, and hot enough to be a mistake."
+    },
+    {
+      "id": "chido_plate",
+      "name": "Plato Chido",
+      "category": "Food",
+      "price": 14,
+      "hunger": 0.66,
+      "shop": false,
+      "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_cs_bowl_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 6.5,
+      "icon": "plate",
+      "tint": "#cf8a3f",
+      "desc": "Rice, beans and the thing you actually came for."
+    },
+    {
+      "id": "chido_horchata",
+      "name": "Horchata",
+      "category": "Drinks",
+      "price": 4,
+      "hunger": 0.1,
+      "drink": true,
+      "shop": false,
+      "prop": [
+        "prop_plastic_cup_02",
+        "prop_cs_bs_cup",
+        "prop_food_bs_cup"
+      ],
+      "seconds": 4.0,
+      "icon": "cup",
+      "tint": "#e8dcc4",
+      "desc": "Cinnamon, rice and more sugar than either."
     }
   ],
   "_animations": [
