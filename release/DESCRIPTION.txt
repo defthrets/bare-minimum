@@ -141,6 +141,8 @@ the DLL and say nothing about it.
   97 settings in an in-game menu. Every shop and every item is editable text.
 
   Optional one-way integration with Hoodrich's social feed.
+  
+  Not all locations for food have been set out , will be adding more in coming updates 
 
 
 ================================================================================
