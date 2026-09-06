@@ -1,0 +1,146 @@
+================================================================================
+  BARE MINIMUM 0.1.0 -- copy for the mod page
+================================================================================
+
+Three lengths and a changelog. Use whichever the site's fields want.
+
+
+--------------------------------------------------------------------------------
+  1. ONE LINE  (summary field)
+--------------------------------------------------------------------------------
+
+Franklin gets hungry and he gets tired. More than a hundred real shops to do
+something about it.
+
+
+--------------------------------------------------------------------------------
+  2. ONE PARAGRAPH  (short description)
+--------------------------------------------------------------------------------
+
+Hunger and sleep for GTA V, as two small marks beside the minimap rather than
+two more bars -- an apple eaten down to a core, an eye slowly closing, so you
+read the state from the shape at a glance. There are 108 places to eat and they
+are the real ones: the 24/7 you walk past every mission, the taco windows, the
+hot dog carts, Burger Shot, Bean Machine, Rob's Liquor, the delis and the
+restaurants nobody ever gets to walk into. 157 things to buy, each with its own
+price, its own effect and its own line about itself. Shops with a full menu,
+stalls that just hand you a hot dog, and drive-throughs you order from without
+leaving the car. What you buy goes in your pocket for later, or into the fridge
+in any safehouse kitchen. Sleep in any bed. Run everywhere and you will pay for
+it in both. Ninety-seven settings, all live in an in-game menu, and every shop
+and every item is a plain text file you can edit. Drop-in install, works on
+Legacy and Enhanced, no OpenIV, and your save is never touched.
+
+
+--------------------------------------------------------------------------------
+  3. FULL DESCRIPTION  (main body)
+--------------------------------------------------------------------------------
+
+TWO MARKS, NOT TWO BARS
+
+Hunger and sleep sit beside the minimap as an apple and a moon. Each goes
+through five separate drawings as it empties -- the apple is eaten down to a
+core, the eye closes -- so the state is carried by the shape rather than by the
+length of a line. If you would rather have bars, there is a bar style in the
+settings.
+
+Both run on the game clock, so a full day of them is about 48 minutes of play.
+
+
+MORE THAN A HUNDRED PLACES TO EAT
+
+108 of them, and they are the shops that are already there: every 24/7 and LTD,
+the taco windows, the hot dog carts, Burger Shot, Up-n-Atom, Taco Bomb, Bean
+Machine, Cool Beans, Rusty Brown's, Pizza This, Rob's Liquor, the corner
+stores, the delis, and a good few restaurants the game never lets you into. Del
+Perro and Vespucci are covered end to end.
+
+Each has its own menu, its own prices, its own hours and its own voice. A
+breakfast menu at midnight is shown greyed with its hours on it rather than
+quietly missing, so you learn to come back.
+
+157 things to buy across food, snacks and drinks. Drink enough of the wrong
+ones and you will feel it, and the walk goes with it.
+
+
+HOW YOU BUY IT
+
+Walk up and press E. A counter or a shelf opens a list with tabs, a picture and
+a price per row, and a line about each one. A hot dog cart just hands you a hot
+dog and he eats it on the spot.
+
+Drive-throughs work from the driver's seat. A meal at the wheel is eaten slowly
+between junctions instead of in four seconds at the window, and the horn is held
+off while you are ordering.
+
+What you buy goes in your pocket by default, so a shop is somewhere you go back
+to rather than a place you stand and eat. Every safehouse kitchen has a working
+fridge that holds forty things -- your pocket on one side, the fridge on the
+other, one key to move things across and another to eat from either side.
+
+
+IT COSTS SOMETHING TO IGNORE
+
+Sprinting empties both meters faster than walking, and the marks visibly speed
+up while you do it, so the reason is on screen.
+
+Let hunger reach nothing and it starts costing health, slowly, with a warning
+first. It stops well above the floor -- it will never kill you.
+
+Let sleep reach nothing and the picture starts to swim. Stay up through that
+and you collapse where you stand and wake up four hours later.
+
+Sleep in any bed, and how well you sleep depends on whose bed it is. Sleeping
+also sobers you up, because it advances the same clock everything else runs on.
+
+
+YOURS TO CHANGE
+
+Ninety-seven settings across nine tabs in an in-game menu on F7, each with a
+line saying what it does, everything live as you turn it, and the changes
+written back to the ini without disturbing your comments or your ordering.
+
+Every shop and every item is a plain text file. Add a shop, change a price,
+write a menu, move something that is in the wrong place. Anything the game
+cannot find is skipped with a line in the log rather than breaking the mod.
+
+
+IF YOU ALSO RUN HOODRICH
+
+The shops talk on its social feed -- 71 accounts and 475 lines, written as
+people who sell lunch rather than as gang members. Entirely optional, entirely
+one-way, and completely silent if you do not have it.
+
+
+INSTALL
+
+Drag into your GTA V folder, say yes to merging, load a save. Needs
+ScriptHookV and ScriptHookVDotNet 3. Works on Legacy and Enhanced from the same
+files. No game file is modified and nothing is written to your save -- delete
+three things and it never happened.
+
+UNBLOCK THE ZIP BEFORE YOU EXTRACT IT, or ScriptHookVDotNet will refuse to load
+the DLL and say nothing about it.
+
+
+--------------------------------------------------------------------------------
+  4. CHANGELOG  (for the mod page's changelog field)
+--------------------------------------------------------------------------------
+
+0.1.0
+
+  First release.
+
+  Hunger and sleep as two icons beside the minimap, five drawings each, running
+  on the game clock. 108 shops, stalls, windows and drive-throughs. 157 items.
+  A pocket, a fridge in every safehouse kitchen, and sleeping in any bed.
+
+  Sprinting costs you both. Hunger at zero takes health slowly and will not
+  kill you. Sleep at zero swims the picture and then puts you on the floor.
+
+  97 settings in an in-game menu. Every shop and every item is editable text.
+
+  Optional one-way integration with Hoodrich's social feed.
+
+
+================================================================================

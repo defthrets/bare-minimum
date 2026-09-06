@@ -1,0 +1,70 @@
+===============================================================================
+  BARE MINIMUM  --  changes
+===============================================================================
+
+
+0.1.0  --  first release
+-------------------------------------------------------------------------------
+
+  HUNGER AND SLEEP, as two small marks beside the minimap rather than two bars.
+  Each goes through five drawings as it empties -- an apple eaten down to a
+  core, an eye closing -- so the state reads from the shape at a glance. A bar
+  style is in the settings for anybody who wants one.
+
+  Both run on the GAME clock, so a day of them is about 48 minutes of play.
+
+  108 PLACES TO BUY FOOD, and they are the real ones: every 24/7 and LTD, the
+  taco windows, the hot dog carts, Burger Shot, Up-n-Atom, Bean Machine, Cool
+  Beans, Rob's Liquor, Taco Bomb, Pizza This, Cluckin' Bell's walk-up, the
+  liquor stores, the corner shops, the delis, and the restaurants nobody ever
+  gets to walk into. Del Perro and Vespucci are covered end to end.
+
+  157 THINGS TO EAT across three categories, each with its own price, its own
+  effect and its own line about itself.
+
+  SHOPS WITH A MENU AND STALLS WITH ONE KEY. A counter or a shelf opens a list
+  with tabs, pictures and prices. A hot dog cart just hands you a hot dog. The
+  drive-throughs work from the driver's seat, and a meal at the wheel is eaten
+  slowly between junctions rather than in four seconds at the window.
+
+  A POCKET, on F11. What you buy goes in it by default -- three things -- so a
+  shop is somewhere you go back to rather than a place you stand and eat.
+
+  A FRIDGE IN EVERY SAFEHOUSE KITCHEN. Forty slots, your pocket on the left and
+  the fridge on the right, one key to move things across and another to eat
+  from either side. Found by looking for a fridge rather than by a coordinate,
+  so every kitchen the base game put one in works.
+
+  SLEEPING IN ANY BED, with the quality depending on whose bed it is. A car is
+  worse than a safehouse and better than nothing. Sleeping sobers you up,
+  because it advances the same clock everything else runs on.
+
+  RUNNING COSTS YOU. Sprinting empties both meters faster, and the marks
+  visibly speed up while you do it, so the reason is on screen rather than in a
+  changelog.
+
+  EMPTY MEANS SOMETHING. Hunger at nothing starts taking health, slowly, with a
+  warning first, and stops well above the floor -- it will never kill you.
+  Sleep at nothing makes the picture swim, and staying up through that puts you
+  on the floor where you stand for four hours.
+
+  DRINK, AND GET DRUNK. Beer, wine and spirits carry their own effect, the walk
+  goes with it, and sleeping it off works for free.
+
+  A SETTINGS MENU ON F7. Ninety-seven settings across nine tabs, each with a
+  line saying what it does, everything live as you turn it, and the changes
+  written back to the ini without touching your comments or your ordering.
+
+  EVERYTHING IS DATA. The shops, the food, the brands and the social posts are
+  four json files in scripts\BareMinimum\. Add a shop, change a price, write a
+  menu. Anything the game cannot find is skipped with a line in the log.
+
+  IF YOU ALSO RUN HOODRICH, the shops talk on its feed: 71 accounts and 475
+  lines, written as people who sell lunch rather than as gang members. Entirely
+  optional, entirely one-way, and completely silent without it.
+
+  Works on GTA V Legacy and Enhanced from the same files. No game file is
+  modified and your save is never touched.
+
+
+===============================================================================

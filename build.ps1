@@ -12,6 +12,7 @@
     .\build.ps1 -Deploy -Target Legacy # ...into one of them
     .\build.ps1 -Deploy -FreshData     # ...and overwrite the installed data files
     .\build.ps1 -Package               # build a release zip in .\release\
+    .\build.ps1 -Package -Full         # ...and a second one with ScriptHookVDotNet in it
 #>
 [CmdletBinding()]
 param(
@@ -20,6 +21,13 @@ param(
 
     [switch]$Deploy,
     [switch]$Package,
+
+    # Also bundle ScriptHookVDotNet, for somebody who does not already run script mods.
+    #
+    # Its licence expressly allows redistribution. ScriptHookV's does NOT, and that one is
+    # locked to a single game build besides -- so a copy bundled today would be the wrong one
+    # the week after the next patch. The read-me sends people to dev-c.com for it.
+    [switch]$Full,
 
     # Which install(s) -Deploy writes to. Bare Minimum is a pure SHVDN script with no asset
     # dependencies and both editions ship the identical ScriptHookVDotNet3.dll, so one build
@@ -32,7 +40,10 @@ param(
     [switch]$FreshData,
 
     [string]$GtaDir = 'C:\Program Files (x86)\Steam\steamapps\common\Grand Theft Auto V',
-    [string]$EnhancedDir = 'C:\Program Files (x86)\Steam\steamapps\common\Grand Theft Auto V Enhanced'
+    [string]$EnhancedDir = 'C:\Program Files (x86)\Steam\steamapps\common\Grand Theft Auto V Enhanced',
+
+    # Where -Full takes ScriptHookVDotNet from. An install that is known to work.
+    [string]$ShvdnFrom = 'C:\Program Files (x86)\Steam\steamapps\common\Grand Theft Auto V Enhanced'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -294,7 +305,6 @@ if ($Package) {
 
     $relDir = Join-Path $root 'release'
     $stage  = Join-Path $relDir "BareMinimum-$version"
-    $zip    = Join-Path $relDir "BareMinimum-$version.zip"
 
     if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
 
@@ -306,32 +316,110 @@ if ($Package) {
     Copy-Item (Join-Path $root 'BareMinimum.ini') (Join-Path $scripts 'BareMinimum.ini')
     Copy-Item (Join-Path $root 'data\*.json') $dataOut
 
-    # The icons, which are named outright rather than swept up by a wildcard.
+    # The icons.
     #
-    # data\*.json above catches the data and nothing else, so a folder added later goes to
-    # nobody -- every download is silently missing it, and the one machine that cannot notice
-    # is this one, where the files are already in place from being deployed. That exact thing
-    # happened to Overspray's voice pack; this line is here so it does not happen again.
+    # THIS USED TO BE GUARDED BY Test-Path AND SILENTLY SKIPPED IF ABSENT, which is the exact
+    # failure the comment beside it was warning about: a folder that quietly does not ship, on
+    # the one machine that cannot notice because the files are already in place from being
+    # deployed. Overspray lost its voice pack that way. It is required now, and the manifest
+    # below COUNTS the files rather than trusting that a copy of a folder copied all of it.
     $icons = Join-Path $root 'data\icons'
-    if (Test-Path $icons) { Copy-Item $icons $dataOut -Recurse }
+    if (-not (Test-Path $icons)) { throw "data\icons is missing -- run tools\make_icons.py" }
+
+    Copy-Item $icons $dataOut -Recurse
 
     foreach ($doc in @('README.txt', 'CHANGES.txt')) {
-        $p = Join-Path $relDir $doc
-        if (Test-Path $p) { Copy-Item $p $stage }
+        $d = Join-Path $relDir $doc
+        if (-not (Test-Path $d)) { throw "release\$doc is missing, and a release without it is a dll in a zip." }
+        Copy-Item $d $stage
     }
+
+    # EVERY FILE A DOWNLOAD NEEDS, NAMED. A wildcard cannot tell the difference between "this
+    # folder is empty" and "this folder was never meant to have anything in it", so the things
+    # that must be there are written down and checked after staging.
+    $must = @(
+        'scripts\BareMinimum.dll',
+        'scripts\BareMinimum.ini',
+        'scripts\BareMinimum\foods.json',
+        'scripts\BareMinimum\vendors.json',
+        'scripts\BareMinimum\brands.json',
+        'scripts\BareMinimum\socials.json',
+        'README.txt',
+        'CHANGES.txt'
+    )
 
     # Belt and braces: a save or a log in a release zip would overwrite the first thing a
     # player did with the mod.
-    Get-ChildItem $stage -Recurse -Include 'needs.json', '*.log', '*.bak' |
+    Get-ChildItem $stage -Recurse -Include 'needs.json', 'pantry.json', 'fridge.json',
+                                           '*.log', '*.log.1', '*.bak' |
         ForEach-Object { Remove-Item $_.FullName -Force }
 
-    if (Test-Path $zip) { Remove-Item $zip -Force }
-    Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip -CompressionLevel Optimal
+    # The artwork, COUNTED rather than assumed. A half-copied folder passes a Test-Path.
+    $wantIcons = (Get-ChildItem $icons -File).Count
+    $gotIcons  = @(Get-ChildItem (Join-Path $dataOut 'icons') -File -ErrorAction SilentlyContinue).Count
 
-    $files = (Get-ChildItem $stage -Recurse -File).Count
-    $size  = [math]::Round((Get-Item $zip).Length / 1KB)
+    if ($gotIcons -ne $wantIcons) {
+        throw "Package has $gotIcons icon(s) and the repo has $wantIcons."
+    }
 
-    Write-Host ""
-    Write-Host "Packaged  $zip" -ForegroundColor Green
-    Write-Host "          $files files, $size KB, version $version"
+    function Assert-Staged($names) {
+        $absent = @()
+        foreach ($m in $names) { if (-not (Test-Path (Join-Path $stage $m))) { $absent += $m } }
+        if ($absent) { throw "Package is missing: $($absent -join ', ')" }
+    }
+
+    function Write-Zip($path, $names) {
+        if (Test-Path $path) { Remove-Item $path -Force }
+        Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $path -CompressionLevel Optimal
+
+        $count = (Get-ChildItem $stage -Recurse -File).Count
+        $kb    = [math]::Round((Get-Item $path).Length / 1KB)
+
+        Write-Host ""
+        Write-Host ("Packaged  " + (Split-Path $path -Leaf)) -ForegroundColor Green
+        Write-Host "          $count files, $kb KB, $gotIcons icons, version $version"
+        foreach ($m in $names) { Write-Host "          + $m" -ForegroundColor DarkGray }
+    }
+
+    # THE MOD-ONLY ZIP IS ALWAYS WRITTEN, AND THE FULL ONE IS BUILT ON TOP OF IT, from this
+    # same staged folder and therefore from this same compile.
+    #
+    # They used to be two runs of this script, which meant two compiles -- and a C# build is
+    # not byte-reproducible, so the two downloads both called 0.1.0 contained different
+    # binaries. Nobody would ever have noticed and it would have made a bug report from one
+    # of them impossible to match against the other.
+    Assert-Staged $must
+    Write-Zip (Join-Path $relDir "BareMinimum-$version.zip") $must
+
+    if ($Full) {
+        # Everything needed to run it, for somebody who does not already run script mods.
+        # Without this the zip is the mod and nothing else, which is right for a modder and
+        # wrong for everybody else -- and "it does not do anything" with no ScriptHookVDotNet
+        # installed looks identical to a mod that is broken.
+        foreach ($f in @('ScriptHookVDotNet.asi', 'ScriptHookVDotNet2.dll',
+                         'ScriptHookVDotNet3.dll', 'ScriptHookVDotNet.ini')) {
+            $src = Join-Path $ShvdnFrom $f
+            if (-not (Test-Path $src)) { throw "-Full needs $f, and it is not in $ShvdnFrom" }
+
+            Copy-Item $src $stage
+            $must += $f
+        }
+
+        # Their licence travels with their binaries. That is the condition of shipping them.
+        $lic = Join-Path $ShvdnFrom 'Licenses'
+        if (-not (Test-Path $lic)) { throw "-Full needs the Licenses folder from $ShvdnFrom" }
+        Copy-Item $lic $stage -Recurse
+
+        $first = Join-Path $relDir 'READ ME FIRST.txt'
+        if (-not (Test-Path $first)) { throw "release\READ ME FIRST.txt is missing." }
+        Copy-Item $first $stage
+        $must += 'READ ME FIRST.txt'
+
+        # A stray log from the copied install would ride along with the runtime.
+        Get-ChildItem $stage -Recurse -Include '*.log', '*.log.1' |
+            ForEach-Object { Remove-Item $_.FullName -Force }
+
+        Assert-Staged $must
+        Write-Zip (Join-Path $relDir "BareMinimum-$version-full.zip") $must
+    }
 }

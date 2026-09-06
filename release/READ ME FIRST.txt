@@ -1,0 +1,92 @@
+===============================================================================
+  BARE MINIMUM 0.1.0  --  FULL PACKAGE
+===============================================================================
+
+  DRAG EVERYTHING IN THIS ZIP INTO YOUR GTA V FOLDER. SAY YES TO MERGING.
+
+  Your GTA V folder is the one with GTA5.exe in it, normally:
+  C:\Program Files (x86)\Steam\steamapps\common\Grand Theft Auto V
+
+  Then load a save and walk to a shop.
+
+
+-------------------------------------------------------------------------------
+  UNBLOCK THE ZIP BEFORE YOU EXTRACT IT
+-------------------------------------------------------------------------------
+
+  Windows marks anything downloaded from the internet, and ScriptHookVDotNet
+  refuses to load a marked DLL. It does not say so -- the mod is simply not
+  there, with nothing in any log to explain it.
+
+  Right-click the ZIP -> Properties -> tick "Unblock" -> OK. THEN extract.
+
+  If you already extracted it, delete what you extracted, unblock the zip and
+  extract it again.
+
+
+-------------------------------------------------------------------------------
+  YOU STILL NEED ONE FILE. IT IS NOT IN HERE AND CANNOT BE.
+-------------------------------------------------------------------------------
+
+  ScriptHookV        http://www.dev-c.com/gtav/scripthookv/
+
+  Nothing in its package grants anyone permission to hand it on, so no mod is
+  allowed to include it -- and it is locked to one exact game build besides, so
+  a copy bundled today would be the wrong one the week after the next patch.
+  It takes about thirty seconds:
+
+    1. Download from the link above.
+    2. Open the zip, go into the "bin" folder.
+    3. Drag ScriptHookV.dll and dinput8.dll into your GTA V folder.
+
+  If ScriptHookV.dll is already sitting next to GTA5.exe -- and it is, if you
+  run any .asi mod at all -- you have nothing to do. Skip this.
+
+
+-------------------------------------------------------------------------------
+  WHAT IS IN HERE
+-------------------------------------------------------------------------------
+
+  scripts\BareMinimum.dll     the mod
+  scripts\BareMinimum.ini     all 97 settings, commented at length
+  scripts\BareMinimum\        its data: the shops, the food, the brands, the
+                              social posts, and 104 pieces of artwork
+
+  ScriptHookVDotNet.asi       ScriptHookVDotNet, which runs .NET mods. Included
+  ScriptHookVDotNet2.dll      because its licence expressly allows it. Not our
+  ScriptHookVDotNet3.dll      work -- (c) crosire, kagikn and Chiheb-Bacha.
+  ScriptHookVDotNet.ini
+  Licenses\                   their licence and notices, kept with the binaries
+
+  README.txt                  how it works, controls, settings, uninstall
+  CHANGES.txt                 what is in this release
+
+  ALREADY RUN OTHER .NET MODS? Then you already have ScriptHookVDotNet, and
+  yours may well be newer than this copy. Every .NET mod on your machine shares
+  one copy of it, so if in doubt, keep the newer one -- skip the four
+  ScriptHookVDotNet files when merging and take only the scripts folder.
+
+  If you would rather not be handed somebody else's copy at all, the mod-only
+  zip is the same release without them.
+
+  GTA V ENHANCED NEEDS 3.6 OR NEWER. The copy in here is 3.9. An older one you
+  already have may load on Legacy only, and Bare Minimum will simply not start.
+
+
+-------------------------------------------------------------------------------
+  THEN
+-------------------------------------------------------------------------------
+
+  Two small marks appear beside the minimap: an apple and a moon. They get
+  worse until you do something about them.
+
+  Walk to any shop counter, stall or window and press E. F11 is your pocket.
+  F7 is the settings.
+
+  Read README.txt for the rest.
+
+  To uninstall: delete scripts\BareMinimum.dll, scripts\BareMinimum.ini and the
+  scripts\BareMinimum folder. No game file is modified by this mod and your
+  save is never touched.
+
+===============================================================================
