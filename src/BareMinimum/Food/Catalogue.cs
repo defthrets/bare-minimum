@@ -247,13 +247,27 @@ namespace BareMinimum.Food
                 StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
-        /// Smoking. The MP interaction set, same family as the eat and drink ones.
+        /// Smoking. The street smoker's ambient set, not an MP interaction.
         ///
         /// A separate entry rather than reusing the drink loop, because the two look nothing
         /// alike and a cigarette drunk like a bottle would be worse than no animation at all.
+        ///
+        /// THE DEFAULT USED TO NAME mp_player_intsmoke, WHICH DOES NOT EXIST. There is an
+        /// inteat and an intdrink in that family and no intsmoke, so the one name written here
+        /// was a name nobody could have checked without the game in front of them. It never
+        /// mattered while foods.json listed alternatives -- but this is what runs when that
+        /// file is missing, which is the one time nothing else can cover for it.
+        ///
+        /// THE idle_a CLIP, NOT base. In an ambient set base is the standing-still pose and
+        /// the idle clips are the movement, so base is a man holding a cigarette and never
+        /// raising it. Hoodrich paid for this lesson on its joint; the note is in Highs.cs.
         /// </summary>
-        public readonly AnimRef Smoke = new AnimRef { Dict = "mp_player_intsmoke",
-                                                      Clip = "mp_player_int_smoke" };
+        public readonly AnimRef Smoke = new AnimRef
+        {
+            Dict = "amb@world_human_smoking@male@male_a@idle_a",
+            Clip = "idle_a",
+            LeftHanded = false
+        };
 
         public IList<Item> Items => _items;
 
@@ -524,7 +538,7 @@ namespace BareMinimum.Food
                                   Props = new[] { "prop_ecola_can" } });
             _items.Add(new Item { Id = "coffee", Name = "Coffee", Category = "Drinks",
                                   Price = 4, Hunger = 0.05f, Wake = 0.10f, Drink = true,
-                                  Props = new[] { "prop_amb_coffeecup_01" } });
+                                  Props = new[] { "p_amb_coffeecup_01" } });
 
             _categories.Add("Food");
             _categories.Add("Snacks");

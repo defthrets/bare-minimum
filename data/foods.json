@@ -44,7 +44,9 @@
       "category": "Food",
       "price": 8,
       "hunger": 0.42,
-      "prop": "prop_sandwich_01",
+      "prop": [
+        "prop_sandwich_01"
+      ],
       "seconds": 4.5,
       "icon": "sandwich",
       "tint": "#e8d9a8",
@@ -58,7 +60,7 @@
       "hunger": 0.5,
       "prop": [
         "prop_cs_burger_01",
-        "prop_food_bs_burger1",
+        "prop_food_bs_burg1",
         "ng_proc_food_burg01a"
       ],
       "seconds": 5.0,
@@ -74,8 +76,7 @@
       "hunger": 0.34,
       "prop": [
         "prop_cs_hotdog_01",
-        "prop_hotdog_01",
-        "prop_food_bs_hotdog",
+        "prop_cs_hotdog_02",
         "prop_cs_burger_01"
       ],
       "seconds": 4.0,
@@ -89,7 +90,10 @@
       "category": "Food",
       "price": 7,
       "hunger": 0.36,
-      "prop": "prop_cs_burger_01",
+      "prop": [
+        "prop_cs_burger_01",
+        "v_res_tt_pizzaplate"
+      ],
       "seconds": 4.0,
       "icon": "pie",
       "tint": "#d8a765",
@@ -101,7 +105,11 @@
       "category": "Food",
       "price": 4,
       "hunger": 0.28,
-      "prop": "prop_cs_burger_01",
+      "prop": [
+        "v_res_fa_potnoodle",
+        "v_ret_247_noodle1",
+        "prop_cs_burger_01"
+      ],
       "seconds": 4.5,
       "icon": "cupnoodle",
       "tint": "#e4cf8f",
@@ -120,9 +128,7 @@
       "shop": false,
       "prop": [
         "prop_taco_01",
-        "prop_taco_02",
-        "ng_proc_food_taco1",
-        "prop_food_bs_taco"
+        "prop_taco_02"
       ],
       "seconds": 4.0,
       "icon": "taco",
@@ -139,14 +145,16 @@
       "hunger": 0.64,
       "shop": false,
       "prop": [
+        "v_res_tt_plate01",
+        "v_res_tt_pizzaplate",
+        "prop_cs_plate_01",
         "prop_taco_01",
         "prop_taco_02",
-        "prop_food_bs_bowl",
         "prop_sandwich_01"
       ],
       "drinkProp": [
         "prop_cs_bs_cup",
-        "prop_food_bs_cup",
+        "prop_plastic_cup_02",
         "prop_ld_can_01"
       ],
       "combo": true,
@@ -165,8 +173,6 @@
       "prop": [
         "prop_taco_01",
         "prop_taco_02",
-        "ng_proc_food_taco1",
-        "prop_food_bs_taco",
         "prop_cs_burger_01"
       ],
       "seconds": 4.0,
@@ -184,9 +190,8 @@
       "shop": false,
       "prop": [
         "prop_cs_burger_01",
-        "prop_food_bs_burger1",
-        "ng_proc_food_burg01a",
-        "prop_burger_01"
+        "prop_food_bs_burg1",
+        "ng_proc_food_burg01a"
       ],
       "seconds": 5.0,
       "icon": "burger",
@@ -205,14 +210,12 @@
       "shop": false,
       "prop": [
         "prop_sandwich_01",
-        "prop_cs_sandwich_01",
-        "prop_food_bs_burger1",
         "prop_cs_burger_01"
       ],
       "drinkProp": [
         "prop_cs_bs_cup",
-        "prop_food_bs_cup",
         "prop_plastic_cup_02",
+        "prop_ld_can_01",
         "prop_ecola_can",
         "prop_ld_flow_bottle"
       ],
@@ -232,8 +235,8 @@
       "hunger": 0.26,
       "shop": false,
       "prop": [
-        "prop_bakery_bagel",
-        "ng_proc_food_bagel",
+        "p_amb_bagel_01",
+        "p_ing_bagel_01",
         "prop_sandwich_01"
       ],
       "seconds": 4.0,
@@ -249,9 +252,9 @@
       "hunger": 0.18,
       "shop": false,
       "prop": [
-        "prop_food_bs_apple",
-        "ng_proc_food_apple01a",
-        "prop_orange_01",
+        "ng_proc_food_aple1a",
+        "ng_proc_food_ornge1a",
+        "ng_proc_food_nana1a",
         "prop_sandwich_01"
       ],
       "seconds": 3.5,
@@ -267,8 +270,7 @@
       "hunger": 0.48,
       "shop": false,
       "prop": [
-        "prop_sandwich_01",
-        "prop_cs_sandwich_01"
+        "prop_sandwich_01"
       ],
       "seconds": 5.0,
       "icon": "sandwich",
@@ -285,8 +287,6 @@
       "hunger": 0.44,
       "shop": false,
       "prop": [
-        "prop_burrito_01",
-        "ng_proc_food_burrito",
         "prop_taco_01",
         "prop_sandwich_01"
       ],
@@ -305,12 +305,14 @@
       "shop": false,
       "prop": [
         "prop_cs_bowl_01",
-        "prop_food_bs_bowl",
-        "prop_bowl_01",
+        "v_res_tt_bowl",
+        "prop_cs_bowl_01b",
         "v_res_mbowl",
         "prop_food_bs_chips"
       ],
       "drinkProp": [
+        "prop_cs_bs_cup",
+        "prop_plastic_cup_02",
         "prop_ld_can_01",
         "prop_ecola_can",
         "prop_ld_flow_bottle"
@@ -333,14 +335,13 @@
       "wake": 0.03,
       "shop": false,
       "prop": [
-        "prop_food_bs_chicken",
-        "prop_cs_bs_chicken",
-        "prop_food_bs_burger1",
+        "prop_pizza_box_01",
+        "prop_food_bag1",
         "prop_cs_burger_01"
       ],
       "drinkProp": [
         "prop_cs_bs_cup",
-        "prop_food_bs_cup",
+        "prop_plastic_cup_02",
         "prop_ld_can_01",
         "prop_ecola_can"
       ],
@@ -360,8 +361,8 @@
       "hunger": 0.24,
       "shop": false,
       "prop": [
-        "prop_food_bs_sardines",
-        "prop_cs_tin_can",
+        "v_ret_247_tuna",
+        "prop_bar_beans",
         "prop_food_bs_chips"
       ],
       "seconds": 4.0,
@@ -377,6 +378,7 @@
       "hunger": 0.11,
       "shop": false,
       "prop": [
+        "prop_candy_pqs",
         "prop_choc_meto",
         "prop_choc_ego",
         "prop_choc_pq"
@@ -400,6 +402,7 @@
       "prop": [
         "prop_beer_pissh",
         "prop_cs_beer_bot_01",
+        "prop_amb_beer_bottle",
         "prop_ld_can_01",
         "prop_ecola_can"
       ],
@@ -419,6 +422,7 @@
       "shop": false,
       "prop": [
         "prop_beer_logger",
+        "prop_beer_logopen",
         "prop_cs_beer_bot_40oz",
         "prop_ld_can_01",
         "prop_ecola_can"
@@ -458,13 +462,14 @@
       "wake": 0.06,
       "shop": false,
       "prop": [
-        "prop_food_bs_bowl",
+        "v_res_tt_plate01",
+        "v_ret_247_eggs",
         "prop_cs_bowl_01",
         "prop_sandwich_01"
       ],
       "drinkProp": [
-        "prop_amb_coffeecup_01",
         "p_amb_coffeecup_01",
+        "p_ing_coffeecup_02",
         "prop_cs_bs_cup",
         "prop_ld_can_01"
       ],
@@ -483,13 +488,15 @@
       "hunger": 0.62,
       "shop": false,
       "prop": [
-        "prop_food_bs_bowl",
+        "v_res_tt_plate01",
+        "v_res_tt_pizzaplate",
+        "prop_cs_plate_01",
         "prop_cs_bowl_01",
         "prop_sandwich_01"
       ],
       "drinkProp": [
         "prop_cs_bs_cup",
-        "prop_food_bs_cup",
+        "prop_plastic_cup_02",
         "prop_ld_can_01"
       ],
       "combo": true,
@@ -510,8 +517,7 @@
       "shop": false,
       "prop": [
         "prop_wine_bot_01",
-        "prop_bottle_wine",
-        "prop_cs_wine_bot",
+        "prop_drink_redwine",
         "prop_ld_flow_bottle"
       ],
       "seconds": 4.5,
@@ -529,14 +535,13 @@
       "hunger": 0.66,
       "shop": false,
       "prop": [
-        "prop_food_bs_chicken",
-        "prop_cs_bs_chicken",
-        "prop_food_bs_burger1",
+        "prop_food_cb_nugets",
+        "prop_food_bag1",
         "prop_cs_burger_01"
       ],
       "drinkProp": [
         "prop_cs_bs_cup",
-        "prop_food_bs_cup",
+        "prop_plastic_cup_02",
         "prop_ld_can_01"
       ],
       "combo": true,
@@ -556,14 +561,16 @@
       "hunger": 0.6,
       "shop": false,
       "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_food_bs_tray_01",
+        "v_res_tt_plate01",
         "prop_taco_01",
         "prop_taco_02",
-        "prop_food_bs_bowl",
         "prop_sandwich_01"
       ],
       "drinkProp": [
         "prop_cs_bs_cup",
-        "prop_food_bs_cup",
+        "prop_plastic_cup_02",
         "prop_ld_can_01"
       ],
       "combo": true,
@@ -584,14 +591,16 @@
       "hunger": 0.59,
       "shop": false,
       "prop": [
+        "v_res_tt_pizzaplate",
+        "prop_food_bs_tray_01",
+        "v_res_tt_plate01",
         "prop_taco_01",
         "prop_taco_02",
-        "prop_food_bs_bowl",
         "prop_sandwich_01"
       ],
       "drinkProp": [
         "prop_cs_bs_cup",
-        "prop_food_bs_cup",
+        "prop_plastic_cup_02",
         "prop_ld_can_01"
       ],
       "combo": true,
@@ -607,7 +616,11 @@
       "category": "Snacks",
       "price": 3,
       "hunger": 0.14,
-      "prop": "prop_food_bs_chips",
+      "prop": [
+        "prop_food_bs_chips",
+        "prop_cs_crisps_01",
+        "prop_food_chips"
+      ],
       "seconds": 3.0,
       "icon": "chips",
       "tint": "#e8c452",
@@ -619,7 +632,9 @@
       "category": "Snacks",
       "price": 3,
       "hunger": 0.13,
-      "prop": "prop_choc_ego",
+      "prop": [
+        "prop_choc_ego"
+      ],
       "seconds": 3.0,
       "icon": "bar",
       "tint": "#c98a4a",
@@ -631,7 +646,9 @@
       "category": "Snacks",
       "price": 3,
       "hunger": 0.13,
-      "prop": "prop_choc_meto",
+      "prop": [
+        "prop_choc_meto"
+      ],
       "seconds": 3.0,
       "icon": "bar",
       "tint": "#b0764a",
@@ -643,7 +660,9 @@
       "category": "Snacks",
       "price": 3,
       "hunger": 0.12,
-      "prop": "prop_choc_pq",
+      "prop": [
+        "prop_choc_pq"
+      ],
       "seconds": 3.0,
       "icon": "bar",
       "tint": "#c47f52",
@@ -655,7 +674,10 @@
       "category": "Snacks",
       "price": 6,
       "hunger": 0.2,
-      "prop": "prop_food_bs_chips",
+      "prop": [
+        "prop_ld_snack_01",
+        "prop_food_bs_chips"
+      ],
       "seconds": 3.5,
       "icon": "jerky",
       "tint": "#a9663f",
@@ -668,10 +690,9 @@
       "price": 2,
       "hunger": 0.15,
       "prop": [
-        "prop_apple_01",
-        "ng_proc_food_apple01a",
-        "prop_food_bs_apple",
-        "v_res_tt_apple"
+        "ng_proc_food_aple1a",
+        "ng_proc_food_ornge1a",
+        "ng_proc_food_nana1a"
       ],
       "seconds": 3.5,
       "icon": "fruit",
@@ -686,7 +707,10 @@
       "hunger": 0.06,
       "wake": 0.04,
       "drink": true,
-      "prop": "prop_ecola_can",
+      "prop": [
+        "prop_ecola_can",
+        "prop_food_bs_soda_01"
+      ],
       "seconds": 3.5,
       "icon": "can",
       "tint": "#d84a44",
@@ -700,7 +724,10 @@
       "hunger": 0.06,
       "wake": 0.03,
       "drink": true,
-      "prop": "prop_ld_can_01",
+      "prop": [
+        "prop_ld_can_01",
+        "prop_food_cb_soda_01"
+      ],
       "seconds": 3.5,
       "icon": "can",
       "tint": "#63c264",
@@ -713,7 +740,9 @@
       "price": 2,
       "hunger": 0.05,
       "drink": true,
-      "prop": "prop_ld_flow_bottle",
+      "prop": [
+        "prop_ld_flow_bottle"
+      ],
       "seconds": 3.5,
       "icon": "water",
       "tint": "#8fc4dd",
@@ -729,9 +758,8 @@
       "drink": true,
       "prop": [
         "p_amb_coffeecup_01",
-        "prop_amb_coffeecup_01",
-        "prop_coffee_cup_01",
-        "ng_proc_coffee_cup_01",
+        "p_ing_coffeecup_02",
+        "prop_food_bs_coffee",
         "prop_plastic_cup_02"
       ],
       "seconds": 4.0,
@@ -747,7 +775,10 @@
       "hunger": 0.05,
       "wake": 0.14,
       "drink": true,
-      "prop": "prop_energy_drink",
+      "prop": [
+        "prop_energy_drink",
+        "prop_ld_can_01"
+      ],
       "seconds": 3.5,
       "icon": "energy",
       "tint": "#c8d84a",
@@ -761,7 +792,10 @@
       "hunger": 0.08,
       "wake": 0.03,
       "drink": true,
-      "prop": "prop_ld_can_01",
+      "prop": [
+        "prop_ld_can_01b",
+        "prop_ld_can_01"
+      ],
       "seconds": 3.5,
       "icon": "can",
       "tint": "#e08a3a",
@@ -780,10 +814,10 @@
       "tint": "#d24a44",
       "desc": "Ask your doctor if smoking is right for you.",
       "prop": [
-        "prop_cigar_01",
         "prop_cs_ciggy_01",
         "prop_amb_ciggy_01",
-        "p_cs_ciggy_01"
+        "prop_cs_ciggy_01b",
+        "prop_cigar_01"
       ],
       "seconds": 6.0
     },
@@ -800,10 +834,10 @@
       "tint": "#7a8fb0",
       "desc": "For the discerning gentleman who wants a cough with class.",
       "prop": [
-        "prop_cigar_01",
         "prop_cs_ciggy_01",
         "prop_amb_ciggy_01",
-        "p_cs_ciggy_01"
+        "prop_cs_ciggy_01b",
+        "prop_cigar_01"
       ],
       "seconds": 6.0
     },
@@ -820,7 +854,7 @@
       "desc": "Chicken, they say. It has been in a fryer, that much is certain.",
       "prop": [
         "prop_cs_burger_01",
-        "prop_food_bs_burger1",
+        "prop_food_bs_burg1",
         "ng_proc_food_burg01a"
       ],
       "seconds": 5.0
@@ -838,9 +872,8 @@
       "tint": "#efd6c0",
       "desc": "Thick enough to stand a spoon in. The straw does not stand a chance.",
       "prop": [
-        "prop_cs_bs_cup",
-        "prop_food_bs_cup",
-        "prop_plastic_cup_02"
+        "prop_plastic_cup_02",
+        "prop_cs_bs_cup"
       ],
       "seconds": 4.5
     },
@@ -858,7 +891,7 @@
       "prop": [
         "prop_amb_donut",
         "prop_donut_01",
-        "v_res_donut"
+        "v_res_tt_doughnut01"
       ],
       "seconds": 3.0
     },
@@ -876,8 +909,7 @@
       "desc": "Brain freeze, sold by the cup. Legally a drink.",
       "prop": [
         "prop_plastic_cup_02",
-        "prop_cs_bs_cup",
-        "prop_food_bs_cup"
+        "prop_cs_bs_cup"
       ],
       "seconds": 4.0
     },
@@ -893,7 +925,6 @@
       "desc": "Melting faster than you can eat it. That is the whole game.",
       "prop": [
         "prop_choc_ego",
-        "prop_cs_ice_cream",
         "prop_amb_donut"
       ],
       "seconds": 3.5
@@ -909,9 +940,8 @@
       "tint": "#dd9a48",
       "desc": "Reheated under a lamp since some point this morning.",
       "prop": [
-        "prop_pizza_box_01",
         "v_res_tt_pizzaplate",
-        "prop_food_bs_burger1"
+        "prop_pizza_box_01"
       ],
       "seconds": 4.5
     },
@@ -927,8 +957,9 @@
       "tint": "#e3bb72",
       "desc": "Twenty dollars, no time limit, no dignity. You will not need dinner.",
       "prop": [
+        "v_res_tt_plate01",
         "v_res_tt_pizzaplate",
-        "prop_food_bs_burger1",
+        "prop_cs_plate_01",
         "prop_cs_burger_01"
       ],
       "seconds": 9.0
@@ -944,8 +975,9 @@
       "tint": "#e0c184",
       "desc": "The same food, before three, for less money. Nobody knows why.",
       "prop": [
-        "prop_cs_burger_01",
-        "prop_food_bs_burger1"
+        "v_res_tt_pizzaplate",
+        "prop_cs_bowl_01",
+        "prop_cs_burger_01"
       ],
       "seconds": 6.0
     },
@@ -960,8 +992,9 @@
       "tint": "#dcc078",
       "desc": "Comes in a box with a little wire handle. Traditional.",
       "prop": [
-        "prop_cs_burger_01",
-        "prop_food_bs_burger1"
+        "v_res_fa_potnoodle",
+        "prop_cs_bowl_01",
+        "prop_cs_burger_01"
       ],
       "seconds": 5.0
     },
@@ -977,8 +1010,9 @@
       "tint": "#e6cf9a",
       "desc": "Mostly broth. Two wontons, if the ladle likes you.",
       "prop": [
-        "prop_cs_burger_01",
-        "prop_food_bs_burger1"
+        "v_res_fa_potnoodle",
+        "prop_cs_bowl_01",
+        "prop_cs_burger_01"
       ],
       "seconds": 5.0
     },
@@ -994,8 +1028,9 @@
       "tint": "#a8a49a",
       "desc": "Label long gone, big dent in the side. Could be peaches. Could be dog food.",
       "prop": [
-        "prop_food_bs_tins",
-        "prop_food_cb_can",
+        "prop_bar_beans",
+        "v_res_fa_tintomsoup",
+        "v_ret_247_tomsoup1",
         "prop_cs_beer_bot_01"
       ],
       "seconds": 4.0
@@ -1012,8 +1047,9 @@
       "tint": "#d9843c",
       "desc": "From Bean's. It would have been rude not to.",
       "prop": [
-        "prop_food_bs_tins",
-        "prop_food_cb_can",
+        "prop_bar_beans",
+        "v_res_fa_tintomsoup",
+        "v_ret_247_tomsoup1",
         "prop_cs_beer_bot_01"
       ],
       "seconds": 4.5
@@ -1029,9 +1065,9 @@
       "tint": "#dcb877",
       "desc": "Yesterday's, at today's price.",
       "prop": [
-        "prop_food_bs_bagel",
-        "v_res_tt_bread",
-        "prop_cs_sandwich_01"
+        "v_res_fa_bread01",
+        "v_res_fa_bread02",
+        "v_ret_247_bread1"
       ],
       "seconds": 5.0
     },
@@ -1047,6 +1083,7 @@
       "tint": "#dfe4ea",
       "desc": "Check the date. Go on. Check it.",
       "prop": [
+        "prop_cs_milk_01",
         "prop_food_bs_juice01",
         "prop_ld_flow_bottle",
         "prop_plastic_cup_02"
@@ -1067,9 +1104,8 @@
       "tint": "#7a4a2c",
       "desc": "Small, black, and rude about it. You will feel it in the teeth.",
       "prop": [
-        "prop_cs_coffee_cup",
         "p_ing_coffeecup_02",
-        "prop_coffee_cup_01",
+        "p_amb_coffeecup_01",
         "prop_food_bs_coffee",
         "prop_plastic_cup_02"
       ],
@@ -1088,9 +1124,8 @@
       "tint": "#c9a074",
       "desc": "Mostly milk, entirely expensive. There is a leaf drawn in it.",
       "prop": [
-        "prop_cs_coffee_cup",
         "p_ing_coffeecup_02",
-        "prop_coffee_cup_01",
+        "p_amb_coffeecup_01",
         "prop_food_bs_coffee",
         "prop_plastic_cup_02"
       ],
@@ -1108,8 +1143,8 @@
       "tint": "#e0b169",
       "desc": "Flakes everywhere. On you, on the table, on the man behind you.",
       "prop": [
-        "prop_food_bs_bagel",
-        "prop_cs_sandwich_01",
+        "p_amb_bagel_01",
+        "p_ing_bagel_01",
         "prop_food_bs_chips"
       ],
       "seconds": 4.0
@@ -1126,9 +1161,8 @@
       "tint": "#b98fc4",
       "desc": "Cake, before midday, with a job title that makes it breakfast.",
       "prop": [
-        "prop_food_bs_bagel",
         "prop_amb_donut",
-        "prop_cs_sandwich_01"
+        "p_amb_bagel_01"
       ],
       "seconds": 4.0
     },
@@ -1144,9 +1178,7 @@
       "tint": "#e0cb96",
       "desc": "A foot of it. Measured generously, by them, in their favour.",
       "prop": [
-        "prop_sandwich_01",
-        "prop_cs_sandwich_01",
-        "prop_food_bs_burger1"
+        "prop_sandwich_01"
       ],
       "seconds": 6.5
     },
@@ -1163,8 +1195,7 @@
       "desc": "The house dog. Small name, large object.",
       "prop": [
         "prop_cs_hotdog_01",
-        "prop_food_bs_hotdog",
-        "prop_hotdog_01",
+        "prop_cs_hotdog_02",
         "prop_cs_burger_01"
       ],
       "seconds": 5.0
@@ -1181,8 +1212,7 @@
       "desc": "Eaten leaning forward, always, by everyone.",
       "prop": [
         "prop_cs_hotdog_01",
-        "prop_food_bs_hotdog",
-        "prop_hotdog_01",
+        "prop_cs_hotdog_02",
         "prop_cs_burger_01"
       ],
       "seconds": 5.5
@@ -1198,9 +1228,8 @@
       "tint": "#e3bd63",
       "desc": "On a stick, which makes it street food and therefore fine.",
       "prop": [
+        "prop_cs_hotdog_02",
         "prop_cs_hotdog_01",
-        "prop_food_bs_hotdog",
-        "prop_hotdog_01",
         "prop_cs_burger_01"
       ],
       "seconds": 4.0
@@ -1223,8 +1252,7 @@
         "prop_cigar_02",
         "prop_cigar_03",
         "prop_cs_ciggy_01",
-        "prop_amb_ciggy_01",
-        "p_cs_ciggy_01"
+        "prop_amb_ciggy_01"
       ],
       "seconds": 8.0
     },
@@ -1245,8 +1273,7 @@
         "prop_cigar_02",
         "prop_cigar_03",
         "prop_cs_ciggy_01",
-        "prop_amb_ciggy_01",
-        "p_cs_ciggy_01"
+        "prop_amb_ciggy_01"
       ],
       "seconds": 9.0
     },
@@ -1262,8 +1289,9 @@
       "tint": "#d9557f",
       "desc": "Weighed out of a jar with a little brass scoop. Worth it for that alone.",
       "prop": [
-        "prop_choc_pq",
         "prop_candy_pqs",
+        "ng_proc_candy01a",
+        "prop_choc_pq",
         "prop_choc_ego"
       ],
       "seconds": 4.0
@@ -1279,8 +1307,9 @@
       "tint": "#c58a45",
       "desc": "One of these will pull a filling out. That is the deal you are making.",
       "prop": [
-        "prop_choc_ego",
         "prop_candy_pqs",
+        "ng_proc_candy01a",
+        "prop_choc_ego",
         "prop_choc_meto"
       ],
       "seconds": 4.5
@@ -1297,9 +1326,7 @@
       "tint": "#e6d4a4",
       "desc": "Made in front of you, at the speed of somebody being watched.",
       "prop": [
-        "prop_sandwich_01",
-        "prop_cs_sandwich_01",
-        "prop_food_bs_burger1"
+        "prop_sandwich_01"
       ],
       "seconds": 6.0
     },
@@ -1315,9 +1342,7 @@
       "tint": "#d9a862",
       "desc": "Pressed flat under something heavy. Ground, and then pounded.",
       "prop": [
-        "prop_sandwich_01",
-        "prop_cs_sandwich_01",
-        "prop_food_bs_burger1"
+        "prop_sandwich_01"
       ],
       "seconds": 6.5
     },
@@ -1334,9 +1359,8 @@
       "tint": "#c08a4e",
       "desc": "A whole pot, for one person, with a little strainer. Very civil.",
       "prop": [
-        "prop_cs_coffee_cup",
+        "v_res_tt_mug01",
         "p_ing_coffeecup_02",
-        "prop_coffee_cup_01",
         "prop_food_bs_coffee",
         "prop_plastic_cup_02"
       ],
@@ -1355,9 +1379,9 @@
       "tint": "#8a5433",
       "desc": "More of a dessert than a drink, and nobody here is pretending otherwise.",
       "prop": [
-        "prop_cs_coffee_cup",
+        "v_res_tt_mug01",
+        "p_amb_coffeecup_01",
         "p_ing_coffeecup_02",
-        "prop_coffee_cup_01",
         "prop_food_bs_coffee",
         "prop_plastic_cup_02"
       ],
@@ -1378,8 +1402,7 @@
       "prop": [
         "prop_amb_donut",
         "prop_donut_01",
-        "v_res_donut",
-        "prop_food_bs_bagel"
+        "v_res_tt_doughnut01"
       ],
       "seconds": 3.0
     },
@@ -1397,8 +1420,7 @@
       "prop": [
         "prop_amb_donut",
         "prop_donut_01",
-        "v_res_donut",
-        "prop_food_bs_bagel"
+        "v_res_tt_doughnut01"
       ],
       "seconds": 3.0
     },
@@ -1433,9 +1455,8 @@
       "tint": "#8a5a38",
       "desc": "Filter, stewed, bottomless in spirit. It goes with the ring.",
       "prop": [
-        "prop_cs_coffee_cup",
+        "p_amb_coffeecup_01",
         "p_ing_coffeecup_02",
-        "prop_coffee_cup_01",
         "prop_food_bs_coffee"
       ],
       "seconds": 3.5
@@ -1452,10 +1473,8 @@
       "tint": "#8fc45c",
       "desc": "It's big. That is the entire brand and they are not wrong.",
       "prop": [
-        "prop_cs_burger_01",
         "prop_sandwich_01",
-        "prop_cs_sandwich_01",
-        "prop_food_bs_burger1"
+        "prop_cs_burger_01"
       ],
       "seconds": 6.5
     },
@@ -1471,10 +1490,8 @@
       "tint": "#c8d98a",
       "desc": "Salad, chicken, and a word about how fresh it is on every surface.",
       "prop": [
-        "prop_cs_burger_01",
         "prop_sandwich_01",
-        "prop_cs_sandwich_01",
-        "prop_food_bs_burger1"
+        "prop_cs_burger_01"
       ],
       "seconds": 5.5
     },
@@ -1492,8 +1509,7 @@
       "desc": "Fruit, blended, priced as though that were difficult.",
       "prop": [
         "prop_plastic_cup_02",
-        "prop_cs_bs_cup",
-        "prop_food_bs_cup"
+        "prop_cs_bs_cup"
       ],
       "seconds": 4.5
     },
@@ -1510,8 +1526,8 @@
       "desc": "A whole one. To yourself. Nobody is here to judge, and yet.",
       "prop": [
         "prop_pizza_box_01",
+        "prop_pizza_box_02",
         "v_res_tt_pizzaplate",
-        "prop_food_bs_burger1",
         "prop_cs_burger_01"
       ],
       "seconds": 10.0
@@ -1527,9 +1543,8 @@
       "tint": "#dd8f3e",
       "desc": "Folded lengthways, because that is how it is done and you know it.",
       "prop": [
-        "prop_pizza_box_01",
         "v_res_tt_pizzaplate",
-        "prop_food_bs_burger1",
+        "prop_pizza_box_01",
         "prop_cs_burger_01"
       ],
       "seconds": 4.5
@@ -1545,10 +1560,10 @@
       "tint": "#dcb478",
       "desc": "A pizza that has folded in on itself. Relatable.",
       "prop": [
+        "prop_sandwich_01",
+        "prop_cs_burger_01",
         "prop_pizza_box_01",
-        "v_res_tt_pizzaplate",
-        "prop_food_bs_burger1",
-        "prop_cs_burger_01"
+        "v_res_tt_pizzaplate"
       ],
       "seconds": 6.5
     },
@@ -1563,8 +1578,9 @@
       "tint": "#e2c069",
       "desc": "Comes with the meal. Ordered separately anyway.",
       "prop": [
-        "prop_food_bs_bagel",
-        "prop_cs_sandwich_01",
+        "v_res_fa_bread01",
+        "v_res_fa_bread02",
+        "v_ret_247_bread1",
         "prop_pizza_box_01"
       ],
       "seconds": 4.5
@@ -1582,8 +1598,9 @@
       "tint": "#dcb069",
       "desc": "Egg, pork, and a broth somebody has clearly been simmering since Tuesday.",
       "prop": [
+        "v_res_fa_potnoodle",
+        "prop_cs_bowl_01",
         "prop_cs_burger_01",
-        "prop_food_bs_burger1",
         "v_res_tt_pizzaplate"
       ],
       "seconds": 7.5
@@ -1599,9 +1616,9 @@
       "tint": "#e0a552",
       "desc": "Peanuts on top, lime on the side, no notes.",
       "prop": [
-        "prop_cs_burger_01",
-        "prop_food_bs_burger1",
-        "v_res_tt_pizzaplate"
+        "v_res_tt_pizzaplate",
+        "prop_cs_bowl_01",
+        "prop_cs_burger_01"
       ],
       "seconds": 6.5
     },
@@ -1616,8 +1633,9 @@
       "tint": "#e8ddbe",
       "desc": "Eight of them. You will want twelve. Everybody wants twelve.",
       "prop": [
+        "prop_cs_bowl_01",
+        "v_res_tt_bowl",
         "prop_cs_burger_01",
-        "prop_food_bs_burger1",
         "v_res_tt_pizzaplate"
       ],
       "seconds": 5.5
@@ -1636,8 +1654,7 @@
       "desc": "Comes with a straw wide enough to be a weapon.",
       "prop": [
         "prop_plastic_cup_02",
-        "prop_cs_bs_cup",
-        "prop_food_bs_cup"
+        "prop_cs_bs_cup"
       ],
       "seconds": 4.5
     },
@@ -1657,8 +1674,7 @@
       "prop": [
         "prop_plastic_cup_02",
         "prop_cs_bs_cup",
-        "prop_food_bs_cup",
-        "prop_cs_coffee_cup"
+        "prop_cs_paper_cup"
       ],
       "seconds": 4.0
     },
@@ -1676,9 +1692,7 @@
       "desc": "Ice, milk, and a rumour of espresso.",
       "prop": [
         "prop_plastic_cup_02",
-        "prop_cs_bs_cup",
-        "prop_food_bs_cup",
-        "prop_cs_coffee_cup"
+        "prop_cs_bs_cup"
       ],
       "seconds": 4.0
     },
@@ -1696,9 +1710,7 @@
       "desc": "Coffee that has given up and become a milkshake. No shame in it.",
       "prop": [
         "prop_plastic_cup_02",
-        "prop_cs_bs_cup",
-        "prop_food_bs_cup",
-        "prop_cs_coffee_cup"
+        "prop_cs_bs_cup"
       ],
       "seconds": 5.0
     },
@@ -1715,8 +1727,7 @@
       "desc": "The size of a coaster and still warm in the middle.",
       "prop": [
         "prop_choc_ego",
-        "prop_amb_donut",
-        "prop_food_bs_bagel"
+        "prop_amb_donut"
       ],
       "seconds": 4.0
     },
@@ -1735,8 +1746,8 @@
       "desc": "Squeezed in front of you, loudly, by a machine that has seen things.",
       "prop": [
         "prop_plastic_cup_02",
+        "prop_food_bs_juice01",
         "prop_cs_bs_cup",
-        "prop_food_bs_cup",
         "prop_ld_flow_bottle"
       ],
       "seconds": 4.0
@@ -1755,8 +1766,8 @@
       "desc": "Kale, celery, and the distinct feeling of being told off.",
       "prop": [
         "prop_plastic_cup_02",
+        "prop_food_bs_juice01",
         "prop_cs_bs_cup",
-        "prop_food_bs_cup",
         "prop_ld_flow_bottle"
       ],
       "seconds": 4.5
@@ -1776,7 +1787,6 @@
       "prop": [
         "prop_plastic_cup_02",
         "prop_cs_bs_cup",
-        "prop_food_bs_cup",
         "prop_ld_flow_bottle"
       ],
       "seconds": 5.0
@@ -1794,9 +1804,10 @@
       "tint": "#6fb03a",
       "desc": "Tastes like a lawn. Works like a slap.",
       "prop": [
+        "prop_cs_shot_glass",
+        "prop_whiskey_glasses",
         "prop_plastic_cup_02",
         "prop_cs_bs_cup",
-        "prop_food_bs_cup",
         "prop_ld_flow_bottle"
       ],
       "seconds": 2.5
@@ -1815,6 +1826,7 @@
       "prop": [
         "prop_food_bag1",
         "prop_cs_shopping_bag",
+        "ng_proc_food_bag01a",
         "prop_pizza_box_01",
         "prop_cs_burger_01"
       ],
@@ -1831,9 +1843,9 @@
       "tint": "#d9994a",
       "desc": "Off the hot spinner by the door. The best thing in any supermarket.",
       "prop": [
-        "prop_food_bs_chick",
-        "prop_cs_burger_01",
-        "prop_food_bs_burger1"
+        "prop_food_cb_nugets",
+        "prop_cs_steak",
+        "prop_cs_burger_01"
       ],
       "seconds": 8.0
     },
@@ -1867,6 +1879,7 @@
       "prop": [
         "prop_food_bag1",
         "prop_cs_shopping_bag",
+        "ng_proc_food_bag01a",
         "prop_pizza_box_01",
         "prop_cs_burger_01"
       ],
@@ -1884,9 +1897,10 @@
       "tint": "#c98552",
       "desc": "Cut off the tray, weighed, wrapped in foil. Ask for the end piece.",
       "prop": [
+        "v_res_tt_plate01",
         "v_res_tt_pizzaplate",
-        "prop_cs_burger_01",
-        "prop_food_bs_burger1"
+        "prop_cs_plate_01",
+        "prop_cs_burger_01"
       ],
       "seconds": 7.0
     },
@@ -1902,9 +1916,11 @@
       "tint": "#dba85c",
       "desc": "Ladled out of a pot that has never once been empty.",
       "prop": [
+        "prop_cs_bowl_01",
+        "v_res_tt_bowl",
+        "prop_cs_bowl_01b",
         "v_res_tt_pizzaplate",
-        "prop_cs_burger_01",
-        "prop_food_bs_burger1"
+        "prop_cs_burger_01"
       ],
       "seconds": 5.5
     },
@@ -1919,9 +1935,8 @@
       "tint": "#e0b25e",
       "desc": "There is a whole one behind the counter and she will notice if you stare.",
       "prop": [
-        "prop_cs_slice_cake",
-        "v_res_tt_pizzaplate",
-        "prop_food_bs_bagel"
+        "prop_cs_burger_01",
+        "v_res_tt_pizzaplate"
       ],
       "seconds": 4.5
     },
@@ -1936,9 +1951,9 @@
       "tint": "#b89a6a",
       "desc": "Rice, oil, tinned tomatoes. The things you only notice when they run out.",
       "prop": [
+        "prop_pizza_box_01",
         "prop_food_bag1",
-        "prop_cs_shopping_bag",
-        "prop_pizza_box_01"
+        "prop_cs_shopping_bag"
       ],
       "seconds": 7.0
     },
@@ -1955,7 +1970,6 @@
       "desc": "Three scoops, sauce, a wafer stuck in at an angle. Correct.",
       "prop": [
         "prop_choc_ego",
-        "prop_cs_ice_cream",
         "prop_amb_donut"
       ],
       "seconds": 5.0
@@ -1973,8 +1987,7 @@
       "desc": "From the machine with MILK SHAKES painted on it in two colours.",
       "prop": [
         "prop_plastic_cup_02",
-        "prop_cs_bs_cup",
-        "prop_food_bs_cup"
+        "prop_cs_bs_cup"
       ],
       "seconds": 4.5
     },
@@ -1992,9 +2005,8 @@
       "tint": "#6b4326",
       "desc": "Roasted since 1983 and they will tell you so while it pours.",
       "prop": [
-        "prop_cs_coffee_cup",
         "p_ing_coffeecup_02",
-        "prop_coffee_cup_01",
+        "p_amb_coffeecup_01",
         "prop_food_bs_coffee"
       ],
       "seconds": 4.5
@@ -2010,8 +2022,7 @@
       "tint": "#e0a640",
       "desc": "Yellow pastry, serious filling. Hold it in the paper bag or lose a shirt.",
       "prop": [
-        "prop_cs_sandwich_01",
-        "prop_food_bs_burger1",
+        "prop_sandwich_01",
         "prop_cs_burger_01"
       ],
       "seconds": 5.0
@@ -2030,6 +2041,7 @@
       "desc": "The proper cloudy kind. Takes the roof of your mouth off.",
       "prop": [
         "prop_ld_flow_bottle",
+        "prop_cs_script_bottle",
         "prop_cs_beer_bot_01",
         "prop_plastic_cup_02"
       ],
@@ -2047,9 +2059,8 @@
       "tint": "#a86e3c",
       "desc": "There is more rum in this than anybody admits at eleven in the morning.",
       "prop": [
-        "prop_cs_slice_cake",
-        "prop_choc_ego",
-        "prop_food_bs_bagel"
+        "prop_amb_donut",
+        "prop_choc_ego"
       ],
       "seconds": 4.5
     },
@@ -2064,12 +2075,12 @@
       "shop": false,
       "prop": [
         "prop_cs_burger_01",
-        "prop_food_bs_burger1",
+        "prop_food_bs_burg1",
         "ng_proc_food_burg01a"
       ],
       "drinkProp": [
         "prop_cs_bs_cup",
-        "prop_food_bs_cup",
+        "prop_plastic_cup_02",
         "prop_ld_can_01"
       ],
       "combo": true,
@@ -2088,7 +2099,7 @@
       "shop": false,
       "prop": [
         "prop_cs_burger_01",
-        "prop_food_bs_burger1",
+        "prop_food_bs_burg1",
         "ng_proc_food_burg01a"
       ],
       "seconds": 6.0,
@@ -2105,6 +2116,8 @@
       "shop": false,
       "prop": [
         "prop_food_bs_chips",
+        "prop_cs_crisps_01",
+        "prop_food_chips",
         "prop_food_bag1"
       ],
       "seconds": 4.5,
@@ -2122,9 +2135,8 @@
       "drink": true,
       "shop": false,
       "prop": [
-        "prop_cs_bs_cup",
-        "prop_food_bs_cup",
-        "prop_plastic_cup_02"
+        "prop_plastic_cup_02",
+        "prop_cs_bs_cup"
       ],
       "seconds": 4.5,
       "icon": "shake",
@@ -2142,12 +2154,12 @@
       "shop": false,
       "prop": [
         "prop_cs_burger_01",
-        "prop_food_bs_burger1",
+        "prop_food_bs_burg1",
         "ng_proc_food_burg01a"
       ],
       "drinkProp": [
         "prop_cs_bs_cup",
-        "prop_food_bs_cup",
+        "prop_plastic_cup_02",
         "prop_ld_can_01"
       ],
       "combo": true,
@@ -2166,8 +2178,8 @@
       "shop": false,
       "prop": [
         "prop_cs_bowl_01",
-        "prop_food_bs_bowl",
-        "prop_bowl_01"
+        "v_res_tt_bowl",
+        "prop_cs_bowl_01b"
       ],
       "seconds": 6.0,
       "icon": "bowl",
@@ -2183,8 +2195,7 @@
       "shop": false,
       "prop": [
         "prop_taco_01",
-        "prop_taco_02",
-        "prop_food_bs_taco"
+        "prop_taco_02"
       ],
       "seconds": 5.0,
       "icon": "taco",
@@ -2199,6 +2210,8 @@
       "hunger": 0.45,
       "shop": false,
       "prop": [
+        "v_res_tt_plate01",
+        "v_ret_247_eggs",
         "v_res_tt_pizzaplate",
         "prop_cs_bowl_01",
         "prop_sandwich_01"
@@ -2218,6 +2231,8 @@
       "shop": false,
       "prop": [
         "v_res_tt_pizzaplate",
+        "prop_food_bs_tray_01",
+        "v_res_tt_plate01",
         "prop_cs_bowl_01",
         "prop_sandwich_01"
       ],
@@ -2234,7 +2249,9 @@
       "hunger": 0.72,
       "shop": false,
       "prop": [
+        "v_res_tt_plate01",
         "v_res_tt_pizzaplate",
+        "prop_cs_plate_01",
         "prop_cs_bowl_01",
         "prop_sandwich_01"
       ],
@@ -2269,8 +2286,8 @@
       "hunger": 0.24,
       "shop": false,
       "prop": [
-        "prop_cs_slice_cake",
-        "prop_amb_donut"
+        "prop_amb_donut",
+        "prop_choc_ego"
       ],
       "seconds": 5.0,
       "icon": "cake",
@@ -2285,7 +2302,9 @@
       "hunger": 0.54,
       "shop": false,
       "prop": [
+        "v_res_tt_plate01",
         "v_res_tt_pizzaplate",
+        "prop_cs_plate_01",
         "prop_cs_bowl_01",
         "prop_sandwich_01"
       ],
@@ -2303,6 +2322,8 @@
       "shop": false,
       "prop": [
         "v_res_tt_pizzaplate",
+        "prop_food_bs_tray_01",
+        "v_res_tt_plate01",
         "prop_cs_bowl_01",
         "prop_sandwich_01"
       ],
@@ -2337,6 +2358,7 @@
       "shop": false,
       "prop": [
         "prop_pizza_box_01",
+        "prop_pizza_box_02",
         "v_res_tt_pizzaplate"
       ],
       "seconds": 7.0,
@@ -2354,8 +2376,7 @@
       "shop": false,
       "prop": [
         "prop_taco_01",
-        "prop_taco_02",
-        "prop_food_bs_taco"
+        "prop_taco_02"
       ],
       "seconds": 5.0,
       "icon": "taco",
@@ -2370,7 +2391,9 @@
       "hunger": 0.64,
       "shop": false,
       "prop": [
+        "v_res_tt_plate01",
         "v_res_tt_pizzaplate",
+        "prop_cs_plate_01",
         "prop_cs_bowl_01",
         "prop_sandwich_01"
       ],
@@ -2391,9 +2414,7 @@
       "shop": false,
       "prop": [
         "prop_taco_01",
-        "prop_taco_02",
-        "prop_food_bs_taco",
-        "ng_proc_food_taco1"
+        "prop_taco_02"
       ],
       "seconds": 5.0,
       "icon": "taco",
@@ -2408,10 +2429,8 @@
       "hunger": 0.44,
       "shop": false,
       "prop": [
-        "prop_cs_burger_01",
         "prop_sandwich_01",
-        "prop_cs_sandwich_01",
-        "prop_food_bs_burger1"
+        "prop_cs_burger_01"
       ],
       "seconds": 5.5,
       "icon": "wrap",
@@ -2426,7 +2445,9 @@
       "hunger": 0.66,
       "shop": false,
       "prop": [
+        "v_res_tt_plate01",
         "v_res_tt_pizzaplate",
+        "prop_cs_plate_01",
         "prop_cs_bowl_01",
         "prop_sandwich_01"
       ],
@@ -2446,7 +2467,7 @@
       "prop": [
         "prop_plastic_cup_02",
         "prop_cs_bs_cup",
-        "prop_food_bs_cup"
+        "prop_cs_paper_cup"
       ],
       "seconds": 4.0,
       "icon": "cup",
@@ -2466,8 +2487,8 @@
       "shop": false,
       "prop": [
         "prop_cs_bowl_01",
-        "prop_food_bs_bowl",
-        "prop_bowl_01"
+        "v_res_tt_bowl",
+        "prop_cs_bowl_01b"
       ],
       "seconds": 6.0,
       "icon": "bowl",
@@ -2485,8 +2506,7 @@
       "shop": false,
       "prop": [
         "prop_plastic_cup_02",
-        "prop_cs_bs_cup",
-        "prop_food_bs_cup"
+        "prop_cs_bs_cup"
       ],
       "seconds": 4.5,
       "icon": "smoothie",
@@ -2503,6 +2523,7 @@
       "prop": [
         "prop_food_bag1",
         "prop_cs_shopping_bag",
+        "ng_proc_food_bag01a",
         "prop_pizza_box_01",
         "prop_cs_burger_01"
       ],
@@ -2523,9 +2544,9 @@
       "hunger": 0.32,
       "shop": false,
       "prop": [
-        "prop_food_bs_bagel",
-        "prop_sandwich_01",
-        "prop_cs_sandwich_01"
+        "p_amb_bagel_01",
+        "p_ing_bagel_01",
+        "prop_sandwich_01"
       ],
       "seconds": 4.5,
       "icon": "bagel",
@@ -2540,9 +2561,7 @@
       "hunger": 0.58,
       "shop": false,
       "prop": [
-        "prop_sandwich_01",
-        "prop_cs_sandwich_01",
-        "prop_food_bs_burger1"
+        "prop_sandwich_01"
       ],
       "seconds": 6.5,
       "icon": "sandwich",
@@ -2579,6 +2598,8 @@
       "shop": false,
       "prop": [
         "v_res_tt_pizzaplate",
+        "prop_food_bs_tray_01",
+        "v_res_tt_plate01",
         "prop_cs_bowl_01",
         "prop_sandwich_01"
       ],
@@ -2596,7 +2617,7 @@
       "shop": false,
       "prop": [
         "prop_cs_burger_01",
-        "prop_food_bs_burger1",
+        "prop_food_bs_burg1",
         "ng_proc_food_burg01a"
       ],
       "seconds": 6.0,
@@ -2613,8 +2634,8 @@
       "shop": false,
       "prop": [
         "prop_cs_bowl_01",
-        "prop_food_bs_bowl",
-        "prop_bowl_01"
+        "v_res_tt_bowl",
+        "prop_cs_bowl_01b"
       ],
       "seconds": 6.0,
       "icon": "bowl",
@@ -2629,9 +2650,9 @@
       "hunger": 0.54,
       "shop": false,
       "prop": [
-        "prop_food_bs_chick",
-        "prop_cs_burger_01",
-        "prop_food_bs_burger1"
+        "prop_food_cb_nugets",
+        "prop_cs_steak",
+        "prop_cs_burger_01"
       ],
       "seconds": 6.0,
       "icon": "chicken",
@@ -2647,6 +2668,8 @@
       "shop": false,
       "prop": [
         "prop_food_bs_chips",
+        "prop_cs_crisps_01",
+        "prop_food_chips",
         "prop_food_bag1"
       ],
       "seconds": 4.5,
@@ -2666,9 +2689,7 @@
       "hunger": 0.5,
       "shop": false,
       "prop": [
-        "prop_sandwich_01",
-        "prop_cs_sandwich_01",
-        "prop_food_bs_burger1"
+        "prop_sandwich_01"
       ],
       "seconds": 6.0,
       "icon": "sub",
@@ -2687,7 +2708,9 @@
       "hunger": 0.62,
       "shop": false,
       "prop": [
+        "v_res_tt_plate01",
         "v_res_tt_pizzaplate",
+        "prop_cs_plate_01",
         "prop_cs_bowl_01",
         "prop_sandwich_01"
       ],
@@ -2705,8 +2728,8 @@
       "shop": false,
       "prop": [
         "prop_cs_bowl_01",
-        "prop_food_bs_bowl",
-        "prop_bowl_01"
+        "v_res_tt_bowl",
+        "prop_cs_bowl_01b"
       ],
       "seconds": 6.0,
       "icon": "bowl",
@@ -2724,8 +2747,8 @@
       "shop": false,
       "prop": [
         "prop_plastic_cup_02",
-        "prop_cs_bs_cup",
-        "prop_food_bs_cup"
+        "prop_food_bs_juice01",
+        "prop_cs_bs_cup"
       ],
       "seconds": 4.0,
       "icon": "juice",
@@ -2745,7 +2768,7 @@
       "shop": false,
       "prop": [
         "prop_cs_burger_01",
-        "prop_food_bs_burger1",
+        "prop_food_bs_burg1",
         "ng_proc_food_burg01a"
       ],
       "seconds": 6.0,
@@ -2762,6 +2785,8 @@
       "shop": false,
       "prop": [
         "v_res_tt_pizzaplate",
+        "prop_food_bs_tray_01",
+        "v_res_tt_plate01",
         "prop_cs_bowl_01",
         "prop_sandwich_01"
       ],
@@ -2778,9 +2803,7 @@
       "hunger": 0.54,
       "shop": false,
       "prop": [
-        "prop_sandwich_01",
-        "prop_cs_sandwich_01",
-        "prop_food_bs_burger1"
+        "prop_sandwich_01"
       ],
       "seconds": 6.0,
       "icon": "sub",
@@ -2800,6 +2823,7 @@
       "shop": false,
       "prop": [
         "prop_pizza_box_01",
+        "prop_pizza_box_02",
         "v_res_tt_pizzaplate",
         "prop_cs_burger_01"
       ],
@@ -2816,8 +2840,8 @@
       "hunger": 0.3,
       "shop": false,
       "prop": [
-        "prop_pizza_box_01",
         "v_res_tt_pizzaplate",
+        "prop_pizza_box_01",
         "prop_cs_burger_01"
       ],
       "seconds": 4.5,
@@ -2833,9 +2857,7 @@
       "hunger": 0.56,
       "shop": false,
       "prop": [
-        "prop_sandwich_01",
-        "prop_cs_sandwich_01",
-        "prop_food_bs_burger1"
+        "prop_sandwich_01"
       ],
       "seconds": 6.5,
       "icon": "sub",
@@ -2851,8 +2873,8 @@
       "shop": false,
       "prop": [
         "prop_cs_bowl_01",
-        "prop_food_bs_bowl",
-        "prop_bowl_01"
+        "v_res_tt_bowl",
+        "prop_cs_bowl_01b"
       ],
       "seconds": 5.5,
       "icon": "bowl",
@@ -2872,8 +2894,8 @@
       "shop": false,
       "prop": [
         "prop_cs_bowl_01",
-        "prop_food_bs_bowl",
-        "prop_bowl_01"
+        "v_res_tt_bowl",
+        "prop_cs_bowl_01b"
       ],
       "seconds": 7.0,
       "icon": "bowl",
@@ -2888,7 +2910,9 @@
       "hunger": 0.72,
       "shop": false,
       "prop": [
+        "v_res_tt_plate01",
         "v_res_tt_pizzaplate",
+        "prop_cs_plate_01",
         "prop_cs_bowl_01",
         "prop_sandwich_01"
       ],
@@ -2910,6 +2934,8 @@
       "shop": false,
       "prop": [
         "v_res_tt_pizzaplate",
+        "prop_food_bs_tray_01",
+        "v_res_tt_plate01",
         "prop_cs_bowl_01",
         "prop_sandwich_01"
       ],
@@ -2926,7 +2952,9 @@
       "hunger": 0.74,
       "shop": false,
       "prop": [
+        "v_res_tt_plate01",
         "v_res_tt_pizzaplate",
+        "prop_cs_plate_01",
         "prop_cs_bowl_01",
         "prop_sandwich_01"
       ],
@@ -2945,9 +2973,10 @@
       "drink": true,
       "shop": false,
       "prop": [
+        "v_res_tt_mug01",
+        "p_ing_coffeecup_02",
         "prop_plastic_cup_02",
-        "prop_cs_bs_cup",
-        "prop_food_bs_cup"
+        "prop_cs_bs_cup"
       ],
       "seconds": 4.0,
       "icon": "teapot",
@@ -2961,10 +2990,18 @@
   ],
   "animations": {
     "eat": {
-      "dict": "mp_player_inteat@burger",
-      "clip": "mp_player_int_eat_burger",
       "hand": "left",
-      "scenario": "WORLD_HUMAN_STAND_IMPATIENT"
+      "scenario": "WORLD_HUMAN_STAND_IMPATIENT",
+      "options": [
+        {
+          "dict": "mp_player_inteat@burger",
+          "clip": "mp_player_int_eat_burger"
+        },
+        {
+          "dict": "mp_player_inteat@pnq",
+          "clip": "loop"
+        }
+      ]
     },
     "drink": {
       "dict": "mp_player_intdrink",
@@ -2994,20 +3031,12 @@
     "smoke": {
       "options": [
         {
-          "dict": "amb@world_human_smoking@male@male_a@base",
-          "clip": "base"
-        },
-        {
           "dict": "amb@world_human_smoking@male@male_a@idle_a",
           "clip": "idle_a"
         },
         {
-          "dict": "amb@world_human_smoking_pot@male@base",
+          "dict": "amb@world_human_smoking@male@male_a@base",
           "clip": "base"
-        },
-        {
-          "dict": "mp_player_intsmoke",
-          "clip": "mp_player_int_smoke"
         }
       ],
       "scenario": "WORLD_HUMAN_SMOKING",
