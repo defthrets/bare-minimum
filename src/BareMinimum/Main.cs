@@ -218,6 +218,11 @@ namespace BareMinimum
                 _effects.Update(_needs, suspended);
                 _gauge.Draw(_needs, suspended);
 
+                // LAST, so a card rides over the gauge rather than under it -- and outside
+                // the menus' own suspension, because a wake-up card is worth seeing whatever
+                // else happens to be open.
+                UI.Toast.Draw(suspended);
+
                 _failures = 0;
             }
             catch (Exception ex)
@@ -295,6 +300,7 @@ namespace BareMinimum
             try { _shop.Shutdown(); } catch (Exception ex) { Log.Error("Shop shutdown", ex); }
             try { _vendors.Shutdown(); } catch (Exception ex) { Log.Error("Vendor shutdown", ex); }
             try { _eating.Shutdown(); } catch (Exception ex) { Log.Error("Eating shutdown", ex); }
+            try { UI.Toast.Clear(); } catch { /* a card is not worth a failed shutdown */ }
             try { _sleeping.Shutdown(); } catch (Exception ex) { Log.Error("Sleep shutdown", ex); }
             try { _knock.Shutdown(); } catch (Exception ex) { Log.Error("Knock shutdown", ex); }
             try { _effects.Clear(); } catch (Exception ex) { Log.Error("Clearing effects", ex); }

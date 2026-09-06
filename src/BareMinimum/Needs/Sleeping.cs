@@ -585,6 +585,12 @@ namespace BareMinimum.Needs
             var quality = _bunk == Bunk.Bed ? 1f
                         : _bunk == Bunk.Collapse ? _cfg.SleepCollapseQuality
                         : _cfg.CarRestoreFraction;
+
+            // WHERE THE METER WAS, KEPT FOR THE CARD. The wake-up card sweeps its bar from
+            // here to wherever the night left it, and by the time the card is built the old
+            // value is gone -- so it is taken now, one line before it changes.
+            _restedBefore = _needs.Sleep.Value;
+
             _needs.Slept(_hours, quality);
 
             // Waking up rested is also waking up with your wind back. Free, and it is the
@@ -606,20 +612,71 @@ namespace BareMinimum.Needs
             }
         }
 
+        /// <summary>
+        /// Where the sleep meter stood before the night. The card sweeps its bar from here.
+        /// </summary>
+        private float _restedBefore;
+
+        /// <summary>
+        /// The two colours a wake-up card can be.
+        ///
+        /// The awake blue is the far end of the moon's own ramp beside the minimap, so the
+        /// card and the mark it is about are the same colour. A collapse is red because it is
+        /// not a night's sleep, it is the thing that happens instead of one.
+        /// </summary>
+        private static readonly System.Drawing.Color Awake =
+            System.Drawing.Color.FromArgb(255, 96, 178, 246);
+
+        private static readonly System.Drawing.Color Collapsed =
+            System.Drawing.Color.FromArgb(255, 214, 69, 58);
+
+        /// <summary>
+        /// Which of the five moon drawings the card wears.
+        ///
+        /// ASKED OF THE NEED, NOT WORKED OUT HERE. The first cut of this split the range into
+        /// five equal parts, and Need.Stage does not -- its bands are 0.80, 0.58, 0.34 and
+        /// 0.14, weighted so the bottom two are narrow and urgent. A card claiming to show the
+        /// same drawing as the mark beside the minimap, and showing a different one, is worse
+        /// than a card with no picture on it.
+        /// </summary>
+        private string Moon()
+        {
+            var at = _needs.Sleep.Stage;
+
+            if (at < 0) at = 0;
+            if (at > 4) at = 4;
+
+            return "moon" + at + ".png";
+        }
+
         private void Finish()
         {
             HandBackControl();
+
+            // READ BEFORE THEY ARE CLEARED. Both of these were reset on the two lines above
+            // the message that used them, so the collapse wording could never appear -- every
+            // wake-up said "Slept", including the ones where he had passed out in the street.
+            var passedOut = _bunk == Bunk.Collapse;
 
             _phase = Phase.Idle;
             _bunk = Bunk.None;
 
             try
             {
-                var pct = (int)Math.Round(_needs.Sleep.Value * 100f);
+                var rested = _needs.Sleep.Value;
+                var pct = (int)Math.Round(rested * 100f);
 
-                GTA.UI.Notification.PostTicker(
-                    (_bunk == Bunk.Collapse ? "~r~Passed out~s~ for " : "~b~Slept~s~ ") +
-                    _hours.ToString("0.#") + "h.  Rested " + pct + "%.", false, false);
+                var hours = _hours.ToString("0.#") + (_hours >= 1.95f ? " HOURS" : " HOUR");
+
+                // The moon at the stage it ended on, which is the same drawing the mark
+                // beside the minimap is showing by the time the card fades.
+                UI.Toast.Show(Moon(),
+                              (passedOut ? "PASSED OUT FOR " : "SLEPT ") + hours,
+                              passedOut
+                                  ? "You went down where you stood. Rested " + pct + "%."
+                                  : "Rested " + pct + "%.",
+                              passedOut ? Collapsed : Awake,
+                              _restedBefore, rested);
             }
             catch
             {
