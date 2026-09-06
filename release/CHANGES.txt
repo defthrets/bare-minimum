@@ -11,6 +11,12 @@
   core, an eye closing -- so the state reads from the shape at a glance. A bar
   style is in the settings for anybody who wants one.
 
+  THEY SIT LOW AND OUT PAST THE RIGHT-HAND EDGE OF THE MAP, and they stay put.
+  There is an automatic placement that hugs the minimap and it is switched off,
+  because it has to ask the game where the map ends and the game answers for a
+  STOCK radar -- run anything that has resized yours and the marks land on top
+  of it. F7 moves them anywhere you like, live, as you press.
+
   Both run on the GAME clock, so a day of them is about 48 minutes of play.
 
   108 PLACES TO BUY FOOD, and they are the real ones: every 24/7 and LTD, the

@@ -33,12 +33,29 @@ namespace BareMinimum.UI
     /// </summary>
     internal static class Toast
     {
-        /// <summary>How long it stays up, all in: rise, hold and fall.</summary>
-        public const int LifeMs = 3000;
+        /// <summary>
+        /// How long it sits FULLY UP, once it has finished arriving and before it starts to go.
+        ///
+        /// This is the number that means anything to a reader, which is why it is the one
+        /// that is set. The old single figure covered the rise and the fall as well, so
+        /// "three seconds" bought about two and a half seconds of readable card and the
+        /// setting quietly under-delivered on its own name.
+        /// </summary>
+        public const int HoldMs = 4000;
 
         /// <summary>The rise on the way in and the fall on the way out.</summary>
         private const int RiseMs = 220;
         private const int FallMs = 340;
+
+        /// <summary>
+        /// The whole life, which is the hold plus what it costs to arrive and to leave.
+        ///
+        /// DERIVED, NOT SET. Paint reaches full opacity at RiseMs and starts dropping at
+        /// LifeMs - FallMs, so this expression is what makes the gap between those two
+        /// exactly HoldMs. Typed as a separate number the two would drift apart the first
+        /// time either half of the animation was retimed.
+        /// </summary>
+        public const int LifeMs = RiseMs + HoldMs + FallMs;
 
         /// <summary>How long the meter takes to sweep from where it was to where it is.</summary>
         private const int SweepMs = 900;
@@ -114,14 +131,14 @@ namespace BareMinimum.UI
         /// <summary>
         /// Draws it, if there is one and this is a frame it belongs on.
         ///
-        /// THE THREE SECONDS START ON THE FIRST FRAME IT CAN BE SEEN, not when it was raised.
+        /// THE CLOCK STARTS ON THE FIRST FRAME IT CAN BE SEEN, not when it was raised.
         ///
         /// That is the whole difference between a card that works and one nobody ever sees.
         /// The case it is for is somebody else's sleep mod: it fades the screen to black,
         /// moves the clock, and fades back. We notice the jump DURING the black, and a card
         /// whose clock had already started would spend its whole life behind a fade and be
         /// gone by the time the picture returned. Waiting costs nothing and the card arrives
-        /// with the world.
+        /// with the world -- with its full four seconds still ahead of it.
         ///
         /// It gives up after PatienceMs, so a card caught behind something long does not
         /// announce a night's sleep from before it.

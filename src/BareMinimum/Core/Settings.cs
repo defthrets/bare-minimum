@@ -456,22 +456,47 @@ namespace BareMinimum.Core
         public bool ShowHud = true;
 
         /// <summary>
-        /// Place the icons beside the minimap automatically, whatever the screen shape is.
+        /// Place the marks against the minimap automatically, whatever the screen shape is.
         ///
-        /// THIS CANNOT BE A FIXED FRACTION, which is why the setting exists. GTA anchors the
-        /// minimap to screen HEIGHT, so it is a constant number of PIXELS wide on any monitor
-        /// of the same height -- and therefore a SHRINKING fraction of the width as the screen
-        /// gets wider. Its right edge is at 0.157 of the width on 16:9 and about 0.117 on a
-        /// 21:9 ultrawide. A default written for one is visibly wrong on the other: either
-        /// floating out in the middle of the screen, or sitting on top of the map.
+        /// OFF BY DEFAULT NOW, and the position below is a measured one rather than a computed
+        /// one. Auto asks the GAME where the minimap ends and tucks the pair just past it,
+        /// which is right for a vanilla radar and wrong the moment anything has resized one --
+        /// and a great many people run something that has. On the screen this default was
+        /// taken from, the game reports its map ending at 0.117 of the width while the map on
+        /// screen runs most of the way to twice that, so auto put the pair on top of it.
+        ///
+        /// THE TRADE IS REAL AND IT IS WORTH KNOWING. GTA anchors the minimap to screen
+        /// HEIGHT, so the map is a constant number of PIXELS wide on any monitor of the same
+        /// height and a SHRINKING fraction of the width as the screen gets wider -- its right
+        /// edge is 0.157 of the width on 16:9 and about 0.117 on a 21:9. A fixed X therefore
+        /// cannot hug the map on both. This one is clear of the map on either, which costs the
+        /// tucked-in look on 16:9 and buys a HUD that is never underneath anything.
+        ///
+        /// Turn this back on for the old behaviour; it is the first row of the F7 placement
+        /// page and takes effect the moment it is pressed.
         /// </summary>
-        public bool HudAutoPosition = true;
+        public bool HudAutoPosition = false;
 
-        /// <summary>Used only when HudAutoPosition is false. Fractions of the screen.</summary>
-        public float HudX = 0.163f;
-        public float HudY = 0.836f;
+        /// <summary>
+        /// Used only when HudAutoPosition is false. Fractions of the screen, and the TOP LEFT
+        /// of the pair -- the foot of it is HudY + HudSize * 2 + the gap, which is the line
+        /// the bars stand on when the style is switched.
+        ///
+        /// Down at the bottom edge and clear of the minimap's right-hand side. Taken off a
+        /// 3440x1440 screen with the pair placed by hand: left edge 0.252, foot 0.983.
+        /// </summary>
+        public float HudX = 0.252f;
+        public float HudY = 0.912f;
 
-        /// <summary>Icon height as a fraction of screen height. Width follows; the PNGs are square.</summary>
+        /// <summary>
+        /// Icon height as a fraction of screen height. Width follows; the PNGs are square.
+        ///
+        /// IT ALSO SETS THE FOOT, which is worth knowing before reaching for it to move the
+        /// bars. Bars() is handed the foot and never sees this number, so on the bar style
+        /// size is a position control and nothing else -- winding it down to the floor is a
+        /// way of dragging the pair towards the bottom of the screen, and it is not the way.
+        /// HudY is.
+        /// </summary>
         public float HudSize = 0.032f;
 
         /// <summary>Clear air between the two icons, as a fraction of the icon's own height.</summary>
