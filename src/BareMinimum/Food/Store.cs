@@ -219,8 +219,17 @@ namespace BareMinimum.Food
                 var doc = JsonFile.Read(File);
                 if (doc == null || doc.IsNull) return;
 
+                var version = doc["version"].AsInt(1);
+
                 var people = doc["characters"];
                 if (people == null || people.IsNull) return;
+
+                // The version-1 protagonist names were wrong in this file too -- it is keyed
+                // by exactly the same Who() that was mislabelling them. Same plan, so a bag
+                // and a stomach cannot end up disagreeing about whose they are.
+                var plan = version < Needs.Needs.StateVersion
+                    ? Needs.Needs.RenamePlan(new List<string>(people.Keys))
+                    : null;
 
                 foreach (var who in people.Keys)
                 {
@@ -246,9 +255,28 @@ namespace BareMinimum.Food
                         order.Add(id);
                     }
 
-                    _bags[who] = bag;
-                    _order[who] = order;
+                    var key = who;
+
+                    if (plan != null)
+                    {
+                        string renamed;
+                        if (!plan.TryGetValue(who, out renamed)) continue;   // dropped by the plan
+
+                        if (!string.Equals(renamed, who, StringComparison.OrdinalIgnoreCase))
+                        {
+                            Log.Info(What + ": \"" + who + "\" was really " + renamed +
+                                     " - renamed.");
+                        }
+
+                        key = renamed;
+                    }
+
+                    _bags[key] = bag;
+                    _order[key] = order;
                 }
+
+                // So the corrected names reach the file rather than only this session.
+                if (plan != null) _dirty = true;
             }
             catch (Exception ex)
             {
@@ -288,7 +316,7 @@ namespace BareMinimum.Food
                 }
 
                 var doc = Json.Object()
-                    .Set("version", 1)
+                    .Set("version", Needs.Needs.StateVersion)
                     .Set("characters", people);
 
                 if (!JsonFile.Write(File, doc))

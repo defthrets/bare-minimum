@@ -653,11 +653,17 @@ namespace BareMinimum.Needs
                 var me = Game.Player.Character;
                 if (me == null || !me.Exists()) return "unknown";
 
+                // THESE ARE JENKINS-ONE-AT-A-TIME OF THE MODEL NAMES, and they were wrong.
+                // The old table read 0x9B22DBAF as michael and 0x9B810FA2 as franklin, which
+                // is each name one person to the left of the hash it belongs to, and its
+                // third constant -- 0x9B0083C0 -- is not any protagonist, so Michael matched
+                // nothing and fell through to the generic branch below. Checked, not
+                // remembered: hash("player_zero") == 0x0D7114C9.
                 switch ((uint)me.Model.Hash)
                 {
-                    case 0x9B22DBAFu: return "michael";    // player_zero
-                    case 0x9B810FA2u: return "franklin";   // player_one
-                    case 0x9B0083C0u: return "trevor";     // player_two
+                    case 0x0D7114C9u: return "michael";    // player_zero
+                    case 0x9B22DBAFu: return "franklin";   // player_one
+                    case 0x9B810FA2u: return "trevor";     // player_two
                 }
 
                 return "ped_" + ((uint)me.Model.Hash).ToString("x8", CultureInfo.InvariantCulture);
@@ -666,6 +672,82 @@ namespace BareMinimum.Needs
             {
                 return "unknown";
             }
+        }
+
+        /// <summary>
+        /// The version stamped into every file this mod keys by character.
+        ///
+        /// 1  the protagonist hashes were wrong, so the names in the file were too.
+        /// 2  the hashes are right, and a version-1 file is renamed on the way in.
+        ///
+        /// SHARED BY ALL THREE FILES -- needs.json, pantry.json and fridge.json -- because
+        /// they are keyed the same way and were wrong the same way. Two numbers would mean
+        /// migrating one of them and forgetting the others.
+        /// </summary>
+        internal const int StateVersion = 2;
+
+        /// <summary>
+        /// What a version-1 key should have been called.
+        ///
+        /// Reads oddly on purpose: the old "michael" really was Franklin, and the old
+        /// "franklin" really was Trevor. Anything else -- an mp_ ped, an addon model -- was
+        /// already keyed by its own hash and is left exactly as it is.
+        /// </summary>
+        private static string Renamed(string old)
+        {
+            if (string.IsNullOrEmpty(old)) return old;
+
+            switch (old.ToLowerInvariant())
+            {
+                case "michael": return "franklin";       // 0x9B22DBAF was Franklin all along
+                case "franklin": return "trevor";        // 0x9B810FA2 was Trevor
+                case "ped_0d7114c9": return "michael";   // fell past the switch entirely
+                default: return old;
+            }
+        }
+
+        /// <summary>
+        /// Works out what every key in a version-1 file becomes, in one pass.
+        ///
+        /// IN ONE PASS BECAUSE THE RENAMES OVERLAP. "michael" becomes "franklin" and
+        /// "franklin" becomes "trevor", so renaming in place would walk one character's
+        /// numbers down the chain and land them on somebody else.
+        ///
+        /// A key that only a hand-edit could have produced -- "trevor", which no build could
+        /// ever write -- loses to real game data moving into that slot, and is reported
+        /// rather than dropped in silence.
+        /// </summary>
+        internal static Dictionary<string, string> RenamePlan(ICollection<string> keys)
+        {
+            var plan = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var taken = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            // The real moves first, so they own their destination.
+            foreach (var key in keys)
+            {
+                var to = Renamed(key);
+                if (string.Equals(to, key, StringComparison.OrdinalIgnoreCase)) continue;
+
+                plan[key] = to;
+                taken.Add(to);
+            }
+
+            foreach (var key in keys)
+            {
+                if (plan.ContainsKey(key)) continue;
+
+                if (taken.Contains(key))
+                {
+                    Log.Info("Dropping the \"" + key + "\" entry: no build could have written " +
+                             "it, and a real character is moving into that slot.");
+                    continue;
+                }
+
+                plan[key] = key;
+                taken.Add(key);
+            }
+
+            return plan;
         }
 
         /// <summary>Parks the current character's numbers and picks up the new one's.</summary>
@@ -720,17 +802,47 @@ namespace BareMinimum.Needs
                     return;
                 }
 
+                var version = doc["version"].AsInt(1);
                 var people = doc["characters"];
+
+                var read = new Dictionary<string, float[]>(StringComparer.OrdinalIgnoreCase);
 
                 foreach (var key in people.Keys)
                 {
                     var node = people[key];
-                    _saved[key] = new[]
+                    read[key] = new[]
                     {
                         Clamp01(node["hunger"].AsFloat(1f)),
                         Clamp01(node["sleep"].AsFloat(1f)),
                         Clamp01(node["drunk"].AsFloat(0f))
                     };
+                }
+
+                if (version < StateVersion)
+                {
+                    var plan = RenamePlan(new List<string>(read.Keys));
+
+                    foreach (var move in plan)
+                    {
+                        float[] v;
+                        if (!read.TryGetValue(move.Key, out v)) continue;
+
+                        _saved[move.Value] = v;
+
+                        if (!string.Equals(move.Key, move.Value, StringComparison.OrdinalIgnoreCase))
+                        {
+                            Log.Info("Needs: \"" + move.Key + "\" was really " + move.Value +
+                                     " - renamed.");
+                        }
+                    }
+
+                    // So the corrected names reach the file. Re-running this on the original
+                    // would give the same answer, so a crash before the write costs nothing.
+                    _dirty = true;
+                }
+                else
+                {
+                    foreach (var pair in read) _saved[pair.Key] = pair.Value;
                 }
 
                 Log.Info("Loaded needs for " + _saved.Count + " character(s).");
@@ -773,7 +885,7 @@ namespace BareMinimum.Needs
                 }
 
                 var doc = Json.Object()
-                    .Set("version", 1)
+                    .Set("version", StateVersion)
                     .Set("characters", people);
 
                 if (!JsonFile.Write(Paths.StateFile, doc))
