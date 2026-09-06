@@ -242,7 +242,20 @@
 
      Every shop is a coordinate in vendors.json. Move it, or add your own.
 
-  4. I WANT IT QUIETER.
+  4. I SEE THE APPLE AND THE MOON, BUT NO BARS.
+
+     That is not a fault, it is the default. The two marks ARE the HUD; the
+     bars are the other style and you have to ask for them.
+
+     F7 -> HUD -> HUD style -> press right until it reads BARS. It changes as
+     you press and it is written to the ini for you, so there is nothing to
+     restart. If you would rather edit the file, it is Style = Bars under [HUD]
+     in scripts\BareMinimum.ini.
+
+     BareMinimum.log names the style it drew on the line beginning "HUD:", if
+     you want to be sure of what you are running.
+
+  5. I WANT IT QUIETER.
 
      HUD -> Animate turns off every moving thing on screen, including the
      panels. General -> Enabled turns the whole mod off and leaves the F7 menu

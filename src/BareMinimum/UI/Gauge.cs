@@ -191,10 +191,22 @@ namespace BareMinimum.UI
                 var mapL = MinimapLeft();
                 var mapW = MinimapWidth();
 
-                // The minimap's measured bounds go in the log alongside the icons' position.
+                // The minimap's measured bounds go in the log alongside the position.
                 // This is the line that would have caught the icons landing on the wrong side
                 // of the map in one reading, instead of needing a screenshot to notice.
-                Log.Info("HUD: icons " + (side * res.Height).ToString("0") + " px square at " +
+                //
+                // AND IT NAMES THE STYLE, because the first thing anybody reported was "no
+                // bars, only icons" -- which is the default working correctly, and was not
+                // answerable from this line as it stood. The size is only an icon size on the
+                // icon style; on bars it is the offset that sets the foot and nothing else,
+                // so it is not called a square unless it is one.
+                var style = _cfg.Style.ToString();
+
+                Log.Info("HUD: " + style + " " +
+                         (_cfg.Style == HudStyle.Icons
+                              ? (side * res.Height).ToString("0") + " px square"
+                              : "bar " + (_cfg.HudBarLength * res.Height).ToString("0") + " px") +
+                         " at " +
                          (x * res.Width).ToString("0") + "," + (y * res.Height).ToString("0") +
                          "  (screen " + res.Width + "x" + res.Height +
                          ", aspect " + Aspect().ToString("0.00") +
