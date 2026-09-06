@@ -1,5 +1,5 @@
 ===============================================================================
-  BARE MINIMUM 0.1.0  --  FULL PACKAGE
+  BARE MINIMUM 0.1.1  --  FULL PACKAGE
 ===============================================================================
 
   DRAG EVERYTHING IN THIS ZIP INTO YOUR GTA V FOLDER. SAY YES TO MERGING.

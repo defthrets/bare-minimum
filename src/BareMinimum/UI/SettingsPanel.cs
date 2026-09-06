@@ -628,7 +628,7 @@ namespace BareMinimum.UI
 
             Bool("Show HUD", "HUD", "Show",
                  () => _cfg.ShowHud, v => _cfg.ShowHud = v,
-                 "The apple and the eye beside the minimap.");
+                 "The hunger and sleep gauges. Bars or marks, whichever style is set.");
 
             Choice("HUD style", "HUD", "Style", new[] { "Icons", "Bars" },
                    () => (int)_cfg.Style, v => _cfg.Style = (HudStyle)v,

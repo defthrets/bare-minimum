@@ -3,6 +3,32 @@
 ===============================================================================
 
 
+0.1.1  --  the bars ship, and the three of them are told apart properly
+-------------------------------------------------------------------------------
+
+  THE BARS ARE THE HUD NOW. They were always in the box and you had to go and
+  find them, and the first thing anybody reported was thinking the icons WERE
+  the bug. The icons have not been touched and are still one press away --
+  F7 -> HUD -> HUD style -- they are simply no longer the thing you get without
+  asking.
+
+  IT SHIPS SET UP THE WAY IT IS PLAYED. The gauges' length, width, mark size,
+  wave and drift, the pantry at five slots, the hunger and sleep clocks, and
+  shop markers on the pause map are all real numbers off a real install rather
+  than the first ones that looked about right.
+
+  MICHAEL, FRANKLIN AND TREVOR WERE LABELLED WRONG, and had been since the
+  first build. The three model hashes were each a person out of step, and
+  Michael's was not in the list at all -- so Franklin's hunger was filed under
+  "michael", Trevor's under "franklin", and Michael's under a raw hash. Nothing
+  was ever shared or lost between them, because nothing reads the name; every
+  label was simply wrong, in the log and in three save files.
+
+  YOUR SAVE IS CORRECTED ONCE, ON LOAD. needs.json, pantry.json and fridge.json
+  are renamed in place the first time 0.1.1 runs and stamped version 2, so it
+  cannot happen twice. Nobody inherits anybody else's stomach on the way past.
+
+
 0.1.0  --  first release, and a work in progress
 -------------------------------------------------------------------------------
 
@@ -11,12 +37,17 @@
   the fuel stations are thin, and more go in with every update. Everything below
   this line works today.
 
-  HUNGER AND SLEEP, as two small marks beside the minimap rather than two bars.
-  Each goes through five drawings as it empties -- an apple eaten down to a
-  core, an eye closing -- so the state reads from the shape at a glance. A bar
-  style is in the settings for anybody who wants one.
+  HUNGER AND SLEEP, as two thin gauges low on the screen. They are animated and
+  they move differently on purpose: hunger churns and gets more agitated the
+  emptier it is, sleep breathes and the breath slows as you tire.
+
+  A SECOND HUD IN THE BOX. Switch HUD style to ICONS and the bars come off,
+  leaving an apple and a moon that go through five drawings each as they empty
+  -- the apple eaten to a core, the eye closing. It reads as a shape rather
+  than a length and tells you less on purpose. One press in the F7 menu.
 
   THEY SIT LOW AND OUT PAST THE RIGHT-HAND EDGE OF THE MAP, and they stay put.
+  Both HUDs share the spot, so switching style does not move anything.
   There is an automatic placement that hugs the minimap and it is switched off,
   because it has to ask the game where the map ends and the game answers for a
   STOCK radar -- run anything that has resized yours and the marks land on top

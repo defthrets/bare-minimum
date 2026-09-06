@@ -15,10 +15,12 @@ namespace BareMinimum.Core
     /// <summary>Which HUD is drawn beside the minimap.</summary>
     internal enum HudStyle
     {
-        /// <summary>An apple and an eye that change shape. The default.</summary>
+        /// <summary>An apple and an eye that change shape.</summary>
         Icons,
 
-        /// <summary>Two filled bars, in the manner of the fuel gauge in Fumes.</summary>
+        /// <summary>
+        /// Two filled bars, in the manner of the fuel gauge in Fumes. The default.
+        /// </summary>
         Bars
     }
 
@@ -48,7 +50,7 @@ namespace BareMinimum.Core
         /// quarters of real play: enough that eating is something you do while getting on
         /// with the game rather than instead of it.
         /// </summary>
-        public float HungerHoursToEmpty = 52f;
+        public float HungerHoursToEmpty = 54f;
 
         /// <summary>Multiplier on the drain while sprinting, swimming or otherwise working.</summary>
         public float HungerExertionMultiplier = 2.2f;
@@ -76,7 +78,7 @@ namespace BareMinimum.Core
         /// sleep" lands where the effects do: the first slowdown arrives around twenty-eight
         /// hours awake, which is a bit over one day.
         /// </summary>
-        public float SleepHoursToEmpty = 80f;
+        public float SleepHoursToEmpty = 82f;
 
         /// <summary>
         /// GAME hours of sleep that take you from empty to fully rested.
@@ -90,7 +92,7 @@ namespace BareMinimum.Core
         /// Twelve, so two normal nights take somebody from nothing to full and one six-hour
         /// night is worth half a meter.
         /// </summary>
-        public float SleepHoursToFull = 12f;
+        public float SleepHoursToFull = 8f;
 
         // ---- Effects ---------------------------------------------------------
 
@@ -411,13 +413,16 @@ namespace BareMinimum.Core
         public float ShopBlipRange = 220f;
 
         /// <summary>
-        /// Whether they also appear on the PAUSE map. Off.
+        /// Whether they also appear on the PAUSE map. On.
         ///
-        /// The pause map is where somebody goes to plan a journey, and a screen full of
-        /// identical shop icons is exactly the clutter that makes people turn a mod off. On
-        /// the minimap, near you, it is useful; on the big map it is noise.
+        /// This used to be off, and the argument was clutter: a screen full of identical shop
+        /// icons is what makes people turn a mod off. What changed is that the blips are
+        /// GROUPED now -- the pause map's legend collects them under one name and steps
+        /// through them with left and right -- so the big map is a directory you can page
+        /// rather than a rash of pins. Planning a journey past somewhere to eat is the one
+        /// job the pause map is actually for.
         /// </summary>
-        public bool ShopBlipsOnMainMap = false;
+        public bool ShopBlipsOnMainMap = true;
 
         /// <summary>
         /// Whether every shop marker carries the SAME name, so the map legend lists them once.
@@ -554,12 +559,16 @@ namespace BareMinimum.Core
         /// <summary>
         /// Which of the two HUDs is on screen.
         ///
-        /// NOT A REPLACEMENT, A CHOICE. The icons were the original requirement and they are
-        /// still the default: a shape that changes says more at a glance than a length does.
-        /// But a bar reads a number off at once, which the icons deliberately do not, and
-        /// which some people would rather have.
+        /// NOT A REPLACEMENT, A CHOICE, and the bars are the one that ships. The icons were
+        /// the original requirement and they say more at a glance than a length does -- but a
+        /// bar reads its number off immediately, which the icons deliberately will not, and
+        /// that turns out to be what people expect when they install a hunger mod. The first
+        /// report on the first release was somebody who thought the icons WERE the bug.
+        ///
+        /// The icons are one press away on the F7 placement page and nothing about them has
+        /// been taken out.
         /// </summary>
-        public HudStyle Style = HudStyle.Icons;
+        public HudStyle Style = HudStyle.Bars;
 
         /// <summary>
         /// How tall the WHOLE gauge is -- bar plus the plate under it -- as a fraction of
@@ -588,10 +597,10 @@ namespace BareMinimum.Core
         /// should agree about how big an instrument is, and Fumes' numbers have been looked
         /// at on this monitor for months, which is worth more than a fresh guess.
         /// </summary>
-        public float HudBarLength = 0.184f;
+        public float HudBarLength = 0.18f;
 
         /// <summary>How WIDE a bar is, as a fraction of screen width. Fumes' figure.</summary>
-        public float HudBarWidth = 0.0046f;
+        public float HudBarWidth = 0.0048f;
 
         /// <summary>
         /// How far EITHER bar's surface moves, 0 to 1.
@@ -605,7 +614,7 @@ namespace BareMinimum.Core
         /// ONE NUMBER FOR BOTH, because "how much do the levels move" is one question however
         /// differently the two answer it -- hunger bows, sleep takes a drop and settles.
         /// </summary>
-        public float HudBarWave = 0.6f;
+        public float HudBarWave = 1f;
 
         /// <summary>
         /// Overall speed of everything that moves inside a bar. 1 is as shipped.
@@ -670,7 +679,7 @@ namespace BareMinimum.Core
         /// being guessed at. These went in at roughly three times this and read as busy --
         /// they are meant to be something you notice on the second look, not traffic.
         /// </summary>
-        public float HudBarDrift = 0.35f;
+        public float HudBarDrift = 1f;
 
         /// <summary>
         /// The mark under the bar, as a share of its BLACK PLATE. 1 fills the plate edge to
@@ -682,7 +691,7 @@ namespace BareMinimum.Core
         /// Clamped to 1 either way, because a mark wider than its own ground is just a mark
         /// on the world again, which is the thing the plate exists to stop.
         /// </summary>
-        public float HudBarIconScale = 0.78f;
+        public float HudBarIconScale = 0.85f;
 
         // ---- Keys ------------------------------------------------------------
 
@@ -726,7 +735,7 @@ namespace BareMinimum.Core
         /// care whether that is twenty tacos or one of everything, and a player who runs out of
         /// room wants to know how many MORE THINGS they can carry, not how many kinds.
         /// </summary>
-        public int PantrySlots = 3;
+        public int PantrySlots = 5;
 
         // ---- the fridge ------------------------------------------------------
 

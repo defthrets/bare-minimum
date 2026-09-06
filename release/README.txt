@@ -1,10 +1,10 @@
 ===============================================================================
-  BARE MINIMUM 0.1.0  --  hunger and sleep for GTA V
+  BARE MINIMUM 0.1.1  --  hunger and sleep for GTA V
   by spitmux
 ===============================================================================
 
-  Franklin gets hungry and he gets tired. Two small marks sit beside the
-  minimap and quietly get worse until you do something about it.
+  Franklin gets hungry and he gets tired. Two thin gauges sit low on the left
+  and quietly empty until you do something about it.
 
   There are more than a hundred places to eat, and they are the real ones --
   the 24/7 you walk past every mission, the taco window, the hot dog cart on
@@ -70,21 +70,29 @@
 
 
 -------------------------------------------------------------------------------
-  THE TWO MARKS
+  THE TWO GAUGES
 -------------------------------------------------------------------------------
 
-  Beside the minimap: an apple for hunger, a moon for sleep.
+  Hunger on the left, sleep on the right, standing on the bottom edge of the
+  screen out past the minimap. An apple and a moon underneath say which is
+  which.
 
-  They are not bars. Each one goes through five drawings as it empties -- the
-  apple is eaten down to a core, the eye closes -- so you read the state from
-  the shape at a glance rather than measuring a line. There IS a bar style in
-  the settings if you would rather have one.
+  They are animated, and the two move DIFFERENTLY on purpose. Hunger churns,
+  and the emptier it gets the more agitated it becomes, which is the opposite
+  of a fuel gauge. Sleep breathes as a whole, and the breath slows and deepens
+  as you tire.
+
+  THERE IS A SECOND HUD IN THE BOX. Set HUD style to ICONS and the bars come
+  off, leaving the apple and the moon on their own -- each going through five
+  drawings as it empties, the apple eaten down to a core, the eye closing -- so
+  you read the state from the shape rather than the length. It tells you less
+  on purpose. F7 -> HUD -> HUD style switches between them as you press.
 
   The needs run on the GAME clock, not the real one. A game hour is about two
   real minutes, so a full day is roughly 48 minutes of play.
 
-  RUNNING COSTS MORE. Sprinting empties both faster than walking, and the marks
-  visibly speed up while you do it, so the reason is on screen.
+  RUNNING COSTS MORE. Sprinting empties both faster than walking, and the HUD
+  visibly speeds up while you do it, so the reason is on screen.
 
   LET HUNGER HIT NOTHING and it starts costing health, slowly, with a warning
   first. It will never kill you -- it stops well above the floor and leaves you
@@ -242,15 +250,15 @@
 
      Every shop is a coordinate in vendors.json. Move it, or add your own.
 
-  4. I SEE THE APPLE AND THE MOON, BUT NO BARS.
+  4. I WANT THE OTHER HUD.
 
-     That is not a fault, it is the default. The two marks ARE the HUD; the
-     bars are the other style and you have to ask for them.
+     There are two and neither is a fault. BARS is what ships; ICONS replaces
+     them with the apple and the moon on their own, changing shape as they
+     empty.
 
-     F7 -> HUD -> HUD style -> press right until it reads BARS. It changes as
-     you press and it is written to the ini for you, so there is nothing to
-     restart. If you would rather edit the file, it is Style = Bars under [HUD]
-     in scripts\BareMinimum.ini.
+     F7 -> HUD -> HUD style -> press right. It changes as you press and it is
+     written to the ini for you, so there is nothing to restart. In the file it
+     is Style = Bars or Style = Icons under [HUD] in scripts\BareMinimum.ini.
 
      BareMinimum.log names the style it drew on the line beginning "HUD:", if
      you want to be sure of what you are running.

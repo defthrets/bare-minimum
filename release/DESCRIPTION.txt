@@ -1,5 +1,5 @@
 ================================================================================
-  BARE MINIMUM 0.1.0 -- copy for the mod page
+  BARE MINIMUM 0.1.1 -- copy for the mod page
 ================================================================================
 
 Three lengths and a changelog. Use whichever the site's fields want.
@@ -17,9 +17,11 @@ something about it.
   2. ONE PARAGRAPH  (short description)
 --------------------------------------------------------------------------------
 
-Hunger and sleep for GTA V, as two small marks beside the minimap rather than
-two more bars -- an apple eaten down to a core, an eye slowly closing, so you
-read the state from the shape at a glance. There are 108 places to eat and they
+Hunger and sleep for GTA V, as two thin gauges low on the screen -- hunger
+churns and gets more agitated the emptier it is, sleep breathes and the breath
+slows as you tire. There is a second HUD in the box if you would rather read a
+shape than a length: an apple eaten down to a core, an eye slowly closing, one
+press away in the menu. There are 108 places to eat and they
 are the real ones: the 24/7 you walk past every mission, the taco windows, the
 hot dog carts, Burger Shot, Bean Machine, Rob's Liquor, the delis and the
 restaurants nobody ever gets to walk into. 157 things to buy, each with its own
@@ -37,13 +39,19 @@ progress: the shop list is still growing, and adding your own is a text file.
   3. FULL DESCRIPTION  (main body)
 --------------------------------------------------------------------------------
 
-TWO MARKS, NOT TWO BARS
+TWO GAUGES, AND A SECOND HUD IN THE BOX
 
-Hunger and sleep sit beside the minimap as an apple and a moon. Each goes
-through five separate drawings as it empties -- the apple is eaten down to a
-core, the eye closes -- so the state is carried by the shape rather than by the
-length of a line. If you would rather have bars, there is a bar style in the
-settings.
+Hunger and sleep stand on the bottom edge of the screen, out past the minimap,
+with an apple and a moon underneath saying which is which. They are animated
+and they move DIFFERENTLY on purpose: hunger churns, and gets more agitated the
+emptier it is, which is the opposite of a fuel gauge; sleep breathes as a
+whole, and the breath slows and deepens as you tire.
+
+Switch HUD style to ICONS and the bars come off entirely, leaving the apple and
+the moon on their own -- each going through five separate drawings as it
+empties, so the state is carried by the shape rather than by the length of a
+line. It tells you less, deliberately, and it was the original idea for this
+mod. One press in the menu, either way.
 
 Both run on the game clock, so a full day of them is about 48 minutes of play.
 
@@ -133,6 +141,23 @@ the DLL and say nothing about it.
 --------------------------------------------------------------------------------
   4. CHANGELOG  (for the mod page's changelog field)
 --------------------------------------------------------------------------------
+
+0.1.1
+
+  The bars are the default HUD now. The icons are still in the box and still
+  one press away in the F7 menu, they are just no longer what you get without
+  asking for it.
+
+  Ships set up the way it is actually played: the gauges' size and animation,
+  the pantry at five slots, the hunger and sleep clocks, and shop markers on
+  the pause map.
+
+  Michael, Franklin and Trevor were labelled wrong internally and had been
+  since the first build -- the model hashes were a person out of step. Nothing
+  was shared or lost between characters, but the names in the log and in the
+  save files were wrong. Your save is corrected once, automatically, the first
+  time 0.1.1 runs.
+
 
 0.1.0
 
