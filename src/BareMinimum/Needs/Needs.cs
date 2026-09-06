@@ -239,18 +239,59 @@ namespace BareMinimum.Needs
             Log.Info("Something else advanced the clock " + hours.ToString("0.#") +
                      "h - counting it as sleep.");
 
+            // Taken before Slept moves it, so the card's bar can sweep from where the meter
+            // stood to where the night left it.
+            var before = Sleep.Value;
+
             Slept(hours, _cfg.OutsideSleepQuality);
 
             try
             {
-                GTA.UI.Notification.PostTicker(
-                    "~b~Slept~s~ " + hours.ToString("0.#") + "h.  Rested " +
-                    ((int)Math.Round(Sleep.Value * 100f)) + "%.", false, false);
+                // THE SAME CARD OUR OWN BED PUTS UP.
+                //
+                // This path is a night in SOMEBODY ELSE'S bed -- their mod moves the clock and
+                // we read the jump -- and it is the path most people are actually on, because
+                // most people already have a sleep mod. It was still posting the old grey
+                // ticker while our own bed put up the card, so the card looked broken to
+                // anybody who never used our bed: they slept, and got the thing it replaced.
+                var rested = Sleep.Value;
+
+                var whole = hours.ToString("0.#") +
+                            (hours >= 1.95f ? " HOURS" : " HOUR");
+
+                UI.Toast.Show(Moon(), "SLEPT " + whole,
+                              "Rested " + ((int)Math.Round(rested * 100f)) + "%.",
+                              Awake, before, rested);
             }
             catch
             {
                 // Nothing to do about it.
             }
+        }
+
+        /// <summary>
+        /// The blue at the far end of the moon's own ramp beside the minimap, so a wake-up
+        /// card and the mark it is about are the same colour. Sleeping.cs holds the twin of
+        /// this for its own bed.
+        /// </summary>
+        private static readonly System.Drawing.Color Awake =
+            System.Drawing.Color.FromArgb(255, 96, 178, 246);
+
+        /// <summary>
+        /// Which of the five moon drawings the card wears.
+        ///
+        /// Asked of the need rather than worked out, because Need.Stage weights its bands --
+        /// 0.80, 0.58, 0.34, 0.14 -- and a card claiming to show the same drawing as the mark
+        /// beside the minimap has to actually show it.
+        /// </summary>
+        private string Moon()
+        {
+            var at = Sleep.Stage;
+
+            if (at < 0) at = 0;
+            if (at > 4) at = 4;
+
+            return "moon" + at + ".png";
         }
 
         private void Drain(float hours)

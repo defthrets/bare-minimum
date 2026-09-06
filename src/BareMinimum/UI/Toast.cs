@@ -66,7 +66,21 @@ namespace BareMinimum.UI
         private static Color _accent;
         private static float _from;
         private static float _to;
+
+        /// <summary>When it started being SEEN. Zero while it is still waiting for a frame.</summary>
         private static int _shownAt;
+
+        /// <summary>Raised and not yet seen, and when it was raised so it can be given up on.</summary>
+        private static bool _waiting;
+        private static int _raisedAt;
+
+        /// <summary>
+        /// How long a card will wait for the screen before giving up on itself.
+        ///
+        /// A wake-up is worth holding through a fade. It is not worth holding through a
+        /// twenty-minute cutscene and then announcing a night's sleep from before it.
+        /// </summary>
+        private const int PatienceMs = 20000;
 
         /// <summary>
         /// Puts a card up. <paramref name="mark"/> is a file in data\icons, and
@@ -83,39 +97,70 @@ namespace BareMinimum.UI
             _from = Clamp01(from);
             _to = Clamp01(to);
 
-            try { _shownAt = Game.GameTime; }
-            catch { _shownAt = 0; }
+            _shownAt = 0;
+            _waiting = true;
+
+            try { _raisedAt = Game.GameTime; }
+            catch { _waiting = false; }
         }
 
         /// <summary>Takes it off early. For a shutdown, or anything that owns the screen.</summary>
         public static void Clear()
         {
             _shownAt = 0;
+            _waiting = false;
         }
 
         /// <summary>
         /// Draws it, if there is one and this is a frame it belongs on.
         ///
-        /// THE CLOCK RUNS WHETHER IT IS DRAWN OR NOT. A card held back by a cutscene and then
-        /// shown in full afterwards is a message about something that happened a minute ago.
+        /// THE THREE SECONDS START ON THE FIRST FRAME IT CAN BE SEEN, not when it was raised.
+        ///
+        /// That is the whole difference between a card that works and one nobody ever sees.
+        /// The case it is for is somebody else's sleep mod: it fades the screen to black,
+        /// moves the clock, and fades back. We notice the jump DURING the black, and a card
+        /// whose clock had already started would spend its whole life behind a fade and be
+        /// gone by the time the picture returned. Waiting costs nothing and the card arrives
+        /// with the world.
+        ///
+        /// It gives up after PatienceMs, so a card caught behind something long does not
+        /// announce a night's sleep from before it.
         /// </summary>
         public static void Draw(bool suspended)
         {
-            if (_shownAt == 0) return;
+            if (!_waiting && _shownAt == 0) return;
 
-            int age;
+            int now;
 
-            try { age = Game.GameTime - _shownAt; }
-            catch { _shownAt = 0; return; }
+            try { now = Game.GameTime; }
+            catch { Clear(); return; }
+
+            if (_waiting)
+            {
+                // Still behind a fade, a menu or a cutscene. Hold it, up to a point.
+                if (suspended || !Visible())
+                {
+                    if (now - _raisedAt > PatienceMs) Clear();
+                    return;
+                }
+
+                _waiting = false;
+                _shownAt = now;
+            }
+
+            var age = now - _shownAt;
 
             if (age < 0 || age >= LifeMs) { _shownAt = 0; return; }
 
+            // Gone behind something mid-card. The rest of its life runs down anyway: it has
+            // been read by now, and a card that pauses and resumes reads as a card that is
+            // stuck.
             if (suspended || !Visible()) return;
 
             try { Paint(age); }
             catch (Exception ex)
             {
-                _shownAt = 0;
+                Clear();
                 Core.Log.Once("toast", "Could not draw a card: " + ex.Message);
             }
         }
