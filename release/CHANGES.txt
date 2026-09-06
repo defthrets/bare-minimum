@@ -3,8 +3,13 @@
 ===============================================================================
 
 
-0.1.0  --  first release
+0.1.0  --  first release, and a work in progress
 -------------------------------------------------------------------------------
+
+  WHAT IS NOT FINISHED, first, because it is the honest way round: the shop map.
+  108 doors are in and they are complete ones, but the convenience stores and
+  the fuel stations are thin, and more go in with every update. Everything below
+  this line works today.
 
   HUNGER AND SLEEP, as two small marks beside the minimap rather than two bars.
   Each goes through five drawings as it empties -- an apple eaten down to a
@@ -19,11 +24,11 @@
 
   Both run on the GAME clock, so a day of them is about 48 minutes of play.
 
-  108 PLACES TO BUY FOOD, and they are the real ones: every 24/7 and LTD, the
-  taco windows, the hot dog carts, Burger Shot, Up-n-Atom, Bean Machine, Cool
-  Beans, Rob's Liquor, Taco Bomb, Pizza This, Cluckin' Bell's walk-up, the
-  liquor stores, the corner shops, the delis, and the restaurants nobody ever
-  gets to walk into. Del Perro and Vespucci are covered end to end.
+  108 PLACES TO BUY FOOD, and they are the real ones: the taco windows, the hot
+  dog carts, Burger Shot, Up-n-Atom, Bean Machine, Cool Beans, Rob's Liquor,
+  Taco Bomb, Pizza This, thirteen liquor stores, the corner shops, the delis,
+  and the restaurants nobody ever gets to walk into. Del Perro and Vespucci are
+  covered end to end.
 
   157 THINGS TO EAT across three categories, each with its own price, its own
   effect and its own line about itself.

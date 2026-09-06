@@ -12,6 +12,12 @@
   the grille on the window. Every one has its own menu, its own prices and its
   own opinions about you.
 
+  THIS IS A WORK IN PROGRESS, and the part still growing is the map. Everything
+  in here works and the shops that are in are finished -- but not every place in
+  the city is in yet. The convenience stores and the fuel stations are the thin
+  part. More go in with every update, and they are plain text in vendors.json,
+  so you do not have to wait for me to add the one on your corner.
+
   No game file is modified and your save is never touched. Delete three things
   and it never happened.
 

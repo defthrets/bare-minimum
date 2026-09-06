@@ -29,7 +29,8 @@ leaving the car. What you buy goes in your pocket for later, or into the fridge
 in any safehouse kitchen. Sleep in any bed. Run everywhere and you will pay for
 it in both. Ninety-seven settings, all live in an in-game menu, and every shop
 and every item is a plain text file you can edit. Drop-in install, works on
-Legacy and Enhanced, no OpenIV, and your save is never touched.
+Legacy and Enhanced, no OpenIV, and your save is never touched. A work in
+progress: the shop list is still growing, and adding your own is a text file.
 
 
 --------------------------------------------------------------------------------
@@ -49,11 +50,17 @@ Both run on the game clock, so a full day of them is about 48 minutes of play.
 
 MORE THAN A HUNDRED PLACES TO EAT
 
-108 of them, and they are the shops that are already there: every 24/7 and LTD,
-the taco windows, the hot dog carts, Burger Shot, Up-n-Atom, Taco Bomb, Bean
-Machine, Cool Beans, Rusty Brown's, Pizza This, Rob's Liquor, the corner
+108 of them, and they are the shops that are already there: the taco windows,
+the hot dog carts, Burger Shot, Up-n-Atom, Taco Bomb, Bean Machine, Cool Beans,
+Rusty Brown's, Pizza This, Rob's Liquor, thirteen liquor stores, the corner
 stores, the delis, and a good few restaurants the game never lets you into. Del
 Perro and Vespucci are covered end to end.
+
+STILL GROWING, AND THE THIN PART IS NAMED SO YOU KNOW WHAT YOU ARE GETTING: the
+convenience stores and the fuel stations. A handful are in and most are not, and
+they are the next thing going in. Everything that IS in is finished -- menu,
+prices, hours, the lot -- and vendors.json is plain text, so a door I have not
+got to yet is a coordinate and a name away from working.
 
 Each has its own menu, its own prices, its own hours and its own voice. A
 breakfast menu at midnight is shown greyed with its hours on it rather than
@@ -141,8 +148,9 @@ the DLL and say nothing about it.
   97 settings in an in-game menu. Every shop and every item is editable text.
 
   Optional one-way integration with Hoodrich's social feed.
-  
-  Not all locations for food have been set out , will be adding more in coming updates 
+
+  A work in progress. Not every food location is in yet -- the convenience
+  stores and the fuel stations especially -- and more go in with each update.
 
 
 ================================================================================
