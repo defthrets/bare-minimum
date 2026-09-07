@@ -109,6 +109,16 @@ namespace BareMinimum.UI
         /// <summary>The cursor frame that glides between tiles. See UI.Glide.</summary>
         private readonly Glide _frame = new Glide();
 
+        /// <summary>
+        /// The other mod's reason for saying no, and how long it stays up.
+        ///
+        /// HELD RATHER THAN POSTED. Hint fades when nothing is still asking for it, which is
+        /// the behaviour that suits this: the pocket does not close on a refusal, so the chip
+        /// is drawn under the open panel for as long as this clock runs and then goes.
+        /// </summary>
+        private string _refused;
+        private int _refusedUntil;
+
         /// <summary>When the pocket opened, when the cursor last moved, and where it moved from.</summary>
         private int _shownAt;
         private int _pickedAt;
@@ -168,6 +178,7 @@ namespace BareMinimum.UI
             _shownAt = Game.GameTime;
             _pickedAt = _shownAt;
             _last = -1;
+            _refused = null;
             _frame.Reset();
 
             IsOpen = true;
@@ -281,6 +292,10 @@ namespace BareMinimum.UI
             _index = to;
             _pickedAt = Game.GameTime;
 
+            // Moving off the thing that was refused takes the reason with it. It was about
+            // that tile, and it is not about this one.
+            _refused = null;
+
             var perPage = Columns * Rows;
             _page = perPage <= 0 ? 0 : _index / perPage;
 
@@ -376,7 +391,9 @@ namespace BareMinimum.UI
             if (no != null)
             {
                 Sound("ERROR");
-                GTA.UI.Notification.PostTicker("~o~" + no + "~s~.", false, false);
+
+                _refused = no;
+                _refusedUntil = Game.GameTime + 2600;
                 return;
             }
 
@@ -523,6 +540,12 @@ namespace BareMinimum.UI
 
             // Last, so it rides over the tile it is pointing at.
             _frame.Draw(arrive);
+
+            if (_refused == null) return;
+
+            if (Game.GameTime >= _refusedUntil) { _refused = null; return; }
+
+            Hint.Show(_refused);
         }
 
         /// <summary>
