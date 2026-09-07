@@ -96,7 +96,7 @@ namespace BareMinimum.UI
         /// sized for text is a smudge. The rows are sized for the picture and the text sits
         /// beside it.
         /// </summary>
-        private const float RowH = 0.046f;
+        private const float RowH = 0.050f;
 
         private const float CountH = 0.020f;
 
@@ -825,7 +825,11 @@ namespace BareMinimum.UI
 
             if (icon != null && !icon.Missing)
             {
-                var tall = RowH * 0.78f;
+                // MORE OF THE ROW THAN IT USED TO TAKE. At 78% of a shorter row this was a
+                // thumbnail of a sandwich rather than a sandwich, and the whole reason every
+                // item in this mod has a picture drawn for it is so the list can be read at a
+                // glance instead of word by word.
+                var tall = RowH * 0.90f;
                 var wideIcon = Hud.ToX(tall);
 
                 // A greyed row's picture greys with it, or an item you cannot afford still

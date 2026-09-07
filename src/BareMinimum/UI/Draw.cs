@@ -340,6 +340,112 @@ namespace BareMinimum.UI
             }
         }
 
+        /// <summary>
+        /// A line drawn one character at a time, with a gap put between them by hand.
+        /// Returns how wide it ended up.
+        /// </summary>
+        ///
+        /// <remarks>
+        /// BECAUSE THE GAME HAS NO LETTER-SPACING. There is no native for tracking, and it is
+        /// the one thing that separates a sign from a label -- every painted shopfront in the
+        /// world has air between its capitals and every UI label has none. A title set solid
+        /// in the condensed face reads as a field name however large it is drawn.
+        ///
+        /// The cost is one draw and one measure per character instead of one of each. A title
+        /// is a dozen characters on a panel that is already drawing tiles and rules, so it is
+        /// nothing next to the rectangle budget -- but it is why this is for titles and not
+        /// for anything with a paragraph in it.
+        ///
+        /// A CHARACTER THAT MEASURES AS NOTHING IS A SPACE, and is stepped over rather than
+        /// drawn. The measure native is asked to include spaces and does, but a zero coming
+        /// back would otherwise collapse every word in the line into the one before it, which
+        /// is a worse failure than a slightly wide gap.
+        /// </remarks>
+        public static float TextTracked(string text, float x, float y, float scale, Color colour,
+                                        int font, float track, bool outline = true)
+        {
+            if (string.IsNullOrEmpty(text)) return 0f;
+
+            var at = x;
+            var blank = Height(scale, font) * 0.26f;
+
+            foreach (var ch in text)
+            {
+                var wide = Advance(ch, scale, font);
+
+                if (wide <= 0f) wide = blank;
+                else Text(ch.ToString(), at, y, scale, colour, font, false, false, outline);
+
+                at += wide + track;
+            }
+
+            // No trailing gap: the width is up to the right edge of the last letter, not past
+            // it, or every measurement built on this would be one space too long.
+            return at - x - track;
+        }
+
+        /// <summary>How wide TextTracked would draw that line, without drawing it.</summary>
+        public static float WidthTracked(string text, float scale, int font, float track)
+        {
+            if (string.IsNullOrEmpty(text)) return 0f;
+
+            var total = 0f;
+            var blank = Height(scale, font) * 0.26f;
+
+            foreach (var ch in text)
+            {
+                var wide = Advance(ch, scale, font);
+                total += (wide <= 0f ? blank : wide) + track;
+            }
+
+            return total - track;
+        }
+
+        /// <summary>
+        /// How wide one character is, asked for once and then remembered.
+        /// </summary>
+        ///
+        /// <remarks>
+        /// WITHOUT THIS THE HEAD MEASURED ITS TITLE THREE TIMES A FRAME -- once to decide
+        /// whether the name fitted, once for the amber pass and once for the white one -- so
+        /// eleven letters were thirty-three measure natives per frame for a string that had
+        /// not changed since the shop opened. A letter's width in a given face at a given size
+        /// is a constant, and this is where that gets used.
+        ///
+        /// THROWN AWAY IF THE WINDOW CHANGES. These come back as a fraction of the SCREEN, not
+        /// in pixels, so an alt-tab into a different resolution moves every one of them. It is
+        /// one float comparison to be right about that, against a cache that would otherwise
+        /// quietly mis-space every title for the rest of the session.
+        /// </remarks>
+        private static float Advance(char ch, float scale, int font)
+        {
+            var aspect = Aspect;
+
+            if (aspect != _advanceAspect)
+            {
+                Advances.Clear();
+                _advanceAspect = aspect;
+            }
+
+            // Scale is quantised to a thousandth, which is finer than any difference the eye
+            // could find and coarse enough that a shrunk-to-fit title does not mint a fresh
+            // entry per frame as it settles.
+            var key = ((long)font << 48) | ((long)(int)(scale * 1000f) << 24) | ch;
+
+            float wide;
+            if (Advances.TryGetValue(key, out wide)) return wide;
+
+            wide = Width(ch.ToString(), scale, font);
+            Advances[key] = wide;
+
+            return wide;
+        }
+
+        private static readonly System.Collections.Generic.Dictionary<long, float> Advances =
+            new System.Collections.Generic.Dictionary<long, float>();
+
+        private static float _advanceAspect;
+
         /// <summary>Text ending at a right edge. What every figure on the right of a row uses.</summary>
         public static void TextRight(string text, float rightX, float y, float scale, Color colour,
                                      int font = FontBody, bool outline = true)

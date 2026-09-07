@@ -25,7 +25,26 @@ namespace BareMinimum.UI
         // ======================================================================
 
         /// <summary>How tall the head is: one title row and a rule.</summary>
-        public const float HeadH = 0.052f;
+        public const float HeadH = 0.064f;
+
+        /// <summary>
+        /// The room's name, set as signage rather than as a field label.
+        /// </summary>
+        ///
+        /// <remarks>
+        /// BIG, AND SPACED. The size alone was not the problem -- the title was set solid in
+        /// the condensed face, which is the same treatment the tabs and the key caps get, and
+        /// a name given a label's typography reads as a label at any size. The air between the
+        /// capitals is what makes it a sign, and Draw.TextTracked puts it there because the
+        /// game has no tracking of its own.
+        ///
+        /// It SHRINKS TO FIT rather than running under the mark on the right, down to a floor.
+        /// A shop name in this mod is three words at most, so the floor is a backstop for a
+        /// name nobody has written yet rather than something the shipped list reaches.
+        /// </remarks>
+        private const float TitleScale = 0.46f;
+        private const float TitleTrack = 0.0024f;
+        private const float TitleFloor = 0.28f;
 
         /// <summary>
         /// The title row: a mark, the room in capitals, what it is in small dim words after it,
@@ -45,35 +64,22 @@ namespace BareMinimum.UI
         {
             var x = left + pad;
             var edge = left + w - pad;
-            var y = top + 0.011f;
+            var y = top + 0.012f;
 
-            var tx = x;
+            // EVERYTHING ON THE ROW HANGS OFF THE TITLE'S MIDDLE. The offsets used to be a
+            // hand-picked number each, which held while the title was one size and quietly
+            // stopped holding the moment it was not -- the marks stayed where they were and
+            // the words grew past them.
+            var mid = y + Hud.Height(TitleScale, Hud.FontLabel) * 0.5f;
 
-            if (mark != null && !mark.Missing)
-            {
-                var wide = Hud.ToX(HeadIcon);
-
-                mark.DrawSized(x + wide * 0.5f, y + 0.010f, wide, HeadIcon,
-                               Sheen.On(Palette.Alpha(Palette.Brand, (int)(235f * arrive)), 0f, shimmer));
-
-                if (!mark.Missing) tx = x + wide + 0.006f;
-            }
-
-            Hud.Text(title, tx, y, 0.34f, Palette.Alpha(Palette.Text, (int)(255f * arrive)), Hud.FontLabel);
-
-            if (!string.IsNullOrEmpty(blurb))
-            {
-                var after = tx + Hud.Width(title, 0.34f, Hud.FontLabel) + 0.010f;
-
-                Hud.Text(blurb, after, y + 0.0045f, 0.25f,
-                         Palette.Alpha(Palette.TextDim, (int)(175f * arrive)), Hud.FontBody);
-            }
-
+            // THE RIGHT-HAND END FIRST, because the title has to know where to stop. It used
+            // to be measured after the title was already drawn, so a long name simply ran
+            // underneath the figure and the second mark.
             var rx = edge;
 
             if (!string.IsNullOrEmpty(right))
             {
-                Hud.TextRight(right, edge, y + 0.003f, 0.26f,
+                Hud.TextRight(right, edge, mid - Hud.Height(0.26f, Hud.FontLabel) * 0.5f, 0.26f,
                               Palette.Alpha(Palette.TextDim, (int)(200f * arrive)), Hud.FontLabel);
 
                 rx = edge - Hud.Width(right, 0.26f, Hud.FontLabel) - 0.008f;
@@ -81,12 +87,71 @@ namespace BareMinimum.UI
 
             if (tail != null && !tail.Missing)
             {
-                var wide = Hud.ToX(HeadIcon);
+                var wideTail = Hud.ToX(HeadIcon);
 
                 // A third of a cycle behind the first mark, so the pair never brightens
                 // together -- in step they read as one wide ornament rather than two marks.
-                tail.DrawSized(rx - wide * 0.5f, y + 0.010f, wide, HeadIcon,
+                tail.DrawSized(rx - wideTail * 0.5f, mid, wideTail, HeadIcon,
                                Sheen.On(Palette.Alpha(Palette.Brand, (int)(235f * arrive)), 0.33f, shimmer));
+
+                rx -= wideTail + 0.008f;
+            }
+
+            var tx = x;
+
+            if (mark != null && !mark.Missing)
+            {
+                var wide = Hud.ToX(HeadIcon);
+
+                mark.DrawSized(x + wide * 0.5f, mid, wide, HeadIcon,
+                               Sheen.On(Palette.Alpha(Palette.Brand, (int)(235f * arrive)), 0f, shimmer));
+
+                tx = x + wide + 0.008f;
+            }
+
+            var scale = TitleScale;
+            var track = TitleTrack;
+
+            var room = rx - tx - 0.008f;
+            var need = Hud.WidthTracked(title, scale, Hud.FontLabel, track);
+
+            if (need > room && room > 0f && need > 0f)
+            {
+                // The gaps shrink with the letters. Tracking held at full size on a shrunken
+                // face is no longer spacing, it is a word coming apart.
+                var by = room / need;
+
+                scale *= by;
+                track *= by;
+
+                if (scale < TitleFloor)
+                {
+                    track *= TitleFloor / scale;
+                    scale = TitleFloor;
+                }
+            }
+
+            // THE WEIGHT UNDER IT. Drawn once in a deep amber a hair down and right, then
+            // again in white on top. The game's own drop shadow is flat black and does the
+            // same job for a label; a sign wants the panel's own colour under it, and this is
+            // the difference between a big white word and a big white word that is lit.
+            Hud.TextTracked(title, tx + 0.0014f, y + 0.0016f, scale,
+                            Palette.Alpha(Palette.BrandDeep, (int)(135f * arrive)),
+                            Hud.FontLabel, track, false);
+
+            var titleW = Hud.TextTracked(title, tx, y, scale,
+                                         Palette.Alpha(Palette.Text, (int)(255f * arrive)),
+                                         Hud.FontLabel, track);
+
+            if (!string.IsNullOrEmpty(blurb))
+            {
+                var after = tx + titleW + 0.012f;
+
+                if (after < rx)
+                {
+                    Hud.Text(blurb, after, mid - Hud.Height(0.25f, Hud.FontBody) * 0.5f, 0.25f,
+                             Palette.Alpha(Palette.TextDim, (int)(175f * arrive)), Hud.FontBody);
+                }
             }
 
             Theme.Rule(x, top + HeadH - 0.006f, w - pad * 2f, arrive);
@@ -94,7 +159,8 @@ namespace BareMinimum.UI
             return top + HeadH;
         }
 
-        private const float HeadIcon = 0.022f;
+        /// <summary>The marks either side of the title, grown with it.</summary>
+        private const float HeadIcon = 0.028f;
 
         /// <summary>
         /// The head with a shop's own sign in place of the title: the LTD mark over its
