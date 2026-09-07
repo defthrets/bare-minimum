@@ -35,21 +35,19 @@ namespace BareMinimum.Core
         /// So the cap says what the ini says, which is also the only thing that stays correct
         /// when somebody rebinds it.
         ///
-        /// On a pad there is no letter to print and no glyph we are able to draw, so the cap
-        /// is left off rather than showing a keyboard key to somebody holding a controller.
-        /// The words still read correctly without it.
+        /// IT IS SHOWN ON A PAD TOO, and that is a correction. This used to return null the
+        /// moment the game reported a controller as the last input, on the reasoning that a
+        /// keyboard key is a lie to somebody holding a pad. It is not a lie in THIS mod: every
+        /// interact reads the configured key AND Control.Context, so E keeps working with a
+        /// controller plugged in and a pad in your hands. The cap was simply vanishing --
+        /// pick up a pad once, and the prompt lost its button for the rest of the session.
+        ///
+        /// A pad glyph would be better again and is not available: the game only turns
+        /// ~INPUT_~ into a picture inside its own help box, which is the whole reason this
+        /// method exists. A key that works beats a blank space.
         /// </summary>
         public static string Cap(System.Windows.Forms.Keys key)
         {
-            try
-            {
-                if (UI.Draw.OnPad) return null;
-            }
-            catch
-            {
-                // Unknown input method: a key is the safer guess on PC.
-            }
-
             var name = key.ToString();
 
             // Keys.D1 through D9 are the number row, and "D1" on a cap means nothing.
