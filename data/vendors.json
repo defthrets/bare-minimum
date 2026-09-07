@@ -3901,6 +3901,30 @@
         "z": 30.974,
         "heading": 279.407,
         "note": "Paleto Bay, liquor + lotto + hot coffee + check cashing"
+      },
+      {
+        "name": "24/7 Supermarket",
+        "x": 1731.084,
+        "y": 6410.733,
+        "z": 34.474,
+        "heading": 264.371,
+        "note": "Grapeseed, WALK-IN"
+      },
+      {
+        "name": "Up-n-Atom Diner",
+        "x": 1591.846,
+        "y": 6449.649,
+        "z": 24.79,
+        "heading": 341.924,
+        "note": "Grapeseed, sit-down diner"
+      },
+      {
+        "name": "Alamo Fruit Market",
+        "x": 1792.619,
+        "y": 4592.074,
+        "z": 37.158,
+        "heading": 14.865,
+        "note": "Alamo Sea, self-service produce market"
       }
     ],
     "_drugs_comment": [
