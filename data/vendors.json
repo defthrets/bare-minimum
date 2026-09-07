@@ -4005,6 +4005,30 @@
         "z": 32.15,
         "heading": 35.981,
         "note": "Alamo Sea, open 24 hours, wine + beer; Sprunk machine by the door"
+      },
+      {
+        "name": "24/7 Grocery",
+        "x": 544.004,
+        "y": 2675.336,
+        "z": 41.605,
+        "heading": 220.153,
+        "note": "Harmony/Route 68, WALK-IN; Sprunk machine and ice box outside"
+      },
+      {
+        "name": "The Taco Farmer",
+        "x": 650.774,
+        "y": 2727.673,
+        "z": 41.469,
+        "heading": 98.624,
+        "note": "Harmony -- WALK-UP WINDOW; a different branch to the city one"
+      },
+      {
+        "name": "The Taco Farmer",
+        "x": 639.341,
+        "y": 2723.458,
+        "z": 41.368,
+        "heading": 192.393,
+        "note": "Harmony -- DRIVE-THROUGH side of the same building"
       }
     ],
     "_drugs_comment": [
