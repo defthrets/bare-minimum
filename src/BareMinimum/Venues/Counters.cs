@@ -91,7 +91,7 @@ namespace BareMinimum.Venues
         /// a drink from those itself. Venues/Sipping watches them instead of selling from
         /// them, so the vanilla purchase stays the only purchase.
         /// </summary>
-        private static readonly string[] MachineModels =
+        internal static readonly string[] MachineModels =
         {
             "prop_vend_snak_01",
             "prop_vend_snak_01_tu"
@@ -101,7 +101,7 @@ namespace BareMinimum.Venues
         /// Roadside produce stalls. Every one of these is the same canopy in a different
         /// county, which is exactly why they are found by model and not by coordinate.
         /// </summary>
-        private static readonly string[] StallModels =
+        internal static readonly string[] StallModels =
         {
             "prop_fruitstand_b",
             "prop_fruitstand_b_nite",

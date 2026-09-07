@@ -31,6 +31,14 @@ namespace BareMinimum.Venues
         public Vector3 Position;
         public float Heading;
 
+        /// <summary>
+        /// Found in the world rather than listed in vendors.json.
+        ///
+        /// It changes two things and only two: the stand is not built, because it is already
+        /// standing there, and it is never deleted, because it is not ours.
+        /// </summary>
+        public bool Discovered;
+
         public float PedBack = 1.1f;
         public float SpawnRange = 90f;
         public float Reach = 2.4f;
@@ -564,9 +572,126 @@ namespace BareMinimum.Venues
             }
         }
 
+        /// <summary>
+        /// The cart models the game itself places around the map, and what each one sells.
+        ///
+        /// Both verified against this build's object list rather than guessed --
+        /// prop_ven_market_stall1, which the shipped vendor entries also name, does not exist
+        /// in this game at all and would have been a silent miss.
+        /// </summary>
+        private static readonly string[][] CartModels =
+        {
+            new[] { "prop_hotdogstand_01", "hotdog", "Hot Dog Stand", "hot dog" },
+            new[] { "prop_burgerstand_01", "cart_burger", "Beefy Bill's Burger Bar", "burger" },
+        };
+
+        private Model[] _cartHashes;
+        private int _nextCartScan;
+
+        /// <summary>
+        /// Staffs the carts the game placed and this mod did not.
+        ///
+        /// The player only ever sees the result: a hot dog cart that was scenery now has a
+        /// man behind it and sells a hot dog, exactly like the three that are listed. The
+        /// burger carts get the same treatment and sell a burger, which already eats as a
+        /// burger -- cart_burger carries no anim block of its own, so it falls through to the
+        /// default loop, and it is the hot dog that was given a different one.
+        /// </summary>
+        private void Discover(Vector3 from)
+        {
+            if (!_cfg.DiscoverCarts) return;
+
+            var now = Game.GameTime;
+            if (now < _nextCartScan) return;
+            _nextCartScan = now + 3000;
+
+            if (_cartHashes == null)
+            {
+                var good = new List<Model>();
+                foreach (var row in CartModels)
+                {
+                    try
+                    {
+                        var m = new Model(row[0]);
+                        if (m.IsValid) good.Add(m);
+                        else Log.Info("Carts: this build has no " + row[0] + ".");
+                    }
+                    catch { /* a name this build lacks is simply not looked for */ }
+                }
+
+                _cartHashes = good.ToArray();
+                Log.Info("Carts: looking for " + _cartHashes.Length + " cart model(s) in the world.");
+            }
+
+            if (_cartHashes.Length == 0) return;
+
+            Prop[] found;
+            try { found = World.GetNearbyProps(from, 160f, _cartHashes); }
+            catch (Exception ex)
+            {
+                Log.Once("cart-scan", "Could not look for carts: " + ex.Message);
+                return;
+            }
+
+            foreach (var prop in found)
+            {
+                if (prop == null || !prop.Exists()) continue;
+
+                var already = false;
+                foreach (var v in _vendors)
+                {
+                    // Eight metres, which is wider than any cart and narrower than the gap
+                    // between two of them. Our own listed stands create a cart each, so
+                    // without this the scan would staff them a second time.
+                    if (v.Position.DistanceTo(prop.Position) <= 8f) { already = true; break; }
+                }
+
+                if (already) continue;
+
+                var hash = prop.Model.Hash;
+                string[] row = null;
+                foreach (var r in CartModels)
+                {
+                    if (new Model(r[0]).Hash == hash) { row = r; break; }
+                }
+
+                if (row == null) continue;
+
+                var made = new Vendor
+                {
+                    Id = "cart_" + row[3] + "_" + prop.Handle,
+                    Name = row[2],
+                    Offers = new[] { new Offer { Id = row[1] } },
+                    Position = prop.Position,
+                    Heading = prop.Heading,
+                    Discovered = true,
+                    Stand = prop,
+                    PedModels = new[]
+                    {
+                        "s_m_m_strvend_01", "s_m_y_chef_01", "s_m_m_linecook",
+                        "s_m_m_migrant_01", "a_m_m_eastsa_02"
+                    },
+                    PedBack = 0.7f,
+                    Scenario = "WORLD_HUMAN_STAND_IMPATIENT",
+                    Reach = 2.6f,
+                    SpawnRange = 90f,
+                    Label = row[3],
+                    Blip = true,
+                    BlipSprite = 52,
+                    BlipColour = 5
+                };
+
+                _vendors.Add(made);
+                Log.Info("Carts: staffed a " + row[2] + " the game had left empty at " +
+                         made.Position.ToString() + ".");
+            }
+        }
+
         /// <summary>Creates what is near, removes what is not, and keeps the map markers.</summary>
         private void Stream(Vector3 from)
         {
+            Discover(from);
+
             foreach (var v in _vendors)
             {
                 Marker(v, from);
@@ -887,7 +1012,10 @@ namespace BareMinimum.Venues
 
             try
             {
-                if (v.PropModel.HasValue) v.Stand = MakeStand(v);
+                // A discovered cart keeps the prop it was found as. Building another on top
+                // would put two carts in one place, and the second one would be ours to
+                // delete while the first was not.
+                if (!v.Discovered && v.PropModel.HasValue) v.Stand = MakeStand(v);
                 if (v.PedModel.HasValue) v.Seller = MakeSeller(v);
             }
             catch (Exception ex)
@@ -1320,7 +1448,10 @@ namespace BareMinimum.Venues
         {
             try
             {
-                if (v.Stand != null && v.Stand.Exists()) v.Stand.Delete();
+                // THE GAME'S OWN CART IS NOT OURS TO DELETE. Everything else here was built
+                // by MakeStand and should go with the vendor; a discovered one was standing in
+                // the street before this mod loaded and has to be standing there after.
+                if (!v.Discovered && v.Stand != null && v.Stand.Exists()) v.Stand.Delete();
                 if (v.Seller != null && v.Seller.Exists()) v.Seller.Delete();
             }
             catch (Exception ex)

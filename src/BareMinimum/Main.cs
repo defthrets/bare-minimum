@@ -41,6 +41,9 @@ namespace BareMinimum
 
         /// <summary>Watches the soda machines this mod deliberately does not sell from.</summary>
         private readonly Sipping _sipping;
+
+        /// <summary>Marks the machines and stalls, which have no coordinate to blip.</summary>
+        private readonly MachineBlips _machineBlips;
         private readonly Vendors _vendors;
 
         /// <summary>The shops' voice on Hoodrich's feed. Dormant when Hoodrich is absent.</summary>
@@ -94,6 +97,7 @@ namespace BareMinimum
 
             _counters = new Counters(_cfg);
             _sipping = new Sipping(_cfg, _needs);
+            _machineBlips = new MachineBlips(_cfg);
             _socials = new Social.Socials(_cfg);
             _socials.Load();
 
@@ -204,6 +208,7 @@ namespace BareMinimum
                 // player triggers with nothing of ours open, and a suspended tick would miss
                 // the one frame the clip starts on.
                 _sipping.Update();
+                _machineBlips.Update();
 
                 _shop.Update(_sleeping.Busy || _settings.IsOpen || _bag.IsOpen ||
                              _fridge.IsOpen || _vendors.Offering);
@@ -315,6 +320,7 @@ namespace BareMinimum
             try { _eating.Shutdown(); } catch (Exception ex) { Log.Error("Eating shutdown", ex); }
             try { UI.Toast.Clear(); } catch { /* a card is not worth a failed shutdown */ }
             try { UI.Hint.Clear(); } catch { /* nor is a hint */ }
+            try { _machineBlips.Clear(); } catch { /* a stray blip is not worth a failed shutdown */ }
             try { _sleeping.Shutdown(); } catch (Exception ex) { Log.Error("Sleep shutdown", ex); }
             try { _knock.Shutdown(); } catch (Exception ex) { Log.Error("Knock shutdown", ex); }
             try { _effects.Clear(); } catch (Exception ex) { Log.Error("Clearing effects", ex); }

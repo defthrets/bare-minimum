@@ -801,6 +801,28 @@ namespace BareMinimum.Core
         public float VendingSipHunger = 0.05f;
 
         /// <summary>
+        /// Whether the machines and the stalls get map markers of their own.
+        ///
+        /// SEPARATE FROM ShowShopBlips, which they also obey. A shop is a destination and a
+        /// machine is something you notice walking past, so somebody may reasonably want the
+        /// shops marked and not want thirty vending machines on the same map.
+        /// </summary>
+        public bool MachineBlips = true;
+
+        /// <summary>
+        /// Whether the carts the GAME placed get a man behind them and start selling.
+        ///
+        /// The three hot dog stands and three burger carts in vendors.json are built by this
+        /// mod at a listed coordinate. The game puts carts of its own around the map that
+        /// nobody could ever buy from, and this is what staffs those -- found by model, like
+        /// the fridges and the tills, so every one of them works without a coordinate list.
+        ///
+        /// A discovered cart is never deleted when it despawns. It was standing in the street
+        /// before this mod loaded and it is not ours to remove.
+        /// </summary>
+        public bool DiscoverCarts = true;
+
+        /// <summary>
         /// Extra fridge model names to look for, comma-separated, on top of the built-in list.
         ///
         /// BECAUSE THE BUILT-IN LIST CANNOT BE COMPLETE. A fridge is found by model name, and
@@ -1044,6 +1066,8 @@ namespace BareMinimum.Core
                 cfg.StallItems = ini.GetString("Counters", "StallItems", cfg.StallItems);
                 cfg.VendingSipHunger = ini.GetFloat("Counters", "VendingSipHunger",
                                                     cfg.VendingSipHunger, 0f, 0.5f);
+                cfg.MachineBlips = ini.GetBool("Counters", "MachineBlips", cfg.MachineBlips);
+                cfg.DiscoverCarts = ini.GetBool("Counters", "DiscoverCarts", cfg.DiscoverCarts);
 
                 cfg.FoodSpinX = ini.GetFloat("Eating", "FoodSpinX", cfg.FoodSpinX, -180f, 180f);
                 cfg.FoodSpinY = ini.GetFloat("Eating", "FoodSpinY", cfg.FoodSpinY, -180f, 180f);
