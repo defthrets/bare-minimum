@@ -52,7 +52,31 @@
     "  -1469.985, -134.949, 50.570  h195.772  -- Del Perro, one block up from Chido.",
     "      A green awning reading \"...'s Redemption\" over a blue-and-white tiled arch.",
     "      THE NAME IS CUT OFF at the left edge of the photo it came from, so neither",
-    "      the shop nor what it sells is known. Noted 2026-09-06, awaiting the full sign."
+    "      the shop nor what it sells is known. Noted 2026-09-06, awaiting the full sign.",
+    "",
+    "  THE DEL PERRO PARADE, Bay City Avenue, walked north 2026-09-07. Three branches",
+    "  of existing chains went in from it (noodle_exchange_delperro,",
+    "  dickies_bagels_delperro, cool_beans_delperro). Four more places on the same",
+    "  strip are noted here rather than built, for two different reasons.",
+    "",
+    "  NEEDS A MENU -- new brands, so new items, prices, props and generated icons:",
+    "",
+    "    -1246.943, -1105.711, 7.596  h111.018  -- THE SPLIT KIPPER, a fish",
+    "        restaurant. Blue awning with a mermaid-and-anchor crest.",
+    "",
+    "    -1256.286, -1079.436, 7.891  h196.863  -- SURFERIES DINER. Surfboard sign,",
+    "        EAT IN OR TAKE OUT under it.",
+    "",
+    "  COORDINATE NOT TRUSTED -- the sign and the HUD were in different photographs,",
+    "  so these positions are inferred rather than read, and reach is 2.2m:",
+    "",
+    "    ~-1197.3, -1167.8, 7.2  -- LETTUCE BE, vegetarian, at the south end of the",
+    "        parade next to Noodle Exchange. The BRAND ALREADY EXISTS (lettuce_be,",
+    "        Vespucci) so this needs nothing but a confirmed door coordinate.",
+    "",
+    "    ~-1221.4, -1095.9, 7.6  -- PRAWN VIVANT, lobster and shellfish; a chalk",
+    "        menu board reading HOT BOILED LOBSTER, SHRIMP COCKTAIL, CLAM CHOWDER.",
+    "        New brand, so it needs a menu as well as a coordinate."
   ],
   "vendors": [
     {
@@ -3053,6 +3077,517 @@
       "blipSprite": 52,
       "blipColour": 5,
       "ui": true
+    },
+    {
+      "_note": "NOODLE EXCHANGE, the Del Perro parade on Bay City Avenue -- a second branch,",
+      "_note2": "a long way from the Vinewood pair. Same stock as those two, for the reason",
+      "_note3": "the Cool Beans branches share one: it is a chain, and a different menu per",
+      "_note4": "suburb reads as a mistake rather than as local colour. Door coordinate.",
+      "_note5": "Heading is the PLAYER's facing from the photo, so it points INTO the shop.",
+      "_note6": "Nothing spawns here, so it is inert -- recorded for whenever something does.",
+      "id": "noodle_exchange_delperro",
+      "name": "Noodle Exchange",
+      "item": [
+        "nx_ramen",
+        "nx_padthai",
+        "nx_dumplings",
+        "nx_bubbletea"
+      ],
+      "x": -1200.191,
+      "y": -1162.521,
+      "z": 7.183,
+      "heading": 297.676,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5,
+      "ui": true
+    },
+    {
+      "_note": "THE DICKIES BAGELS & DELI on the same Del Perro parade, four doors up from",
+      "_note2": "Noodle Exchange. Second branch; the first is under the freeway at Del Perro",
+      "_note3": "Heights. Carries what that one carries -- the bagel half and the deli half,",
+      "_note4": "and coffee, because a bagel shop without coffee is not one.",
+      "_note5": "Door coordinate. Heading is the player's facing from the photo.",
+      "id": "dickies_bagels_delperro",
+      "name": "The Dickies Bagels & Deli",
+      "item": [
+        "dk_bagel",
+        "dk_reuben",
+        "dk_dozen",
+        "deli_sandwich",
+        "rb_coffee",
+        "ecola",
+        "water"
+      ],
+      "x": -1204.797,
+      "y": -1146.754,
+      "z": 7.184,
+      "heading": 309.27,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5,
+      "ui": true
+    },
+    {
+      "_note": "COOL BEANS COFFEE CO, the fourth branch, further up the same Del Perro",
+      "_note2": "parade. COFFEE TEA & CAKE painted on the window. Same stock as the other",
+      "_note3": "three. Door coordinate; heading is the player's facing from the photo.",
+      "id": "cool_beans_delperro",
+      "name": "Cool Beans Coffee Co",
+      "item": [
+        "cb_coldbrew",
+        "cb_icedlatte",
+        "cb_frappe",
+        "cb_cookie"
+      ],
+      "x": -1207.618,
+      "y": -1135.027,
+      "z": 7.19,
+      "heading": 300.885,
+      "spawnRange": 90.0,
+      "reach": 2.2,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5,
+      "ui": true
     }
-  ]
+  ],
+  "_backlog": {
+    "_comment": [
+      "Doors surveyed in game and NOT YET BUILT. The loader reads \"vendors\" and nothing",
+      "else, so everything in here is inert -- a notebook, not a disabled entry.",
+      "",
+      "Every one was measured against the shipped list and none is within 18m of an",
+      "existing door, so building them is purely additive. Where a note says 'same",
+      "frontage', those rows are one venue photographed from two or three of its doors",
+      "and must become ONE vendor, not several."
+    ],
+    "food": [
+      {
+        "name": "24/7 Supermarket",
+        "x": 528.116,
+        "y": -152.119,
+        "z": 57.2,
+        "heading": 134.474,
+        "note": "Mirror Park"
+      },
+      {
+        "name": "BITE!",
+        "x": 215.318,
+        "y": -17.218,
+        "z": 74.987,
+        "heading": 342.414,
+        "note": "Vinewood"
+      },
+      {
+        "name": "(unnamed)",
+        "x": 229.871,
+        "y": -22.519,
+        "z": 74.987,
+        "heading": 333.831,
+        "note": "Vinewood, name not caught"
+      },
+      {
+        "name": "24/7 Supermarket",
+        "x": 202.153,
+        "y": -26.138,
+        "z": 69.909,
+        "heading": 70.115,
+        "note": "Vinewood"
+      },
+      {
+        "name": "(unnamed)",
+        "x": -212.81,
+        "y": -40.219,
+        "z": 50.055,
+        "heading": 4.905,
+        "note": "Downtown, name not caught"
+      },
+      {
+        "name": "(unnamed)",
+        "x": -144.944,
+        "y": -65.042,
+        "z": 54.059,
+        "heading": 306.05,
+        "note": "Downtown W, name not caught"
+      },
+      {
+        "name": "Les Bianco",
+        "x": -150.152,
+        "y": -105.494,
+        "z": 54.45,
+        "heading": 133.865,
+        "note": "restaurant"
+      },
+      {
+        "name": "(Rancho strip)",
+        "x": -87.494,
+        "y": -83.801,
+        "z": 57.302,
+        "heading": 32.282,
+        "note": "name not caught"
+      },
+      {
+        "name": "Liquor",
+        "x": -58.365,
+        "y": -91.909,
+        "z": 57.253,
+        "heading": 322.251,
+        "note": "Burton"
+      },
+      {
+        "name": "The Fish Net",
+        "x": 16.559,
+        "y": -164.254,
+        "z": 55.373,
+        "heading": 147.747,
+        "note": "restaurant"
+      },
+      {
+        "name": "Trey Baker",
+        "x": 50.796,
+        "y": -136.402,
+        "z": 54.68,
+        "heading": 346.618,
+        "note": "bakery"
+      },
+      {
+        "name": "Pipe Dreams",
+        "x": 66.311,
+        "y": -139.58,
+        "z": 54.502,
+        "heading": 28.995,
+        "note": "Hawick, smokers supplies"
+      },
+      {
+        "name": "BITE!",
+        "x": 89.746,
+        "y": -221.624,
+        "z": 54.119,
+        "heading": 162.541,
+        "note": "Textile City; same frontage as the 24/7 below"
+      },
+      {
+        "name": "24/7 Supermarket",
+        "x": 82.312,
+        "y": -219.387,
+        "z": 54.12,
+        "heading": 124.963,
+        "note": "Textile City"
+      },
+      {
+        "name": "Cluckin' Bell",
+        "x": -138.37,
+        "y": -256.962,
+        "z": 43.081,
+        "heading": 65.404,
+        "note": "Downtown"
+      },
+      {
+        "name": "(unnamed)",
+        "x": -236.233,
+        "y": -372.536,
+        "z": 29.513,
+        "heading": 324.161,
+        "note": "Pillbox, name not caught"
+      },
+      {
+        "name": "BITE!",
+        "x": -241.575,
+        "y": -345.368,
+        "z": 29.502,
+        "heading": 228.617,
+        "note": "Pillbox"
+      },
+      {
+        "name": "Noodle Exchange",
+        "x": -1230.268,
+        "y": -286.484,
+        "z": 37.212,
+        "heading": 59.761,
+        "note": "Del Perro; same frontage as Limey's below"
+      },
+      {
+        "name": "Limey's",
+        "x": -1236.19,
+        "y": -290.259,
+        "z": 37.095,
+        "heading": 113.688,
+        "note": "Del Perro"
+      },
+      {
+        "name": "BITE!",
+        "x": -1250.264,
+        "y": -296.041,
+        "z": 36.834,
+        "heading": 64.6,
+        "note": "Del Perro"
+      },
+      {
+        "name": "Beachfront Market",
+        "x": -1478.409,
+        "y": -950.511,
+        "z": 9.7,
+        "heading": 321.782,
+        "note": "Vespucci Beach"
+      },
+      {
+        "name": "Dune's Beach Cafe",
+        "x": -1500.422,
+        "y": -933.904,
+        "z": 9.659,
+        "heading": 334.772,
+        "note": "Vespucci Beach"
+      },
+      {
+        "name": "Pizza This...",
+        "x": -1527.486,
+        "y": -911.392,
+        "z": 9.645,
+        "heading": 43.647,
+        "note": "Vespucci Beach, walk-up window"
+      },
+      {
+        "name": "Market",
+        "x": -1538.072,
+        "y": -902.082,
+        "z": 9.638,
+        "heading": 27.416,
+        "note": "Vespucci Beach, fruit/juice/soda/coffee"
+      },
+      {
+        "name": "Al Dente's",
+        "x": -1394.026,
+        "y": -919.709,
+        "z": 10.633,
+        "heading": 264.845,
+        "note": "Vespucci"
+      },
+      {
+        "name": "A&R Market",
+        "x": -1359.937,
+        "y": -963.692,
+        "z": 9.213,
+        "heading": 302.623,
+        "note": "wine, beer, food"
+      },
+      {
+        "name": "(unnamed)",
+        "x": -1283.369,
+        "y": -1130.814,
+        "z": 6.279,
+        "heading": 285.699,
+        "note": "Vespucci Canals, name not caught"
+      },
+      {
+        "name": "Fruit of the Vine",
+        "x": -1264.284,
+        "y": -1163.164,
+        "z": 6.251,
+        "heading": 313.509,
+        "note": "Vespucci, wine"
+      },
+      {
+        "name": "Nut Buster",
+        "x": -1271.682,
+        "y": -1200.724,
+        "z": 4.854,
+        "heading": 266.447,
+        "note": "health food, 'Hit the Nut!'"
+      },
+      {
+        "name": "Steamboat Beers",
+        "x": -1209.236,
+        "y": -1384.583,
+        "z": 3.549,
+        "heading": 282.993,
+        "note": "liquor store"
+      },
+      {
+        "name": "(unnamed)",
+        "x": -1184.831,
+        "y": -1412.732,
+        "z": 3.936,
+        "heading": 4.99,
+        "note": "Vespucci Beach; same frontage as below"
+      },
+      {
+        "name": "(unnamed)",
+        "x": -1182.724,
+        "y": -1410.894,
+        "z": 3.982,
+        "heading": 334.988,
+        "note": "Vespucci Beach, name not caught"
+      },
+      {
+        "name": "Ice Maiden",
+        "x": -1171.36,
+        "y": -1434.213,
+        "z": 3.923,
+        "heading": 190.967,
+        "note": "Vespucci Beach, ice cream"
+      },
+      {
+        "name": "Natural smoothies",
+        "x": -1128.87,
+        "y": -1374.012,
+        "z": 4.573,
+        "heading": 26.688,
+        "note": "stand: smoothies, juice, coconuts"
+      },
+      {
+        "name": "Marlins Cafe",
+        "x": -1113.635,
+        "y": -1366.592,
+        "z": 4.541,
+        "heading": 8.95,
+        "note": "same frontage as Crucial Fix below"
+      },
+      {
+        "name": "Crucial Fix",
+        "x": -1108.245,
+        "y": -1356.192,
+        "z": 4.496,
+        "heading": 193.1,
+        "note": "coffee house, Jamaican roast"
+      },
+      {
+        "name": "Taco Libre",
+        "x": -1168.82,
+        "y": -1267.63,
+        "z": 5.662,
+        "heading": 312.68,
+        "note": "Mexican"
+      },
+      {
+        "name": "Limey's Juice Bar",
+        "x": -1183.175,
+        "y": -1248.321,
+        "z": 6.477,
+        "heading": 298.964,
+        "note": "juice and smoothies"
+      },
+      {
+        "name": "The Big Puffa",
+        "x": -1604.114,
+        "y": -979.164,
+        "z": 12.502,
+        "heading": 288.436,
+        "note": "Del Perro Pier seafood; 3 doors, one venue"
+      },
+      {
+        "name": "The Big Puffa",
+        "x": -1606.443,
+        "y": -982.171,
+        "z": 12.506,
+        "heading": 206.755,
+        "note": "Del Perro Pier"
+      },
+      {
+        "name": "The Big Puffa",
+        "x": -1608.964,
+        "y": -984.785,
+        "z": 12.503,
+        "heading": 204.192,
+        "note": "Del Perro Pier"
+      },
+      {
+        "name": "The Big Puffa",
+        "x": -1612.352,
+        "y": -988.939,
+        "z": 12.505,
+        "heading": 156.767,
+        "note": "Del Perro Pier, SEAFOOD frontage"
+      },
+      {
+        "name": "Seafood",
+        "x": -1592.032,
+        "y": -1005.755,
+        "z": 12.508,
+        "heading": 49.402,
+        "note": "Del Perro Pier"
+      },
+      {
+        "name": "Soak N Spoke",
+        "x": -1640.528,
+        "y": -1019.234,
+        "z": 12.636,
+        "heading": 230.527,
+        "note": "Del Perro Pier, kiosk: ice cream, soda, candy"
+      },
+      {
+        "name": "Sharkies Bites",
+        "x": -1654.909,
+        "y": -1037.33,
+        "z": 12.636,
+        "heading": 178.003,
+        "note": "Del Perro Pier window: burgers, tacos, donuts, juice, soda, smoothies"
+      },
+      {
+        "name": "Cream Pie",
+        "x": -1690.038,
+        "y": -1076.391,
+        "z": 12.638,
+        "heading": 174.212,
+        "note": "Del Perro Pier, dessert company"
+      },
+      {
+        "name": "Lagoons Diner",
+        "x": -1694.732,
+        "y": -1084.704,
+        "z": 12.639,
+        "heading": 282.229,
+        "note": "Del Perro Pier"
+      },
+      {
+        "name": "Burger Shot",
+        "x": -1687.726,
+        "y": -1091.618,
+        "z": 12.655,
+        "heading": 273.506,
+        "note": "Del Perro Pier, walk-up window"
+      },
+      {
+        "name": "Cluckin' Bell",
+        "x": -1681.368,
+        "y": -1097.125,
+        "z": 12.635,
+        "heading": 292.465,
+        "note": "Del Perro Pier, walk-up window"
+      },
+      {
+        "name": "Cherry Popper",
+        "x": -1696.993,
+        "y": -1105.998,
+        "z": 12.63,
+        "heading": 70.581,
+        "note": "Del Perro Pier, ice cream company"
+      }
+    ],
+    "_drugs_comment": [
+      "For the drug system that does not exist yet. Not food, and not to be built as food."
+    ],
+    "drugs": [
+      {
+        "name": "Doctor Kush",
+        "x": -1164.581,
+        "y": -1429.232,
+        "z": 4.08,
+        "heading": 202.391,
+        "note": "herbal organics, Vespucci Beach"
+      },
+      {
+        "name": "Seagrass Herbals",
+        "note": "coordinate not caught"
+      },
+      {
+        "name": "Kushy Farmacy",
+        "note": "coordinate not caught"
+      }
+    ]
+  }
 }
