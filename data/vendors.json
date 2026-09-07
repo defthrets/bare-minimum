@@ -3925,6 +3925,30 @@
         "z": 37.158,
         "heading": 14.865,
         "note": "Alamo Sea, self-service produce market"
+      },
+      {
+        "name": "Carniceria Supermarket",
+        "x": 1695.685,
+        "y": 4785.413,
+        "z": 41.478,
+        "heading": 223.961,
+        "note": "Grapeseed: carniceria, tortilleria, verduras, panaderia; same venue as below"
+      },
+      {
+        "name": "Carniceria Supermarket",
+        "x": 1707.068,
+        "y": 4792.25,
+        "z": 41.457,
+        "heading": 245.184,
+        "note": "second door"
+      },
+      {
+        "name": "Grape Seed Farmers Market",
+        "x": 1678.037,
+        "y": 4881.818,
+        "z": 41.517,
+        "heading": 213.784,
+        "note": "market and store; name read from a step-back shot, door coord is this one"
       }
     ],
     "_drugs_comment": [
