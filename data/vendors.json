@@ -3885,6 +3885,22 @@
         "z": 30.96,
         "heading": 94.298,
         "note": "Paleto Bay, supermarket AND pharmacy under one sign"
+      },
+      {
+        "name": "O.O.T.",
+        "x": -1654.738,
+        "y": -1000.208,
+        "z": 12.505,
+        "heading": 109.373,
+        "note": "Del Perro Pier, Out Of Towners Welcome -- bar"
+      },
+      {
+        "name": "Liquor",
+        "x": -407.342,
+        "y": 6062.478,
+        "z": 30.974,
+        "heading": 279.407,
+        "note": "Paleto Bay, liquor + lotto + hot coffee + check cashing"
       }
     ],
     "_drugs_comment": [
