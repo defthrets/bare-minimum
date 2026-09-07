@@ -771,6 +771,36 @@ namespace BareMinimum.Core
         public float FridgeReach = 1.8f;
 
         /// <summary>
+        /// Whether the SNACK machines sell to you. Not the soda ones -- see VendingSipHunger.
+        ///
+        /// The game sells nothing out of a candy machine, so this is not a mod taking one
+        /// over; it is a mod using a prop the game left as scenery. Every one of them in the
+        /// world works, because they are found by model rather than listed by coordinate.
+        /// </summary>
+        public bool VendingMachines = true;
+
+        /// <summary>Whether the roadside produce stalls sell to you. Same argument.</summary>
+        public bool FruitStalls = true;
+
+        /// <summary>
+        /// What a fruit stall has on the trestle, as catalogue ids.
+        ///
+        /// A LIST RATHER THAN A CATEGORY, because "fruit" is not a category in foods.json --
+        /// an apple is a Snack and a fresh fruit is Food, and a stall that sold every Snack
+        /// in the game would be selling jerky and chocolate off a fruit crate.
+        /// </summary>
+        public string StallItems = "fruit,apple,got_box";
+
+        /// <summary>
+        /// How much hunger a drink out of a VANILLA soda machine gives back. 0 turns it off.
+        ///
+        /// Small on purpose. The game's own machine restores a little health and plays its own
+        /// animation, and this rides along with that rather than replacing it -- you drank
+        /// something, so the meter should notice, and that is all it should do.
+        /// </summary>
+        public float VendingSipHunger = 0.05f;
+
+        /// <summary>
         /// Extra fridge model names to look for, comma-separated, on top of the built-in list.
         ///
         /// BECAUSE THE BUILT-IN LIST CANNOT BE COMPLETE. A fridge is found by model name, and
@@ -1007,6 +1037,13 @@ namespace BareMinimum.Core
                 cfg.FridgeReach = ini.GetFloat("Fridge", "Reach", cfg.FridgeReach, 0.5f, 6f);
                 cfg.FridgeExtraModels = ini.GetString("Fridge", "ExtraModels",
                                                       cfg.FridgeExtraModels);
+
+                cfg.VendingMachines = ini.GetBool("Counters", "VendingMachines",
+                                                  cfg.VendingMachines);
+                cfg.FruitStalls = ini.GetBool("Counters", "FruitStalls", cfg.FruitStalls);
+                cfg.StallItems = ini.GetString("Counters", "StallItems", cfg.StallItems);
+                cfg.VendingSipHunger = ini.GetFloat("Counters", "VendingSipHunger",
+                                                    cfg.VendingSipHunger, 0f, 0.5f);
 
                 cfg.FoodSpinX = ini.GetFloat("Eating", "FoodSpinX", cfg.FoodSpinX, -180f, 180f);
                 cfg.FoodSpinY = ini.GetFloat("Eating", "FoodSpinY", cfg.FoodSpinY, -180f, 180f);

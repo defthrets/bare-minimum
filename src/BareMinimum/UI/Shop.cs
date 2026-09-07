@@ -254,8 +254,14 @@ namespace BareMinimum.UI
 
         private void Begin()
         {
-            _ui.Title = "COUNTER";
-            _ui.TitleImage = Mark();
+            _ui.Title = _at == Counter.Machine ? "VENDING MACHINE"
+                      : _at == Counter.Stall ? "FRUIT STALL"
+                      : "COUNTER";
+
+            // A machine and a stall are not a chain, so they never wear a shop's logo -- the
+            // brand lookup is about which BUILDING you are stood in, and the machine outside
+            // the 24/7 is not the 24/7.
+            _ui.TitleImage = _at == Counter.Till ? Mark() : null;
             _ui.Tabs.Clear();
 
             foreach (var c in _menu.Categories)
@@ -264,9 +270,15 @@ namespace BareMinimum.UI
                 // drinks machine is the sort of detail that quietly says nobody thought about it.
                 if (_at == Counter.Machine && IsHotFood(c)) continue;
 
+                // A STALL HAS ONE TAB, because the stock is a named list rather than a
+                // category -- an apple is a Snack and a fresh fruit is Food, so filtering by
+                // category would either miss half the crate or sell jerky off it.
+                if (_at == Counter.Stall) continue;
+
                 _ui.Tabs.Add(c.ToUpperInvariant());
             }
 
+            if (_at == Counter.Stall) _ui.Tabs.Add("PRODUCE");
             if (_ui.Tabs.Count == 0) _ui.Tabs.Add("DRINKS");
 
             _ui.Tab = 0;
@@ -308,6 +320,52 @@ namespace BareMinimum.UI
         private static bool IsHotFood(string category)
         {
             return string.Equals(category, "Food", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>Whether a fruit stall has this on the trestle. Counters/StallItems.</summary>
+        private bool Stocked(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return false;
+
+            foreach (var want in (_cfg.StallItems ?? "").Split(',', ';'))
+            {
+                if (string.Equals(want.Trim(), id, StringComparison.OrdinalIgnoreCase)) return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// The game's own vending-machine animation, played on OUR purchase.
+        ///
+        /// mini@sprunk / plyr_buy_drink_pt1 is what the game plays when it sells you a drink
+        /// from a soda machine. Borrowing it for the candy machine is the point: the player
+        /// has seen this exact animation at the machine next to this one, so a purchase that
+        /// used anything else would look like a different game.
+        ///
+        /// UPPER BODY ONLY and not a task, so it plays over standing and cannot trap him: a
+        /// machine that grabs control for two seconds every time you buy a bag of crisps is
+        /// worse than no animation.
+        /// </summary>
+        private static void Vend()
+        {
+            try
+            {
+                var me = Game.Player.Character;
+                if (me == null || !me.Exists()) return;
+
+                const string dict = "mini@sprunk";
+
+                Function.Call(Hash.REQUEST_ANIM_DICT, dict);
+                if (!Function.Call<bool>(Hash.HAS_ANIM_DICT_LOADED, dict)) return;
+
+                Function.Call(Hash.TASK_PLAY_ANIM, me.Handle, dict, "plyr_buy_drink_pt1",
+                              8f, -8f, 900, 48, 0f, false, false, false);
+            }
+            catch (Exception ex)
+            {
+                Core.Log.Once("vend-anim", "Could not play the machine animation: " + ex.Message);
+            }
         }
 
         /// <summary>The menu is up: run it, and act on whatever was chosen.</summary>
@@ -383,6 +441,17 @@ namespace BareMinimum.UI
 
             foreach (var item in _menu.Items)
             {
+                // A STALL IGNORES THE CATEGORY AND READS ITS OWN LIST. Everything else on this
+                // screen is "show me the Drinks tab"; a trestle with three crates on it is
+                // "show me these three things", and the ini says which.
+                if (_at == Counter.Stall)
+                {
+                    if (!Stocked(item.Id)) continue;
+
+                    _ui.Rows.Add(Stock.RowFor(item, money, item.Price, null));
+                    continue;
+                }
+
                 if (!string.Equals(item.Category, category, StringComparison.OrdinalIgnoreCase))
                     continue;
 
@@ -439,6 +508,11 @@ namespace BareMinimum.UI
                     return;
                 }
 
+                // THE MACHINE MOVES WHEN IT SELLS. A candy machine that takes your money and
+                // stands there is a menu with a prop behind it; the animation is what makes it
+                // the machine you just used.
+                if (_at == Counter.Machine) Vend();
+
                 Notify("~g~" + item.Name + "~s~ - in your pocket. " +
                        _pantry.Total + " of " + _pantry.Slots + ".");
 
@@ -455,6 +529,8 @@ namespace BareMinimum.UI
             if (!Charge(item.Price)) return;
 
             _ui.Close();
+
+            if (_at == Counter.Machine) Vend();
 
             if (!_eating.Begin(item))
             {

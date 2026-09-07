@@ -16,13 +16,26 @@ namespace BareMinimum.Venues
         Till,
 
         /// <summary>
-        /// A vending machine. NOT USED -- machines are left vanilla, deliberately.
+        /// A SNACK machine -- the candy box, not the soda machine.
         ///
-        /// Kept in the enum rather than deleted so the shape of Nearest() still reads as "one
-        /// of several kinds of counter", and so that turning them back on is uncommenting a
-        /// block rather than reconstructing a concept.
+        /// The distinction is the whole reason this is on again. The game sells a drink out
+        /// of a soda machine and plays its own animation for it; putting a second purchase on
+        /// top of that would be two mods fighting over one prop. It sells NOTHING out of a
+        /// candy machine -- that one is scenery -- so there is nothing there to fight with.
+        ///
+        /// The soda machines are handled by watching instead. See Venues/Sipping.
         /// </summary>
-        Machine
+        Machine,
+
+        /// <summary>
+        /// A roadside fruit and veg stall.
+        ///
+        /// BY MODEL, because the game repeats the same stall from the Chumash coast to
+        /// Chiliad -- two of them 2.2km apart wearing the identical canopy. Listing those by
+        /// coordinate would mean finding every one by hand and still missing the rest, which
+        /// is the mistake the fridges and the tills already avoid.
+        /// </summary>
+        Stall
     }
 
     /// <summary>
@@ -47,6 +60,17 @@ namespace BareMinimum.Venues
         /// Shop tills. The register is the right thing to look for rather than the shopkeeper:
         /// a ped wanders, gets shot and despawns, and the till is bolted to the counter.
         /// </summary>
+        /// <summary>
+        /// The settings. Counters had no constructor until the machines and stalls arrived --
+        /// before them there was nothing here a player could turn off.
+        /// </summary>
+        private readonly Settings _cfg;
+
+        public Counters(Settings cfg)
+        {
+            _cfg = cfg;
+        }
+
         private static readonly string[] TillModels =
         {
             "prop_till_01",
@@ -59,13 +83,34 @@ namespace BareMinimum.Venues
             "prop_cashregister_01"
         };
 
-        // VENDING MACHINES ARE LEFT VANILLA and the model list has gone with them, rather
-        // than sitting here unused: the game already sells a drink out of one and plays its
-        // own animation, and a second purchase on top is two mods fighting over one machine.
-        //
-        // If they are ever wanted back, the models were: prop_vend_soda_01, prop_vend_soda_02,
-        // prop_vend_water_01, prop_vend_coffe_01, prop_vend_snak_01, prop_vend_snak_01_tu,
-        // prop_vend_fridge01 -- all seven of which exist in this build.
+        /// <summary>
+        /// SNACK machines only. The soda ones are deliberately absent.
+        ///
+        /// prop_vend_soda_01, prop_vend_soda_02, prop_vend_water_01, prop_vend_coffe_01 and
+        /// prop_vend_fridge01 all exist in this build and are all left alone: the game sells
+        /// a drink from those itself. Venues/Sipping watches them instead of selling from
+        /// them, so the vanilla purchase stays the only purchase.
+        /// </summary>
+        private static readonly string[] MachineModels =
+        {
+            "prop_vend_snak_01",
+            "prop_vend_snak_01_tu"
+        };
+
+        /// <summary>
+        /// Roadside produce stalls. Every one of these is the same canopy in a different
+        /// county, which is exactly why they are found by model and not by coordinate.
+        /// </summary>
+        private static readonly string[] StallModels =
+        {
+            "prop_fruitstand_b",
+            "prop_fruitstand_b_nite",
+            "prop_fruitstand_01",
+            "prop_fruit_stand_01",
+            "prop_fruit_stand_02",
+            "prop_fruit_stand_03",
+            "v_73_p_ap_banostall_az"
+        };
 
         /// <summary>
         /// Shops that are NOT food shops. While one of these is running, there is no counter.
@@ -153,6 +198,8 @@ namespace BareMinimum.Venues
         }
 
         private int[] _tills;
+        private int[] _machines;
+        private int[] _stalls;
 
         private int _nextScan;
         private Counter _kind = Counter.None;
@@ -160,6 +207,16 @@ namespace BareMinimum.Venues
 
         /// <summary>How close you have to stand. A till is behind a counter, so it is generous.</summary>
         public float TillReach = 1.9f;
+
+        /// <summary>
+        /// How close you stand to a machine, and to a stall.
+        ///
+        /// A machine is a box on a wall and you step right up to it, so it is tighter than a
+        /// till. A stall is a trestle with crates in front of it and the seller behind, so it
+        /// is looser -- the same figure the hot dog stands use.
+        /// </summary>
+        public float MachineReach = 1.5f;
+        public float StallReach = 2.6f;
 
         /// <summary>The prop currently being offered, or null.</summary>
         public Prop Found => _found;
@@ -291,13 +348,33 @@ namespace BareMinimum.Venues
                     return _kind;
                 }
 
-                // VENDING MACHINES ARE LEFT ALONE. The game already sells you a drink out of
-                // one and plays its own animation for it, and putting a second, different
-                // purchase on top of that is two mods fighting over the same machine -- ours
-                // silently doing nothing about the health the vanilla one restores.
-                //
-                // The model list below is kept because it costs nothing and the next person
-                // to want them will look for exactly this comment.
+                // AFTER THE TILL, ALWAYS. A 24/7 has a candy machine by the door and a till
+                // eight feet behind it, and the till is the one with the whole menu on it --
+                // being handed a bag of crisps because you stood slightly to the left of the
+                // counter would read as the mod picking wrong.
+                if (_cfg.VendingMachines)
+                {
+                    var machine = Closest(from, MachineReach,
+                                          Resolve(MachineModels, "Snack machines", ref _machines));
+                    if (machine != null)
+                    {
+                        _found = machine;
+                        _kind = Counter.Machine;
+                        return _kind;
+                    }
+                }
+
+                if (_cfg.FruitStalls)
+                {
+                    var stall = Closest(from, StallReach,
+                                        Resolve(StallModels, "Fruit stalls", ref _stalls));
+                    if (stall != null)
+                    {
+                        _found = stall;
+                        _kind = Counter.Stall;
+                        return _kind;
+                    }
+                }
             }
             catch (Exception ex)
             {

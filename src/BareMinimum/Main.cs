@@ -38,6 +38,9 @@ namespace BareMinimum
         private readonly Catalogue _catalogue;
         private readonly Eating _eating;
         private readonly Counters _counters;
+
+        /// <summary>Watches the soda machines this mod deliberately does not sell from.</summary>
+        private readonly Sipping _sipping;
         private readonly Vendors _vendors;
 
         /// <summary>The shops' voice on Hoodrich's feed. Dormant when Hoodrich is absent.</summary>
@@ -89,7 +92,8 @@ namespace BareMinimum
             _larder = new Larder(_cfg, _catalogue);
             _fridges = new Fridges(_cfg);
 
-            _counters = new Counters();
+            _counters = new Counters(_cfg);
+            _sipping = new Sipping(_cfg, _needs);
             _socials = new Social.Socials(_cfg);
             _socials.Load();
 
@@ -195,6 +199,11 @@ namespace BareMinimum
                 // machine wins the interact key rather than both reading it on one frame.
                 _vendors.Update(dt, _sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
                                     _bag.IsOpen || _fridge.IsOpen);
+
+                // NOT GATED ON A MENU. It is watching for the GAME's animation, which the
+                // player triggers with nothing of ours open, and a suspended tick would miss
+                // the one frame the clip starts on.
+                _sipping.Update();
 
                 _shop.Update(_sleeping.Busy || _settings.IsOpen || _bag.IsOpen ||
                              _fridge.IsOpen || _vendors.Offering);
