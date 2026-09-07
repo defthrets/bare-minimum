@@ -57,6 +57,18 @@ namespace BareMinimum.UI
         /// </summary>
         public const int LifeMs = RiseMs + HoldMs + FallMs;
 
+        /// <summary>
+        /// How long THIS card holds, which is not always HoldMs.
+        ///
+        /// A WAKE-UP HAPPENS ONCE A NIGHT AND A MEAL HAPPENS ALL DAY. Four seconds is right
+        /// for the thing you did once; the same four seconds on every bag of crisps is the
+        /// mod talking over the game. So the caller says, and the wake-up simply asks for
+        /// the longer one.
+        /// </summary>
+        private static int _hold = HoldMs;
+
+        private static int Life { get { return RiseMs + _hold + FallMs; } }
+
         /// <summary>How long the meter takes to sweep from where it was to where it is.</summary>
         private const int SweepMs = 900;
 
@@ -107,6 +119,15 @@ namespace BareMinimum.UI
         public static void Show(string mark, string head, string sub, Color accent,
                                 float from, float to)
         {
+            Show(mark, head, sub, accent, from, to, HoldMs);
+        }
+
+        /// <summary>As above, saying how long it should sit there fully up.</summary>
+        public static void Show(string mark, string head, string sub, Color accent,
+                                float from, float to, int holdMs)
+        {
+            _hold = holdMs < 200 ? 200 : holdMs;
+
             _mark = mark;
             _head = head ?? "";
             _sub = sub ?? "";
@@ -167,7 +188,7 @@ namespace BareMinimum.UI
 
             var age = now - _shownAt;
 
-            if (age < 0 || age >= LifeMs) { _shownAt = 0; return; }
+            if (age < 0 || age >= Life) { _shownAt = 0; return; }
 
             // Gone behind something mid-card. The rest of its life runs down anyway: it has
             // been read by now, and a card that pauses and resumes reads as a card that is
@@ -191,7 +212,7 @@ namespace BareMinimum.UI
 
             arrive = 1f - (1f - arrive) * (1f - arrive);
 
-            var left = LifeMs - age;
+            var left = Life - age;
 
             var leaving = Theme.Motion && FallMs > 0
                 ? Math.Min(1f, left / (float)FallMs)

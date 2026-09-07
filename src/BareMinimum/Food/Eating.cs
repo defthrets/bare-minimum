@@ -257,6 +257,12 @@ namespace BareMinimum.Food
             // wake, did nothing at all, and so did the wake on nineteen other items: the
             // donuts, the soups, the breakfast, the toastie. Twenty things quietly having no
             // effect, because the branch that applied the value only ran on one kind of item.
+            // WHERE THE METERS WERE, KEPT FOR THE CARD. It sweeps its bar from here to
+            // wherever the mouthful left it, and by the time the card is built the old value
+            // is gone -- so both are taken now, on the line before they change.
+            _fedBefore = _needs.Hunger.Value;
+            _restedBefore = _needs.Sleep.Value;
+
             if (item.Drink)
             {
                 _needs.Drink(item.Hunger, item.Wake);
@@ -282,46 +288,62 @@ namespace BareMinimum.Food
         /// is how drunk you are, so that is what it says; the couple of per cent of hunger it
         /// happens to add is not news.
         /// </summary>
+        /// <summary>Where the two meters stood before the mouthful. The card sweeps from here.</summary>
+        private float _fedBefore;
+        private float _restedBefore;
+
+        /// <summary>
+        /// What he just had, as the same card the wake-up uses.
+        ///
+        /// NOT THE GAME'S TICKER. That box is the game's own furniture, in the corner, next
+        /// to the messages about your car being impounded -- the right place for the game to
+        /// talk to you and the wrong one for a mod that draws its own shop menus. The wake-up
+        /// moved out of it for that reason and this was the last thing still in it, which is
+        /// awkward given eating is the thing that happens most.
+        ///
+        /// THE ITEM SUPPLIES THE WHOLE CARD. Its icon is the mark, its name is the headline,
+        /// its own tint is the accent, and the bar sweeps between the two readings taken
+        /// either side of the meal. A cigarette moves the sleep meter rather than the stomach,
+        /// so its card sweeps THAT one -- reporting a hunger bar that did not move would be
+        /// the mod saying nothing happened when something did.
+        /// </summary>
         private void Report(Item item)
         {
             try
             {
-                var msg = "~g~" + item.Name + "~s~.  ";
+                var sleepy = item.Smoke || (item.Wake > 0f && item.Hunger <= 0.001f);
 
-                if (item.Smoke)
+                var line = item.Smoke ? "That is better."
+                         : item.Booze > 0f ? Tipsy()
+                         : "Fed " + (int)Math.Round(_needs.Hunger.Value * 100f) + "%.";
+
+                if (!item.Smoke && item.Wake > 0f)
                 {
-                    // No stomach reading to give and no drunk state to report -- but it does
-                    // DO something, and saying so is the difference between a cigarette that
-                    // works and one the player has no reason to believe in.
-                    msg += "That is better.";
-
-                    if (item.Wake > 0f)
-                    {
-                        msg += "  Rested " + (int)Math.Round(_needs.Sleep.Value * 100f) + "%.";
-                    }
-                }
-                else if (item.Booze > 0f)
-                {
-                    msg += Tipsy();
-                }
-                else
-                {
-                    msg += "Fed " + (int)Math.Round(_needs.Hunger.Value * 100f) + "%";
-
-                    if (item.Wake > 0f)
-                    {
-                        msg += ", rested " + (int)Math.Round(_needs.Sleep.Value * 100f) + "%";
-                    }
-
-                    msg += ".";
+                    line = line.TrimEnd('.') + ", rested " +
+                           (int)Math.Round(_needs.Sleep.Value * 100f) + "%.";
                 }
 
-                GTA.UI.Notification.PostTicker(msg, false, false);
+                // TWO AND A HALF, NOT FOUR. The wake-up card can hold four seconds because
+                // it happens once a night; eating happens all day, and the same four seconds
+                // on every bag of crisps is the mod talking over the game.
+                UI.Toast.Show(Mark(item), item.Name.ToUpperInvariant(), line, item.Tint,
+                              sleepy ? _restedBefore : _fedBefore,
+                              sleepy ? _needs.Sleep.Value : _needs.Hunger.Value,
+                              2500);
             }
             catch
             {
                 // Not worth failing a meal over.
             }
+        }
+
+        /// <summary>
+        /// The item's own picture, by the same rule the shelf and the pocket use, so the
+        /// thing on the card is the thing that was on the row he bought it from.
+        /// </summary>
+        private static string Mark(Item item)
+        {
+            return string.IsNullOrEmpty(item.Icon) ? null : "p_" + item.Icon + ".png";
         }
 
         /// <summary>How drunk, in words rather than a number.</summary>
