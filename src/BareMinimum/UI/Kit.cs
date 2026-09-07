@@ -341,6 +341,24 @@ namespace BareMinimum.UI
         public static string Drop { get { return Hud.OnPad ? "X" : "SPACE"; } }
         public static string Pages { get { return Hud.OnPad ? "LB RB" : "Q E"; } }
 
+        /// <summary>
+        /// The button behind Control.Context, which is what every world prompt in this mod is
+        /// actually waiting for. Null on a keyboard, where the caller prints the bound key.
+        /// </summary>
+        ///
+        /// <remarks>
+        /// THE ONE LETTER HERE THAT WAS NOT READ OFF A SCREEN. The four above are the frontend
+        /// buttons and this mod's own menus prove them every time one is opened. Context is a
+        /// gameplay control, nothing shipped on this machine maps it to a button, and the
+        /// game's own glyph for it only renders inside the help box -- outside it the token
+        /// came out raw, which is how "b__7" ended up in front of people.
+        ///
+        /// So it is written down in one place, next to the letters that are certain, rather
+        /// than spelled into a prompt somewhere. If it is wrong on a pad it is wrong here and
+        /// nowhere else.
+        /// </remarks>
+        public static string Interact { get { return Hud.OnPad ? "A" : null; } }
+
         // ======================================================================
         // Tags and words
         // ======================================================================

@@ -27,27 +27,36 @@ namespace BareMinimum.Core
         }
 
         /// <summary>
-        /// What to print on a keycap for a bound key.
-        ///
-        /// THE KEY, NOT A GLYPH. The game turns ~INPUT_~ into a button picture inside its own
-        /// help box and nowhere else; through DISPLAY_TEXT, which every panel in this mod
-        /// uses, the raw token comes out instead -- "t_E" on a keyboard, "b__7" on a pad.
-        /// So the cap says what the ini says, which is also the only thing that stays correct
-        /// when somebody rebinds it.
-        ///
-        /// IT IS SHOWN ON A PAD TOO, and that is a correction. This used to return null the
-        /// moment the game reported a controller as the last input, on the reasoning that a
-        /// keyboard key is a lie to somebody holding a pad. It is not a lie in THIS mod: every
-        /// interact reads the configured key AND Control.Context, so E keeps working with a
-        /// controller plugged in and a pad in your hands. The cap was simply vanishing --
-        /// pick up a pad once, and the prompt lost its button for the rest of the session.
-        ///
-        /// A pad glyph would be better again and is not available: the game only turns
-        /// ~INPUT_~ into a picture inside its own help box, which is the whole reason this
-        /// method exists. A key that works beats a blank space.
+        /// What to print on a keycap: the pad button while he is on a pad, the bound key
+        /// otherwise.
         /// </summary>
+        ///
+        /// <remarks>
+        /// NOT A GLYPH EITHER WAY. The game turns ~INPUT_~ into a button picture inside its
+        /// own help box and nowhere else; through DISPLAY_TEXT, which every panel in this mod
+        /// uses, the raw token comes out instead -- "t_E" on a keyboard, "b__7" on a pad. So
+        /// the cap is a letter this mod draws itself.
+        ///
+        /// IT SAYS THE BUTTON ON A PAD, and that is the second correction to this method. It
+        /// began by returning null whenever the game reported a controller, which left a
+        /// prompt with a hole where its button had been. The fix for that was to show the key
+        /// always, defended on the grounds that E is not a lie -- every interact in here reads
+        /// the configured key AND Control.Context, so E really does still work. Which is true,
+        /// and beside the point: a man holding a controller is not asking whether E works, he
+        /// is asking which button to press, and E is not one of them.
+        ///
+        /// The button itself lives in UI.Kit beside the frontend letters, because that is the
+        /// only thing in this mod that knows what the buttons are called and one such place is
+        /// enough.
+        /// </remarks>
         public static string Cap(System.Windows.Forms.Keys key)
         {
+            // Only while the pad is the thing he is actually using. A controller plugged in
+            // and untouched still reports the keyboard, which is right -- the cap follows the
+            // hands, not the hardware.
+            var button = UI.Kit.Interact;
+            if (button != null) return button;
+
             var name = key.ToString();
 
             // Keys.D1 through D9 are the number row, and "D1" on a cap means nothing.
