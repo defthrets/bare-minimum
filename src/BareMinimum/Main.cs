@@ -223,6 +223,10 @@ namespace BareMinimum
                 // else happens to be open.
                 UI.Toast.Draw(suspended);
 
+                // UNDER THE CARD, because a card is a result and a hint is an offer, and if
+                // the two ever did land on the same frame the result is the one to read.
+                UI.Hint.Draw(suspended);
+
                 _failures = 0;
             }
             catch (Exception ex)
@@ -301,6 +305,7 @@ namespace BareMinimum
             try { _vendors.Shutdown(); } catch (Exception ex) { Log.Error("Vendor shutdown", ex); }
             try { _eating.Shutdown(); } catch (Exception ex) { Log.Error("Eating shutdown", ex); }
             try { UI.Toast.Clear(); } catch { /* a card is not worth a failed shutdown */ }
+            try { UI.Hint.Clear(); } catch { /* nor is a hint */ }
             try { _sleeping.Shutdown(); } catch (Exception ex) { Log.Error("Sleep shutdown", ex); }
             try { _knock.Shutdown(); } catch (Exception ex) { Log.Error("Knock shutdown", ex); }
             try { _effects.Clear(); } catch (Exception ex) { Log.Error("Clearing effects", ex); }

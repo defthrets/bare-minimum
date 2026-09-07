@@ -147,7 +147,7 @@ namespace BareMinimum.Needs
                 if (where == Bunk.None)
                 {
                     // Walked away or drove off: forget the offer so it shows again next time.
-                    if (_offering) { _offering = false; _heldSince = 0; Hud.ClearHelp(); }
+                    if (_offering) { _offering = false; _heldSince = 0; }
                     return;
                 }
 
@@ -250,8 +250,15 @@ namespace BareMinimum.Needs
         /// meter needs a reason not to bother, and one looking at an empty one needs to know a
         /// car is worth less than a bed before they settle for the car.
         /// </summary>
-        /// <summary>How long the offer stays on screen before it gets out of the way.</summary>
-        private const int PromptMs = 2000;
+        /// <summary>
+        /// How long the offer stays on screen before it gets out of the way.
+        ///
+        /// Three rather than two now it is drawn quietly at the bottom instead of shouted
+        /// from the game's help box. Two seconds was the right length for something that
+        /// loud; a chip at two thirds opacity can afford to sit there a little longer without
+        /// becoming furniture.
+        /// </summary>
+        private const int PromptMs = 3000;
 
         private bool _offering;
         private int _offeredAt;
@@ -284,12 +291,9 @@ namespace BareMinimum.Needs
                 var need = (int)(_cfg.CarSleepHoldSeconds * 1000f);
                 var got = Game.GameTime - _heldSince;
 
-                var pips = need <= 0 ? Pips : (int)(Pips * got / (float)need);
+                var at = need <= 0 ? 1f : got / (float)need;
 
-                if (pips < 0) pips = 0;
-                if (pips > Pips) pips = Pips;
-
-                Hud.Help("Dozing off  " + new string('\u25CF', pips));
+                UI.Hint.Show("Dozing off", at < 0f ? 0f : at);
                 return;
             }
 
@@ -298,18 +302,19 @@ namespace BareMinimum.Needs
             if (Game.GameTime - _offeredAt >= PromptMs)
             {
                 _promptDone = true;
-                Hud.ClearHelp();
                 return;
             }
 
             var hold = where == Bunk.Car && _cfg.CarSleepHoldSeconds > 0f;
 
-            Hud.Help((hold ? "Hold " : "Press ") + "~INPUT_CONTEXT~ to " +
-                     (where == Bunk.Bed ? "Sleep" : "Doze off") + ".");
+            // ~INPUT_CONTEXT~ SURVIVES THE MOVE. Our own text goes through the same
+            // ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME the help box used, so the tag still
+            // resolves to a key on a keyboard and a button glyph on a pad -- and Width
+            // measures the resolved string, so the chip is sized around the glyph rather
+            // than around the fourteen characters of the tag.
+            UI.Hint.Show((hold ? "Hold " : "Press ") + "~INPUT_CONTEXT~ to " +
+                         (where == Bunk.Bed ? "sleep" : "doze off"));
         }
-
-        /// <summary>How many marks the hold meter is drawn with.</summary>
-        private const int Pips = 5;
 
         /// <summary>
         /// Whether the interact was pressed, by key OR by the game's own context control.

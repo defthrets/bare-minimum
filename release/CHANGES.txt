@@ -31,6 +31,15 @@
   them, because a typo and a model your game does not have look identical from
   the kitchen. Reported by jerome74.
 
+  THE SLEEP OFFER IS OURS NOW, not the game's help box. It was pinned to the top
+  left in the game's own furniture, next to the messages about your car being
+  impounded -- the loudest thing on screen for the quietest prompt in the mod.
+  It is a small chip at the bottom middle instead, at two thirds opacity, and
+  the hold draws as a thin fill under the words rather than as a row of dots. It
+  fades itself out when whatever asked for it stops asking, so it cannot get
+  stuck on screen. Three seconds rather than two, now that it is quiet enough to
+  afford them.
+
   101 settings, up from 97 -- and the docs had been saying nine tabs when there
   are six.
 
