@@ -52,6 +52,16 @@ namespace BareMinimum.Food
         private bool _animStarted;
 
         /// <summary>
+        /// The animation actually started, so Cleanup can stop that one.
+        ///
+        /// KEPT RATHER THAN RE-DERIVED because Cleanup has no item -- it runs when the mod is
+        /// shutting down or the meal was interrupted, and at that point the thing being eaten
+        /// may already be gone. Stopping the three menu animations by name was fine while
+        /// there were only three; an item with its own dictionary would have been left playing.
+        /// </summary>
+        private AnimRef _playing;
+
+        /// <summary>
         /// True when what is running is a SCENARIO rather than an animation.
         ///
         /// Kept apart because they are stopped by different natives: STOP_ANIM_TASK does
@@ -103,7 +113,7 @@ namespace BareMinimum.Food
                 Ask(item.Prop);
                 Ask(item.DrinkProp);
 
-                AskAnim(_menu.Eat);
+                AskAnim(item.Eat ?? _menu.Eat);
                 AskAnim(_menu.Sip);
                 AskAnim(_menu.Smoke);
             }
@@ -393,7 +403,7 @@ namespace BareMinimum.Food
 
                 var anim = item.Smoke ? _menu.Smoke
                          : (item.Drink || drinking) ? _menu.Sip
-                         : _menu.Eat;
+                         : (item.Eat ?? _menu.Eat);
 
                 var bone = Function.Call<int>(Hash.GET_PED_BONE_INDEX, me.Handle,
                                               anim.LeftHanded ? LeftHandBone : RightHandBone);
@@ -454,7 +464,9 @@ namespace BareMinimum.Food
             // A combo drinks from a cup on its drink stretch; a plain drink always drinks.
             var anim = item.Smoke ? _menu.Smoke
                      : (item.Drink || drinking) ? _menu.Sip
-                     : _menu.Eat;
+                     : (item.Eat ?? _menu.Eat);
+
+            _playing = anim;
 
             // Checked against this build before anything is asked of it. A dictionary that
             // is not here never loads, so without this the code below requests it forever and
@@ -558,6 +570,10 @@ namespace BareMinimum.Food
                             // would also cancel whatever else the player happened to be doing
                             // -- which at a shop counter is usually nothing, and while walking
                             // is not.
+                            // The one that was started first, because an item with its own
+                            // dictionary is not any of the three below and would be left running.
+                            if (_playing != null) Stop(me, _playing);
+
                             Stop(me, _menu.Eat);
                             Stop(me, _menu.Sip);
                             Stop(me, _menu.Smoke);
@@ -570,6 +586,7 @@ namespace BareMinimum.Food
                 }
 
                 _animStarted = false;
+                _playing = null;
                 _scenarioStarted = false;
             }
 

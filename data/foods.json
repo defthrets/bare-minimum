@@ -69,6 +69,24 @@
       "desc": "Bleeds a bit. That is the name, and the experience."
     },
     {
+      "_note": "The street cart burger. Its own item so the cart is not selling a restaurant's branded one, and so its price can be a cart's price.",
+      "id": "cart_burger",
+      "name": "Cart Burger",
+      "category": "Food",
+      "price": 8,
+      "hunger": 0.44,
+      "shop": false,
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burg1",
+        "ng_proc_food_burg01a"
+      ],
+      "seconds": 5.0,
+      "icon": "burger",
+      "tint": "#dd9a4a",
+      "desc": "Off a cart, off a griddle, off the boardwalk. Better than it has any right to be."
+    },
+    {
       "id": "hotdog",
       "name": "Hot Dog",
       "category": "Food",
@@ -82,7 +100,22 @@
       "seconds": 4.0,
       "icon": "hotdog",
       "tint": "#e6b45c",
-      "desc": "Ninety per cent mystery. Ten per cent mustard."
+      "desc": "Ninety per cent mystery. Ten per cent mustard.",
+      "anim": {
+        "_note": "The other player eat set. Not the burger one, so a dog is not a burger.",
+        "options": [
+          {
+            "dict": "mp_player_inteat@pnq",
+            "clip": "loop"
+          },
+          {
+            "dict": "mp_player_inteat@burger",
+            "clip": "mp_player_int_eat_burger"
+          }
+        ],
+        "hand": "left",
+        "scenario": "WORLD_HUMAN_STAND_IMPATIENT"
+      }
     },
     {
       "id": "pie",
@@ -1239,7 +1272,22 @@
         "prop_cs_hotdog_02",
         "prop_cs_burger_01"
       ],
-      "seconds": 5.0
+      "seconds": 5.0,
+      "anim": {
+        "_note": "The other player eat set. Not the burger one, so a dog is not a burger.",
+        "options": [
+          {
+            "dict": "mp_player_inteat@pnq",
+            "clip": "loop"
+          },
+          {
+            "dict": "mp_player_inteat@burger",
+            "clip": "mp_player_int_eat_burger"
+          }
+        ],
+        "hand": "left",
+        "scenario": "WORLD_HUMAN_STAND_IMPATIENT"
+      }
     },
     {
       "id": "chilli_dog",
@@ -1256,7 +1304,22 @@
         "prop_cs_hotdog_02",
         "prop_cs_burger_01"
       ],
-      "seconds": 5.5
+      "seconds": 5.5,
+      "anim": {
+        "_note": "The other player eat set. Not the burger one, so a dog is not a burger.",
+        "options": [
+          {
+            "dict": "mp_player_inteat@pnq",
+            "clip": "loop"
+          },
+          {
+            "dict": "mp_player_inteat@burger",
+            "clip": "mp_player_int_eat_burger"
+          }
+        ],
+        "hand": "left",
+        "scenario": "WORLD_HUMAN_STAND_IMPATIENT"
+      }
     },
     {
       "id": "corn_dog",
@@ -1273,7 +1336,22 @@
         "prop_cs_hotdog_01",
         "prop_cs_burger_01"
       ],
-      "seconds": 4.0
+      "seconds": 4.0,
+      "anim": {
+        "_note": "The other player eat set. Not the burger one, so a dog is not a burger.",
+        "options": [
+          {
+            "dict": "mp_player_inteat@pnq",
+            "clip": "loop"
+          },
+          {
+            "dict": "mp_player_inteat@burger",
+            "clip": "mp_player_int_eat_burger"
+          }
+        ],
+        "hand": "left",
+        "scenario": "WORLD_HUMAN_STAND_IMPATIENT"
+      }
     },
     {
       "_note": "Pipe Down. THE PRICES ARE THE CHARACTER: this is the only shop on the list where one item costs more than a whole meal anywhere else, which is what a tobacconist on a good street is. Smoke items report in words rather than a hunger percentage -- see Eating.Report.",

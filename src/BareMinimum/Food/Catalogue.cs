@@ -106,6 +106,20 @@ namespace BareMinimum.Food
         /// <summary>The drink model that was found to exist, or empty.</summary>
         public string DrinkProp = "";
 
+        /// <summary>
+        /// This item's own eating animation, or null to use the menu's.
+        ///
+        /// PER ITEM BECAUSE A BURGER AND A HOT DOG ARE NOT EATEN THE SAME WAY. Until now all
+        /// hundred and fifty-odd foods played the one burger loop, which is right for a burger
+        /// and merely tolerable for everything else -- and with a burger cart standing next to
+        /// a hot dog cart the two carts would have sold visibly the same meal.
+        ///
+        /// NULL RATHER THAN A COPY OF THE DEFAULT, so that changing the global animation in
+        /// foods.json still moves every item that has not asked for something specific. A
+        /// per-item copy would quietly stop tracking it.
+        /// </summary>
+        public AnimRef Eat;
+
         /// <summary>False once the prop is known not to exist in this build, so it is tried once.</summary>
         public bool PropUsable = true;
     }
@@ -348,7 +362,8 @@ namespace BareMinimum.Food
                         Seconds = node["seconds"].AsFloat(4f),
                         VehicleSeconds = node["vehicleSeconds"].AsFloat(0f),
                         Combo = node["combo"].AsBool(false),
-                        DrinkProps = PropNames(node["drinkProp"])
+                        DrinkProps = PropNames(node["drinkProp"]),
+                        Eat = ItemAnim(node["anim"])
                     };
 
                     if (string.IsNullOrEmpty(item.Name)) continue;
@@ -518,6 +533,26 @@ namespace BareMinimum.Food
             {
                 into.LeftHanded = !hand.Trim().StartsWith("r", StringComparison.OrdinalIgnoreCase);
             }
+        }
+
+        /// <summary>
+        /// One item's own animation block, or null when it has not got one.
+        ///
+        /// NOT SEEDED FROM THE GLOBAL EAT. A half-written override that inherited the burger
+        /// dictionary and replaced only the clip would name a clip that is not in that
+        /// dictionary, and GTA plays a missing clip as nothing at all, in silence -- the same
+        /// failure every other wrong name in this game has. So an override either says what it
+        /// is in full or it is not an override, and ReadAnim's own "one pair is a list of one"
+        /// rule is what decides that: no dict, no options, no override.
+        /// </summary>
+        private static AnimRef ItemAnim(Json node)
+        {
+            if (node == null || node.IsNull) return null;
+
+            var anim = new AnimRef();
+            ReadAnim(node, anim);
+
+            return anim.Options.Length > 0 ? anim : null;
         }
 
         /// <summary>
