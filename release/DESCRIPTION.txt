@@ -1,5 +1,5 @@
 ================================================================================
-  BARE MINIMUM 0.1.2 -- copy for the mod page
+  BARE MINIMUM 0.1.3 -- copy for the mod page
 ================================================================================
 
 Three lengths and a changelog. Use whichever the site's fields want.
@@ -17,7 +17,7 @@ If Hoodrich has a page of its own, its name in section 3 is the one place an
   1. ONE LINE  (summary field -- plain text)
 --------------------------------------------------------------------------------
 
-Franklin gets hungry and he gets tired. 108 real shops to do something about it.
+Franklin gets hungry and he gets tired. 114 real shops to do something about it.
 
 
 --------------------------------------------------------------------------------
@@ -27,14 +27,14 @@ Franklin gets hungry and he gets tired. 108 real shops to do something about it.
 Hunger and sleep for GTA V, as two thin gauges low on the screen with a chicken
 drumstick and a moon underneath them. They do not just drain -- hunger churns,
 and gets more agitated the emptier it is; sleep breathes, and the breath slows
-as you tire. There are 108 places to eat and they are the real ones: the taco
+as you tire. There are 114 places to eat and they are the real ones: the taco
 windows, the hot dog carts, Burger Shot, Bean Machine, Rob's Liquor, the delis
-and the restaurants nobody ever gets to walk into. 157 things to buy, each with
+and the restaurants nobody ever gets to walk into. 158 things to buy, each with
 its own price, its own effect and its own line about itself. Shops with a full
 menu, stalls that just hand you a hot dog, and drive-throughs you order from
 without leaving the car. What you buy goes in your pocket for later, or into the
 fridge in any safehouse kitchen. Sleep in any bed. Run everywhere and you will
-pay for it in both. 101 settings, all live in an in-game menu, and every shop and
+pay for it in both. 105 settings, all live in an in-game menu, and every shop and
 every item is a plain text file you can edit. Drop-in install, works on Legacy
 and Enhanced, and your save is never touched. A work in progress: the shop list
 is still growing, and adding your own is a text file.
@@ -69,11 +69,11 @@ Both run on the <i>game</i> clock, so a full day of them is about 48 minutes of 
 
 <b>🌮 MORE THAN A HUNDRED PLACES TO EAT</b>
 
-108 of them, and they are the shops that are already there: the taco windows, the hot dog carts, Burger Shot, Up-n-Atom, Taco Bomb, Bean Machine, Cool Beans, Rusty Brown's, Pizza This, Rob's Liquor, thirteen liquor stores, the corner stores, the delis, and a good few restaurants the game never lets you into. Del Perro and Vespucci are covered end to end.
+114 of them, and they are the shops that are already there: the taco windows, the hot dog carts, Burger Shot, Up-n-Atom, Taco Bomb, Bean Machine, Cool Beans, Rusty Brown's, Pizza This, Rob's Liquor, thirteen liquor stores, the corner stores, the delis, and a good few restaurants the game never lets you into. Del Perro and Vespucci are covered end to end.
 
 Each has its own menu, its own prices, its own hours and its own voice. A breakfast menu at midnight is shown greyed with its hours on it rather than quietly missing, so you learn to come back.
 
-157 things to buy — 86 meals, 36 snacks and 35 drinks. Drink enough of the wrong ones and you will feel it, and the walk goes with it.
+158 things to buy — 87 meals, 36 snacks and 35 drinks. Drink enough of the wrong ones and you will feel it, and the walk goes with it.
 
 <b>🚧 Still growing, and the thin part is named so you know what you are getting:</b> the convenience stores and the fuel stations. A handful are in and most are not, and they are the next thing going in. Everything that <i>is</i> in is finished — menu, prices, hours, the lot — and vendors.json is plain text, so a door I have not got to yet is a coordinate and a name away from working.
 
@@ -104,7 +104,7 @@ Sleep in any bed, and how well you sleep depends on whose bed it is. A car is wo
 
 <b>🔧 YOURS TO CHANGE</b>
 
-101 settings across six tabs in an in-game menu on <b>F7</b>, each with a line saying what it does, everything live as you turn it, and the changes written back to the ini without disturbing your comments or your ordering.
+105 settings across six tabs in an in-game menu on <b>F7</b>, each with a line saying what it does, everything live as you turn it, and the changes written back to the ini without disturbing your comments or your ordering.
 
 Every shop and every item is a plain text file. Add a shop, change a price, write a menu, move something that is in the wrong place. Anything the game cannot find is skipped with a line in the log rather than breaking the mod.
 
@@ -137,6 +137,15 @@ All three can be changed in the ini.
 --------------------------------------------------------------------------------
   4. CHANGELOG  (changelog field -- paste from here to the next divider)
 --------------------------------------------------------------------------------
+
+<b>0.1.3</b>
+
+<ul>
+<li>🍫 <b>The candy machines sell to you now</b> — snacks and drinks, never hot food, and he does the game's own vending animation when he buys. Found by model, so every one in the world works without a coordinate list.</li>
+<li>🥤 <b>The soda machines deliberately do not.</b> The game already sells a drink out of one and plays its own animation; a second purchase on top would be two mods fighting over one prop. Instead it just notices — drink from one and the hunger meter ticks up.</li>
+<li>🍎 <b>Roadside fruit and veg stalls</b>, the same way. The game repeats one stall from the Chumash coast to Chiliad, so one model finds all of them. What is on the trestle is a list in the ini.</li>
+<li>⚙️ 105 settings, up from 101.</li>
+</ul>
 
 <b>0.1.2</b>
 

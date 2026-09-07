@@ -3,6 +3,44 @@
 ===============================================================================
 
 
+0.1.3  --  vending machines and roadside stalls
+-------------------------------------------------------------------------------
+
+  THE CANDY MACHINES SELL TO YOU NOW, and the soda machines deliberately do not.
+
+  That split is the whole design rather than an oversight. The game already
+  sells a drink out of a soda machine, plays its own animation for it and gives
+  you a little health -- putting a second, different purchase on top of that is
+  two mods fighting over one prop, and it is why machines were left alone in the
+  first place. It sells NOTHING out of a candy machine; that one is scenery. So
+  the candy machines get a menu and the soda machines are only watched: drink
+  from one and the hunger meter notices, which is an observation rather than a
+  purchase and cannot collide with anything.
+
+  A machine stocks snacks and drinks, never hot food, and plays the game's own
+  vending animation when it sells -- the same one you have seen at the machine
+  standing next to it.
+
+  ROADSIDE FRUIT AND VEG STALLS, the same way. The game repeats one stall from
+  the Chumash coast to Chiliad -- two of them 2.2km apart under the identical
+  canopy -- so they are found by MODEL, exactly as the fridges and the tills
+  already are. Every one in the world works, including a map mod's, without a
+  single coordinate being written down. What is on the trestle is a named list
+  in the ini rather than a category, because "fruit" is not a category: an apple
+  is a Snack and a fresh fruit is Food, so filtering by category would either
+  miss half the crate or sell beef jerky off it.
+
+  MACHINES AND STALLS ARE ALWAYS CHECKED AFTER THE TILL. A 24/7 has a candy
+  machine by the door and a till eight feet behind it, and being handed a bag of
+  crisps because you stood slightly to the left of the counter would read as the
+  mod picking the wrong thing.
+
+  Four settings under [Counters] turn any of it off, including the sip.
+
+  105 settings, up from 101.
+
+
+-------------------------------------------------------------------------------
 0.1.2  --  the controller, and two things off the comments
 -------------------------------------------------------------------------------
 
@@ -75,7 +113,7 @@
 -------------------------------------------------------------------------------
 
   WHAT IS NOT FINISHED, first, because it is the honest way round: the shop map.
-  108 doors are in and they are complete ones, but the convenience stores and
+  114 doors are in and they are complete ones, but the convenience stores and
   the fuel stations are thin, and more go in with every update. Everything below
   this line works today.
 
@@ -97,13 +135,13 @@
 
   Both run on the GAME clock, so a day of them is about 48 minutes of play.
 
-  108 PLACES TO BUY FOOD, and they are the real ones: the taco windows, the hot
+  114 PLACES TO BUY FOOD, and they are the real ones: the taco windows, the hot
   dog carts, Burger Shot, Up-n-Atom, Bean Machine, Cool Beans, Rob's Liquor,
   Taco Bomb, Pizza This, thirteen liquor stores, the corner shops, the delis,
   and the restaurants nobody ever gets to walk into. Del Perro and Vespucci are
   covered end to end.
 
-  157 THINGS TO EAT across three categories, each with its own price, its own
+  158 THINGS TO EAT across three categories, each with its own price, its own
   effect and its own line about itself.
 
   SHOPS WITH A MENU AND STALLS WITH ONE KEY. A counter or a shelf opens a list
@@ -135,7 +173,7 @@
   DRINK, AND GET DRUNK. Beer, wine and spirits carry their own effect, the walk
   goes with it, and sleeping it off works for free.
 
-  A SETTINGS MENU ON F7. A hundred and one settings across six tabs, each with a
+  A SETTINGS MENU ON F7. A hundred and five settings across six tabs, each with a
   line saying what it does, everything live as you turn it, and the changes
   written back to the ini without touching your comments or your ordering.
 

@@ -1,5 +1,5 @@
 ===============================================================================
-  BARE MINIMUM 0.1.2  --  FULL PACKAGE
+  BARE MINIMUM 0.1.3  --  FULL PACKAGE
 ===============================================================================
 
   DRAG EVERYTHING IN THIS ZIP INTO YOUR GTA V FOLDER. SAY YES TO MERGING.
@@ -48,7 +48,7 @@
 -------------------------------------------------------------------------------
 
   scripts\BareMinimum.dll     the mod
-  scripts\BareMinimum.ini     all 101 settings, commented at length
+  scripts\BareMinimum.ini     all 105 settings, commented at length
   scripts\BareMinimum\        its data: the shops, the food, the brands, the
                               social posts, and 104 pieces of artwork
 
