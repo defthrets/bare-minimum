@@ -57,7 +57,13 @@ namespace BareMinimum.UI
         private const float Quiet = 0.66f;
 
         private static string _text;
+        private static string _cap;
         private static float _at = -1f;
+
+        /// <summary>The keycap's own geometry, as fractions of screen height.</summary>
+        private const float CapPadX = 0.006f;
+        private const float CapScale = 0.24f;
+        private const float CapGap = 0.008f;
 
         private static int _askedAt;
         private static int _since;
@@ -65,13 +71,33 @@ namespace BareMinimum.UI
         /// <summary>Puts a line up for this frame. Call it again next frame to keep it.</summary>
         public static void Show(string text)
         {
-            Show(text, -1f);
+            Show(text, null, -1f);
+        }
+
+        /// <summary>With a key drawn on a cap in front of the words.</summary>
+        public static void Show(string text, string cap)
+        {
+            Show(text, cap, -1f);
         }
 
         /// <summary>
         /// As above, with a fill from 0 to 1 under the text. A negative number draws no fill.
         /// </summary>
         public static void Show(string text, float at)
+        {
+            Show(text, null, at);
+        }
+
+        /// <summary>
+        /// The whole of it: a line, an optional key on a cap, an optional fill.
+        ///
+        /// THE CAP IS DRAWN BY US RATHER THAN ASKED FOR. ~INPUT_CONTEXT~ resolves to a button
+        /// picture inside the game's HELP box and NOWHERE ELSE -- everywhere else the text
+        /// renderer emits the raw token, so this chip was showing "t_E" and "b__7" to people.
+        /// The key from the ini is the thing the player actually presses, and it stays right
+        /// however they have rebound it.
+        /// </summary>
+        public static void Show(string text, string cap, float at)
         {
             if (string.IsNullOrEmpty(text)) return;
 
@@ -84,6 +110,7 @@ namespace BareMinimum.UI
             if (_since == 0 || now - _askedAt > GraceMs) _since = now;
 
             _text = text;
+            _cap = string.IsNullOrEmpty(cap) ? null : cap;
             _at = at > 1f ? 1f : at;
             _askedAt = now;
         }
@@ -92,6 +119,7 @@ namespace BareMinimum.UI
         public static void Clear()
         {
             _text = null;
+            _cap = null;
             _askedAt = 0;
             _since = 0;
             _at = -1f;
@@ -143,9 +171,15 @@ namespace BareMinimum.UI
             var textW = Hud.Width(_text, Scale, Hud.FontBody);
             var textH = Hud.Height(Scale, Hud.FontBody);
 
+            // The cap is as wide as the letters on it plus a margin either side, so E and
+            // NumPad0 both sit in one that fits them.
+            var capText = _cap == null ? 0f : Hud.Width(_cap, CapScale, Hud.FontLabel);
+            var capW = _cap == null ? 0f : capText + Hud.ToX(CapPadX) * 2f;
+            var capLead = _cap == null ? 0f : capW + Hud.ToX(CapGap);
+
             var fill = _at >= 0f;
 
-            var w = Pad + textW + Pad;
+            var w = Pad + capLead + textW + Pad;
             var h = Pad * 0.85f + textH + (fill ? 0.004f + TrackH : 0f) + Pad * 0.85f;
 
             var x = 0.5f - w * 0.5f;
@@ -153,7 +187,19 @@ namespace BareMinimum.UI
 
             Theme.Panel(x, top, w, h, show);
 
-            Hud.Text(_text, x + Pad, top + Pad * 0.85f, Scale,
+            if (_cap != null)
+            {
+                var capH = Hud.Height(CapScale, Hud.FontLabel) + 0.004f;
+                var capY = top + Pad * 0.85f + (textH - capH) * 0.5f - 0.001f;
+
+                Hud.RoundRect(x + Pad, capY, capW, capH, 0.0022f,
+                              Palette.Alpha(Palette.Brand, (int)(58f * show)));
+
+                Hud.Text(_cap, x + Pad + (capW - capText) * 0.5f, capY + 0.002f, CapScale,
+                         Palette.Alpha(Palette.Brand, (int)(255f * show)), Hud.FontLabel);
+            }
+
+            Hud.Text(_text, x + Pad + capLead, top + Pad * 0.85f, Scale,
                      Palette.Alpha(Palette.Text, (int)(232f * show)), Hud.FontBody);
 
             if (!fill) return;

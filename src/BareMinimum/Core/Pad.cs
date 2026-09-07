@@ -27,6 +27,39 @@ namespace BareMinimum.Core
         }
 
         /// <summary>
+        /// What to print on a keycap for a bound key.
+        ///
+        /// THE KEY, NOT A GLYPH. The game turns ~INPUT_~ into a button picture inside its own
+        /// help box and nowhere else; through DISPLAY_TEXT, which every panel in this mod
+        /// uses, the raw token comes out instead -- "t_E" on a keyboard, "b__7" on a pad.
+        /// So the cap says what the ini says, which is also the only thing that stays correct
+        /// when somebody rebinds it.
+        ///
+        /// On a pad there is no letter to print and no glyph we are able to draw, so the cap
+        /// is left off rather than showing a keyboard key to somebody holding a controller.
+        /// The words still read correctly without it.
+        /// </summary>
+        public static string Cap(System.Windows.Forms.Keys key)
+        {
+            try
+            {
+                if (UI.Draw.OnPad) return null;
+            }
+            catch
+            {
+                // Unknown input method: a key is the safer guess on PC.
+            }
+
+            var name = key.ToString();
+
+            // Keys.D1 through D9 are the number row, and "D1" on a cap means nothing.
+            if (name.Length == 2 && name[0] == 'D' && name[1] >= '0' && name[1] <= '9')
+                return name.Substring(1);
+
+            return name;
+        }
+
+        /// <summary>
         /// Two buttons together, edge-detected against the caller's own memory.
         ///
         /// The caller keeps the flag because there is more than one chord in the mod and a

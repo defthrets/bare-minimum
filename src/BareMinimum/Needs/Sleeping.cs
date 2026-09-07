@@ -293,7 +293,7 @@ namespace BareMinimum.Needs
 
                 var at = need <= 0 ? 1f : got / (float)need;
 
-                UI.Hint.Show("Dozing off", at < 0f ? 0f : at);
+                UI.Hint.Show("Dozing off", Core.Pad.Cap(_cfg.InteractKey), at < 0f ? 0f : at);
                 return;
             }
 
@@ -307,13 +307,14 @@ namespace BareMinimum.Needs
 
             var hold = where == Bunk.Car && _cfg.CarSleepHoldSeconds > 0f;
 
-            // ~INPUT_CONTEXT~ SURVIVES THE MOVE. Our own text goes through the same
-            // ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME the help box used, so the tag still
-            // resolves to a key on a keyboard and a button glyph on a pad -- and Width
-            // measures the resolved string, so the chip is sized around the glyph rather
-            // than around the fourteen characters of the tag.
-            UI.Hint.Show((hold ? "Hold " : "Press ") + "~INPUT_CONTEXT~ to " +
-                         (where == Bunk.Bed ? "sleep" : "doze off"));
+            // THE TAG DOES NOT SURVIVE THE MOVE, which is the thing I got wrong. A
+            // ~INPUT_~ tag is turned into a button picture by the game's HELP renderer and
+            // by nothing else; through DISPLAY_TEXT, which is what our own panels use, the
+            // raw token comes out instead -- "t_E" on a keyboard and "b__7" on a pad. So the
+            // chip is handed the KEY and draws its own cap for it.
+            UI.Hint.Show((hold ? "Hold " : "Press ") + "to " +
+                         (where == Bunk.Bed ? "sleep" : "doze off"),
+                         Core.Pad.Cap(_cfg.InteractKey));
         }
 
         /// <summary>
@@ -321,8 +322,8 @@ namespace BareMinimum.Needs
         ///
         /// BOTH, and that is deliberate. The raw key is what the ini configures and what a
         /// keyboard player will have read; Control.Context is what makes a pad work at all,
-        /// and it is also what ~INPUT_CONTEXT~ in the prompt above actually resolves to. Only
-        /// reading the key would show a pad user a button glyph that does nothing.
+        /// and it is what a pad player will press when the chip above says to. Only reading
+        /// the key would leave a controller unable to sleep at all.
         /// </summary>
         private bool Pressed()
         {
