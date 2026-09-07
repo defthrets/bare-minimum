@@ -3829,6 +3829,22 @@
         "z": 31.045,
         "heading": 15.036,
         "note": "Paleto Bay, fresh food daily + produce crates outside"
+      },
+      {
+        "name": "Mojito Inn",
+        "x": -123.485,
+        "y": 6389.982,
+        "z": 31.549,
+        "heading": 223.851,
+        "note": "Paleto Bay; same frontage as below"
+      },
+      {
+        "name": "Mojito Inn",
+        "x": -133.712,
+        "y": 6377.245,
+        "z": 31.553,
+        "heading": 223.693,
+        "note": "second door"
       }
     ],
     "_drugs_comment": [
