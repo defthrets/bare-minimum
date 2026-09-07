@@ -3845,6 +3845,22 @@
         "z": 31.553,
         "heading": 223.693,
         "note": "second door"
+      },
+      {
+        "name": "Del Vecchio Liquor",
+        "x": -155.675,
+        "y": 6327.88,
+        "z": 31.049,
+        "heading": 145.296,
+        "note": "Paleto Bay"
+      },
+      {
+        "name": "The Bay Bar",
+        "x": -261.335,
+        "y": 6291.114,
+        "z": 30.964,
+        "heading": 99.725,
+        "note": "Paleto Bay"
       }
     ],
     "_drugs_comment": [
