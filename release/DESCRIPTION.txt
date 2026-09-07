@@ -1,5 +1,5 @@
 ================================================================================
-  BARE MINIMUM 0.1.3 -- copy for the mod page
+  BARE MINIMUM 0.1.4 -- copy for the mod page
 ================================================================================
 
 Three lengths and a changelog. Use whichever the site's fields want.
@@ -17,7 +17,7 @@ If Hoodrich has a page of its own, its name in section 3 is the one place an
   1. ONE LINE  (summary field -- plain text)
 --------------------------------------------------------------------------------
 
-Franklin gets hungry and he gets tired. 114 real shops to do something about it.
+Franklin gets hungry and he gets tired. 190 real shops to do something about it.
 
 
 --------------------------------------------------------------------------------
@@ -27,9 +27,9 @@ Franklin gets hungry and he gets tired. 114 real shops to do something about it.
 Hunger and sleep for GTA V, as two thin gauges low on the screen with a chicken
 drumstick and a moon underneath them. They do not just drain -- hunger churns,
 and gets more agitated the emptier it is; sleep breathes, and the breath slows
-as you tire. There are 114 places to eat and they are the real ones: the taco
+as you tire. There are 190 places to eat and they are the real ones: the taco
 windows, the hot dog carts, Burger Shot, Bean Machine, Rob's Liquor, the delis
-and the restaurants nobody ever gets to walk into. 158 things to buy, each with
+and the restaurants nobody ever gets to walk into. 201 things to buy, each with
 its own price, its own effect and its own line about itself. Shops with a full
 menu, stalls that just hand you a hot dog, and drive-throughs you order from
 without leaving the car. What you buy goes in your pocket for later, or into the
@@ -69,11 +69,11 @@ Both run on the <i>game</i> clock, so a full day of them is about 48 minutes of 
 
 <b>🌮 MORE THAN A HUNDRED PLACES TO EAT</b>
 
-114 of them, and they are the shops that are already there: the taco windows, the hot dog carts, Burger Shot, Up-n-Atom, Taco Bomb, Bean Machine, Cool Beans, Rusty Brown's, Pizza This, Rob's Liquor, thirteen liquor stores, the corner stores, the delis, and a good few restaurants the game never lets you into. Del Perro and Vespucci are covered end to end.
+190 of them, and they are the shops that are already there: the taco windows, the hot dog carts, Burger Shot, Up-n-Atom, Taco Bomb, Bean Machine, Cool Beans, Rusty Brown's, Pizza This, Rob's Liquor, thirteen liquor stores, the corner stores, the delis, and a good few restaurants the game never lets you into. Del Perro and Vespucci are covered end to end.
 
 Each has its own menu, its own prices, its own hours and its own voice. A breakfast menu at midnight is shown greyed with its hours on it rather than quietly missing, so you learn to come back.
 
-158 things to buy — 87 meals, 36 snacks and 35 drinks. Drink enough of the wrong ones and you will feel it, and the walk goes with it.
+201 things to buy — 111 meals, 50 snacks and 40 drinks. Drink enough of the wrong ones and you will feel it, and the walk goes with it.
 
 <b>🚧 Still growing, and the thin part is named so you know what you are getting:</b> the convenience stores and the fuel stations. A handful are in and most are not, and they are the next thing going in. Everything that <i>is</i> in is finished — menu, prices, hours, the lot — and vendors.json is plain text, so a door I have not got to yet is a coordinate and a name away from working.
 
@@ -137,6 +137,15 @@ All three can be changed in the ini.
 --------------------------------------------------------------------------------
   4. CHANGELOG  (changelog field -- paste from here to the next divider)
 --------------------------------------------------------------------------------
+
+<b>0.1.4</b>
+
+<ul>
+<li>🗺️ <b>114 shops to 190.</b> Every one ridden to in game and measured against the list before it was added — none within six metres of anything already there.</li>
+<li>🐟 <b>43 new things to eat</b> for the twenty-six that needed their own food. The Big Puffa does fish and chips off the pier, Pearls does oysters, Cluckin' Bell does a bucket, the Mojito Inn does a mojito. Where a sign said what it sold, that is what it sells.</li>
+<li>🏪 <b>The other fifty inherit their chain's menu</b> — one chain, one menu — but keep their own sign over the door.</li>
+<li>⚙️ 201 things to eat, up from 158.</li>
+</ul>
 
 <b>0.1.3</b>
 

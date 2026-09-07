@@ -3208,6 +3208,802 @@
       "icon": "teapot",
       "tint": "#a8c47e",
       "desc": "Poured from a height, for reasons nobody will explain."
+    },
+    {
+      "id": "bp_fishchips",
+      "name": "Fish and Chips",
+      "category": "Food",
+      "price": 14,
+      "hunger": 0.62,
+      "shop": false,
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02",
+        "v_res_tt_pizzaplate",
+        "prop_food_bs_tray_01",
+        "v_res_tt_plate01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 5.5,
+      "icon": "platter",
+      "tint": "#d9a441",
+      "desc": "Battered, boxed, and eaten leaning on the pier rail like everyone else."
+    },
+    {
+      "id": "bp_shrimp",
+      "name": "Shrimp Basket",
+      "category": "Food",
+      "price": 16,
+      "hunger": 0.58,
+      "shop": false,
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burg1",
+        "ng_proc_food_burg01a",
+        "prop_food_cb_nugets",
+        "prop_food_bag1"
+      ],
+      "seconds": 6.5,
+      "icon": "bucket",
+      "tint": "#e08a5c",
+      "desc": "A basket of them and a wedge of lemon. The gulls know exactly what this is."
+    },
+    {
+      "id": "bp_chowder",
+      "name": "Clam Chowder",
+      "category": "Food",
+      "price": 11,
+      "hunger": 0.5,
+      "shop": false,
+      "prop": [
+        "prop_ff_noodle_01",
+        "prop_ff_noodle_02",
+        "v_res_fa_potnoodle",
+        "prop_cs_bowl_01",
+        "v_res_tt_bowl",
+        "prop_cs_bowl_01b",
+        "v_res_mbowl",
+        "prop_food_bs_chips"
+      ],
+      "seconds": 5.5,
+      "icon": "bowl",
+      "tint": "#e8dcc0",
+      "desc": "Thick enough to stand a spoon in. That is either the point or the problem."
+    },
+    {
+      "id": "pl_platter",
+      "name": "Seafood Platter",
+      "category": "Food",
+      "price": 34,
+      "hunger": 0.86,
+      "shop": false,
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02",
+        "v_res_tt_pizzaplate",
+        "prop_food_bs_tray_01",
+        "v_res_tt_plate01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 5.5,
+      "icon": "platter",
+      "tint": "#e2b06a",
+      "desc": "Two tiers, ice, and something that still has its face on. Bring money."
+    },
+    {
+      "id": "pl_oysters",
+      "name": "Half Dozen Oysters",
+      "category": "Snacks",
+      "price": 22,
+      "hunger": 0.24,
+      "shop": false,
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02",
+        "v_res_tt_plate01",
+        "v_res_tt_pizzaplate",
+        "prop_cs_plate_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 5.5,
+      "icon": "plate",
+      "tint": "#cbd8cf",
+      "desc": "Six of them, cold, on a bed of ice. An acquired everything."
+    },
+    {
+      "id": "hk_basket",
+      "name": "Hookies Basket",
+      "category": "Food",
+      "price": 15,
+      "hunger": 0.6,
+      "shop": false,
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burg1",
+        "ng_proc_food_burg01a",
+        "prop_food_cb_nugets",
+        "prop_food_bag1"
+      ],
+      "seconds": 6.5,
+      "icon": "bucket",
+      "tint": "#d99a4e",
+      "desc": "Fish, chips and a bit of salad nobody asked for and nobody eats."
+    },
+    {
+      "id": "hk_fish",
+      "name": "Catch of the Day",
+      "category": "Food",
+      "price": 19,
+      "hunger": 0.7,
+      "shop": false,
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02",
+        "v_res_tt_plate01",
+        "v_res_tt_pizzaplate",
+        "prop_cs_plate_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 5.5,
+      "icon": "plate",
+      "tint": "#dcc79a",
+      "desc": "Whatever came off the boat. The board is a chalkboard for a reason."
+    },
+    {
+      "id": "fn_fry",
+      "name": "Fisherman's Fry",
+      "category": "Food",
+      "price": 17,
+      "hunger": 0.66,
+      "shop": false,
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02",
+        "v_res_tt_pizzaplate",
+        "prop_food_bs_tray_01",
+        "v_res_tt_plate01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 5.5,
+      "icon": "platter",
+      "tint": "#d8a35a",
+      "desc": "Everything they had, in the same fryer, on the same plate."
+    },
+    {
+      "id": "fn_roll",
+      "name": "Crab Roll",
+      "category": "Food",
+      "price": 13,
+      "hunger": 0.48,
+      "shop": false,
+      "prop": [
+        "prop_sandwich_01"
+      ],
+      "seconds": 6.5,
+      "icon": "sub",
+      "tint": "#e4b98a",
+      "desc": "More filling than roll, which is the correct ratio and rarely honoured."
+    },
+    {
+      "id": "cluck_bucket",
+      "name": "Cluckin' Bucket",
+      "category": "Food",
+      "price": 18,
+      "hunger": 0.78,
+      "shop": false,
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burg1",
+        "ng_proc_food_burg01a",
+        "prop_food_cb_nugets",
+        "prop_food_bag1"
+      ],
+      "seconds": 6.5,
+      "icon": "bucket",
+      "tint": "#d4553f",
+      "desc": "It comes in a bucket. There is no sensible portion of a bucket."
+    },
+    {
+      "id": "cluck_wrap",
+      "name": "Cluckin' Wrap",
+      "category": "Food",
+      "price": 9,
+      "hunger": 0.42,
+      "shop": false,
+      "prop": [
+        "prop_sandwich_01",
+        "prop_cs_burger_01"
+      ],
+      "seconds": 6.5,
+      "icon": "wrap",
+      "tint": "#d98a55",
+      "desc": "Chicken, lettuce, and a sauce the menu declines to name."
+    },
+    {
+      "id": "cluck_wings",
+      "name": "Wing Box",
+      "category": "Snacks",
+      "price": 11,
+      "hunger": 0.36,
+      "shop": false,
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burg1",
+        "ng_proc_food_burg01a",
+        "prop_food_cb_nugets",
+        "prop_cs_steak"
+      ],
+      "seconds": 8.0,
+      "icon": "chicken",
+      "tint": "#c9603a",
+      "desc": "Six wings and a napkin that is not going to be enough."
+    },
+    {
+      "id": "tb_sourdough",
+      "name": "Sourdough Loaf",
+      "category": "Food",
+      "price": 7,
+      "hunger": 0.44,
+      "shop": false,
+      "prop": [
+        "v_res_fa_bread01",
+        "v_res_fa_bread02",
+        "v_ret_247_bread1"
+      ],
+      "seconds": 5.0,
+      "icon": "loaf",
+      "tint": "#d8b076",
+      "desc": "Still warm through the paper. It will not last the walk home."
+    },
+    {
+      "id": "tb_pastry",
+      "name": "Morning Pastry",
+      "category": "Snacks",
+      "price": 4,
+      "hunger": 0.22,
+      "shop": false,
+      "prop": [
+        "p_amb_bagel_01",
+        "p_ing_bagel_01",
+        "prop_food_bs_chips"
+      ],
+      "seconds": 4.0,
+      "icon": "croissant",
+      "tint": "#e0b878",
+      "desc": "Flakes down your front the moment you bite it. Every single time."
+    },
+    {
+      "id": "gb_bun",
+      "name": "Golden Bun",
+      "category": "Snacks",
+      "price": 3,
+      "hunger": 0.2,
+      "shop": false,
+      "prop": [
+        "prop_amb_donut",
+        "prop_donut_01",
+        "v_res_tt_doughnut01",
+        "p_amb_bagel_01"
+      ],
+      "seconds": 4.0,
+      "icon": "muffin",
+      "tint": "#e2b064",
+      "desc": "Glazed, sticky, and gone in four bites."
+    },
+    {
+      "id": "gb_rye",
+      "name": "Rye Loaf",
+      "category": "Food",
+      "price": 8,
+      "hunger": 0.46,
+      "shop": false,
+      "prop": [
+        "v_res_fa_bread01",
+        "v_res_fa_bread02",
+        "v_ret_247_bread1"
+      ],
+      "seconds": 5.0,
+      "icon": "loaf",
+      "tint": "#b98d5a",
+      "desc": "Dense, dark and faintly sour. Keeps for a week and tastes like it means to."
+    },
+    {
+      "id": "dn_breakfast",
+      "name": "Beach Breakfast",
+      "category": "Food",
+      "price": 12,
+      "hunger": 0.58,
+      "shop": false,
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02",
+        "v_res_tt_plate01",
+        "v_res_tt_pizzaplate",
+        "prop_cs_plate_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 5.5,
+      "icon": "plate",
+      "tint": "#e0c184",
+      "desc": "Eggs, toast and a view of people who got up earlier than you."
+    },
+    {
+      "id": "dn_icedtea",
+      "name": "Iced Tea",
+      "category": "Drinks",
+      "price": 4,
+      "hunger": 0.1,
+      "shop": false,
+      "prop": [
+        "p_amb_coffeecup_01",
+        "p_ing_coffeecup_02",
+        "prop_food_bs_coffee",
+        "prop_plastic_cup_02"
+      ],
+      "seconds": 4.0,
+      "icon": "cup",
+      "tint": "#c8944a",
+      "desc": "Sweet enough to stand a spoon in, which is the local standard."
+    },
+    {
+      "id": "mc_grill",
+      "name": "Grilled Fish Plate",
+      "category": "Food",
+      "price": 16,
+      "hunger": 0.64,
+      "shop": false,
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02",
+        "v_res_tt_plate01",
+        "v_res_tt_pizzaplate",
+        "prop_cs_plate_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 5.5,
+      "icon": "plate",
+      "tint": "#dcc08a",
+      "desc": "Off the grill, onto the plate, out to the deck. Nothing wasted."
+    },
+    {
+      "id": "ht_burger",
+      "name": "Hang Ten Burger",
+      "category": "Food",
+      "price": 13,
+      "hunger": 0.62,
+      "shop": false,
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burg1",
+        "ng_proc_food_burg01a"
+      ],
+      "seconds": 5.0,
+      "icon": "burger",
+      "tint": "#c8703c",
+      "desc": "Char off the grill and sand off the floor. Both are traditional."
+    },
+    {
+      "id": "ht_dog",
+      "name": "Surf Dog",
+      "category": "Food",
+      "price": 8,
+      "hunger": 0.4,
+      "shop": false,
+      "prop": [
+        "prop_cs_hotdog_01",
+        "prop_cs_hotdog_02",
+        "prop_cs_burger_01"
+      ],
+      "seconds": 4.0,
+      "icon": "hotdog",
+      "tint": "#d4763e",
+      "desc": "A hot dog eaten in a wetsuit is a different hot dog."
+    },
+    {
+      "id": "tl_tacos",
+      "name": "Tacos Libres",
+      "category": "Food",
+      "price": 9,
+      "hunger": 0.46,
+      "shop": false,
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02"
+      ],
+      "seconds": 4.0,
+      "icon": "taco",
+      "tint": "#d97b3a",
+      "desc": "Three, on paper, with the onion and coriander already on them."
+    },
+    {
+      "id": "tl_torta",
+      "name": "Torta",
+      "category": "Food",
+      "price": 11,
+      "hunger": 0.56,
+      "shop": false,
+      "prop": [
+        "prop_sandwich_01"
+      ],
+      "seconds": 6.5,
+      "icon": "sub",
+      "tint": "#d99a5a",
+      "desc": "A sandwich that has been to the gym."
+    },
+    {
+      "id": "tl_quesadilla",
+      "name": "Quesadilla",
+      "category": "Snacks",
+      "price": 7,
+      "hunger": 0.32,
+      "shop": false,
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02",
+        "v_res_tt_pizzaplate",
+        "prop_food_bs_tray_01",
+        "v_res_tt_plate01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 5.5,
+      "icon": "platter",
+      "tint": "#e0b055",
+      "desc": "Folded, pressed, cut in four. Nobody has ever been given four."
+    },
+    {
+      "id": "im_cone",
+      "name": "Ice Maiden Cone",
+      "category": "Snacks",
+      "price": 4,
+      "hunger": 0.14,
+      "shop": false,
+      "prop": [
+        "prop_choc_ego",
+        "prop_choc_meto",
+        "prop_choc_pq",
+        "prop_amb_donut"
+      ],
+      "seconds": 3.5,
+      "icon": "cone",
+      "tint": "#f0dcc4",
+      "desc": "Two scoops and a race against the weather."
+    },
+    {
+      "id": "im_split",
+      "name": "Banana Split",
+      "category": "Snacks",
+      "price": 8,
+      "hunger": 0.28,
+      "shop": false,
+      "prop": [
+        "prop_choc_ego",
+        "prop_choc_meto",
+        "prop_choc_pq",
+        "prop_amb_donut"
+      ],
+      "seconds": 5.0,
+      "icon": "sundae",
+      "tint": "#f2d8b0",
+      "desc": "Three scoops, a banana, and the sincere belief this counts as fruit."
+    },
+    {
+      "id": "cp_cone",
+      "name": "Cherry Popper Cone",
+      "category": "Snacks",
+      "price": 4,
+      "hunger": 0.14,
+      "shop": false,
+      "prop": [
+        "prop_choc_ego",
+        "prop_choc_meto",
+        "prop_choc_pq",
+        "prop_amb_donut"
+      ],
+      "seconds": 3.5,
+      "icon": "cone",
+      "tint": "#e8a0b0",
+      "desc": "You'll always remember your first, says the sign, at some length."
+    },
+    {
+      "id": "cp_tub",
+      "name": "Cherry Popper Tub",
+      "category": "Snacks",
+      "price": 7,
+      "hunger": 0.26,
+      "shop": false,
+      "prop": [
+        "prop_choc_ego",
+        "prop_choc_meto",
+        "prop_choc_pq",
+        "prop_amb_donut"
+      ],
+      "seconds": 5.0,
+      "icon": "sundae",
+      "tint": "#e69ab0",
+      "desc": "A tub and a flat wooden spoon that makes everything taste of lolly stick."
+    },
+    {
+      "id": "cr_slice",
+      "name": "Slice of Pie",
+      "category": "Snacks",
+      "price": 6,
+      "hunger": 0.28,
+      "shop": false,
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burg1",
+        "ng_proc_food_burg01a",
+        "v_res_tt_pizzaplate"
+      ],
+      "seconds": 4.0,
+      "icon": "pie",
+      "tint": "#dda45c",
+      "desc": "Cut from something enormous behind glass. The good bit is the edge."
+    },
+    {
+      "id": "cr_cheesecake",
+      "name": "Cheesecake",
+      "category": "Snacks",
+      "price": 8,
+      "hunger": 0.34,
+      "shop": false,
+      "prop": [
+        "prop_amb_donut",
+        "prop_donut_01",
+        "v_res_tt_doughnut01",
+        "prop_choc_ego"
+      ],
+      "seconds": 4.5,
+      "icon": "cake",
+      "tint": "#eddab0",
+      "desc": "Dense, cold and quietly ruinous."
+    },
+    {
+      "id": "sn_cone",
+      "name": "Kiosk Cone",
+      "category": "Snacks",
+      "price": 3,
+      "hunger": 0.13,
+      "shop": false,
+      "prop": [
+        "prop_choc_ego",
+        "prop_choc_meto",
+        "prop_choc_pq",
+        "prop_amb_donut"
+      ],
+      "seconds": 3.5,
+      "icon": "cone",
+      "tint": "#eedcc0",
+      "desc": "Soft serve from a machine that has been on since 1997."
+    },
+    {
+      "id": "sh_burger",
+      "name": "Sharkies Burger",
+      "category": "Food",
+      "price": 11,
+      "hunger": 0.56,
+      "shop": false,
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burg1",
+        "ng_proc_food_burg01a"
+      ],
+      "seconds": 5.0,
+      "icon": "burger",
+      "tint": "#c06840",
+      "desc": "Off the window counter, wrapped in paper, gone before the pier ends."
+    },
+    {
+      "id": "sh_donut",
+      "name": "Boardwalk Donut",
+      "category": "Snacks",
+      "price": 3,
+      "hunger": 0.18,
+      "shop": false,
+      "prop": [
+        "prop_amb_donut",
+        "prop_donut_01",
+        "v_res_tt_doughnut01"
+      ],
+      "seconds": 3.0,
+      "icon": "donut",
+      "tint": "#e0a45c",
+      "desc": "Sugar, air and a paper bag going translucent."
+    },
+    {
+      "id": "mp_pie",
+      "name": "Mom's Pie",
+      "category": "Food",
+      "price": 9,
+      "hunger": 0.46,
+      "shop": false,
+      "prop": [
+        "prop_cs_burger_01",
+        "prop_food_bs_burg1",
+        "ng_proc_food_burg01a",
+        "v_res_tt_pizzaplate"
+      ],
+      "seconds": 4.0,
+      "icon": "pie",
+      "tint": "#d9a256",
+      "desc": "Sit in or eat out, says the wall. Either way it is the same pie."
+    },
+    {
+      "id": "mp_plate",
+      "name": "Blue Plate",
+      "category": "Food",
+      "price": 14,
+      "hunger": 0.66,
+      "shop": false,
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02",
+        "v_res_tt_plate01",
+        "v_res_tt_pizzaplate",
+        "prop_cs_plate_01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 5.5,
+      "icon": "plate",
+      "tint": "#dcc08a",
+      "desc": "Meat, two veg, gravy over everything. No decisions required."
+    },
+    {
+      "id": "bv_stew",
+      "name": "Lodge Stew",
+      "category": "Food",
+      "price": 13,
+      "hunger": 0.6,
+      "shop": false,
+      "prop": [
+        "prop_ff_noodle_01",
+        "prop_ff_noodle_02",
+        "v_res_fa_potnoodle",
+        "prop_cs_bowl_01",
+        "v_res_tt_bowl",
+        "prop_cs_bowl_01b",
+        "v_res_mbowl",
+        "prop_food_bs_chips"
+      ],
+      "seconds": 5.5,
+      "icon": "bowl",
+      "tint": "#a9713f",
+      "desc": "Whatever was in the pot, ladled over whatever was left of the bread."
+    },
+    {
+      "id": "pi_ribs",
+      "name": "Pipeline Ribs",
+      "category": "Food",
+      "price": 21,
+      "hunger": 0.78,
+      "shop": false,
+      "prop": [
+        "prop_taco_01",
+        "prop_taco_02",
+        "v_res_tt_pizzaplate",
+        "prop_food_bs_tray_01",
+        "v_res_tt_plate01",
+        "prop_sandwich_01"
+      ],
+      "seconds": 5.5,
+      "icon": "platter",
+      "tint": "#a85536",
+      "desc": "A rack, a roll of paper towel, and no further conversation."
+    },
+    {
+      "id": "mj_mojito",
+      "name": "Mojito",
+      "category": "Drinks",
+      "price": 9,
+      "hunger": 0.08,
+      "shop": false,
+      "prop": [
+        "prop_cs_shot_glass",
+        "prop_whiskey_glasses",
+        "prop_plastic_cup_02",
+        "prop_cs_bs_cup",
+        "prop_ld_flow_bottle"
+      ],
+      "seconds": 2.5,
+      "icon": "shot",
+      "tint": "#bcd8a8",
+      "desc": "Mint, ice, and a straw you will chew flat by the second one."
+    },
+    {
+      "id": "bb_pint",
+      "name": "Bay Bar Pint",
+      "category": "Drinks",
+      "price": 6,
+      "hunger": 0.06,
+      "shop": false,
+      "prop": [
+        "prop_beer_pissh",
+        "prop_cs_beer_bot_01",
+        "prop_amb_beer_bottle",
+        "prop_ld_can_01",
+        "prop_ecola_can"
+      ],
+      "seconds": 4.0,
+      "icon": "beer",
+      "tint": "#c9963f",
+      "desc": "Cold, wet, and served without eye contact."
+    },
+    {
+      "id": "oot_pitcher",
+      "name": "Out Of Towner",
+      "category": "Drinks",
+      "price": 12,
+      "hunger": 0.1,
+      "shop": false,
+      "prop": [
+        "prop_beer_pissh",
+        "prop_cs_beer_bot_01",
+        "prop_amb_beer_bottle",
+        "prop_ld_can_01",
+        "prop_ecola_can"
+      ],
+      "seconds": 4.0,
+      "icon": "beer",
+      "tint": "#cfa04a",
+      "desc": "A jug and four glasses. The name is on the sign and on you."
+    },
+    {
+      "id": "ps_beer",
+      "name": "Tramway Beer",
+      "category": "Drinks",
+      "price": 6,
+      "hunger": 0.06,
+      "shop": false,
+      "prop": [
+        "prop_beer_pissh",
+        "prop_cs_beer_bot_01",
+        "prop_amb_beer_bottle",
+        "prop_ld_can_01",
+        "prop_ecola_can"
+      ],
+      "seconds": 4.0,
+      "icon": "beer",
+      "tint": "#c99a45",
+      "desc": "Drunk at the top, carried down. Or the other way round, which is worse."
+    },
+    {
+      "id": "ad_pasta",
+      "name": "Pasta of the Day",
+      "category": "Food",
+      "price": 17,
+      "hunger": 0.7,
+      "shop": false,
+      "prop": [
+        "prop_ff_noodle_01",
+        "prop_ff_noodle_02",
+        "v_res_fa_potnoodle",
+        "prop_cs_bowl_01",
+        "v_res_tt_bowl",
+        "prop_cs_bowl_01b",
+        "v_res_mbowl",
+        "prop_food_bs_chips"
+      ],
+      "seconds": 5.5,
+      "icon": "bowl",
+      "tint": "#d9a45c",
+      "desc": "Whatever the kitchen felt like. It has never once been a disappointment."
+    },
+    {
+      "id": "ad_bread",
+      "name": "Garlic Bread",
+      "category": "Snacks",
+      "price": 6,
+      "hunger": 0.3,
+      "shop": false,
+      "prop": [
+        "v_res_fa_bread01",
+        "v_res_fa_bread02",
+        "v_ret_247_bread1"
+      ],
+      "seconds": 5.0,
+      "icon": "loaf",
+      "tint": "#dfb877",
+      "desc": "Comes free if you order enough. It is never free."
     }
   ],
   "_animations": [

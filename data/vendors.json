@@ -4643,6 +4643,559 @@
       "blip": true,
       "blipSprite": 52,
       "blipColour": 5
+    },
+    {
+      "_note": "restaurant. Surveyed in game.",
+      "id": "fish_net_downtown",
+      "name": "The Fish Net",
+      "x": 16.559,
+      "y": -164.254,
+      "z": 55.373,
+      "heading": 147.747,
+      "item": [
+        "fn_fry",
+        "fn_roll",
+        "beer",
+        "wine",
+        "water"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "bakery. Surveyed in game.",
+      "id": "trey_baker_downtown",
+      "name": "Trey Baker",
+      "x": 50.796,
+      "y": -136.402,
+      "z": 54.68,
+      "heading": 346.618,
+      "item": [
+        "tb_sourdough",
+        "tb_pastry",
+        "rb_coffee"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Downtown. Surveyed in game.",
+      "id": "cluckin_bell_downtown",
+      "name": "Cluckin' Bell",
+      "x": -138.37,
+      "y": -256.962,
+      "z": 43.081,
+      "heading": 65.404,
+      "item": [
+        "cluck_bucket",
+        "cluck_wrap",
+        "cluck_wings",
+        "ecola",
+        "sprunk"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Vespucci Beach. Surveyed in game.",
+      "id": "dunes_beach_cafe",
+      "name": "Dune's Beach Cafe",
+      "x": -1500.422,
+      "y": -933.904,
+      "z": 9.659,
+      "heading": 334.772,
+      "item": [
+        "dn_breakfast",
+        "dn_icedtea",
+        "rb_coffee",
+        "fruit"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Vespucci. Surveyed in game.",
+      "id": "al_dentes_vespucci",
+      "name": "Al Dente's",
+      "x": -1394.026,
+      "y": -919.709,
+      "z": 10.633,
+      "heading": 264.845,
+      "item": [
+        "ad_pasta",
+        "ad_bread",
+        "wine",
+        "bm_espresso"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Vespucci Beach, ice cream. Surveyed in game.",
+      "id": "ice_maiden_vespucci",
+      "name": "Ice Maiden",
+      "x": -1171.36,
+      "y": -1434.213,
+      "z": 3.923,
+      "heading": 190.967,
+      "item": [
+        "im_cone",
+        "im_split",
+        "sludgie",
+        "ice_cream"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "same frontage as Crucial Fix below. Surveyed in game.",
+      "id": "marlins_cafe_vespucci",
+      "name": "Marlins Cafe",
+      "x": -1113.635,
+      "y": -1366.592,
+      "z": 4.541,
+      "heading": 8.95,
+      "item": [
+        "mc_grill",
+        "rb_coffee",
+        "dn_icedtea",
+        "water"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Mexican. Surveyed in game.",
+      "id": "taco_libre_vespucci",
+      "name": "Taco Libre",
+      "x": -1168.82,
+      "y": -1267.63,
+      "z": 5.662,
+      "heading": 312.68,
+      "item": [
+        "tl_tacos",
+        "tl_torta",
+        "tl_quesadilla",
+        "ecola",
+        "sprunk"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Del Perro Pier. Surveyed in game.",
+      "id": "big_puffa_pier",
+      "name": "The Big Puffa",
+      "x": -1606.443,
+      "y": -982.171,
+      "z": 12.506,
+      "heading": 206.755,
+      "item": [
+        "bp_fishchips",
+        "bp_shrimp",
+        "bp_chowder",
+        "beer",
+        "ecola"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Del Perro Pier. Surveyed in game.",
+      "id": "seafood_pier",
+      "name": "Seafood",
+      "x": -1592.032,
+      "y": -1005.755,
+      "z": 12.508,
+      "heading": 49.402,
+      "item": [
+        "bp_fishchips",
+        "bp_shrimp",
+        "bp_chowder",
+        "water"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Del Perro Pier, kiosk: ice cream, soda, candy. Surveyed in game.",
+      "id": "soak_n_spoke_pier",
+      "name": "Soak N Spoke",
+      "x": -1640.528,
+      "y": -1019.234,
+      "z": 12.636,
+      "heading": 230.527,
+      "item": [
+        "sn_cone",
+        "ice_cream",
+        "candybox",
+        "crisps",
+        "ecola",
+        "sprunk"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Del Perro Pier window: burgers, tacos, donuts, juice, soda, smoothies. Surveyed in game.",
+      "id": "sharkies_bites_pier",
+      "name": "Sharkies Bites",
+      "x": -1654.909,
+      "y": -1037.33,
+      "z": 12.636,
+      "heading": 178.003,
+      "item": [
+        "sh_burger",
+        "taco",
+        "sh_donut",
+        "lm_orange",
+        "ecola",
+        "bite_smoothie"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Del Perro Pier, dessert company. Surveyed in game.",
+      "id": "cream_pie_pier",
+      "name": "Cream Pie",
+      "x": -1690.038,
+      "y": -1076.391,
+      "z": 12.638,
+      "heading": 174.212,
+      "item": [
+        "cr_slice",
+        "cr_cheesecake",
+        "rb_coffee"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Del Perro Pier, walk-up window. Surveyed in game.",
+      "id": "cluckin_bell_pier",
+      "name": "Cluckin' Bell",
+      "x": -1681.368,
+      "y": -1097.125,
+      "z": 12.635,
+      "heading": 292.465,
+      "item": [
+        "cluck_bucket",
+        "cluck_wrap",
+        "cluck_wings",
+        "ecola",
+        "sprunk"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Del Perro Pier, ice cream company. Surveyed in game.",
+      "id": "cherry_popper_pier",
+      "name": "Cherry Popper",
+      "x": -1696.993,
+      "y": -1105.998,
+      "z": 12.63,
+      "heading": 70.581,
+      "item": [
+        "cp_cone",
+        "cp_tub",
+        "sludgie"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "seafood restaurant, Del Perro. Surveyed in game.",
+      "id": "pearls_delperro",
+      "name": "Pearls",
+      "x": -1816.26,
+      "y": -1193.522,
+      "z": 13.79,
+      "heading": 143.732,
+      "item": [
+        "pl_platter",
+        "pl_oysters",
+        "wine",
+        "water"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "restaurant & bar, Pacific Bluffs. Surveyed in game.",
+      "id": "pipeline_inn",
+      "name": "Pipeline Inn",
+      "x": -2193.772,
+      "y": -388.596,
+      "z": 12.957,
+      "heading": 53.426,
+      "item": [
+        "pi_ribs",
+        "bb_pint",
+        "whiskey",
+        "wine"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Chumash, grill diner + surf goods. Surveyed in game.",
+      "id": "hang_ten_chumash",
+      "name": "Hang Ten",
+      "x": -2964.439,
+      "y": 432.079,
+      "z": 14.752,
+      "heading": 263.669,
+      "item": [
+        "ht_burger",
+        "ht_dog",
+        "ecola",
+        "sprunk"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Chumash, sit in or eat out. Surveyed in game.",
+      "id": "moms_pie_chumash",
+      "name": "Mom's Pie Diner",
+      "x": -3046.659,
+      "y": 615.577,
+      "z": 6.822,
+      "heading": 105.646,
+      "item": [
+        "mp_pie",
+        "mp_plate",
+        "rb_coffee"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "seafood diner, Paleto coast. Surveyed in game.",
+      "id": "hookies_paleto",
+      "name": "Hookies",
+      "x": -2193.262,
+      "y": 4286.801,
+      "z": 49.175,
+      "heading": 306.823,
+      "item": [
+        "hk_basket",
+        "hk_fish",
+        "beer",
+        "ecola"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "bar at the aerial tramway, beer signs. Surveyed in game.",
+      "id": "pala_springs_tramway",
+      "name": "Pala Springs Tramway",
+      "x": -754.234,
+      "y": 5579.016,
+      "z": 36.186,
+      "heading": 208.747,
+      "item": [
+        "ps_beer",
+        "crisps",
+        "jerky",
+        "water"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "diner AND general store, Paleto forest. Surveyed in game.",
+      "id": "bayview_lodge",
+      "name": "Bayview Lodge",
+      "x": -696.348,
+      "y": 5802.609,
+      "z": 16.808,
+      "heading": 248.108,
+      "item": [
+        "bv_stew",
+        "mp_pie",
+        "rb_coffee",
+        "beer",
+        "crisps",
+        "jerky"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Paleto Bay. Surveyed in game.",
+      "id": "mojito_inn_paleto",
+      "name": "Mojito Inn",
+      "x": -123.485,
+      "y": 6389.982,
+      "z": 31.549,
+      "heading": 223.851,
+      "item": [
+        "mj_mojito",
+        "beer",
+        "whiskey",
+        "wine"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Paleto Bay. Surveyed in game.",
+      "id": "bay_bar_paleto",
+      "name": "The Bay Bar",
+      "x": -261.335,
+      "y": 6291.114,
+      "z": 30.964,
+      "heading": 99.725,
+      "item": [
+        "bb_pint",
+        "whiskey",
+        "wine",
+        "crisps"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Paleto Bay, deli + cafe. Surveyed in game.",
+      "id": "golden_buns_paleto",
+      "name": "Golden Buns Bakery",
+      "x": -302.752,
+      "y": 6212.352,
+      "z": 30.908,
+      "heading": 159.527,
+      "item": [
+        "gb_bun",
+        "gb_rye",
+        "tb_pastry",
+        "rb_coffee"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Del Perro Pier, Out Of Towners Welcome -- bar. Surveyed in game.",
+      "id": "oot_pier",
+      "name": "O.O.T.",
+      "x": -1654.738,
+      "y": -1000.208,
+      "z": 12.505,
+      "heading": 109.373,
+      "item": [
+        "oot_pitcher",
+        "beer",
+        "whiskey",
+        "crisps"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
     }
   ],
   "_backlog": {
@@ -4692,52 +5245,12 @@
         "note": "name not caught"
       },
       {
-        "name": "The Fish Net",
-        "x": 16.559,
-        "y": -164.254,
-        "z": 55.373,
-        "heading": 147.747,
-        "note": "restaurant"
-      },
-      {
-        "name": "Trey Baker",
-        "x": 50.796,
-        "y": -136.402,
-        "z": 54.68,
-        "heading": 346.618,
-        "note": "bakery"
-      },
-      {
-        "name": "Cluckin' Bell",
-        "x": -138.37,
-        "y": -256.962,
-        "z": 43.081,
-        "heading": 65.404,
-        "note": "Downtown"
-      },
-      {
         "name": "(unnamed)",
         "x": -236.233,
         "y": -372.536,
         "z": 29.513,
         "heading": 324.161,
         "note": "Pillbox, name not caught"
-      },
-      {
-        "name": "Dune's Beach Cafe",
-        "x": -1500.422,
-        "y": -933.904,
-        "z": 9.659,
-        "heading": 334.772,
-        "note": "Vespucci Beach"
-      },
-      {
-        "name": "Al Dente's",
-        "x": -1394.026,
-        "y": -919.709,
-        "z": 10.633,
-        "heading": 264.845,
-        "note": "Vespucci"
       },
       {
         "name": "(unnamed)",
@@ -4764,44 +5277,12 @@
         "note": "Vespucci Beach, name not caught"
       },
       {
-        "name": "Ice Maiden",
-        "x": -1171.36,
-        "y": -1434.213,
-        "z": 3.923,
-        "heading": 190.967,
-        "note": "Vespucci Beach, ice cream"
-      },
-      {
-        "name": "Marlins Cafe",
-        "x": -1113.635,
-        "y": -1366.592,
-        "z": 4.541,
-        "heading": 8.95,
-        "note": "same frontage as Crucial Fix below"
-      },
-      {
-        "name": "Taco Libre",
-        "x": -1168.82,
-        "y": -1267.63,
-        "z": 5.662,
-        "heading": 312.68,
-        "note": "Mexican"
-      },
-      {
         "name": "The Big Puffa",
         "x": -1604.114,
         "y": -979.164,
         "z": 12.502,
         "heading": 288.436,
         "note": "Del Perro Pier seafood; 3 doors, one venue"
-      },
-      {
-        "name": "The Big Puffa",
-        "x": -1606.443,
-        "y": -982.171,
-        "z": 12.506,
-        "heading": 206.755,
-        "note": "Del Perro Pier"
       },
       {
         "name": "The Big Puffa",
@@ -4820,100 +5301,12 @@
         "note": "Del Perro Pier, SEAFOOD frontage"
       },
       {
-        "name": "Seafood",
-        "x": -1592.032,
-        "y": -1005.755,
-        "z": 12.508,
-        "heading": 49.402,
-        "note": "Del Perro Pier"
-      },
-      {
-        "name": "Soak N Spoke",
-        "x": -1640.528,
-        "y": -1019.234,
-        "z": 12.636,
-        "heading": 230.527,
-        "note": "Del Perro Pier, kiosk: ice cream, soda, candy"
-      },
-      {
-        "name": "Sharkies Bites",
-        "x": -1654.909,
-        "y": -1037.33,
-        "z": 12.636,
-        "heading": 178.003,
-        "note": "Del Perro Pier window: burgers, tacos, donuts, juice, soda, smoothies"
-      },
-      {
-        "name": "Cream Pie",
-        "x": -1690.038,
-        "y": -1076.391,
-        "z": 12.638,
-        "heading": 174.212,
-        "note": "Del Perro Pier, dessert company"
-      },
-      {
-        "name": "Cluckin' Bell",
-        "x": -1681.368,
-        "y": -1097.125,
-        "z": 12.635,
-        "heading": 292.465,
-        "note": "Del Perro Pier, walk-up window"
-      },
-      {
-        "name": "Cherry Popper",
-        "x": -1696.993,
-        "y": -1105.998,
-        "z": 12.63,
-        "heading": 70.581,
-        "note": "Del Perro Pier, ice cream company"
-      },
-      {
-        "name": "Pearls",
-        "x": -1816.26,
-        "y": -1193.522,
-        "z": 13.79,
-        "heading": 143.732,
-        "note": "seafood restaurant, Del Perro"
-      },
-      {
-        "name": "Pipeline Inn",
-        "x": -2193.772,
-        "y": -388.596,
-        "z": 12.957,
-        "heading": 53.426,
-        "note": "restaurant & bar, Pacific Bluffs"
-      },
-      {
-        "name": "Hang Ten",
-        "x": -2964.439,
-        "y": 432.079,
-        "z": 14.752,
-        "heading": 263.669,
-        "note": "Chumash, grill diner + surf goods"
-      },
-      {
-        "name": "Mom's Pie Diner",
-        "x": -3046.659,
-        "y": 615.577,
-        "z": 6.822,
-        "heading": 105.646,
-        "note": "Chumash, sit in or eat out"
-      },
-      {
         "name": "Fresh Fruit & Veg",
         "x": -2507.502,
         "y": 3614.455,
         "z": 13.299,
         "heading": 82.199,
         "note": "roadside stand -- SHOULD BE FOUND BY PROP, not this coordinate"
-      },
-      {
-        "name": "Hookies",
-        "x": -2193.262,
-        "y": 4286.801,
-        "z": 49.175,
-        "heading": 306.823,
-        "note": "seafood diner, Paleto coast; same venue as below"
       },
       {
         "name": "Hookies",
@@ -4932,30 +5325,6 @@
         "note": "roadside stand, Mt Chiliad -- SAME STALL MODEL as the Chumash one"
       },
       {
-        "name": "Pala Springs Tramway",
-        "x": -754.234,
-        "y": 5579.016,
-        "z": 36.186,
-        "heading": 208.747,
-        "note": "bar at the aerial tramway, beer signs"
-      },
-      {
-        "name": "Bayview Lodge",
-        "x": -696.348,
-        "y": 5802.609,
-        "z": 16.808,
-        "heading": 248.108,
-        "note": "diner AND general store, Paleto forest"
-      },
-      {
-        "name": "Mojito Inn",
-        "x": -123.485,
-        "y": 6389.982,
-        "z": 31.549,
-        "heading": 223.851,
-        "note": "Paleto Bay; same frontage as below"
-      },
-      {
         "name": "Mojito Inn",
         "x": -133.712,
         "y": 6377.245,
@@ -4964,36 +5333,12 @@
         "note": "second door"
       },
       {
-        "name": "The Bay Bar",
-        "x": -261.335,
-        "y": 6291.114,
-        "z": 30.964,
-        "heading": 99.725,
-        "note": "Paleto Bay"
-      },
-      {
-        "name": "Golden Buns Bakery",
-        "x": -302.752,
-        "y": 6212.352,
-        "z": 30.908,
-        "heading": 159.527,
-        "note": "Paleto Bay, deli + cafe; shuttered frontage"
-      },
-      {
         "name": "Peckerwood",
         "x": -316.593,
         "y": 6194.261,
         "z": 31.041,
         "heading": 228.576,
         "note": "Paleto Bay -- sign reads College Style, looks like CLOTHING not food; check before building"
-      },
-      {
-        "name": "O.O.T.",
-        "x": -1654.738,
-        "y": -1000.208,
-        "z": 12.505,
-        "heading": 109.373,
-        "note": "Del Perro Pier, Out Of Towners Welcome -- bar"
       },
       {
         "name": "Carniceria Supermarket",

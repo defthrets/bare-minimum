@@ -3,6 +3,42 @@
 ===============================================================================
 
 
+0.1.4  --  seventy-six more doors, and food for the ones that needed it
+-------------------------------------------------------------------------------
+
+  114 SHOPS TO 190. Every one of them was ridden to in game and its coordinate
+  read off the screen, then measured against the list before it was added --
+  none is within six metres of anything that was already there.
+
+  FIFTY OF THEM NEEDED NO NEW FOOD. Another BITE!, another 24/7, another liquor
+  store: those inherit the parent's menu exactly, one chain one menu, which is
+  the rule the Bean Machines and the Up-n-Atoms already followed. The sign name
+  is kept though -- Willie's Supermarket stocks what a supermarket stocks, but
+  the prompt says Willie's.
+
+  THE OTHER TWENTY-SIX NEEDED FOOD WRITING, and got 43 new things to eat. The
+  Big Puffa does fish and chips, a shrimp basket and clam chowder off the pier;
+  Pearls does a seafood platter and half a dozen oysters; Cluckin' Bell does a
+  bucket; Cherry Popper and Ice Maiden do cones; Mom's Pie does a blue plate;
+  the Mojito Inn does a mojito. Where a sign said what it sold, that is what it
+  sells -- Sharkies Bites has burgers, tacos, donuts, juice, soda and smoothies
+  painted on the wall a foot high, and now sells exactly those.
+
+  NOT ONE PROP NAME WAS TYPED. GTA takes a bad model name in silence and hands
+  you an item you mime eating, and 38 of them were wrong once already. Every new
+  item borrows the prop list of an item that is already in the file and already
+  works, matched by icon.
+
+  201 things to eat, up from 158.
+
+  SEVENTEEN SURVEYED DOORS ARE STILL NOT BUILT and are listed in vendors.json
+  rather than forgotten: eight whose sign was not readable in the photograph,
+  three spare doors of the Big Puffa, three second doors of shops already built,
+  one that turned out to be a clothes shop, and two roadside fruit stands --
+  which do not need building, because the stalls are found by model now.
+
+
+-------------------------------------------------------------------------------
 0.1.3  --  vending machines and roadside stalls
 -------------------------------------------------------------------------------
 
@@ -113,7 +149,7 @@
 -------------------------------------------------------------------------------
 
   WHAT IS NOT FINISHED, first, because it is the honest way round: the shop map.
-  114 doors are in and they are complete ones, but the convenience stores and
+  190 doors are in and they are complete ones, but the convenience stores and
   the fuel stations are thin, and more go in with every update. Everything below
   this line works today.
 
@@ -135,13 +171,13 @@
 
   Both run on the GAME clock, so a day of them is about 48 minutes of play.
 
-  114 PLACES TO BUY FOOD, and they are the real ones: the taco windows, the hot
+  190 PLACES TO BUY FOOD, and they are the real ones: the taco windows, the hot
   dog carts, Burger Shot, Up-n-Atom, Bean Machine, Cool Beans, Rob's Liquor,
   Taco Bomb, Pizza This, thirteen liquor stores, the corner shops, the delis,
   and the restaurants nobody ever gets to walk into. Del Perro and Vespucci are
   covered end to end.
 
-  158 THINGS TO EAT across three categories, each with its own price, its own
+  201 THINGS TO EAT across three categories, each with its own price, its own
   effect and its own line about itself.
 
   SHOPS WITH A MENU AND STALLS WITH ONE KEY. A counter or a shelf opens a list
