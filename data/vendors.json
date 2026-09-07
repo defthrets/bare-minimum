@@ -3861,6 +3861,22 @@
         "z": 30.964,
         "heading": 99.725,
         "note": "Paleto Bay"
+      },
+      {
+        "name": "Golden Buns Bakery",
+        "x": -302.752,
+        "y": 6212.352,
+        "z": 30.908,
+        "heading": 159.527,
+        "note": "Paleto Bay, deli + cafe; shuttered frontage"
+      },
+      {
+        "name": "Peckerwood",
+        "x": -316.593,
+        "y": 6194.261,
+        "z": 31.041,
+        "heading": 228.576,
+        "note": "Paleto Bay -- sign reads College Style, looks like CLOTHING not food; check before building"
       }
     ],
     "_drugs_comment": [
