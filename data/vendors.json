@@ -3566,6 +3566,70 @@
         "z": 12.63,
         "heading": 70.581,
         "note": "Del Perro Pier, ice cream company"
+      },
+      {
+        "name": "Bean Machine",
+        "x": -1703.665,
+        "y": -1101.209,
+        "z": 12.638,
+        "heading": 141.919,
+        "note": "Del Perro Pier"
+      },
+      {
+        "name": "Pearls",
+        "x": -1816.26,
+        "y": -1193.522,
+        "z": 13.79,
+        "heading": 143.732,
+        "note": "seafood restaurant, Del Perro"
+      },
+      {
+        "name": "Pipeline Inn",
+        "x": -2193.772,
+        "y": -388.596,
+        "z": 12.957,
+        "heading": 53.426,
+        "note": "restaurant & bar, Pacific Bluffs"
+      },
+      {
+        "name": "Rob's Liquor & Market",
+        "x": -2975.469,
+        "y": 384.115,
+        "z": 14.488,
+        "heading": 289.267,
+        "note": "Chumash, deli counter"
+      },
+      {
+        "name": "Hang Ten",
+        "x": -2964.439,
+        "y": 432.079,
+        "z": 14.752,
+        "heading": 263.669,
+        "note": "Chumash, grill diner + surf goods"
+      },
+      {
+        "name": "Mom's Pie Diner",
+        "x": -3046.659,
+        "y": 615.577,
+        "z": 6.822,
+        "heading": 105.646,
+        "note": "Chumash, sit in or eat out"
+      },
+      {
+        "name": "24/7 Supermarket",
+        "x": -3040.898,
+        "y": 585.72,
+        "z": 7.909,
+        "heading": 331.574,
+        "note": "Chumash, WALK-IN: counter is inside"
+      },
+      {
+        "name": "24/7 Supermarket",
+        "x": -3239.606,
+        "y": 1004.546,
+        "z": 12.618,
+        "heading": 47.151,
+        "note": "Banham Canyon, WALK-IN; reported as not opening"
       }
     ],
     "_drugs_comment": [
