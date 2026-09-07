@@ -11,8 +11,8 @@
   the keyboard only, so a controller player was shown a button, pressed it, and
   nothing happened. Sleeping and the fridge already read both; those two had
   been left out. The two panels open on a chord as well -- LB + D-pad Up for the
-  settings, LB + D-pad Left for the pocket -- avoiding LB + D-pad Down, which is
-  Fumes' menu, because one chord opening two mods' panels is worse than none.
+  settings, RB + X for the pocket -- avoiding LB + D-pad Down, which is Fumes'
+  menu, because one chord opening two mods' panels is worse than none.
   Asked for by Jodosodojo.
 
   DOZING OFF IN A CAR IS A HOLD, not a tap. In a car the interact is the same

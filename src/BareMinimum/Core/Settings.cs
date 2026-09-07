@@ -812,9 +812,9 @@ namespace BareMinimum.Core
         /// spare button on a pad -- every one of them is spoken for on foot -- so a single
         /// press is always one press away from something the game already does.
         ///
-        /// LB + D-pad UP for the menu and LB + D-pad LEFT for the pocket. Fumes already owns
-        /// LB + D-pad DOWN for its menu, and somebody running both mods should not have one
-        /// chord open two panels.
+        /// LB + D-pad UP for the menu and RB + X for the pocket. Fumes already owns LB +
+        /// D-pad DOWN for its menu, and somebody running both mods should not have one chord
+        /// open two panels.
         ///
         /// The interact needs no setting of its own: everything that reads the interact key
         /// already reads Control.Context beside it, which is the button the on-screen prompt

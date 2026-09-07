@@ -131,7 +131,7 @@ Drag into your GTA V folder, say yes to merging, load a save. Needs ScriptHookV 
 
 All three can be changed in the ini.
 
-🎮 <b>On a controller:</b> the context button does everything E does. The panels open on a chord, because a pad has no button spare — <b>LB + D-pad Up</b> for settings, <b>LB + D-pad Left</b> for your pocket. Inside a panel the d-pad moves, A chooses and B closes, and the on-screen hints switch to those glyphs the moment you pick a pad up.
+🎮 <b>On a controller:</b> the context button does everything E does. The panels open on a chord, because a pad has no button spare — <b>LB + D-pad Up</b> for settings, <b>RB + X</b> for your pocket. Inside a panel the d-pad moves, A chooses and B closes, and the on-screen hints switch to those glyphs the moment you pick a pad up.
 
 
 --------------------------------------------------------------------------------
@@ -141,7 +141,7 @@ All three can be changed in the ini.
 <b>0.1.2</b>
 
 <ul>
-<li>🎮 <b>It works on a controller now.</b> The counter and the shelf drew the pad's own button on their prompt and then read the keyboard only — shown a button, pressed it, nothing happened. Both read the pad now. The panels open on a chord too: <b>LB + D-pad Up</b> for settings, <b>LB + D-pad Left</b> for your pocket. <i>Asked for by Jodosodojo.</i></li>
+<li>🎮 <b>It works on a controller now.</b> The counter and the shelf drew the pad's own button on their prompt and then read the keyboard only — shown a button, pressed it, nothing happened. Both read the pad now. The panels open on a chord too: <b>LB + D-pad Up</b> for settings, <b>RB + X</b> for your pocket. <i>Asked for by Jodosodojo.</i></li>
 <li>🚗 <b>Dozing off in a car is a hold, not a tap</b> — in a car that button also orders at a drive-through, so a press meant for lunch put you to sleep for four hours. A second and a half, with a meter while it fills. Beds are untouched. <i>Asked for by jerome74.</i></li>
 <li>🧊 <b>A fridge this build has not heard of can be named in the ini.</b> Fridge/ExtraModels takes a comma-separated list on top of the built-in fourteen, and the log now names the models that did not resolve instead of counting them. <i>Reported by jerome74.</i></li>
 <li>💤 <b>The sleep offer is a small chip at the bottom of the screen</b>, not the game's help box in the top corner — and the hold draws as a thin fill under the words.</li>

@@ -182,10 +182,15 @@ namespace BareMinimum.UI
             var edge = down && !_down;
             _down = down;
 
-            // LB + D-pad LEFT. Checked even when the key already fired, so the chord's own
-            // memory stays in step and releasing it cannot fire a second time.
+            // RB + X. Checked even when the key already fired, so the chord's own memory
+            // stays in step and releasing it cannot fire a second time.
+            //
+            // BOTH HALVES ARE BUSY ON FOOT -- RB takes cover and X sprints -- which is true
+            // of every pair on a pad and is why this is a chord at all. Holding RB and
+            // tapping X is not a thing the game does together, which is the test that
+            // matters; what it costs is that the cover press still registers underneath.
             if (_cfg.BagPad &&
-                Core.Pad.Chord(GTA.Control.FrontendLb, GTA.Control.FrontendLeft, ref _padWas))
+                Core.Pad.Chord(GTA.Control.FrontendRb, GTA.Control.FrontendX, ref _padWas))
             {
                 edge = true;
             }
