@@ -147,7 +147,7 @@ namespace BareMinimum.Needs
                 if (where == Bunk.None)
                 {
                     // Walked away or drove off: forget the offer so it shows again next time.
-                    if (_offering) { _offering = false; Hud.ClearHelp(); }
+                    if (_offering) { _offering = false; _heldSince = 0; Hud.ClearHelp(); }
                     return;
                 }
 
@@ -158,9 +158,13 @@ namespace BareMinimum.Needs
                     _promptDone = false;
                 }
 
+                // ASKED BEFORE THE PROMPT IS DRAWN, so the hold meter on screen is this
+                // frame's state rather than the previous one's.
+                var ready = Ready(where);
+
                 Prompt(where);
 
-                if (Pressed()) Begin(where);
+                if (ready) Begin(where);
             }
             catch (Exception ex)
             {
@@ -271,6 +275,24 @@ namespace BareMinimum.Needs
         /// </summary>
         private void Prompt(Bunk where)
         {
+            // A HOLD IN PROGRESS OUTRANKS THE TIMED OFFER, and outranks _promptDone with it.
+            // The offer gets out of the way after two seconds, which is right for a line of
+            // text and wrong for a meter: with nothing on screen, a hold is indistinguishable
+            // from a button that has stopped working.
+            if (_heldSince != 0)
+            {
+                var need = (int)(_cfg.CarSleepHoldSeconds * 1000f);
+                var got = Game.GameTime - _heldSince;
+
+                var pips = need <= 0 ? Pips : (int)(Pips * got / (float)need);
+
+                if (pips < 0) pips = 0;
+                if (pips > Pips) pips = Pips;
+
+                Hud.Help("Dozing off  " + new string('\u25CF', pips));
+                return;
+            }
+
             if (_promptDone) return;
 
             if (Game.GameTime - _offeredAt >= PromptMs)
@@ -280,9 +302,14 @@ namespace BareMinimum.Needs
                 return;
             }
 
-            Hud.Help("Press ~INPUT_CONTEXT~ to " +
+            var hold = where == Bunk.Car && _cfg.CarSleepHoldSeconds > 0f;
+
+            Hud.Help((hold ? "Hold " : "Press ") + "~INPUT_CONTEXT~ to " +
                      (where == Bunk.Bed ? "Sleep" : "Doze off") + ".");
         }
+
+        /// <summary>How many marks the hold meter is drawn with.</summary>
+        private const int Pips = 5;
 
         /// <summary>
         /// Whether the interact was pressed, by key OR by the game's own context control.
@@ -307,6 +334,66 @@ namespace BareMinimum.Needs
         }
 
         private bool _keyWasDown;
+
+        /// <summary>When the current hold started. Zero when nothing is being held.</summary>
+        private int _heldSince;
+
+        /// <summary>
+        /// Whether the interact is DOWN -- a level, not an edge, which is what a hold needs.
+        /// </summary>
+        private bool HeldDown()
+        {
+            if (Core.Pad.Down(GTA.Control.Context)) return true;
+
+            try { return Game.IsKeyPressed(_cfg.InteractKey); }
+            catch { return false; }
+        }
+
+        /// <summary>
+        /// Whether to start the sleep: a tap at a bed, a HOLD in a car.
+        ///
+        /// THE CAR IS THE ONE THAT NEEDED IT. In a car the interact is the same button that
+        /// orders at a drive-through, so a press meant for lunch put you to sleep for four
+        /// hours instead -- reported by jerome74, and easy to do. At a bed nothing else is
+        /// competing for the press, and a hold there would be friction bought with nothing.
+        ///
+        /// CarHoldSeconds = 0 puts the old tap back for anybody who preferred it.
+        /// </summary>
+        private bool Ready(Bunk where)
+        {
+            var seconds = where == Bunk.Car ? _cfg.CarSleepHoldSeconds : 0f;
+
+            if (seconds <= 0f)
+            {
+                _heldSince = 0;
+                return Pressed();
+            }
+
+            if (!HeldDown())
+            {
+                _heldSince = 0;
+                return false;
+            }
+
+            var now = Game.GameTime;
+
+            // First frame of the hold: start the clock, do not act on it yet.
+            if (_heldSince == 0)
+            {
+                _heldSince = now;
+                return false;
+            }
+
+            if (now - _heldSince < (int)(seconds * 1000f)) return false;
+
+            _heldSince = 0;
+
+            // The button is still down as the sleep begins. Telling the edge detector it has
+            // already seen this press stops the release from starting a second one the moment
+            // he wakes up.
+            _keyWasDown = true;
+            return true;
+        }
 
         /// <summary>
         /// Edge-detects the configured key.

@@ -87,7 +87,7 @@ namespace BareMinimum
             // Same rule as the pantry: AFTER the catalogue, because the load drops anything
             // foods.json no longer defines and it cannot know that until the list is read.
             _larder = new Larder(_cfg, _catalogue);
-            _fridges = new Fridges();
+            _fridges = new Fridges(_cfg);
 
             _counters = new Counters();
             _socials = new Social.Socials(_cfg);

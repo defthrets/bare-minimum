@@ -170,6 +170,8 @@ namespace BareMinimum.UI
         // Input
         // ======================================================================
 
+        private bool _padWas;
+
         private bool Toggled()
         {
             var down = false;
@@ -179,6 +181,14 @@ namespace BareMinimum.UI
 
             var edge = down && !_down;
             _down = down;
+
+            // LB + D-pad LEFT. Checked even when the key already fired, so the chord's own
+            // memory stays in step and releasing it cannot fire a second time.
+            if (_cfg.BagPad &&
+                Core.Pad.Chord(GTA.Control.FrontendLb, GTA.Control.FrontendLeft, ref _padWas))
+            {
+                edge = true;
+            }
 
             if (!edge) return false;
             if (Game.GameTime < _quietUntil) return false;

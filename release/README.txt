@@ -1,5 +1,5 @@
 ===============================================================================
-  BARE MINIMUM 0.1.1  --  hunger and sleep for GTA V
+  BARE MINIMUM 0.1.2  --  hunger and sleep for GTA V
   by spitmux
 ===============================================================================
 
@@ -65,8 +65,16 @@
     Q and E    change tab       SPACE   move a thing in or out of the fridge
     BACKSPACE  close
 
-  A controller works throughout. The key hints change to A, B and X the moment
-  you pick one up.
+  ON A CONTROLLER: the context button does everything E does -- buy, order, open
+  a fridge, get into a bed. The two panels open on a chord, because a pad has no
+  button spare:
+
+    LB + D-pad UP      settings
+    LB + D-pad LEFT    your pocket
+
+  Inside a panel the d-pad moves, A chooses and B closes, and the key hints
+  change to those glyphs the moment you pick a pad up. Fumes uses LB + D-pad
+  DOWN for its own menu, so these two stay clear of it.
 
 
 -------------------------------------------------------------------------------
@@ -156,7 +164,7 @@
   SETTINGS
 -------------------------------------------------------------------------------
 
-  F7 opens the menu. Ninety-seven settings across nine tabs, every one with a
+  F7 opens the menu. A hundred and one settings across six tabs, every one with a
   line saying what it does, and everything takes effect as you turn it.
 
   Everything is also in scripts\BareMinimum.ini, which is commented at length

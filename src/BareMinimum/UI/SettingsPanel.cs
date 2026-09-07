@@ -259,16 +259,27 @@ namespace BareMinimum.UI
         /// across a dozen frames, which would open and close the menu repeatedly for as long
         /// as the key is down.
         /// </summary>
+        private bool _padWas;
+
         private bool Toggled()
         {
             bool down;
 
             try { down = Game.IsKeyPressed(_cfg.MenuKey); }
-            catch { return false; }
+            catch { down = false; }
 
             var edge = down && !_keyWasDown;
             _keyWasDown = down;
-            return edge;
+
+            // LB + D-pad UP. Not DOWN: Fumes opens its own menu on LB + D-pad Down, and one
+            // chord opening two mods' panels is worse than having no pad support at all.
+            //
+            // Asked EVERY frame rather than only when the key missed, so the chord's memory
+            // cannot fall out of step and fire again on release.
+            var pad = _cfg.MenuPad &&
+                      Core.Pad.Chord(GTA.Control.FrontendLb, GTA.Control.FrontendUp, ref _padWas);
+
+            return edge || pad;
         }
 
         private void Refill()
@@ -539,6 +550,15 @@ namespace BareMinimum.UI
             Bool("Sleep in cars", "Sleeping", "InCars",
                  () => _cfg.SleepInCars, v => _cfg.SleepInCars = v,
                  "Stopped, engine off, no wanted level.");
+
+            Float("Hold to doze off", "Sleeping", "CarHoldSeconds",
+                  () => _cfg.CarSleepHoldSeconds, v => _cfg.CarSleepHoldSeconds = v,
+                  0.25f, 0f, 5f, "0.00",
+                  "Seconds to HOLD the interact in a car. 0 is a tap. In a car that button " +
+                  "also orders at a drive-through, so a tap could put you to sleep by " +
+                  "accident. Beds are unaffected.",
+                  () => _cfg.SleepInCars,
+                  "~y~Turn sleeping in cars ON first.");
 
             Bool("Count other mods' sleep", "Sleeping", "CreditOutsideSleep",
                  () => _cfg.CreditOutsideSleep, v => _cfg.CreditOutsideSleep = v,

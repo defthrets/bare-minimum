@@ -40,6 +40,18 @@ namespace BareMinimum.Venues
         /// anything, so listing one too many costs a line in the log; listing one too few
         /// costs a kitchen where the fridge does nothing and no clue as to why.
         /// </summary>
+        /// <summary>
+        /// The settings, for the one thing this class asks them: the player's own extra
+        /// fridge model names. It had no constructor at all before, because until ExtraModels
+        /// there was nothing here that could be configured.
+        /// </summary>
+        private readonly Settings _cfg;
+
+        public Fridges(Settings cfg)
+        {
+            _cfg = cfg;
+        }
+
         private static readonly string[] Candidates =
         {
             // Safehouse kitchens
@@ -79,7 +91,24 @@ namespace BareMinimum.Venues
             var good = new List<int>();
             var missing = new List<string>();
 
-            foreach (var name in Candidates)
+            // THE SHIPPED LIST PLUS WHATEVER THE PLAYER ADDED. A fridge is found by model
+            // name, so a kitchen this build has never heard of -- an interior mod's house, a
+            // room added to the game after this was written -- simply has no fridge as far as
+            // the mod is concerned, and until now there was nothing the player could do but
+            // wait for me to add it. jerome74's is the one that prompted this.
+            var wanted = new List<string>(Candidates);
+
+            foreach (var extra in (_cfg.FridgeExtraModels ?? "").Split(',', ';'))
+            {
+                var name = extra.Trim();
+
+                if (name.Length == 0) continue;
+                if (wanted.Contains(name)) continue;
+
+                wanted.Add(name);
+            }
+
+            foreach (var name in wanted)
             {
                 try
                 {
@@ -96,8 +125,15 @@ namespace BareMinimum.Venues
 
             _hashes = good.ToArray();
 
-            Log.Info("Fridges: " + _hashes.Length + " of " + Candidates.Length +
-                     " model(s) exist in this build.");
+            // THE NAMES THAT DID NOT RESOLVE ARE LISTED, not just counted. The whole point of
+            // ExtraModels is that somebody types a model name into an ini, and a typo and a
+            // model this game does not have look identical from the kitchen -- no fridge,
+            // either way. Reading them back is the only way to tell which one it was.
+            Log.Info("Fridges: " + _hashes.Length + " of " + wanted.Count +
+                     " model(s) exist in this build" +
+                     (missing.Count == 0
+                          ? "."
+                          : ". Not in this game: " + string.Join(", ", missing.ToArray()) + "."));
 
             if (missing.Count > 0)
             {

@@ -529,6 +529,12 @@ namespace BareMinimum.UI
             }
 
             bool down;
+            // THE PROMPT ADVERTISES ~INPUT_CONTEXT~, so the context button has to work.
+            // It drew the pad's own glyph and then read the keyboard only, which meant a
+            // controller player was shown a button and pressed it and nothing happened.
+            // Sleeping and the fridge already did both; these two were the ones left out.
+            if (Core.Pad.Context()) return true;
+
             try { down = Game.IsKeyPressed(_cfg.InteractKey); }
             catch { return false; }
 

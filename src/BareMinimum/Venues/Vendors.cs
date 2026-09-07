@@ -1762,6 +1762,9 @@ namespace BareMinimum.Venues
             }
 
             bool down;
+            // The shelf shows ~INPUT_CONTEXT~ too. Same omission as the counter.
+            if (Core.Pad.Context()) return true;
+
             try { down = Game.IsKeyPressed(_cfg.InteractKey); }
             catch { return false; }
 

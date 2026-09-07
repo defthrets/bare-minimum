@@ -243,6 +243,20 @@ namespace BareMinimum.Core
         public bool SleepInBeds = true;
         public bool SleepInCars = true;
 
+        /// <summary>
+        /// How long the interact has to be HELD to doze off in a car. Seconds; 0 is a tap.
+        ///
+        /// A CAR ONLY, and not a bed. In a car the interact is the same button that orders at
+        /// a drive-through, so a tap meant for lunch put you to sleep instead -- which is what
+        /// was reported. At a bed nothing else is competing for the press, and a hold there
+        /// would be friction bought with nothing.
+        ///
+        /// 1.5 rather than the three seconds asked for: long enough that it cannot happen by
+        /// accident, short enough that somebody who meant it does not wonder whether it is
+        /// broken. The ini goes to five for anybody who wants more.
+        /// </summary>
+        public float CarSleepHoldSeconds = 1.5f;
+
         /// <summary>Game hours a proper bed advances the clock by.</summary>
         public float BedHours = 8f;
 
@@ -757,6 +771,19 @@ namespace BareMinimum.Core
         public float FridgeReach = 1.8f;
 
         /// <summary>
+        /// Extra fridge model names to look for, comma-separated, on top of the built-in list.
+        ///
+        /// BECAUSE THE BUILT-IN LIST CANNOT BE COMPLETE. A fridge is found by model name, and
+        /// a kitchen this build has never heard of -- a house from an interior mod, a room
+        /// Rockstar added after this was written -- has a fridge that simply does not answer.
+        /// Before this there was nothing the player could do about that but wait for me.
+        ///
+        /// A name that does not exist in the running game costs one line in the log and
+        /// nothing else, so guessing here is safe.
+        /// </summary>
+        public string FridgeExtraModels = "";
+
+        /// <summary>
         /// How food is turned in his hand, in degrees about the prop's own three axes.
         ///
         /// A prop attached to the hand bone with no rotation takes the model's own idea of
@@ -777,6 +804,24 @@ namespace BareMinimum.Core
 
         /// <summary>Opens the pocket: what you have bought and not eaten yet.</summary>
         public Keys BagKey = Keys.F11;
+
+        /// <summary>
+        /// Whether the settings menu and the pocket open on a CONTROLLER as well.
+        ///
+        /// A CHORD, not a button, and for the reason Fumes gives for its own: there is no
+        /// spare button on a pad -- every one of them is spoken for on foot -- so a single
+        /// press is always one press away from something the game already does.
+        ///
+        /// LB + D-pad UP for the menu and LB + D-pad LEFT for the pocket. Fumes already owns
+        /// LB + D-pad DOWN for its menu, and somebody running both mods should not have one
+        /// chord open two panels.
+        ///
+        /// The interact needs no setting of its own: everything that reads the interact key
+        /// already reads Control.Context beside it, which is the button the on-screen prompt
+        /// is showing you in the first place.
+        /// </summary>
+        public bool MenuPad = true;
+        public bool BagPad = true;
 
         // ======================================================================
 
@@ -867,6 +912,8 @@ namespace BareMinimum.Core
 
                 cfg.SleepInBeds = ini.GetBool("Sleeping", "InBeds", cfg.SleepInBeds);
                 cfg.SleepInCars = ini.GetBool("Sleeping", "InCars", cfg.SleepInCars);
+                cfg.CarSleepHoldSeconds = ini.GetFloat("Sleeping", "CarHoldSeconds",
+                                                       cfg.CarSleepHoldSeconds, 0f, 5f);
                 cfg.BedHours = ini.GetFloat("Sleeping", "BedHours", cfg.BedHours, 1f, 24f);
                 cfg.CarHours = ini.GetFloat("Sleeping", "CarHours", cfg.CarHours, 1f, 24f);
                 cfg.CarRestoreFraction = ini.GetFloat("Sleeping", "CarRestoreFraction",
@@ -949,6 +996,8 @@ namespace BareMinimum.Core
                 cfg.InteractKey = ini.GetKey("Keys", "Interact", cfg.InteractKey);
                 cfg.MenuKey = ini.GetKey("Keys", "Menu", cfg.MenuKey);
                 cfg.BagKey = ini.GetKey("Keys", "Bag", cfg.BagKey);
+                cfg.MenuPad = ini.GetBool("Keys", "MenuPad", cfg.MenuPad);
+                cfg.BagPad = ini.GetBool("Keys", "BagPad", cfg.BagPad);
 
                 cfg.BuyToPantry = ini.GetBool("Money", "BuyToPantry", cfg.BuyToPantry);
                 cfg.PantrySlots = (int)ini.GetFloat("Money", "PantrySlots", cfg.PantrySlots, 1f, 200f);
@@ -956,6 +1005,8 @@ namespace BareMinimum.Core
                 cfg.FridgeEnabled = ini.GetBool("Fridge", "Enabled", cfg.FridgeEnabled);
                 cfg.FridgeSlots = (int)ini.GetFloat("Fridge", "Slots", cfg.FridgeSlots, 1f, 500f);
                 cfg.FridgeReach = ini.GetFloat("Fridge", "Reach", cfg.FridgeReach, 0.5f, 6f);
+                cfg.FridgeExtraModels = ini.GetString("Fridge", "ExtraModels",
+                                                      cfg.FridgeExtraModels);
 
                 cfg.FoodSpinX = ini.GetFloat("Eating", "FoodSpinX", cfg.FoodSpinX, -180f, 180f);
                 cfg.FoodSpinY = ini.GetFloat("Eating", "FoodSpinY", cfg.FoodSpinY, -180f, 180f);

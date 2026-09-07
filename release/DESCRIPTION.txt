@@ -1,5 +1,5 @@
 ================================================================================
-  BARE MINIMUM 0.1.1 -- copy for the mod page
+  BARE MINIMUM 0.1.2 -- copy for the mod page
 ================================================================================
 
 Three lengths and a changelog. Use whichever the site's fields want.
@@ -34,7 +34,7 @@ its own price, its own effect and its own line about itself. Shops with a full
 menu, stalls that just hand you a hot dog, and drive-throughs you order from
 without leaving the car. What you buy goes in your pocket for later, or into the
 fridge in any safehouse kitchen. Sleep in any bed. Run everywhere and you will
-pay for it in both. 97 settings, all live in an in-game menu, and every shop and
+pay for it in both. 101 settings, all live in an in-game menu, and every shop and
 every item is a plain text file you can edit. Drop-in install, works on Legacy
 and Enhanced, and your save is never touched. A work in progress: the shop list
 is still growing, and adding your own is a text file.
@@ -104,7 +104,7 @@ Sleep in any bed, and how well you sleep depends on whose bed it is. A car is wo
 
 <b>🔧 YOURS TO CHANGE</b>
 
-97 settings across six tabs in an in-game menu on <b>F7</b>, each with a line saying what it does, everything live as you turn it, and the changes written back to the ini without disturbing your comments or your ordering.
+101 settings across six tabs in an in-game menu on <b>F7</b>, each with a line saying what it does, everything live as you turn it, and the changes written back to the ini without disturbing your comments or your ordering.
 
 Every shop and every item is a plain text file. Add a shop, change a price, write a menu, move something that is in the wrong place. Anything the game cannot find is skipped with a line in the log rather than breaking the mod.
 
@@ -131,10 +131,21 @@ Drag into your GTA V folder, say yes to merging, load a save. Needs ScriptHookV 
 
 All three can be changed in the ini.
 
+🎮 <b>On a controller:</b> the context button does everything E does. The panels open on a chord, because a pad has no button spare — <b>LB + D-pad Up</b> for settings, <b>LB + D-pad Left</b> for your pocket. Inside a panel the d-pad moves, A chooses and B closes, and the on-screen hints switch to those glyphs the moment you pick a pad up.
+
 
 --------------------------------------------------------------------------------
   4. CHANGELOG  (changelog field -- paste from here to the next divider)
 --------------------------------------------------------------------------------
+
+<b>0.1.2</b>
+
+<ul>
+<li>🎮 <b>It works on a controller now.</b> The counter and the shelf drew the pad's own button on their prompt and then read the keyboard only — shown a button, pressed it, nothing happened. Both read the pad now. The panels open on a chord too: <b>LB + D-pad Up</b> for settings, <b>LB + D-pad Left</b> for your pocket. <i>Asked for by Jodosodojo.</i></li>
+<li>🚗 <b>Dozing off in a car is a hold, not a tap</b> — in a car that button also orders at a drive-through, so a press meant for lunch put you to sleep for four hours. A second and a half, with a meter while it fills. Beds are untouched. <i>Asked for by jerome74.</i></li>
+<li>🧊 <b>A fridge this build has not heard of can be named in the ini.</b> Fridge/ExtraModels takes a comma-separated list on top of the built-in fourteen, and the log now names the models that did not resolve instead of counting them. <i>Reported by jerome74.</i></li>
+<li>⚙️ 101 settings, up from 97.</li>
+</ul>
 
 <b>0.1.1</b>
 

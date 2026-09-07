@@ -3,6 +3,39 @@
 ===============================================================================
 
 
+0.1.2  --  the controller, and two things off the comments
+-------------------------------------------------------------------------------
+
+  IT WORKS ON A CONTROLLER NOW, and one part of that was a plain bug. The
+  counter and the shelf DREW the pad's own button on their prompt and then read
+  the keyboard only, so a controller player was shown a button, pressed it, and
+  nothing happened. Sleeping and the fridge already read both; those two had
+  been left out. The two panels open on a chord as well -- LB + D-pad Up for the
+  settings, LB + D-pad Left for the pocket -- avoiding LB + D-pad Down, which is
+  Fumes' menu, because one chord opening two mods' panels is worse than none.
+  Asked for by Jodosodojo.
+
+  DOZING OFF IN A CAR IS A HOLD, not a tap. In a car the interact is the same
+  button that orders at a drive-through, so a press meant for lunch put you to
+  sleep for four hours instead. A second and a half by default, with a meter on
+  screen while it fills; Sleeping/CarHoldSeconds sets it, and 0 puts the tap
+  back. Beds are untouched -- nothing competes for the press there, and a hold
+  would be friction bought with nothing. Asked for by jerome74.
+
+  A FRIDGE THIS BUILD HAS NOT HEARD OF CAN BE NAMED IN THE INI. Fridges are
+  found by model name, so a kitchen from an interior mod -- or a room the game
+  added after this was written -- simply had no fridge, and there was nothing
+  the player could do but wait for me. Fridge/ExtraModels takes a comma-
+  separated list on top of the built-in fourteen. The log line beginning
+  "Fridges:" now NAMES the models that did not resolve rather than counting
+  them, because a typo and a model your game does not have look identical from
+  the kitchen. Reported by jerome74.
+
+  101 settings, up from 97 -- and the docs had been saying nine tabs when there
+  are six.
+
+
+-------------------------------------------------------------------------------
 0.1.1  --  the bars ship, and the three of them are told apart properly
 -------------------------------------------------------------------------------
 
@@ -93,7 +126,7 @@
   DRINK, AND GET DRUNK. Beer, wine and spirits carry their own effect, the walk
   goes with it, and sleeping it off works for free.
 
-  A SETTINGS MENU ON F7. Ninety-seven settings across nine tabs, each with a
+  A SETTINGS MENU ON F7. A hundred and one settings across six tabs, each with a
   line saying what it does, everything live as you turn it, and the changes
   written back to the ini without touching your comments or your ordering.
 
