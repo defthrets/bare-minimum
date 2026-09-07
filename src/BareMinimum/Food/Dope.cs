@@ -409,62 +409,87 @@ namespace BareMinimum.Food
         /// </summary>
         ///
         /// <remarks>
-        /// THE SIGNS ARE THE WHOLE DESIGN. A meter here reads as how full you are and how
-        /// rested you are, so a stimulant does not FEED you -- it stops you noticing that you
-        /// are hungry while burning through what you had, which is hunger down and sleep up.
-        /// Weed is the one that runs the other way on both counts: the munchies are hunger
-        /// down harder than anything else here, and it makes you heavy rather than awake.
+        /// TWO CAMPS, AND EVERYTHING IN ONE RUNS THE SAME WAY. The downers put you under and
+        /// leave you hungry; the uppers stand you up and put ten per cent back on the stomach.
         ///
-        /// NOTHING HERE IS A BED. The largest sleep on the list is meth at just over a quarter
-        /// of the meter, against eight hours for a full night, and it costs the most hunger of
-        /// anything to get it. Posted Up refuses a fourth dose and puts you face down for an
-        /// overdose -- which comes back through Api.Pantry.Drain and takes far more off both
-        /// meters than the doses put on -- so the loop that punishes living on this is already
-        /// there and did not need building again on this side.
+        /// IT USED TO SAY THE OPPOSITE FOR HALF THE LIST, on a reading of the meters that was
+        /// too clever by half: a stimulant does not literally feed anybody, so it took hunger
+        /// away and handed sleep back, and a sedative was called restful because rest is what
+        /// people take one for. Both of those are arguments. Neither is what happens in front
+        /// of you -- take a xanax and you are tired, take meth and you are up, and you are not
+        /// thinking about dinner because you feel fine.
+        ///
+        /// WAKE = 1 MEANS FULL, not "add one to it". Restore clamps at the top of the meter,
+        /// so a whole number fills it from wherever it happened to be. That is deliberate and
+        /// it is the biggest thing in this file: meth and the rest of the uppers ARE a night's
+        /// sleep, not a top-up towards one, so anybody holding product need never go to bed.
+        /// The counterweight is not on this side and does not need to be -- Posted Up refuses
+        /// a fourth dose, and an overdose comes back through Api.Pantry.Drain taking far more
+        /// off both meters than any of this puts on.
         ///
         /// IN A TABLE RATHER THAN A JSON, unlike everything else this mod reads. The ids are
         /// not ours: they come out of the other mod's drugs.json, and a file inviting somebody
         /// to add "fentanyl" here would be a file whose entries mostly do nothing, because
         /// nothing over there is carrying one. An id we have never heard of still works -- see
         /// Effect -- it simply does nothing to the meters.
+        ///
+        /// AN ENTRY MAY LEAD THE CATALOGUE. oxycodone is written down here and Posted Up does
+        /// not stock it, so today it is a row that never matches anything. That costs nothing
+        /// and means the day it is added over there it already behaves, rather than silently
+        /// doing nothing to either meter until somebody notices.
         /// </remarks>
         private static readonly Dictionary<string, Dose> Doses =
             new Dictionary<string, Dose>(StringComparer.OrdinalIgnoreCase)
         {
+            // ---- down: under, and hungry with it ----
+
+            { "xanax", new Dose {
+                Hunger = -0.08f, Wake = -0.35f,
+                Tint = Color.FromArgb(255, 190, 206, 232),
+                Desc = "Puts you under. You will not stay up." } },
+
+            { "heroin", new Dose {
+                Hunger = -0.15f, Wake = -0.30f,
+                Tint = Color.FromArgb(255, 168, 130, 96),
+                Desc = "A nod, and nothing else matters." } },
+
+            // Not in Posted Up's drugs.json today. Here so that it behaves the day it is.
+            { "oxycodone", new Dose {
+                Hunger = -0.12f, Wake = -0.30f,
+                Tint = Color.FromArgb(255, 228, 212, 158),
+                Desc = "A warm nod. Everything slows down." } },
+
+            // The heaviest stomach on the list and the lightest head. Weed does not put you
+            // out the way the other three do -- it makes you heavy, and it makes you eat.
             { "weed", new Dose {
-                Hunger = -0.16f, Wake = -0.05f,
+                Hunger = -0.16f, Wake = -0.25f,
                 Tint = Color.FromArgb(255, 126, 178, 96),
                 Desc = "The munchies, and a heavy head." } },
 
-            { "xanax", new Dose {
-                Hunger = -0.03f, Wake = 0.12f,
-                Tint = Color.FromArgb(255, 190, 206, 232),
-                Desc = "Puts you under. You come back rested." } },
-
-            { "ecstasy", new Dose {
-                Hunger = -0.12f, Wake = 0.20f,
-                Tint = Color.FromArgb(255, 212, 122, 196),
-                Desc = "Up all night. No appetite at all." } },
-
-            { "coke", new Dose {
-                Hunger = -0.10f, Wake = 0.18f,
-                Tint = Color.FromArgb(255, 238, 238, 244),
-                Desc = "Wired. You will not want dinner." } },
-
-            { "crack", new Dose {
-                Hunger = -0.14f, Wake = 0.15f,
-                Tint = Color.FromArgb(255, 226, 206, 168),
-                Desc = "Sharp, short, and it eats you." } },
+            // ---- up: wide awake, and a tenth back on the stomach ----
 
             { "meth", new Dose {
-                Hunger = -0.18f, Wake = 0.28f,
+                Hunger = 0.10f, Wake = 1f,
                 Tint = Color.FromArgb(255, 150, 205, 230),
-                Desc = "Days awake. Days without food." } },
+                Desc = "Days awake. Nothing gets you down." } },
 
-            { "heroin", new Dose {
-                Hunger = -0.15f, Wake = 0.10f,
-                Tint = Color.FromArgb(255, 168, 130, 96),
-                Desc = "A nod, and nothing else matters." } },
+            { "coke", new Dose {
+                Hunger = 0.10f, Wake = 1f,
+                Tint = Color.FromArgb(255, 238, 238, 244),
+                Desc = "Wide awake, and suddenly fine." } },
+
+            // CRACK AND ECSTASY WERE NOT NAMED and are here anyway, because they are the same
+            // camp and half a rule is worse than either whole one -- a man who has just learnt
+            // that uppers stand him up should not find that two of them do not.
+            { "crack", new Dose {
+                Hunger = 0.10f, Wake = 1f,
+                Tint = Color.FromArgb(255, 226, 206, 168),
+                Desc = "Sharp and short, and you are up." } },
+
+            { "ecstasy", new Dose {
+                Hunger = 0.10f, Wake = 1f,
+                Tint = Color.FromArgb(255, 212, 122, 196),
+                Desc = "Up all night, and glad about it." } },
         };
 
         /// <summary>
