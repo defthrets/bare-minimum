@@ -69,7 +69,36 @@ namespace BareMinimum.UI
         private readonly Pantry _pantry;
         private readonly Eating _eating;
 
+        /// <summary>
+        /// The meters, which this class never had to touch before.
+        ///
+        /// Eating a sandwich goes through Eating, which owns the animation and moves them when
+        /// the mouthful actually lands. A drug's animation belongs to the other mod, so there
+        /// is nothing here to own it -- what is left is the part this mod does own, and Dope
+        /// needs the meters handed to it to do that part.
+        /// </summary>
+        private readonly Needs.Needs _needs;
+
         private List<string> _ids = new List<string>();
+
+        /// <summary>
+        /// What Posted Up has you carrying, if it is installed. Empty otherwise, which is what
+        /// this pocket looked like before the bridge existed.
+        /// </summary>
+        private List<string> _dope = new List<string>();
+
+        /// <summary>Tiles in the grid: the food, and then the product after it.</summary>
+        private int Places { get { return _ids.Count + _dope.Count; } }
+
+        /// <summary>Whether that tile is a bag rather than a sandwich.</summary>
+        private bool IsDope(int at) { return at >= _ids.Count && at < Places; }
+
+        /// <summary>The id under that tile, from whichever list it falls in.</summary>
+        private string IdAt(int at)
+        {
+            if (at < 0 || at >= Places) return null;
+            return at < _ids.Count ? _ids[at] : _dope[at - _ids.Count];
+        }
 
         private int _index;
         private int _page;
@@ -87,12 +116,14 @@ namespace BareMinimum.UI
 
         public bool IsOpen { get; private set; }
 
-        public Bag(Core.Settings cfg, Catalogue menu, Pantry pantry, Eating eating)
+        public Bag(Core.Settings cfg, Catalogue menu, Pantry pantry, Eating eating,
+                   Needs.Needs needs)
         {
             _cfg = cfg;
             _menu = menu;
             _pantry = pantry;
             _eating = eating;
+            _needs = needs;
         }
 
         // ======================================================================
@@ -158,7 +189,18 @@ namespace BareMinimum.UI
         {
             _ids = _pantry.Ids();
 
-            if (_index >= _ids.Count) _index = Math.Max(0, _ids.Count - 1);
+            // ASKED EVERY REFILL RATHER THAN CACHED. What is in the other mod's pockets
+            // changes without this one being told -- a sale, a bust, a dose taken from its own
+            // screen -- and a list held from the last time the pocket was open would offer a
+            // bag that has already gone.
+            _dope.Clear();
+
+            if (_cfg.DrugsInPocket)
+            {
+                foreach (var id in Food.Dope.Ids()) _dope.Add(id);
+            }
+
+            if (_index >= Places) _index = Math.Max(0, Places - 1);
 
             Warm();
 
@@ -209,7 +251,7 @@ namespace BareMinimum.UI
                 return;
             }
 
-            if (_ids.Count > 0)
+            if (Places > 0)
             {
                 if (Pressed(GTA.Control.FrontendRight)) Move(1);
                 if (Pressed(GTA.Control.FrontendLeft)) Move(-1);
@@ -233,7 +275,7 @@ namespace BareMinimum.UI
         private void Move(int by)
         {
             var to = _index + by;
-            if (to < 0 || to >= _ids.Count) return;
+            if (to < 0 || to >= Places) return;
 
             _last = _index;
             _index = to;
@@ -259,7 +301,10 @@ namespace BareMinimum.UI
         /// </summary>
         private void Warm()
         {
-            if (_ids.Count == 0) return;
+            // Food only. A drug's animation belongs to the other mod and is loaded by it;
+            // asking Eating to warm a prop for an id it has never heard of would find nothing
+            // and log a miss for something that was never going to be in his hand.
+            if (_ids.Count == 0 || IsDope(_index)) return;
 
             var id = _ids[Clamp(_index, 0, _ids.Count - 1)];
 
@@ -268,7 +313,9 @@ namespace BareMinimum.UI
 
         private void Eat()
         {
-            if (_ids.Count == 0) return;
+            if (Places == 0) return;
+
+            if (IsDope(_index)) { Take(); return; }
 
             if (_eating.Busy)
             {
@@ -299,6 +346,45 @@ namespace BareMinimum.UI
             // OUT OF THE WAY WHILE YOU EAT. The animation is the point of the purchase and it
             // happens behind this panel; a grid sitting over your own hands is the wrong thing
             // to be looking at.
+            Close();
+        }
+
+        /// <summary>
+        /// Takes a drug, which is almost nothing to do with this class.
+        /// </summary>
+        ///
+        /// <remarks>
+        /// NOTHING IS TAKEN OFF HIM HERE and nothing is put back. Eat above does that dance
+        /// because this mod owns the pantry and can be left holding a sandwich that never got
+        /// eaten; the product belongs to the other mod, and Dope.Take is one call that either
+        /// does the whole thing or does none of it. Reaching in to remove a gram first would
+        /// be this mod inventing a half-state in somebody else's inventory.
+        ///
+        /// A REFUSAL IS A SENTENCE, not a beep. "You've had enough of that" is the other mod's
+        /// own wording for its own rule, and showing it is the difference between a button
+        /// that is broken and a button that is telling you something.
+        /// </remarks>
+        private void Take()
+        {
+            var id = IdAt(_index);
+            if (id == null) { Sound("ERROR"); return; }
+
+            if (!Food.Dope.Enough(id)) { Sound("ERROR"); return; }
+
+            var no = Food.Dope.Take(_needs, id);
+
+            if (no != null)
+            {
+                Sound("ERROR");
+                GTA.UI.Notification.PostTicker("~o~" + no + "~s~.", false, false);
+                return;
+            }
+
+            Sound("SELECT");
+
+            // The same exit as a meal, for the same reason: the ritual it starts is the whole
+            // point of having pressed the button, and none of it can be seen from behind a
+            // panel.
             Close();
         }
 
@@ -364,22 +450,30 @@ namespace BareMinimum.UI
             var perPage = Columns * Rows;
             var first = _page * perPage;
 
-            var onPage = Math.Max(0, Math.Min(perPage, _ids.Count - first));
+            var onPage = Math.Max(0, Math.Min(perPage, Places - first));
             var shownRows = onPage == 0 ? 1 : (onPage + Columns - 1) / Columns;
 
             var height = Kit.HeadH + GridPad + shownRows * tileH + GridPad + CardH + Kit.FootH;
 
             Theme.Panel(left, top, panelW, height, arrive);
 
+            // FOOD ONLY IN THE COUNT. Slots is this mod's rule about how many sandwiches fit
+            // in a pocket; the product has a capacity of its own over in the other mod and is
+            // reported beside it rather than folded into it.
+            var held = _pantry.Total + " of " + _pantry.Slots;
+
+            if (_dope.Count > 0)
+            {
+                held += "  \u00b7  " + Food.Dope.Carried.ToString("0.#") + "g";
+            }
+
             var y = Kit.Head(left, top, panelW, Pad, IconCache.Get("p_bag.png"), "POCKET",
-                             "what you are carrying", null, _pantry.Total + " of " + _pantry.Slots,
+                             "what you are carrying", null, held,
                              arrive, 0f);
 
             y += GridPad;
 
             _frame.Begin();
-
-            Item item = null;
 
             if (onPage == 0)
             {
@@ -411,7 +505,7 @@ namespace BareMinimum.UI
                     var picked = at == _index;
                     var lit = Theme.Lit(at, _index, _last, grown);
 
-                    Tile(_ids[at], tx, ty, tileW, tileH, lit, show, i, picked, grown);
+                    Tile(at, tx, ty, tileW, tileH, lit, show, i, picked, grown);
 
                     if (picked)
                     {
@@ -419,15 +513,13 @@ namespace BareMinimum.UI
                                       tileW - Gap * 2f, tileH - Gap * 2f * Hud.Aspect);
                     }
                 }
-
-                item = _menu.Find(_ids[Clamp(_index, 0, _ids.Count - 1)]);
             }
 
             y += shownRows * tileH + GridPad;
 
-            Card(x, y, wide, item, arrive);
+            Card(x, y, wide, _index, arrive);
 
-            Foot(x, right, top + height - Kit.FootH, item, arrive);
+            Foot(x, right, top + height - Kit.FootH, _index, arrive);
 
             // Last, so it rides over the tile it is pointing at.
             _frame.Draw(arrive);
@@ -438,9 +530,12 @@ namespace BareMinimum.UI
         /// the cursor and going down where it left, the light crossing the lit one. The same
         /// tile Hoodrich draws, in this mod's colour.
         /// </summary>
-        private void Tile(string id, float x, float y, float w, float h, float lit, float show,
+        private void Tile(int at, float x, float y, float w, float h, float lit, float show,
                           int slot, bool picked, float grown)
         {
+            var id = IdAt(at);
+            if (id == null) return;
+
             var gx = Gap;
             var gy = Gap * Hud.Aspect;
 
@@ -455,10 +550,19 @@ namespace BareMinimum.UI
 
             Theme.Plate(tx, ty, tw, th, lit * show);
 
-            var item = _menu.Find(id);
-            if (item == null) return;
+            var dope = IsDope(at);
 
-            var icon = IconCache.Get("p_" + item.Icon + ".png");
+            var item = dope ? null : _menu.Find(id);
+            if (!dope && item == null) return;
+
+            // A DRUG'S PICTURE IS THE OTHER MOD'S FILE, handed over as a full path. Icon builds
+            // its own path with Path.Combine against this mod's icon folder, and Path.Combine
+            // gives a rooted path straight back -- so a bag of crack drawn out of somebody
+            // else's folder needs nothing changed in Icon at all.
+            var icon = dope ? IconCache.Get(Food.Dope.IconOf(id))
+                            : IconCache.Get("p_" + item.Icon + ".png");
+
+            var tint = dope ? Food.Dope.Effect(id).Tint : item.Tint;
 
             if (icon != null && !icon.Missing)
             {
@@ -470,9 +574,9 @@ namespace BareMinimum.UI
                 // The item's own colour on the dark tile, brightening toward white as the
                 // plate comes up. The art is white and CustomSprite MULTIPLIES, so one file
                 // does all of it.
-                var tint = Sheen.On(item.Tint, slot * 0.11f, lit < 0.5f ? Shimmer() : 0f);
+                var lively = Sheen.On(tint, slot * 0.11f, lit < 0.5f ? Shimmer() : 0f);
 
-                var ink = Theme.Ink(Palette.Alpha(tint, (int)(238f * show)), lit);
+                var ink = Theme.Ink(Palette.Alpha(lively, (int)(238f * show)), lit);
 
                 icon.DrawSized(tx + tw / 2f, ty + th * 0.46f, wideIcon, tall, ink);
             }
@@ -480,7 +584,11 @@ namespace BareMinimum.UI
             // How many, on a chip in the corner. Drawn for every stack including a single one:
             // "1" says this is the last taco, and a badge that appears only at two reads as an
             // error state the first time it shows up.
-            var n = _pantry.CountOf(id);
+            //
+            // A drug counts itself: whole pills for the things that come as pills, and grams
+            // to one place for everything else. Asked rather than worked out here, because
+            // which is which lives in the other mod's drugs.json.
+            var n = dope ? Food.Dope.Chip(id) : _pantry.CountOf(id).ToString();
 
             var chipW = Hud.ToX(0.013f);
             const float chipH = 0.013f;
@@ -488,7 +596,7 @@ namespace BareMinimum.UI
             Hud.Bar(tx + tw - chipW, ty + th - chipH, chipW, chipH,
                     Color.FromArgb((int)(215f * show), 12, 12, 15));
 
-            Hud.TextRight(n.ToString(), tx + tw - 0.0015f, ty + th - chipH + 0.0005f, 0.22f,
+            Hud.TextRight(n, tx + tw - 0.0015f, ty + th - chipH + 0.0005f, 0.22f,
                           Palette.Alpha(Palette.Text, (int)(255f * show)), Hud.FontLabel, false);
         }
 
@@ -502,7 +610,7 @@ namespace BareMinimum.UI
         /// name slides in from the left as the plate comes up under the new tile, so the word
         /// arrives with the cursor rather than swapping under it.
         /// </summary>
-        private void Card(float x, float y, float wide, Item item, float arrive)
+        private void Card(float x, float y, float wide, int at, float arrive)
         {
             // The same plate every chosen thing sits on, faint, so the name and the line under
             // it read as one card rather than two lines of text loose on the panel.
@@ -510,27 +618,49 @@ namespace BareMinimum.UI
 
             var tx = x + 0.010f;
 
-            if (item == null)
+            var id = IdAt(at);
+
+            if (id == null)
             {
                 Hud.Text("Buy something and it turns up here.", tx, y + 0.010f, 0.27f,
                          Palette.Alpha(Palette.TextDim, (int)(190f * arrive)), Hud.FontBody);
                 return;
             }
 
+            string name, desc;
+
+            if (IsDope(at))
+            {
+                // HOW MUCH, ON THE CARD RATHER THAN THE TILE. The chip in the corner has room
+                // for a number and this has room for the word after it, so the tile says "3"
+                // and the card says three pills -- which is the pair of readings the grid was
+                // built for in the first place.
+                name = Food.Dope.NameOf(id) + " -- " + Food.Dope.Label(id);
+                desc = Food.Dope.Effect(id).Desc;
+            }
+            else
+            {
+                var item = _menu.Find(id);
+                if (item == null) return;
+
+                name = item.Name;
+                desc = item.Desc;
+            }
+
             var grown = Theme.Grown(_pickedAt);
 
-            Theme.Caption(item.Name, tx, y + 0.008f, grown, 0.32f);
+            Theme.Caption(name, tx, y + 0.008f, grown, 0.32f);
 
-            if (!string.IsNullOrEmpty(item.Desc))
+            if (!string.IsNullOrEmpty(desc))
             {
-                Hud.Text(Kit.Fit(item.Desc, wide - 0.014f, 0.25f, Hud.FontBody), tx, y + 0.031f, 0.25f,
+                Hud.Text(Kit.Fit(desc, wide - 0.014f, 0.25f, Hud.FontBody), tx, y + 0.031f, 0.25f,
                          Palette.Alpha(Palette.TextDim, (int)((110f + 90f * grown) * arrive)),
                          Hud.FontBody);
             }
         }
 
         /// <summary>The keys as caps, with the way out in the same corner as every other screen.</summary>
-        private void Foot(float x, float right, float y, Item item, float arrive)
+        private void Foot(float x, float right, float y, int at, float arrive)
         {
             Theme.Rule(x, y, right - x, arrive);
 
@@ -538,11 +668,14 @@ namespace BareMinimum.UI
 
             Kit.KeyRight(right, ky, Kit.Back, "DONE", arrive);
 
-            if (_ids.Count == 0) return;
+            if (Places == 0) return;
 
             var kx = Kit.Key(x, ky, null, "arrow_leftright.png", "PICK", arrive);
 
-            var verb = item == null ? "EAT IT"
+            var item = IsDope(at) ? null : _menu.Find(IdAt(at));
+
+            var verb = IsDope(at) ? "TAKE IT"
+                     : item == null ? "EAT IT"
                      : item.Smoke ? "SMOKE IT"
                      : item.Drink ? "DRINK IT"
                                   : "EAT IT";

@@ -104,7 +104,7 @@ namespace BareMinimum
             _vendors = new Vendors(_cfg, _catalogue, _eating, _needs, _socials, _pantry);
             _shop = new Shop(_cfg, _catalogue, _counters, _eating, _needs, _pantry);
 
-            _bag = new Bag(_cfg, _catalogue, _pantry, _eating);
+            _bag = new Bag(_cfg, _catalogue, _pantry, _eating, _needs);
             _fridge = new FridgeScreen(_cfg, _catalogue, _pantry, _larder, _eating, _fridges);
 
             // The bridge other mods reach by reflection. Wired LAST, so anything that finds

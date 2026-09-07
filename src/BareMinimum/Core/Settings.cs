@@ -875,6 +875,22 @@ namespace BareMinimum.Core
         public bool MenuPad = true;
         public bool BagPad = true;
 
+        /// <summary>
+        /// Whether drugs carried in Posted Up show in this mod's pocket and can be taken from
+        /// it.
+        /// </summary>
+        ///
+        /// <remarks>
+        /// DOES NOTHING WITHOUT THAT MOD, so there is no cost to leaving it on. Off is for
+        /// somebody who has both and wants the drug system reached only the way its own author
+        /// built it, with this one staying out of it.
+        ///
+        /// It never touches PantrySlots. The product has a capacity of its own over there --
+        /// four hundred grams -- and each mod enforces the limit on the thing it owns, so
+        /// turning this on does not cost you room for a sandwich.
+        /// </remarks>
+        public bool DrugsInPocket = true;
+
         // ======================================================================
 
         /// <summary>
@@ -1050,6 +1066,8 @@ namespace BareMinimum.Core
                 cfg.BagKey = ini.GetKey("Keys", "Bag", cfg.BagKey);
                 cfg.MenuPad = ini.GetBool("Keys", "MenuPad", cfg.MenuPad);
                 cfg.BagPad = ini.GetBool("Keys", "BagPad", cfg.BagPad);
+
+                cfg.DrugsInPocket = ini.GetBool("General", "DrugsInPocket", cfg.DrugsInPocket);
 
                 cfg.BuyToPantry = ini.GetBool("Money", "BuyToPantry", cfg.BuyToPantry);
                 cfg.PantrySlots = (int)ini.GetFloat("Money", "PantrySlots", cfg.PantrySlots, 1f, 200f);
