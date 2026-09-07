@@ -3662,6 +3662,22 @@
         "z": 49.174,
         "heading": 240.85,
         "note": "second door"
+      },
+      {
+        "name": "Fresh Fruit & Veg",
+        "x": -1045.116,
+        "y": 5327.903,
+        "z": 44.095,
+        "heading": 237.499,
+        "note": "roadside stand, Mt Chiliad -- SAME STALL MODEL as the Chumash one"
+      },
+      {
+        "name": "Pala Springs Tramway",
+        "x": -754.234,
+        "y": 5579.016,
+        "z": 36.186,
+        "heading": 208.747,
+        "note": "bar at the aerial tramway, beer signs"
       }
     ],
     "_drugs_comment": [
