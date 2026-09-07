@@ -3638,6 +3638,30 @@
         "z": 32.686,
         "heading": 253.093,
         "note": "FUEL STATION shop, Harmony/Route 68 -- pay inside"
+      },
+      {
+        "name": "Fresh Fruit & Veg",
+        "x": -2507.502,
+        "y": 3614.455,
+        "z": 13.299,
+        "heading": 82.199,
+        "note": "roadside stand -- SHOULD BE FOUND BY PROP, not this coordinate"
+      },
+      {
+        "name": "Hookies",
+        "x": -2193.262,
+        "y": 4286.801,
+        "z": 49.175,
+        "heading": 306.823,
+        "note": "seafood diner, Paleto coast; same venue as below"
+      },
+      {
+        "name": "Hookies",
+        "x": -2193.525,
+        "y": 4289.72,
+        "z": 49.174,
+        "heading": 240.85,
+        "note": "second door"
       }
     ],
     "_drugs_comment": [
