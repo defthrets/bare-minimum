@@ -3289,6 +3289,1360 @@
         "scenario": "WORLD_HUMAN_SMOKING"
       },
       "ui": false
+    },
+    {
+      "_note": "Mirror Park. Surveyed in game; inherits 24/7's menu -- one chain, one menu.",
+      "id": "24_7_supermarket_mirrorpark",
+      "name": "24/7 Supermarket",
+      "x": 528.116,
+      "y": -152.119,
+      "z": 57.2,
+      "heading": 134.474,
+      "item": [
+        "sandwich",
+        "hotdog",
+        "pie",
+        "noodles",
+        "crisps",
+        "jerky",
+        "choc_meteorite",
+        "candybox",
+        "ecola",
+        "sprunk",
+        "energy",
+        "water",
+        "coffee",
+        "ice_cream",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Vinewood. Surveyed in game; inherits BITE!'s menu -- one chain, one menu.",
+      "id": "bite_vinewood",
+      "name": "BITE!",
+      "x": 215.318,
+      "y": -17.218,
+      "z": 74.987,
+      "heading": 342.414,
+      "item": [
+        "bite_wrap",
+        "bite_fresh_wrap",
+        "bite_smoothie"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Vinewood. Surveyed in game; inherits 24/7's menu -- one chain, one menu.",
+      "id": "24_7_supermarket_vinewood",
+      "name": "24/7 Supermarket",
+      "x": 202.153,
+      "y": -26.138,
+      "z": 69.909,
+      "heading": 70.115,
+      "item": [
+        "sandwich",
+        "hotdog",
+        "pie",
+        "noodles",
+        "crisps",
+        "jerky",
+        "choc_meteorite",
+        "candybox",
+        "ecola",
+        "sprunk",
+        "energy",
+        "water",
+        "coffee",
+        "ice_cream",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "restaurant. Surveyed in game; inherits Les Bianco's menu -- one chain, one menu.",
+      "id": "les_bianco_downtown",
+      "name": "Les Bianco",
+      "x": -150.152,
+      "y": -105.494,
+      "z": 54.45,
+      "heading": 133.865,
+      "item": [
+        "lbi_primo",
+        "lbi_secondo",
+        "wine",
+        "whiskey",
+        "bm_espresso"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Burton. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
+      "id": "liquor_burton",
+      "name": "Liquor",
+      "x": -58.365,
+      "y": -91.909,
+      "z": 57.253,
+      "heading": 322.251,
+      "item": [
+        "beer",
+        "beer_logger",
+        "whiskey",
+        "wine",
+        "ecola",
+        "sprunk",
+        "water",
+        "crisps",
+        "jerky",
+        "candybox",
+        "sardines",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Hawick, smokers supplies. Surveyed in game; inherits Pipe Down's menu -- one chain, one menu.",
+      "id": "pipe_dreams_hawick",
+      "name": "Pipe Dreams",
+      "x": 66.311,
+      "y": -139.58,
+      "z": 54.502,
+      "heading": 28.995,
+      "item": [
+        "cigar",
+        "pipe_tobacco",
+        "boiled_sweets",
+        "toffees",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Textile City. Surveyed in game; inherits BITE!'s menu -- one chain, one menu.",
+      "id": "bite_textile",
+      "name": "BITE!",
+      "x": 89.746,
+      "y": -221.624,
+      "z": 54.119,
+      "heading": 162.541,
+      "item": [
+        "bite_wrap",
+        "bite_fresh_wrap",
+        "bite_smoothie"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Textile City. Surveyed in game; inherits 24/7's menu -- one chain, one menu.",
+      "id": "24_7_supermarket_textile",
+      "name": "24/7 Supermarket",
+      "x": 82.312,
+      "y": -219.387,
+      "z": 54.12,
+      "heading": 124.963,
+      "item": [
+        "sandwich",
+        "hotdog",
+        "pie",
+        "noodles",
+        "crisps",
+        "jerky",
+        "choc_meteorite",
+        "candybox",
+        "ecola",
+        "sprunk",
+        "energy",
+        "water",
+        "coffee",
+        "ice_cream",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Pillbox. Surveyed in game; inherits BITE!'s menu -- one chain, one menu.",
+      "id": "bite_pillbox",
+      "name": "BITE!",
+      "x": -241.575,
+      "y": -345.368,
+      "z": 29.502,
+      "heading": 228.617,
+      "item": [
+        "bite_wrap",
+        "bite_fresh_wrap",
+        "bite_smoothie"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Del Perro. Surveyed in game; inherits Noodle Exchange's menu -- one chain, one menu.",
+      "id": "noodle_exchange_delperro_2",
+      "name": "Noodle Exchange",
+      "x": -1230.268,
+      "y": -286.484,
+      "z": 37.212,
+      "heading": 59.761,
+      "item": [
+        "nx_ramen",
+        "nx_padthai",
+        "nx_dumplings",
+        "nx_bubbletea"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Del Perro. Surveyed in game; inherits Limey's's menu -- one chain, one menu.",
+      "id": "limey_s_delperro",
+      "name": "Limey's",
+      "x": -1236.19,
+      "y": -290.259,
+      "z": 37.095,
+      "heading": 113.688,
+      "item": [
+        "lm_orange",
+        "lm_green",
+        "lm_smoothie",
+        "lm_shot"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Del Perro. Surveyed in game; inherits BITE!'s menu -- one chain, one menu.",
+      "id": "bite_delperro_2",
+      "name": "BITE!",
+      "x": -1250.264,
+      "y": -296.041,
+      "z": 36.834,
+      "heading": 64.6,
+      "item": [
+        "bite_wrap",
+        "bite_fresh_wrap",
+        "bite_smoothie"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Vespucci Beach. Surveyed in game; inherits Bean's Market's menu -- one chain, one menu.",
+      "id": "beachfront_market_vespuccibeach",
+      "name": "Beachfront Market",
+      "x": -1478.409,
+      "y": -950.511,
+      "z": 9.7,
+      "heading": 321.782,
+      "item": [
+        "beans_tin",
+        "beans_bread",
+        "beans_milk",
+        "fruit",
+        "sardines",
+        "crisps",
+        "water"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Vespucci Beach, walk-up window. Surveyed in game; inherits Pizza This...'s menu -- one chain, one menu.",
+      "id": "pizza_this_vespuccibeach",
+      "name": "Pizza This...",
+      "x": -1527.486,
+      "y": -911.392,
+      "z": 9.645,
+      "heading": 43.647,
+      "item": [
+        "pt_pizza",
+        "pt_slice",
+        "pt_calzone",
+        "pt_garlic_bread"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Vespucci Beach, fruit/juice/soda/coffee. Surveyed in game; inherits Food Market's menu -- one chain, one menu.",
+      "id": "market_vespuccibeach",
+      "name": "Market",
+      "x": -1538.072,
+      "y": -902.082,
+      "z": 9.638,
+      "heading": 27.416,
+      "item": [
+        "fm_shop",
+        "fm_rotisserie",
+        "fm_readymeal",
+        "fm_produce"
+      ],
+      "ui": true,
+      "reach": 2.4,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "wine, beer, food. Surveyed in game; inherits Bean's Market's menu -- one chain, one menu.",
+      "id": "a_r_market_vespucci",
+      "name": "A&R Market",
+      "x": -1359.937,
+      "y": -963.692,
+      "z": 9.213,
+      "heading": 302.623,
+      "item": [
+        "beans_tin",
+        "beans_bread",
+        "beans_milk",
+        "fruit",
+        "sardines",
+        "crisps",
+        "water"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Vespucci, wine. Surveyed in game; inherits Fruit of the Vine's menu -- one chain, one menu.",
+      "id": "fruit_of_the_vine_vespucci",
+      "name": "Fruit of the Vine",
+      "x": -1264.284,
+      "y": -1163.164,
+      "z": 6.251,
+      "heading": 313.509,
+      "item": [
+        "wine",
+        "whiskey",
+        "beer",
+        "beer_logger",
+        "jerky",
+        "crisps",
+        "boiled_sweets"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "health food, 'Hit the Nut!'. Surveyed in game; inherits The Grain of Truth's menu -- one chain, one menu.",
+      "id": "nut_buster_vespucci",
+      "name": "Nut Buster",
+      "x": -1271.682,
+      "y": -1200.724,
+      "z": 4.854,
+      "heading": 266.447,
+      "item": [
+        "got_bowl",
+        "got_smoothie",
+        "got_box",
+        "fruit",
+        "beans_milk",
+        "water"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "liquor store. Surveyed in game; inherits Liquor Store's menu -- one chain, one menu.",
+      "id": "steamboat_beers_vespuccibeach",
+      "name": "Steamboat Beers",
+      "x": -1209.236,
+      "y": -1384.583,
+      "z": 3.549,
+      "heading": 282.993,
+      "item": [
+        "beer",
+        "beer_logger",
+        "whiskey",
+        "crisps",
+        "jerky",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "stand: smoothies, juice, coconuts. Surveyed in game; inherits Squeeze One Out's menu -- one chain, one menu.",
+      "id": "natural_smoothies_vespuccibeach",
+      "name": "Natural smoothies",
+      "x": -1128.87,
+      "y": -1374.012,
+      "z": 4.573,
+      "heading": 26.688,
+      "item": [
+        "lm_orange",
+        "lm_green",
+        "lm_smoothie",
+        "lm_shot",
+        "fruit",
+        "water",
+        "bm_muffin",
+        "cb_cookie"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "coffee house, Jamaican roast. Surveyed in game; inherits Crucial Fix's menu -- one chain, one menu.",
+      "id": "crucial_fix_vespuccibeach",
+      "name": "Crucial Fix",
+      "x": -1108.245,
+      "y": -1356.192,
+      "z": 4.496,
+      "heading": 193.1,
+      "item": [
+        "cf_roast",
+        "cf_patty",
+        "cf_gingerbeer",
+        "cf_rumcake"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "juice and smoothies. Surveyed in game; inherits Limey's's menu -- one chain, one menu.",
+      "id": "limey_s_juice_bar_vespucci",
+      "name": "Limey's Juice Bar",
+      "x": -1183.175,
+      "y": -1248.321,
+      "z": 6.477,
+      "heading": 298.964,
+      "item": [
+        "lm_orange",
+        "lm_green",
+        "lm_smoothie",
+        "lm_shot"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Del Perro Pier. Surveyed in game; inherits Mexican and American Diner's menu -- one chain, one menu.",
+      "id": "lagoons_diner_pier",
+      "name": "Lagoons Diner",
+      "x": -1694.732,
+      "y": -1084.704,
+      "z": 12.639,
+      "heading": 282.229,
+      "item": [
+        {
+          "id": "diner_breakfast",
+          "from": 5,
+          "to": 11
+        },
+        {
+          "id": "diner_plate"
+        },
+        {
+          "id": "rb_coffee"
+        },
+        {
+          "id": "ecola"
+        }
+      ],
+      "ui": true,
+      "reach": 2.4,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Del Perro Pier, walk-up window. Surveyed in game; inherits Burger Shot's menu -- one chain, one menu.",
+      "id": "burger_shot_pier",
+      "name": "Burger Shot",
+      "x": -1687.726,
+      "y": -1091.618,
+      "z": 12.655,
+      "heading": 273.506,
+      "item": [
+        "burger",
+        "bs_moneyshot",
+        "bs_heartstopper",
+        "bs_torpedo",
+        "ecola",
+        "sprunk"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Del Perro Pier. Surveyed in game; inherits Bean Machine's menu -- one chain, one menu.",
+      "id": "bean_machine_pier",
+      "name": "Bean Machine",
+      "x": -1703.665,
+      "y": -1101.209,
+      "z": 12.638,
+      "heading": 141.919,
+      "item": [
+        {
+          "id": "bm_croissant",
+          "from": 6,
+          "to": 12
+        },
+        {
+          "id": "bm_muffin",
+          "from": 6,
+          "to": 15
+        },
+        {
+          "id": "bm_espresso"
+        },
+        {
+          "id": "bm_latte"
+        }
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Chumash, deli counter. Surveyed in game; inherits Rob's Liquor's menu -- one chain, one menu.",
+      "id": "rob_s_liquor_market_chumash",
+      "name": "Rob's Liquor & Market",
+      "x": -2975.469,
+      "y": 384.115,
+      "z": 14.488,
+      "heading": 289.267,
+      "item": [
+        "beer",
+        "beer_logger",
+        "wine",
+        "whiskey",
+        "crisps",
+        "jerky",
+        "candybox",
+        "sardines",
+        "ecola",
+        "sprunk",
+        "water",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Chumash, WALK-IN: counter is inside. Surveyed in game; inherits 24/7's menu -- one chain, one menu.",
+      "id": "24_7_supermarket_chumash",
+      "name": "24/7 Supermarket",
+      "x": -3040.898,
+      "y": 585.72,
+      "z": 7.909,
+      "heading": 331.574,
+      "item": [
+        "sandwich",
+        "hotdog",
+        "pie",
+        "noodles",
+        "crisps",
+        "jerky",
+        "choc_meteorite",
+        "candybox",
+        "ecola",
+        "sprunk",
+        "energy",
+        "water",
+        "coffee",
+        "ice_cream",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Banham Canyon, WALK-IN. Surveyed in game; inherits 24/7's menu -- one chain, one menu.",
+      "id": "24_7_supermarket_banham",
+      "name": "24/7 Supermarket",
+      "x": -3239.606,
+      "y": 1004.546,
+      "z": 12.618,
+      "heading": 47.151,
+      "item": [
+        "sandwich",
+        "hotdog",
+        "pie",
+        "noodles",
+        "crisps",
+        "jerky",
+        "choc_meteorite",
+        "candybox",
+        "ecola",
+        "sprunk",
+        "energy",
+        "water",
+        "coffee",
+        "ice_cream",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "FUEL STATION shop, Harmony/Route 68 -- pay inside. Surveyed in game; inherits 24/7's menu -- one chain, one menu.",
+      "id": "ron_24_7_route68",
+      "name": "Ron / 24-7",
+      "x": -2544.354,
+      "y": 2316.191,
+      "z": 32.686,
+      "heading": 253.093,
+      "item": [
+        "sandwich",
+        "hotdog",
+        "pie",
+        "noodles",
+        "crisps",
+        "jerky",
+        "choc_meteorite",
+        "candybox",
+        "ecola",
+        "sprunk",
+        "energy",
+        "water",
+        "coffee",
+        "ice_cream",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Paleto Bay, fresh food daily + produce crates outside. Surveyed in game; inherits Bean's Market's menu -- one chain, one menu.",
+      "id": "don_s_country_store_paleto",
+      "name": "Don's Country Store",
+      "x": 162.54,
+      "y": 6635.688,
+      "z": 31.045,
+      "heading": 15.036,
+      "item": [
+        "beans_tin",
+        "beans_bread",
+        "beans_milk",
+        "fruit",
+        "sardines",
+        "crisps",
+        "water"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Paleto Bay. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
+      "id": "del_vecchio_liquor_paleto",
+      "name": "Del Vecchio Liquor",
+      "x": -155.675,
+      "y": 6327.88,
+      "z": 31.049,
+      "heading": 145.296,
+      "item": [
+        "beer",
+        "beer_logger",
+        "whiskey",
+        "wine",
+        "ecola",
+        "sprunk",
+        "water",
+        "crisps",
+        "jerky",
+        "candybox",
+        "sardines",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Paleto Bay, supermarket AND pharmacy under one sign. Surveyed in game; inherits Chico's Hypermarket's menu -- one chain, one menu.",
+      "id": "willie_s_supermarket_paleto",
+      "name": "Willie's Supermarket",
+      "x": -58.162,
+      "y": 6523.444,
+      "z": 30.96,
+      "heading": 94.298,
+      "item": [
+        "wine",
+        "beer",
+        "beer_logger",
+        "whiskey",
+        "beans_milk",
+        "fm_produce",
+        "fm_readymeal",
+        "beans_bread",
+        "beans_tin",
+        "crisps",
+        "candybox",
+        "ecola",
+        "sprunk",
+        "water",
+        "ice_cream",
+        "cig_redwood"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Paleto Bay, liquor + lotto + hot coffee + check cashing. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
+      "id": "liquor_paleto",
+      "name": "Liquor",
+      "x": -407.342,
+      "y": 6062.478,
+      "z": 30.974,
+      "heading": 279.407,
+      "item": [
+        "beer",
+        "beer_logger",
+        "whiskey",
+        "wine",
+        "ecola",
+        "sprunk",
+        "water",
+        "crisps",
+        "jerky",
+        "candybox",
+        "sardines",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Grapeseed, WALK-IN. Surveyed in game; inherits 24/7's menu -- one chain, one menu.",
+      "id": "24_7_supermarket_grapeseed",
+      "name": "24/7 Supermarket",
+      "x": 1731.084,
+      "y": 6410.733,
+      "z": 34.474,
+      "heading": 264.371,
+      "item": [
+        "sandwich",
+        "hotdog",
+        "pie",
+        "noodles",
+        "crisps",
+        "jerky",
+        "choc_meteorite",
+        "candybox",
+        "ecola",
+        "sprunk",
+        "energy",
+        "water",
+        "coffee",
+        "ice_cream",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Grapeseed, sit-down diner. Surveyed in game; inherits Up-n-Atom Burger's menu -- one chain, one menu.",
+      "id": "up_n_atom_diner_grapeseed",
+      "name": "Up-n-Atom Diner",
+      "x": 1591.846,
+      "y": 6449.649,
+      "z": 24.79,
+      "heading": 341.924,
+      "item": [
+        "ua_triple",
+        "ua_baconmelt",
+        "ua_fries",
+        "ua_shake",
+        "ecola",
+        "sprunk",
+        "rb_coffee",
+        "beans_milk"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "hours": {
+        "open": 10,
+        "close": 2
+      },
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Alamo Sea, self-service produce market. Surveyed in game; inherits Bean's Market's menu -- one chain, one menu.",
+      "id": "alamo_fruit_market_alamo",
+      "name": "Alamo Fruit Market",
+      "x": 1792.619,
+      "y": 4592.074,
+      "z": 37.158,
+      "heading": 14.865,
+      "item": [
+        "beans_tin",
+        "beans_bread",
+        "beans_milk",
+        "fruit",
+        "sardines",
+        "crisps",
+        "water"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Grapeseed: carniceria, tortilleria, verduras, panaderia. Surveyed in game; inherits Chico's Hypermarket's menu -- one chain, one menu.",
+      "id": "carniceria_supermarket_grapeseed",
+      "name": "Carniceria Supermarket",
+      "x": 1695.685,
+      "y": 4785.413,
+      "z": 41.478,
+      "heading": 223.961,
+      "item": [
+        "wine",
+        "beer",
+        "beer_logger",
+        "whiskey",
+        "beans_milk",
+        "fm_produce",
+        "fm_readymeal",
+        "beans_bread",
+        "beans_tin",
+        "crisps",
+        "candybox",
+        "ecola",
+        "sprunk",
+        "water",
+        "ice_cream",
+        "cig_redwood"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "market and store. Surveyed in game; inherits Bean's Market's menu -- one chain, one menu.",
+      "id": "grape_seed_farmers_market_grapeseed",
+      "name": "Grape Seed Farmers Market",
+      "x": 1678.037,
+      "y": 4881.818,
+      "z": 41.517,
+      "heading": 213.784,
+      "item": [
+        "beans_tin",
+        "beans_bread",
+        "beans_milk",
+        "fruit",
+        "sardines",
+        "crisps",
+        "water"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Sandy Shores. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
+      "id": "liquor_sandy",
+      "name": "Liquor",
+      "x": 2482.45,
+      "y": 4100.175,
+      "z": 37.614,
+      "heading": 87.171,
+      "item": [
+        "beer",
+        "beer_logger",
+        "whiskey",
+        "wine",
+        "ecola",
+        "sprunk",
+        "water",
+        "crisps",
+        "jerky",
+        "candybox",
+        "sardines",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Sandy Shores, open 24 hours. Surveyed in game; inherits Liquor Market's menu -- one chain, one menu.",
+      "id": "liquor_market_sandy",
+      "name": "Liquor Market",
+      "x": 2456.338,
+      "y": 4058.12,
+      "z": 37.541,
+      "heading": 81.695,
+      "item": [
+        "beer",
+        "beer_logger",
+        "whiskey",
+        "wine",
+        "ecola",
+        "sprunk",
+        "water",
+        "crisps",
+        "jerky",
+        "candybox",
+        "sardines",
+        "cig_redwood",
+        "cig_debonaire",
+        "noodles",
+        "orangotang"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "FUEL STATION shop, Sandy Shores. Surveyed in game; inherits 24/7's menu -- one chain, one menu.",
+      "id": "sandy_s_gas_station_sandy",
+      "name": "Sandy's Gas Station",
+      "x": 2001.535,
+      "y": 3779.583,
+      "z": 31.657,
+      "heading": 93.042,
+      "item": [
+        "sandwich",
+        "hotdog",
+        "pie",
+        "noodles",
+        "crisps",
+        "jerky",
+        "choc_meteorite",
+        "candybox",
+        "ecola",
+        "sprunk",
+        "energy",
+        "water",
+        "coffee",
+        "ice_cream",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Sandy Shores, open 24 hours, full menu inside. Surveyed in game; inherits Wok It Off's menu -- one chain, one menu.",
+      "id": "chinese_restaurant_sandy",
+      "name": "Chinese Restaurant",
+      "x": 1907.185,
+      "y": 3709.734,
+      "z": 32.191,
+      "heading": 67.767,
+      "item": [
+        {
+          "id": "wok_lunch",
+          "from": 11,
+          "to": 15
+        },
+        {
+          "id": "wok_buffet"
+        },
+        {
+          "id": "wok_chow"
+        },
+        {
+          "id": "wok_soup"
+        }
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Sandy Shores, liquor + grocery + beer under one roof. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
+      "id": "liquor_grocery_sandy",
+      "name": "Liquor & Grocery",
+      "x": 1952.805,
+      "y": 3842.281,
+      "z": 31.651,
+      "heading": 124.316,
+      "item": [
+        "beer",
+        "beer_logger",
+        "whiskey",
+        "wine",
+        "ecola",
+        "sprunk",
+        "water",
+        "crisps",
+        "jerky",
+        "candybox",
+        "sardines",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Sandy Shores WALK-IN, interior counter -- WANTS A CASHIER PED standing behind it. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
+      "id": "ace_liquor_sandy",
+      "name": "Ace Liquor",
+      "x": 1392.62,
+      "y": 3604.079,
+      "z": 34.449,
+      "heading": 23.555,
+      "item": [
+        "beer",
+        "beer_logger",
+        "whiskey",
+        "wine",
+        "ecola",
+        "sprunk",
+        "water",
+        "crisps",
+        "jerky",
+        "candybox",
+        "sardines",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Alamo Sea, open 24 hours, wine + beer. Surveyed in game; inherits Liquor Market's menu -- one chain, one menu.",
+      "id": "liquor_market_alamo",
+      "name": "Liquor Market",
+      "x": 911.291,
+      "y": 3643.841,
+      "z": 32.15,
+      "heading": 35.981,
+      "item": [
+        "beer",
+        "beer_logger",
+        "whiskey",
+        "wine",
+        "ecola",
+        "sprunk",
+        "water",
+        "crisps",
+        "jerky",
+        "candybox",
+        "sardines",
+        "cig_redwood",
+        "cig_debonaire",
+        "noodles",
+        "orangotang"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Harmony/Route 68, WALK-IN. Surveyed in game; inherits 24/7's menu -- one chain, one menu.",
+      "id": "24_7_grocery_harmony",
+      "name": "24/7 Grocery",
+      "x": 544.004,
+      "y": 2675.336,
+      "z": 41.605,
+      "heading": 220.153,
+      "item": [
+        "sandwich",
+        "hotdog",
+        "pie",
+        "noodles",
+        "crisps",
+        "jerky",
+        "choc_meteorite",
+        "candybox",
+        "ecola",
+        "sprunk",
+        "energy",
+        "water",
+        "coffee",
+        "ice_cream",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Harmony -- WALK-UP WINDOW. Surveyed in game; inherits The Taco Farmer's menu -- one chain, one menu.",
+      "id": "the_taco_farmer_harmony",
+      "name": "The Taco Farmer",
+      "x": 650.774,
+      "y": 2727.673,
+      "z": 41.469,
+      "heading": 98.624,
+      "item": [
+        "farmer_taco",
+        "farmer_plate",
+        "ecola",
+        "sprunk"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Harmony -- DRIVE-THROUGH side of the same building. Surveyed in game; inherits The Taco Farmer's menu -- one chain, one menu. The drive-through side, so it serves you in the car.",
+      "id": "the_taco_farmer_harmony_drivethru",
+      "name": "The Taco Farmer",
+      "x": 639.341,
+      "y": 2723.458,
+      "z": 41.368,
+      "heading": 192.393,
+      "item": [
+        "farmer_taco",
+        "farmer_plate",
+        "ecola",
+        "sprunk"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5,
+      "fromVehicle": true
+    },
+    {
+      "_note": "Harmony, WALK-IN. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
+      "id": "liquor_harmony",
+      "name": "Liquor",
+      "x": 1166.531,
+      "y": 2703.357,
+      "z": 38.179,
+      "heading": 41.298,
+      "item": [
+        "beer",
+        "beer_logger",
+        "whiskey",
+        "wine",
+        "ecola",
+        "sprunk",
+        "water",
+        "crisps",
+        "jerky",
+        "candybox",
+        "sardines",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
+    },
+    {
+      "_note": "Harmony: groceries, ice, beer, wine, deli. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
+      "id": "jr_market_liquor_harmony",
+      "name": "JR Market Liquor",
+      "x": 578.93,
+      "y": 2679.033,
+      "z": 41.268,
+      "heading": 196.811,
+      "item": [
+        "beer",
+        "beer_logger",
+        "whiskey",
+        "wine",
+        "ecola",
+        "sprunk",
+        "water",
+        "crisps",
+        "jerky",
+        "candybox",
+        "sardines",
+        "cig_redwood",
+        "cig_debonaire"
+      ],
+      "ui": true,
+      "reach": 2.2,
+      "spawnRange": 90.0,
+      "blip": true,
+      "blipSprite": 52,
+      "blipColour": 5
     }
   ],
   "_backlog": {
@@ -3296,28 +4650,15 @@
       "Doors surveyed in game and NOT YET BUILT. The loader reads \"vendors\" and nothing",
       "else, so everything in here is inert -- a notebook, not a disabled entry.",
       "",
-      "Every one was measured against the shipped list and none is within 18m of an",
-      "existing door, so building them is purely additive. Where a note says 'same",
-      "frontage', those rows are one venue photographed from two or three of its doors",
-      "and must become ONE vendor, not several."
+      "What is left is the doors that need FOOD WRITTEN FOR THEM: a seafood diner needs",
+      "seafood, with a price, a hunger figure, a verified prop and a line about itself.",
+      "The branches of shops that already had a menu have been built and removed.",
+      "",
+      "Two Fresh Fruit & Veg stands stay listed for the record and should NOT be built as",
+      "vendors -- the roadside stalls are found by model now, so those two are already",
+      "working along with every other one in the world."
     ],
     "food": [
-      {
-        "name": "24/7 Supermarket",
-        "x": 528.116,
-        "y": -152.119,
-        "z": 57.2,
-        "heading": 134.474,
-        "note": "Mirror Park"
-      },
-      {
-        "name": "BITE!",
-        "x": 215.318,
-        "y": -17.218,
-        "z": 74.987,
-        "heading": 342.414,
-        "note": "Vinewood"
-      },
       {
         "name": "(unnamed)",
         "x": 229.871,
@@ -3325,14 +4666,6 @@
         "z": 74.987,
         "heading": 333.831,
         "note": "Vinewood, name not caught"
-      },
-      {
-        "name": "24/7 Supermarket",
-        "x": 202.153,
-        "y": -26.138,
-        "z": 69.909,
-        "heading": 70.115,
-        "note": "Vinewood"
       },
       {
         "name": "(unnamed)",
@@ -3351,28 +4684,12 @@
         "note": "Downtown W, name not caught"
       },
       {
-        "name": "Les Bianco",
-        "x": -150.152,
-        "y": -105.494,
-        "z": 54.45,
-        "heading": 133.865,
-        "note": "restaurant"
-      },
-      {
         "name": "(Rancho strip)",
         "x": -87.494,
         "y": -83.801,
         "z": 57.302,
         "heading": 32.282,
         "note": "name not caught"
-      },
-      {
-        "name": "Liquor",
-        "x": -58.365,
-        "y": -91.909,
-        "z": 57.253,
-        "heading": 322.251,
-        "note": "Burton"
       },
       {
         "name": "The Fish Net",
@@ -3391,30 +4708,6 @@
         "note": "bakery"
       },
       {
-        "name": "Pipe Dreams",
-        "x": 66.311,
-        "y": -139.58,
-        "z": 54.502,
-        "heading": 28.995,
-        "note": "Hawick, smokers supplies"
-      },
-      {
-        "name": "BITE!",
-        "x": 89.746,
-        "y": -221.624,
-        "z": 54.119,
-        "heading": 162.541,
-        "note": "Textile City; same frontage as the 24/7 below"
-      },
-      {
-        "name": "24/7 Supermarket",
-        "x": 82.312,
-        "y": -219.387,
-        "z": 54.12,
-        "heading": 124.963,
-        "note": "Textile City"
-      },
-      {
         "name": "Cluckin' Bell",
         "x": -138.37,
         "y": -256.962,
@@ -3431,68 +4724,12 @@
         "note": "Pillbox, name not caught"
       },
       {
-        "name": "BITE!",
-        "x": -241.575,
-        "y": -345.368,
-        "z": 29.502,
-        "heading": 228.617,
-        "note": "Pillbox"
-      },
-      {
-        "name": "Noodle Exchange",
-        "x": -1230.268,
-        "y": -286.484,
-        "z": 37.212,
-        "heading": 59.761,
-        "note": "Del Perro; same frontage as Limey's below"
-      },
-      {
-        "name": "Limey's",
-        "x": -1236.19,
-        "y": -290.259,
-        "z": 37.095,
-        "heading": 113.688,
-        "note": "Del Perro"
-      },
-      {
-        "name": "BITE!",
-        "x": -1250.264,
-        "y": -296.041,
-        "z": 36.834,
-        "heading": 64.6,
-        "note": "Del Perro"
-      },
-      {
-        "name": "Beachfront Market",
-        "x": -1478.409,
-        "y": -950.511,
-        "z": 9.7,
-        "heading": 321.782,
-        "note": "Vespucci Beach"
-      },
-      {
         "name": "Dune's Beach Cafe",
         "x": -1500.422,
         "y": -933.904,
         "z": 9.659,
         "heading": 334.772,
         "note": "Vespucci Beach"
-      },
-      {
-        "name": "Pizza This...",
-        "x": -1527.486,
-        "y": -911.392,
-        "z": 9.645,
-        "heading": 43.647,
-        "note": "Vespucci Beach, walk-up window"
-      },
-      {
-        "name": "Market",
-        "x": -1538.072,
-        "y": -902.082,
-        "z": 9.638,
-        "heading": 27.416,
-        "note": "Vespucci Beach, fruit/juice/soda/coffee"
       },
       {
         "name": "Al Dente's",
@@ -3503,44 +4740,12 @@
         "note": "Vespucci"
       },
       {
-        "name": "A&R Market",
-        "x": -1359.937,
-        "y": -963.692,
-        "z": 9.213,
-        "heading": 302.623,
-        "note": "wine, beer, food"
-      },
-      {
         "name": "(unnamed)",
         "x": -1283.369,
         "y": -1130.814,
         "z": 6.279,
         "heading": 285.699,
         "note": "Vespucci Canals, name not caught"
-      },
-      {
-        "name": "Fruit of the Vine",
-        "x": -1264.284,
-        "y": -1163.164,
-        "z": 6.251,
-        "heading": 313.509,
-        "note": "Vespucci, wine"
-      },
-      {
-        "name": "Nut Buster",
-        "x": -1271.682,
-        "y": -1200.724,
-        "z": 4.854,
-        "heading": 266.447,
-        "note": "health food, 'Hit the Nut!'"
-      },
-      {
-        "name": "Steamboat Beers",
-        "x": -1209.236,
-        "y": -1384.583,
-        "z": 3.549,
-        "heading": 282.993,
-        "note": "liquor store"
       },
       {
         "name": "(unnamed)",
@@ -3567,14 +4772,6 @@
         "note": "Vespucci Beach, ice cream"
       },
       {
-        "name": "Natural smoothies",
-        "x": -1128.87,
-        "y": -1374.012,
-        "z": 4.573,
-        "heading": 26.688,
-        "note": "stand: smoothies, juice, coconuts"
-      },
-      {
         "name": "Marlins Cafe",
         "x": -1113.635,
         "y": -1366.592,
@@ -3583,28 +4780,12 @@
         "note": "same frontage as Crucial Fix below"
       },
       {
-        "name": "Crucial Fix",
-        "x": -1108.245,
-        "y": -1356.192,
-        "z": 4.496,
-        "heading": 193.1,
-        "note": "coffee house, Jamaican roast"
-      },
-      {
         "name": "Taco Libre",
         "x": -1168.82,
         "y": -1267.63,
         "z": 5.662,
         "heading": 312.68,
         "note": "Mexican"
-      },
-      {
-        "name": "Limey's Juice Bar",
-        "x": -1183.175,
-        "y": -1248.321,
-        "z": 6.477,
-        "heading": 298.964,
-        "note": "juice and smoothies"
       },
       {
         "name": "The Big Puffa",
@@ -3671,22 +4852,6 @@
         "note": "Del Perro Pier, dessert company"
       },
       {
-        "name": "Lagoons Diner",
-        "x": -1694.732,
-        "y": -1084.704,
-        "z": 12.639,
-        "heading": 282.229,
-        "note": "Del Perro Pier"
-      },
-      {
-        "name": "Burger Shot",
-        "x": -1687.726,
-        "y": -1091.618,
-        "z": 12.655,
-        "heading": 273.506,
-        "note": "Del Perro Pier, walk-up window"
-      },
-      {
         "name": "Cluckin' Bell",
         "x": -1681.368,
         "y": -1097.125,
@@ -3701,14 +4866,6 @@
         "z": 12.63,
         "heading": 70.581,
         "note": "Del Perro Pier, ice cream company"
-      },
-      {
-        "name": "Bean Machine",
-        "x": -1703.665,
-        "y": -1101.209,
-        "z": 12.638,
-        "heading": 141.919,
-        "note": "Del Perro Pier"
       },
       {
         "name": "Pearls",
@@ -3727,14 +4884,6 @@
         "note": "restaurant & bar, Pacific Bluffs"
       },
       {
-        "name": "Rob's Liquor & Market",
-        "x": -2975.469,
-        "y": 384.115,
-        "z": 14.488,
-        "heading": 289.267,
-        "note": "Chumash, deli counter"
-      },
-      {
         "name": "Hang Ten",
         "x": -2964.439,
         "y": 432.079,
@@ -3749,30 +4898,6 @@
         "z": 6.822,
         "heading": 105.646,
         "note": "Chumash, sit in or eat out"
-      },
-      {
-        "name": "24/7 Supermarket",
-        "x": -3040.898,
-        "y": 585.72,
-        "z": 7.909,
-        "heading": 331.574,
-        "note": "Chumash, WALK-IN: counter is inside"
-      },
-      {
-        "name": "24/7 Supermarket",
-        "x": -3239.606,
-        "y": 1004.546,
-        "z": 12.618,
-        "heading": 47.151,
-        "note": "Banham Canyon, WALK-IN; reported as not opening"
-      },
-      {
-        "name": "Ron / 24-7",
-        "x": -2544.354,
-        "y": 2316.191,
-        "z": 32.686,
-        "heading": 253.093,
-        "note": "FUEL STATION shop, Harmony/Route 68 -- pay inside"
       },
       {
         "name": "Fresh Fruit & Veg",
@@ -3823,14 +4948,6 @@
         "note": "diner AND general store, Paleto forest"
       },
       {
-        "name": "Don's Country Store",
-        "x": 162.54,
-        "y": 6635.688,
-        "z": 31.045,
-        "heading": 15.036,
-        "note": "Paleto Bay, fresh food daily + produce crates outside"
-      },
-      {
         "name": "Mojito Inn",
         "x": -123.485,
         "y": 6389.982,
@@ -3845,14 +4962,6 @@
         "z": 31.553,
         "heading": 223.693,
         "note": "second door"
-      },
-      {
-        "name": "Del Vecchio Liquor",
-        "x": -155.675,
-        "y": 6327.88,
-        "z": 31.049,
-        "heading": 145.296,
-        "note": "Paleto Bay"
       },
       {
         "name": "The Bay Bar",
@@ -3879,14 +4988,6 @@
         "note": "Paleto Bay -- sign reads College Style, looks like CLOTHING not food; check before building"
       },
       {
-        "name": "Willie's Supermarket",
-        "x": -58.162,
-        "y": 6523.444,
-        "z": 30.96,
-        "heading": 94.298,
-        "note": "Paleto Bay, supermarket AND pharmacy under one sign"
-      },
-      {
         "name": "O.O.T.",
         "x": -1654.738,
         "y": -1000.208,
@@ -3895,156 +4996,12 @@
         "note": "Del Perro Pier, Out Of Towners Welcome -- bar"
       },
       {
-        "name": "Liquor",
-        "x": -407.342,
-        "y": 6062.478,
-        "z": 30.974,
-        "heading": 279.407,
-        "note": "Paleto Bay, liquor + lotto + hot coffee + check cashing"
-      },
-      {
-        "name": "24/7 Supermarket",
-        "x": 1731.084,
-        "y": 6410.733,
-        "z": 34.474,
-        "heading": 264.371,
-        "note": "Grapeseed, WALK-IN"
-      },
-      {
-        "name": "Up-n-Atom Diner",
-        "x": 1591.846,
-        "y": 6449.649,
-        "z": 24.79,
-        "heading": 341.924,
-        "note": "Grapeseed, sit-down diner"
-      },
-      {
-        "name": "Alamo Fruit Market",
-        "x": 1792.619,
-        "y": 4592.074,
-        "z": 37.158,
-        "heading": 14.865,
-        "note": "Alamo Sea, self-service produce market"
-      },
-      {
-        "name": "Carniceria Supermarket",
-        "x": 1695.685,
-        "y": 4785.413,
-        "z": 41.478,
-        "heading": 223.961,
-        "note": "Grapeseed: carniceria, tortilleria, verduras, panaderia; same venue as below"
-      },
-      {
         "name": "Carniceria Supermarket",
         "x": 1707.068,
         "y": 4792.25,
         "z": 41.457,
         "heading": 245.184,
         "note": "second door"
-      },
-      {
-        "name": "Grape Seed Farmers Market",
-        "x": 1678.037,
-        "y": 4881.818,
-        "z": 41.517,
-        "heading": 213.784,
-        "note": "market and store; name read from a step-back shot, door coord is this one"
-      },
-      {
-        "name": "Liquor",
-        "x": 2482.45,
-        "y": 4100.175,
-        "z": 37.614,
-        "heading": 87.171,
-        "note": "Sandy Shores"
-      },
-      {
-        "name": "Liquor Market",
-        "x": 2456.338,
-        "y": 4058.12,
-        "z": 37.541,
-        "heading": 81.695,
-        "note": "Sandy Shores, open 24 hours"
-      },
-      {
-        "name": "Sandy's Gas Station",
-        "x": 2001.535,
-        "y": 3779.583,
-        "z": 31.657,
-        "heading": 93.042,
-        "note": "FUEL STATION shop, Sandy Shores"
-      },
-      {
-        "name": "Chinese Restaurant",
-        "x": 1907.185,
-        "y": 3709.734,
-        "z": 32.191,
-        "heading": 67.767,
-        "note": "Sandy Shores, open 24 hours, full menu inside"
-      },
-      {
-        "name": "Liquor & Grocery",
-        "x": 1952.805,
-        "y": 3842.281,
-        "z": 31.651,
-        "heading": 124.316,
-        "note": "Sandy Shores, liquor + grocery + beer under one roof"
-      },
-      {
-        "name": "Ace Liquor",
-        "x": 1392.62,
-        "y": 3604.079,
-        "z": 34.449,
-        "heading": 23.555,
-        "note": "Sandy Shores WALK-IN, interior counter -- WANTS A CASHIER PED standing behind it"
-      },
-      {
-        "name": "Liquor Market",
-        "x": 911.291,
-        "y": 3643.841,
-        "z": 32.15,
-        "heading": 35.981,
-        "note": "Alamo Sea, open 24 hours, wine + beer; Sprunk machine by the door"
-      },
-      {
-        "name": "24/7 Grocery",
-        "x": 544.004,
-        "y": 2675.336,
-        "z": 41.605,
-        "heading": 220.153,
-        "note": "Harmony/Route 68, WALK-IN; Sprunk machine and ice box outside"
-      },
-      {
-        "name": "The Taco Farmer",
-        "x": 650.774,
-        "y": 2727.673,
-        "z": 41.469,
-        "heading": 98.624,
-        "note": "Harmony -- WALK-UP WINDOW; a different branch to the city one"
-      },
-      {
-        "name": "The Taco Farmer",
-        "x": 639.341,
-        "y": 2723.458,
-        "z": 41.368,
-        "heading": 192.393,
-        "note": "Harmony -- DRIVE-THROUGH side of the same building"
-      },
-      {
-        "name": "Liquor",
-        "x": 1166.531,
-        "y": 2703.357,
-        "z": 38.179,
-        "heading": 41.298,
-        "note": "Harmony, WALK-IN; reported as not opening"
-      },
-      {
-        "name": "JR Market Liquor",
-        "x": 578.93,
-        "y": 2679.033,
-        "z": 41.268,
-        "heading": 196.811,
-        "note": "Harmony: groceries, ice, beer, wine, deli"
       }
     ],
     "_drugs_comment": [
