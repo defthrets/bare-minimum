@@ -3965,6 +3965,22 @@
         "z": 37.541,
         "heading": 81.695,
         "note": "Sandy Shores, open 24 hours"
+      },
+      {
+        "name": "Sandy's Gas Station",
+        "x": 2001.535,
+        "y": 3779.583,
+        "z": 31.657,
+        "heading": 93.042,
+        "note": "FUEL STATION shop, Sandy Shores"
+      },
+      {
+        "name": "Chinese Restaurant",
+        "x": 1907.185,
+        "y": 3709.734,
+        "z": 32.191,
+        "heading": 67.767,
+        "note": "Sandy Shores, open 24 hours, full menu inside"
       }
     ],
     "_drugs_comment": [
