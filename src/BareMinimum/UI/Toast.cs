@@ -11,7 +11,12 @@ namespace BareMinimum.UI
     /// A short card at the bottom of the screen: a mark, a headline, a line under it, and a
     /// meter that fills to where the thing it is reporting ended up.
     ///
-    /// IT REPLACES THE GAME'S TICKER FOR THE THINGS THAT ARE OURS. PostTicker puts a grey box
+    /// IT REPLACES THE GAME'S TICKER FOR RESULTS -- what you ate, what a night's sleep did.
+    /// Errors and housekeeping still use PostTicker on purpose: "Not enough money", "settings
+    /// saved", the line at start-up. Those ARE the game talking to you about the state of
+    /// things, and the corner is where a player already looks for that.
+    ///
+    /// FOR THE THINGS THAT ARE OURS. PostTicker puts a grey box
     /// in the corner above the minimap, in the game's own font, alongside the messages about
     /// your car being impounded. That is the right place for a message FROM THE GAME and the
     /// wrong one for a mod that has its own panels, its own icons and its own colour -- a mod
