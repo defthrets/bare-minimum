@@ -3949,6 +3949,22 @@
         "z": 41.517,
         "heading": 213.784,
         "note": "market and store; name read from a step-back shot, door coord is this one"
+      },
+      {
+        "name": "Liquor",
+        "x": 2482.45,
+        "y": 4100.175,
+        "z": 37.614,
+        "heading": 87.171,
+        "note": "Sandy Shores"
+      },
+      {
+        "name": "Liquor Market",
+        "x": 2456.338,
+        "y": 4058.12,
+        "z": 37.541,
+        "heading": 81.695,
+        "note": "Sandy Shores, open 24 hours"
       }
     ],
     "_drugs_comment": [
