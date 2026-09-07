@@ -3997,6 +3997,14 @@
         "z": 34.449,
         "heading": 23.555,
         "note": "Sandy Shores WALK-IN, interior counter -- WANTS A CASHIER PED standing behind it"
+      },
+      {
+        "name": "Liquor Market",
+        "x": 911.291,
+        "y": 3643.841,
+        "z": 32.15,
+        "heading": 35.981,
+        "note": "Alamo Sea, open 24 hours, wine + beer; Sprunk machine by the door"
       }
     ],
     "_drugs_comment": [
