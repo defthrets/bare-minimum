@@ -242,6 +242,19 @@ namespace BareMinimum.Core
         /// <summary>What is in the fridge, per character. Written by the mod, never shipped.</summary>
         public static string FridgeFile => Path.Combine(Writable, "fridge.json");
 
+        /// <summary>
+        /// Every cart this mod has found the game had left empty, across every session.
+        ///
+        /// A HARVEST FILE, NOT A SAVE. Nothing reads it back: it is written so that driving
+        /// around the map ONCE produces a list of every hot dog and burger cart in the game,
+        /// which then goes into vendors.json as ordinary listed stands and lets the whole
+        /// discovery scan be deleted for release. See Vendors.Discover.
+        ///
+        /// In Writable rather than the log because a long drive rolls the log over and takes
+        /// the first half of the findings with it.
+        /// </summary>
+        public static string CartsFile => Path.Combine(Writable, "carts-found.json");
+
         private static void EnsureDir(string path)
         {
             try

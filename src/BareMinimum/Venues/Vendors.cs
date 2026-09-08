@@ -818,9 +818,133 @@ namespace BareMinimum.Venues
                 made.BlipColour = dressed == null ? 5 : dressed.Colour;
 
                 _vendors.Add(made);
-                Log.Info("Carts: staffed a " + row[2] + " the game had left empty at " +
-                         made.Position.ToString() + ".");
+                Record(row, made);
             }
+        }
+
+        /// <summary>Every cart written down so far, so a second sighting is not a second line.</summary>
+        private readonly List<string> _harvest = new List<string>();
+        private readonly List<Vector3> _harvestAt = new List<Vector3>();
+        private bool _harvestRead;
+
+        /// <summary>
+        /// Writes a found cart down, once, forever.
+        ///
+        /// THE POINT OF THIS IS TO DELETE THE FEATURE THAT FEEDS IT. Discover exists because
+        /// the game scatters hot dog and burger carts around the map and nobody has typed out
+        /// where they all are. Drive the map once with it on and this file is that list -- model,
+        /// position and heading, which is everything a vendors.json entry needs -- and then the
+        /// stands can be listed like the rest, appear on the map without having been driven
+        /// past first, and the whole scan can come out for release.
+        ///
+        /// KEPT ACROSS SESSIONS, and deduplicated by position, because no one drives the whole
+        /// map in one sitting and a cart seen on Tuesday should not be written down again on
+        /// Wednesday. Three metres: a cart is not that wide, and the same prop always reports
+        /// the same place.
+        ///
+        /// Written as text rather than through the json writer because the shape is fixed and
+        /// this file is read by a person and a script, never by the mod.
+        /// </summary>
+        private void Record(string[] row, Vendor made)
+        {
+            Log.Info("Carts: staffed a " + row[2] + " the game had left empty at " +
+                     Num(made.Position.X) + ", " + Num(made.Position.Y) + ", " +
+                     Num(made.Position.Z) + " facing " + Num(made.Heading) + ".");
+
+            try
+            {
+                if (!_harvestRead)
+                {
+                    _harvestRead = true;
+                    ReadHarvest();
+                }
+
+                foreach (var seen in _harvestAt)
+                {
+                    if (seen.DistanceTo(made.Position) <= 3f) return;
+                }
+
+                _harvestAt.Add(made.Position);
+                _harvest.Add("    { \"model\": \"" + row[0] + "\", \"item\": \"" + row[1] +
+                             "\", \"name\": \"" + row[2] + "\", \"label\": \"" + row[3] +
+                             "\", \"x\": " + Num(made.Position.X) +
+                             ", \"y\": " + Num(made.Position.Y) +
+                             ", \"z\": " + Num(made.Position.Z) +
+                             ", \"heading\": " + Num(made.Heading) + " }");
+
+                WriteHarvest();
+            }
+            catch (Exception ex)
+            {
+                Log.Once("cart-harvest", "Could not write the cart list: " + ex.Message);
+            }
+        }
+
+        /// <summary>What was written down in earlier sessions, so this one adds rather than replaces.</summary>
+        private void ReadHarvest()
+        {
+            var path = Paths.CartsFile;
+            if (!System.IO.File.Exists(path)) return;
+
+            foreach (var line in System.IO.File.ReadAllLines(path))
+            {
+                var text = line.Trim();
+                if (!text.StartsWith("{")) continue;
+
+                _harvest.Add("    " + text.TrimEnd(','));
+
+                float x, y, z;
+                if (Coord(text, "\"x\":", out x) && Coord(text, "\"y\":", out y) && Coord(text, "\"z\":", out z))
+                {
+                    _harvestAt.Add(new Vector3(x, y, z));
+                }
+            }
+
+            Log.Info("Carts: " + _harvest.Count + " already written down in " + path + ".");
+        }
+
+        private void WriteHarvest()
+        {
+            var text = new System.Text.StringBuilder();
+
+            text.AppendLine("{");
+            text.AppendLine("  \"_comment\": \"Every cart found in the world, for pasting into vendors.json. Written by Vendors.Discover; nothing reads it back.\",");
+            text.AppendLine("  \"carts\": [");
+
+            for (var i = 0; i < _harvest.Count; i++)
+            {
+                text.AppendLine(_harvest[i] + (i < _harvest.Count - 1 ? "," : ""));
+            }
+
+            text.AppendLine("  ]");
+            text.AppendLine("}");
+
+            System.IO.File.WriteAllText(Paths.CartsFile, text.ToString());
+        }
+
+        /// <summary>One number out of a line of the harvest file. False rather than a guess.</summary>
+        private static bool Coord(string text, string key, out float value)
+        {
+            value = 0f;
+
+            var at = text.IndexOf(key, StringComparison.Ordinal);
+            if (at < 0) return false;
+
+            at += key.Length;
+
+            var end = at;
+            while (end < text.Length && text[end] != ',' && text[end] != '}') end++;
+
+            return float.TryParse(text.Substring(at, end - at).Trim(),
+                                  System.Globalization.NumberStyles.Float,
+                                  System.Globalization.CultureInfo.InvariantCulture,
+                                  out value);
+        }
+
+        /// <summary>A number the way a json file wants it: a full stop, whatever the machine's language.</summary>
+        private static string Num(float v)
+        {
+            return v.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
         }
 
         /// <summary>Creates what is near, removes what is not, and keeps the map markers.</summary>
