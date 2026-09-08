@@ -57,6 +57,55 @@ namespace BareMinimum.UI
 
         private bool _measured;
 
+        /// <summary>
+        /// The vitals -- health, armour, energy -- which stand in this row's first slots. Set
+        /// by Main; null leaves the row as the two bars it was.
+        /// </summary>
+        public global::BareMinimum.Vitals.VitalsHud Vitals { get; set; }
+
+        /// <summary>
+        /// One row of upright bars: where it is, and every number a bar in it is drawn from.
+        ///
+        /// COMPUTED ONCE, HANDED TO EVERY COLUMN. The health, armour and energy columns are
+        /// drawn by Vitals.Columns and the sleep and food ones here, and the only way five
+        /// bars from two files come out as one instrument is if all five read the same
+        /// numbers -- not the same formulas copied, the same numbers.
+        /// </summary>
+        internal sealed class Row
+        {
+            public float X;
+            public float BarW, Edge, PlateW, PlateH, Breath, BarH, Top, Foot, Pitch;
+            public float Opacity, IconScale;
+
+            /// <summary>The centre line of a slot. 0 is the leftmost bar.</summary>
+            public float Centre(int slot) { return X + BarW / 2f + slot * Pitch; }
+        }
+
+        /// <summary>
+        /// The black surround and the channel of one slot: the fuel gauge's own numbers, alphas
+        /// included. A surround at 205 over a channel at 165, and an edge of 0.22 of the bar's
+        /// width with a floor under it -- a proportional edge alone becomes a hairline on a
+        /// narrow bar, and a fixed one becomes a frame thicker than the gauge. Both of those
+        /// were argued out in Fumes. Every column in the row comes through here.
+        /// </summary>
+        internal void Frame(Row row, int slot, float strength = 1f)
+        {
+            var x = row.Centre(slot) - row.BarW / 2f;
+            var aspect = Aspect();
+
+            Hud.Bar(x - row.Edge, row.Top - row.Edge * aspect,
+                    row.BarW + row.Edge * 2f, row.BarH + row.Edge * 2f * aspect,
+                    Fade(Color.FromArgb(205, 0, 0, 0), strength));
+
+            Hud.Bar(x, row.Top, row.BarW, row.BarH, Fade(Color.FromArgb(165, 28, 28, 32), strength));
+        }
+
+        /// <summary>The plate under one slot's foot, with a mark on it. See Badge.</summary>
+        internal void Plate(Row row, int slot, Icon mark, float strength = 1f)
+        {
+            Badge(mark, row.Centre(slot), row.Foot, row.PlateW, row.PlateH, row.Breath, strength);
+        }
+
         public Gauge(Settings cfg)
         {
             _cfg = cfg;
@@ -366,18 +415,33 @@ namespace BareMinimum.UI
             // little over that and the pair always has daylight between them.
             var pitch = barW * (1f + Math.Max(0.56f, _cfg.HudGap * 2.4f));
 
-            Column(needs.Hunger, _food, x + barW / 2f, barTop, barH, barW,
-                   plateW, plateH, breath, false);
+            var row = new Row
+            {
+                X = x, BarW = barW, Edge = edge, PlateW = plateW, PlateH = plateH, Breath = breath,
+                BarH = barH, Top = barTop, Foot = barTop + barH, Pitch = pitch,
+                Opacity = _cfg.HudOpacity, IconScale = _cfg.HudBarIconScale
+            };
 
-            Column(needs.Sleep, _moon, x + barW / 2f + pitch, barTop, barH, barW,
-                   plateW, plateH, breath, true);
+            // THE ORDER OF THE ROW: health, armour, energy, sleep, food. The vitals take the
+            // first slots -- three, or two for somebody with no third bar -- and these two
+            // follow, sleep before food. Asked before either is drawn, so the slots agree.
+            var lead = Vitals != null ? Vitals.ColumnsShown : 0;
+
+            Column(needs.Sleep, _moon, row, lead, true);
+            Column(needs.Hunger, _food, row, lead + 1, false);
+
+            if (Vitals != null) Vitals.DrawColumns(this, row);
         }
 
         /// <summary>One upright bar: the mark above it, the channel, and the level inside.</summary>
-        private void Column(Need need, Icon[] set, float centreX, float top, float h,
-                            float w, float plateW, float plateH, float breath, bool sleep)
+        private void Column(Need need, Icon[] set, Row row, int slot, bool sleep)
         {
             if (_cfg.HudHideWhenFine && need.Value > _cfg.HudFineAbove) return;
+
+            var centreX = row.Centre(slot);
+            var top = row.Top;
+            var h = row.BarH;
+            var w = row.BarW;
 
             var body = Colour(need, sleep);
 
@@ -389,18 +453,9 @@ namespace BareMinimum.UI
 
             var x = centreX - w / 2f;
 
-            // THE FUEL GAUGE'S OWN NUMBERS, alphas included. A surround at 205 over a channel
-            // at 165, and an edge of 0.22 of the bar's width with a floor under it -- a
-            // proportional edge alone becomes a hairline on a narrow bar, and a fixed one
-            // becomes a frame thicker than the gauge. Both of those were argued out in Fumes
-            // and there is no reason to argue them again here.
-            var edge = w * 0.22f;
-            if (edge < 0.0005f) edge = 0.0005f;
-
-            Hud.Bar(x - edge, top - edge * Aspect(), w + edge * 2f, h + edge * 2f * Aspect(),
-                    Fade(Color.FromArgb(205, 0, 0, 0)));
-
-            Hud.Bar(x, top, w, h, Fade(Color.FromArgb(165, 28, 28, 32)));
+            // THE FRAME, through the one method every column in the row is framed by -- the
+            // vitals' three as much as these two. See Frame for the numbers.
+            Frame(row, slot);
 
             // THE MARK IS DRAWN HERE, BEFORE THE LEVEL, AND UNCONDITIONALLY.
             //
@@ -412,7 +467,7 @@ namespace BareMinimum.UI
             //
             // It sits BELOW the bar -- plateY is footY + breath -- so it cannot overlap the
             // level however full that is, and drawing it first costs nothing.
-            Badge(flat, centreX, top + h, plateW, plateH, breath);
+            Plate(row, slot, flat);
 
             var fraction = Clamp01(need.Value);
             if (fraction <= 0.002f) return;
@@ -450,13 +505,13 @@ namespace BareMinimum.UI
         /// invisible and only fattens the shape.
         /// </summary>
         private void Badge(Icon icon, float centreX, float footY,
-                           float plateW, float plateH, float breath)
+                           float plateW, float plateH, float breath, float strength = 1f)
         {
             var plateX = centreX - plateW / 2f;
             var plateY = footY + breath;
 
             Hud.Bar(plateX, plateY, plateW, plateH,
-                    Fade(Color.FromArgb(205, 0, 0, 0)));
+                    Fade(Color.FromArgb(205, 0, 0, 0), strength));
 
             if (icon == null || icon.Missing) return;
 
@@ -466,7 +521,7 @@ namespace BareMinimum.UI
             var markH = markW * Aspect();
 
             icon.DrawSized(centreX, plateY + plateH / 2f, markW, markH,
-                           Fade(Color.FromArgb(240, 242, 246, 252)));
+                           Fade(Color.FromArgb(240, 242, 246, 252), strength));
         }
 
         private static float Clamp(float v, float lo, float hi)
@@ -1430,9 +1485,9 @@ namespace BareMinimum.UI
         }
 
         /// <summary>The colour at the HUD's opacity, for parts that do not go through Colour.</summary>
-        private Color Fade(Color c)
+        private Color Fade(Color c, float strength = 1f)
         {
-            var a = (int)(c.A * _cfg.HudOpacity + 0.5f);
+            var a = (int)(c.A * _cfg.HudOpacity * strength + 0.5f);
 
             if (a < 0) a = 0;
             if (a > 255) a = 255;
@@ -1646,13 +1701,20 @@ namespace BareMinimum.UI
 
         private static readonly float[] Stops = { 0f, 0.25f, 0.50f, 0.75f, 1f };
 
+        // ORANGE NOW, NOT GREEN. Green went to the health bar when the vitals moved into the
+        // row -- a health bar is green to everybody, and two green columns side by side would
+        // have been the very confusion this ramp was once moved to avoid. Food is orange the
+        // whole way, deep at empty and bright at full: a warm, edible colour, and the one
+        // family none of the other four uses -- health runs green to red, armour is blue,
+        // energy is yellow, sleep is purple. It still darkens as it empties, so the two habits
+        // the eye has learned -- darker is worse, hue says which -- both hold.
         private static readonly Color[] Ramp =
         {
-            Color.FromArgb(235, 102,  72,  34),   // empty     brown
-            Color.FromArgb(235,  82, 122,  54),   // bad       olive
-            Color.FromArgb(235,  40, 176,  88),   // middling  green
-            Color.FromArgb(235,  66, 212, 112),   // fine      fresh green
-            Color.FromArgb(235, 104, 234, 140)    // full      vivid green
+            Color.FromArgb(235, 112,  48,  28),   // empty     deep burnt orange
+            Color.FromArgb(235, 166,  72,  36),   // bad       burnt orange
+            Color.FromArgb(235, 206,  96,  44),   // middling  orange
+            Color.FromArgb(235, 232, 118,  52),   // fine      bright orange
+            Color.FromArgb(235, 246, 138,  58)    // full      vivid orange
         };
 
         // SLEEP IS BLUE AWAKE, DEEP PURPLE EXHAUSTED. It ran sunlight-through-to-night for
@@ -1669,13 +1731,16 @@ namespace BareMinimum.UI
         // distinction between the two meters, which it does easily: green against blue-violet
         // measures dE 72 at the closest approach any two levels can produce, where anything
         // above about 30 is already unmistakable.
+        // PURPLE THE WHOLE WAY NOW. The full end used to be an awake blue, and blue is the
+        // armour bar's; two slots apart the two read as the same thing at a glance. Sleep is
+        // lavender at full and deep purple at empty, and never blue.
         private static readonly Color[] SleepRamp =
         {
-            Color.FromArgb(235,  74,  40, 104),   // empty     deep purple
-            Color.FromArgb(235, 102,  62, 148),   // bad       purple
-            Color.FromArgb(235, 124, 100, 200),   // middling  violet
-            Color.FromArgb(235, 110, 146, 228),   // fine      blue-violet
-            Color.FromArgb(235,  96, 178, 246)    // full      awake blue
+            Color.FromArgb(235,  58,  32, 104),   // empty     deep purple
+            Color.FromArgb(235,  86,  52, 156),   // bad       purple
+            Color.FromArgb(235, 112,  74, 196),   // middling  violet
+            Color.FromArgb(235, 134,  96, 222),   // fine      light violet
+            Color.FromArgb(235, 156, 120, 240)    // full      lavender
         };
 
         private static Color OnRamp(float t)

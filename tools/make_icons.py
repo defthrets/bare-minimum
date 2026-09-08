@@ -699,6 +699,85 @@ def eye(stage, phase=0):
     return img
 
 
+# ===========================================================================
+# The vitals' marks: a heart, a shield, a bolt, for the plates under health, armour and
+# energy. Rim-free like the other plate marks, and for the same reason. Drawn in the
+# same 256 design space as everything above; these came across from Vitals with that mod.
+# ===========================================================================
+
+def heart():
+    """
+    Two lobes and a point.
+
+    The lobes are circles and the point is a triangle whose top corners sit on the lobes'
+    widest points, so the outline runs from lobe to tip in one straight line with no step
+    where the shapes meet. The tip is a little below where a circle would put it, which is
+    what makes it a heart rather than a rounded triangle.
+    """
+    img, d = canvas()
+
+    r = 46
+    cy = 104
+    left, right = 92, 164
+
+    for cx in (left, right):
+        d.ellipse([s(cx - r), s(cy - r), s(cx + r), s(cy + r)], fill=WHITE)
+
+    d.polygon([(s(left - r), s(cy)), (s(right + r), s(cy)), (s(128), s(214))], fill=WHITE)
+
+    return img
+
+
+def shield():
+    """
+    A heater shield: a flat top, straight shoulders, and two arcs down to a point.
+
+    The arcs are quarter-ellipses rather than circles, so the point is lower than it is wide
+    and the thing reads as a shield rather than as a badge. Thirty points an arc is more than
+    the 4x supersample can show, which is the idea -- the facets are gone before the resize.
+    """
+    img, d = canvas()
+
+    top, left, right = 50, 52, 204
+    shoulder, tip = 118, 216
+    rx, ry = 76, tip - shoulder
+    steps = 30
+
+    pts = [(left, top), (right, top), (right, shoulder)]
+
+    for i in range(1, steps):
+        a = (math.pi / 2) * i / steps
+        pts.append((128 + rx * math.cos(a), shoulder + ry * math.sin(a)))
+
+    pts.append((128, tip))
+
+    for i in range(steps - 1, 0, -1):
+        a = (math.pi / 2) * i / steps
+        pts.append((128 - rx * math.cos(a), shoulder + ry * math.sin(a)))
+
+    pts.append((left, shoulder))
+
+    d.polygon([(s(x), s(y)) for x, y in pts], fill=WHITE)
+
+    return img
+
+
+def bolt():
+    """
+    A lightning bolt, the seven-cornered one.
+
+    Leaning right, which is the way every other bolt on a HUD leans, and heavier in the
+    middle than at either end so it still has a body at nine pixels tall.
+    """
+    img, d = canvas()
+
+    pts = [(154, 34), (70, 144), (122, 144), (104, 222), (188, 108), (136, 108)]
+
+    d.polygon([(s(x), s(y)) for x, y in pts], fill=WHITE)
+
+    return img
+
+
 def main():
     print("Writing icons to " + OUT)
 
@@ -729,6 +808,11 @@ def main():
 
     for stage in range(5):
         save(moon(stage), "moon%d_flat.png" % stage, outline=False)
+
+    # THE VITALS' MARKS, rim-free like the other plate marks.
+    save(heart(), "heart.png", outline=False)
+    save(shield(), "shield.png", outline=False)
+    save(bolt(), "bolt.png", outline=False)
 
     print("Done. Deploy with:  .\\build.ps1 -Deploy -FreshData")
 

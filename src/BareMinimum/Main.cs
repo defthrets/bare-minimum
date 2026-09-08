@@ -5,6 +5,7 @@ using BareMinimum.Food;
 using BareMinimum.Needs;
 using BareMinimum.UI;
 using BareMinimum.Venues;
+using BareMinimum.Vitals;
 
 namespace BareMinimum
 {
@@ -60,6 +61,9 @@ namespace BareMinimum
         private readonly Shop _shop;
         private readonly SettingsPanel _settings;
         private readonly Gauge _gauge;
+
+        /// <summary>Health, armour and energy -- the vitals, once a mod of their own. See Vitals.VitalsHud.</summary>
+        private readonly VitalsHud _vitals;
         private readonly Pantry _pantry;
         private readonly Bag _bag;
 
@@ -124,6 +128,11 @@ namespace BareMinimum
             _settings = new SettingsPanel(_cfg, _needs);
             _gauge = new Gauge(_cfg);
 
+            // The vitals stand in the gauge's row, so the gauge is handed them: it asks how
+            // many slots they take before placing its own two, and has them draw after.
+            _vitals = new VitalsHud(_cfg);
+            _gauge.Vitals = _vitals;
+
             Interval = 0;
             Tick += OnTick;
             Aborted += OnAborted;
@@ -169,6 +178,13 @@ namespace BareMinimum
                 // and every arrow press drives both of them at once.
                 _settings.Update(_sleeping.Busy || _shop.IsOpen || _vendors.MenuOpen ||
                                  _bag.IsOpen || _fridge.IsOpen);
+
+                // THE VITALS RUN BEFORE THE ENABLED GATE, because the game's own bars are
+                // hidden by them and have to be put back when the mod is switched off -- a
+                // pass that stopped running would leave the health strip missing. They draw
+                // their own strip and the minimap's frame here; their upright columns are
+                // drawn by the gauge, which asks them how many slots they take.
+                _vitals.Update(_cfg.Enabled && _cfg.VitalsEnabled);
 
                 if (!_cfg.Enabled) return;
 
@@ -337,6 +353,7 @@ namespace BareMinimum
             try { _settings.Shutdown(); } catch (Exception ex) { Log.Error("Settings shutdown", ex); }
             try { _shop.Shutdown(); } catch (Exception ex) { Log.Error("Shop shutdown", ex); }
             try { _inside.Shutdown(); } catch (Exception ex) { Log.Error("Room shutdown", ex); }
+            try { _vitals.Shutdown(); } catch (Exception ex) { Log.Error("Vitals shutdown", ex); }
             try { _vendors.Shutdown(); } catch (Exception ex) { Log.Error("Vendor shutdown", ex); }
             try { _eating.Shutdown(); } catch (Exception ex) { Log.Error("Eating shutdown", ex); }
             try { UI.Toast.Clear(); } catch { /* a card is not worth a failed shutdown */ }

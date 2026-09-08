@@ -24,6 +24,25 @@ namespace BareMinimum.Core
         Bars
     }
 
+    /// <summary>Which shape the vitals -- health, armour, energy -- take.</summary>
+    internal enum VitalsStyle
+    {
+        /// <summary>Three columns at the left of the row, framed as the sleep and food bars are. The default.</summary>
+        Upright,
+
+        /// <summary>Three bars lying where the game's own strip was, under the minimap.</summary>
+        Strip
+    }
+
+    /// <summary>Whether a special ability bar is drawn when the energy meter is switched off.</summary>
+    internal enum SpecialMode
+    {
+        /// <summary>Only for Michael, Franklin and Trevor -- which is when the game draws its own.</summary>
+        Auto,
+        Always,
+        Never
+    }
+
     internal sealed class Settings
     {
         // ---- General ---------------------------------------------------------
@@ -734,6 +753,183 @@ namespace BareMinimum.Core
         /// </summary>
         public float HudBarLean = 1f;
 
+        // ---- Vitals ----------------------------------------------------------
+        //
+        // HEALTH, ARMOUR AND ENERGY, once a mod of their own. The game's strip under the
+        // minimap is hidden and the three are drawn as liquid, upright in the row with the
+        // sleep and food bars or lying where the strip was. See Vitals.VitalsHud.
+
+        public bool VitalsEnabled = true;
+        public VitalsStyle VitalsStyle = VitalsStyle.Upright;
+
+        /// <summary>Shows the game's own bars again, with ours drawn half-strength over them, for lining up.</summary>
+        public bool VitalsCompare = false;
+
+        /// <summary>Hide the game's health and armour strip under the minimap, and its special ability bar.</summary>
+        public bool VitalsHideHealthArmour = true;
+        public bool VitalsHideSpecial = true;
+
+        /// <summary>
+        /// The layout the minimap is told to use. 3 is the golf layout, which has no bars in
+        /// it; that is the whole trick. 0 is what the game itself uses in single player.
+        /// </summary>
+        public int VitalsHideType = 3;
+        public int VitalsShowType = 0;
+
+        /// <summary>Collapse the big map once at start-up, in case something left it open. This mod never opens it.</summary>
+        public bool VitalsShrinkMapOnStart = true;
+
+        /// <summary>
+        /// The FiveM trick of flicking the big map open and shut a frame apart so the minimap
+        /// re-reads its layout. OFF: on this game the shut arrived while the map was still
+        /// opening and was ignored, which left the minimap the size of the screen.
+        /// </summary>
+        public bool VitalsMapFlick = false;
+
+        /// <summary>
+        /// THE THIRD BAR IS ENERGY: a sprint meter. It drains while you sprint, and empty it
+        /// locks the sprint -- you jog -- until it has come back to EnergySprintAgainAt. Off,
+        /// the third bar is the special ability's charge, worked out, see SpecialMode.
+        /// </summary>
+        public bool VitalsEnergy = true;
+
+        /// <summary>Seconds of flat-out sprinting from full to empty.</summary>
+        public float EnergySprintSeconds = 12f;
+
+        /// <summary>Seconds from empty back to full, stood still or in a car. Half as fast at a jog.</summary>
+        public float EnergyRebuildSeconds = 7f;
+
+        /// <summary>How far back up it has to be before the sprint unlocks, 0 to 1.</summary>
+        public float EnergySprintAgainAt = 0.35f;
+
+        /// <summary>With the energy meter off: when a special ability bar is drawn at all.</summary>
+        public SpecialMode VitalsSpecial = SpecialMode.Auto;
+
+        /// <summary>The stock bars' own colours. Health runs to red with the level; the third is energy's yellow or the special's gold.</summary>
+        public System.Drawing.Color VitalsHealth = System.Drawing.Color.FromArgb(255, 114, 204, 114);
+        public System.Drawing.Color VitalsArmour = System.Drawing.Color.FromArgb(255, 93, 182, 229);
+        public System.Drawing.Color VitalsEnergyColour = System.Drawing.Color.FromArgb(255, 244, 208, 72);
+        public System.Drawing.Color VitalsSpecialColour = System.Drawing.Color.FromArgb(255, 240, 200, 80);
+
+        /// <summary>One clock for everything periodic in the vitals. 1 is normal.</summary>
+        public float VitalsPace = 1f;
+
+        /// <summary>How many specks live inside the vitals, 0 to 1. Bubbles, glints, sparks.</summary>
+        public float VitalsParticles = 1f;
+
+        /// <summary>A lighter band along one side of the fill, 0 to 1. 0 is flat.</summary>
+        public float VitalsGloss = 0.18f;
+
+        public bool VitalsLowHealthPulse = true;
+        public float VitalsLowHealthAt = 0.25f;
+
+        /// <summary>The third bar brightens and beats while the special ability is running.</summary>
+        public bool VitalsActivePulse = true;
+
+        /// <summary>The special meter's rates, for when the energy meter is off. The game does not say how full it is.</summary>
+        public float SpecialDurationSeconds = 30f;
+        public float SpecialMinDurationFraction = 0.30f;
+        public float SpecialRechargeSeconds = 150f;
+        public float SpecialMinimumCharge = 0.10f;
+
+        // ---- the strip, when the vitals lie under the minimap ----
+
+        /// <summary>Put the strip where the game's own strip is, asked of the game.</summary>
+        public bool VitalsStripAuto = true;
+
+        /// <summary>Used only when Auto is off: the strip's LEFT edge, the BOTTOM of the stock strip, and the minimap's width as a fraction of screen HEIGHT.</summary>
+        public float VitalsStripX = 0.0150f;
+        public float VitalsStripY = 0.9860f;
+        public float VitalsStripWidth = 0.25f;
+
+        public float VitalsStripWidthScale = 1f;
+
+        /// <summary>How thick the strip's bars are, as a fraction of screen WIDTH -- the same unit as BarWidth.</summary>
+        public float VitalsStripThickness = 0.0048f;
+
+        public float VitalsStripOffsetX = 0f;
+        public float VitalsStripOffsetY = 0f;
+
+        /// <summary>How the strip is shared out. The game gives health half and splits the rest.</summary>
+        public float VitalsHealthShare = 0.50f;
+        public float VitalsArmourShare = 0.25f;
+        public float VitalsThirdShare = 0.25f;
+
+        /// <summary>Daylight between two bars of the strip, as a fraction of its width.</summary>
+        public float VitalsStripGap = 0.008f;
+
+        /// <summary>The empty part of a strip bar, and how solid the strip is.</summary>
+        public System.Drawing.Color VitalsChannel = System.Drawing.Color.FromArgb(110, 0, 0, 0);
+        public float VitalsStripOpacity = 0.85f;
+
+        // ---- Minimap ---------------------------------------------------------
+
+        /// <summary>A frame round the minimap in the bars' own black, so the map and the row read as one instrument.</summary>
+        public bool MinimapFrame = true;
+
+        /// <summary>The street and the suburb, always, written into the frame's foot where the game's strip was.</summary>
+        public bool MinimapLabel = true;
+
+        /// <summary>"r,g,b" or "r,g,b,a", each 0 to 255. Anything else keeps the default and says so.</summary>
+        private static System.Drawing.Color ParseColour(string section, string key, string s, System.Drawing.Color fallback)
+        {
+            if (string.IsNullOrEmpty(s)) return fallback;
+
+            var parts = s.Split(',');
+            if (parts.Length < 3 || parts.Length > 4)
+            {
+                Log.Warn("[" + section + "] " + key + " = '" + s + "' is not r,g,b or r,g,b,a - using the default.");
+                return fallback;
+            }
+
+            var n = new int[4];
+            n[3] = fallback.A;
+
+            for (var i = 0; i < parts.Length; i++)
+            {
+                int v;
+                if (!int.TryParse(parts[i].Trim(), System.Globalization.NumberStyles.Integer,
+                                  System.Globalization.CultureInfo.InvariantCulture, out v))
+                {
+                    Log.Warn("[" + section + "] " + key + " = '" + s + "' has a part that is not a number - using the default.");
+                    return fallback;
+                }
+
+                n[i] = v < 0 ? 0 : v > 255 ? 255 : v;
+            }
+
+            return System.Drawing.Color.FromArgb(n[3], n[0], n[1], n[2]);
+        }
+
+        private static VitalsStyle ParseVitalsStyle(string s, VitalsStyle fallback)
+        {
+            if (string.IsNullOrEmpty(s)) return fallback;
+
+            switch (s.Trim().ToLowerInvariant())
+            {
+                case "upright": case "columns": case "vertical": case "bars": return VitalsStyle.Upright;
+                case "strip": case "horizontal": case "stock": return VitalsStyle.Strip;
+                default:
+                    Log.Warn("[Vitals] Style = '" + s + "' is not Upright or Strip - using " + fallback + ".");
+                    return fallback;
+            }
+        }
+
+        private static SpecialMode ParseSpecial(string s, SpecialMode fallback)
+        {
+            if (string.IsNullOrEmpty(s)) return fallback;
+
+            switch (s.Trim().ToLowerInvariant())
+            {
+                case "auto": return SpecialMode.Auto;
+                case "always": case "show": case "on": case "true": return SpecialMode.Always;
+                case "never": case "hide": case "off": case "false": return SpecialMode.Never;
+                default:
+                    Log.Warn("[Vitals] Special = '" + s + "' is not Auto, Always or Never - using " + fallback + ".");
+                    return fallback;
+            }
+        }
+
         /// <summary>
         /// The mark under the bar, as a share of its BLACK PLATE. 1 fills the plate edge to
         /// edge; the default leaves a margin, which is what makes it read as a badge rather
@@ -1124,6 +1320,53 @@ namespace BareMinimum.Core
                 cfg.HudBarEffort = ini.GetFloat("HUD", "BarEffort", cfg.HudBarEffort, 1f, 6f);
                 cfg.HudBarSlosh = ini.GetFloat("HUD", "BarSlosh", cfg.HudBarSlosh, 0f, 1f);
                 cfg.HudBarLean = ini.GetFloat("HUD", "BarLean", cfg.HudBarLean, 0f, 1f);
+
+                cfg.VitalsEnabled = ini.GetBool("Vitals", "Enabled", cfg.VitalsEnabled);
+                cfg.VitalsStyle = ParseVitalsStyle(ini.GetString("Vitals", "Style", "Upright"), cfg.VitalsStyle);
+                cfg.VitalsCompare = ini.GetBool("Vitals", "Compare", cfg.VitalsCompare);
+                cfg.VitalsHideHealthArmour = ini.GetBool("Vitals", "HideHealthArmour", cfg.VitalsHideHealthArmour);
+                cfg.VitalsHideSpecial = ini.GetBool("Vitals", "HideSpecial", cfg.VitalsHideSpecial);
+                cfg.VitalsHideType = ini.GetInt("Vitals", "HideType", cfg.VitalsHideType, 0, 10);
+                cfg.VitalsShowType = ini.GetInt("Vitals", "ShowType", cfg.VitalsShowType, 0, 10);
+                cfg.VitalsShrinkMapOnStart = ini.GetBool("Vitals", "ShrinkMapOnStart", cfg.VitalsShrinkMapOnStart);
+                cfg.VitalsMapFlick = ini.GetBool("Vitals", "MapFlick", cfg.VitalsMapFlick);
+                cfg.VitalsEnergy = ini.GetBool("Vitals", "Energy", cfg.VitalsEnergy);
+                cfg.EnergySprintSeconds = ini.GetFloat("Vitals", "EnergySprintSeconds", cfg.EnergySprintSeconds, 1f, 600f);
+                cfg.EnergyRebuildSeconds = ini.GetFloat("Vitals", "EnergyRebuildSeconds", cfg.EnergyRebuildSeconds, 1f, 600f);
+                cfg.EnergySprintAgainAt = ini.GetFloat("Vitals", "EnergySprintAgainAt", cfg.EnergySprintAgainAt, 0.05f, 1f);
+                cfg.VitalsSpecial = ParseSpecial(ini.GetString("Vitals", "Special", "Auto"), cfg.VitalsSpecial);
+                cfg.VitalsHealth = ParseColour("Vitals", "HealthColour", ini.GetString("Vitals", "HealthColour", null), cfg.VitalsHealth);
+                cfg.VitalsArmour = ParseColour("Vitals", "ArmourColour", ini.GetString("Vitals", "ArmourColour", null), cfg.VitalsArmour);
+                cfg.VitalsEnergyColour = ParseColour("Vitals", "EnergyColour", ini.GetString("Vitals", "EnergyColour", null), cfg.VitalsEnergyColour);
+                cfg.VitalsSpecialColour = ParseColour("Vitals", "SpecialColour", ini.GetString("Vitals", "SpecialColour", null), cfg.VitalsSpecialColour);
+                cfg.VitalsPace = ini.GetFloat("Vitals", "Pace", cfg.VitalsPace, 0.05f, 10f);
+                cfg.VitalsParticles = ini.GetFloat("Vitals", "Particles", cfg.VitalsParticles, 0f, 1f);
+                cfg.VitalsGloss = ini.GetFloat("Vitals", "Gloss", cfg.VitalsGloss, 0f, 1f);
+                cfg.VitalsLowHealthPulse = ini.GetBool("Vitals", "LowHealthPulse", cfg.VitalsLowHealthPulse);
+                cfg.VitalsLowHealthAt = ini.GetFloat("Vitals", "LowHealthAt", cfg.VitalsLowHealthAt, 0f, 1f);
+                cfg.VitalsActivePulse = ini.GetBool("Vitals", "ActivePulse", cfg.VitalsActivePulse);
+                cfg.SpecialDurationSeconds = ini.GetFloat("Vitals", "SpecialDurationSeconds", cfg.SpecialDurationSeconds, 1f, 600f);
+                cfg.SpecialMinDurationFraction = ini.GetFloat("Vitals", "SpecialMinDurationFraction", cfg.SpecialMinDurationFraction, 0.05f, 1f);
+                cfg.SpecialRechargeSeconds = ini.GetFloat("Vitals", "SpecialRechargeSeconds", cfg.SpecialRechargeSeconds, 1f, 3600f);
+                cfg.SpecialMinimumCharge = ini.GetFloat("Vitals", "SpecialMinimumCharge", cfg.SpecialMinimumCharge, 0f, 1f);
+
+                cfg.VitalsStripAuto = ini.GetBool("VitalsStrip", "Auto", cfg.VitalsStripAuto);
+                cfg.VitalsStripX = ini.GetFloat("VitalsStrip", "X", cfg.VitalsStripX, 0f, 1f);
+                cfg.VitalsStripY = ini.GetFloat("VitalsStrip", "Y", cfg.VitalsStripY, 0f, 1f);
+                cfg.VitalsStripWidth = ini.GetFloat("VitalsStrip", "Width", cfg.VitalsStripWidth, 0.02f, 1f);
+                cfg.VitalsStripWidthScale = ini.GetFloat("VitalsStrip", "WidthScale", cfg.VitalsStripWidthScale, 0.2f, 3f);
+                cfg.VitalsStripThickness = ini.GetFloat("VitalsStrip", "Thickness", cfg.VitalsStripThickness, 0.001f, 0.03f);
+                cfg.VitalsStripOffsetX = ini.GetFloat("VitalsStrip", "OffsetX", cfg.VitalsStripOffsetX, -0.5f, 0.5f);
+                cfg.VitalsStripOffsetY = ini.GetFloat("VitalsStrip", "OffsetY", cfg.VitalsStripOffsetY, -0.5f, 0.5f);
+                cfg.VitalsHealthShare = ini.GetFloat("VitalsStrip", "HealthShare", cfg.VitalsHealthShare, 0.05f, 1f);
+                cfg.VitalsArmourShare = ini.GetFloat("VitalsStrip", "ArmourShare", cfg.VitalsArmourShare, 0.05f, 1f);
+                cfg.VitalsThirdShare = ini.GetFloat("VitalsStrip", "ThirdShare", cfg.VitalsThirdShare, 0.05f, 1f);
+                cfg.VitalsStripGap = ini.GetFloat("VitalsStrip", "Gap", cfg.VitalsStripGap, 0f, 0.1f);
+                cfg.VitalsChannel = ParseColour("VitalsStrip", "Channel", ini.GetString("VitalsStrip", "Channel", null), cfg.VitalsChannel);
+                cfg.VitalsStripOpacity = ini.GetFloat("VitalsStrip", "Opacity", cfg.VitalsStripOpacity, 0.05f, 1f);
+
+                cfg.MinimapFrame = ini.GetBool("Minimap", "Frame", cfg.MinimapFrame);
+                cfg.MinimapLabel = ini.GetBool("Minimap", "Label", cfg.MinimapLabel);
 
                 cfg.HudAnimate = ini.GetBool("HUD", "Animate", cfg.HudAnimate);
                 cfg.HudShimmer = ini.GetFloat("HUD", "Shimmer", cfg.HudShimmer, 0f, 1f);

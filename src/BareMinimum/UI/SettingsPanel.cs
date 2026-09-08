@@ -668,6 +668,78 @@ namespace BareMinimum.UI
                  () => _cfg.ShowShopBlips,
                  "~y~Turn shop map markers ON first.");
 
+            Group("Vitals");
+
+            Bool("Vitals", "Vitals", "Enabled",
+                 () => _cfg.VitalsEnabled, v => _cfg.VitalsEnabled = v,
+                 "Health, armour and energy, redrawn as bars of ours. The game's own strip " +
+                 "under the minimap goes; off puts it back.");
+
+            Choice("Vitals style", "Vitals", "Style", new[] { "Upright", "Strip" },
+                   () => (int)_cfg.VitalsStyle, v => _cfg.VitalsStyle = (VitalsStyle)v,
+                   "Upright: three columns at the left of the row with sleep and food. Strip: " +
+                   "lying under the minimap where the game's own bars were.");
+
+            Bool("Energy bar", "Vitals", "Energy",
+                 () => _cfg.VitalsEnergy, v => _cfg.VitalsEnergy = v,
+                 "The third bar is a sprint meter. Empty, you jog until it comes back. Off, " +
+                 "it shows the special ability instead.",
+                 () => _cfg.VitalsEnabled, "~y~Turn the vitals ON first.");
+
+            Float("Sprint lasts", "Vitals", "EnergySprintSeconds",
+                  () => _cfg.EnergySprintSeconds, v => _cfg.EnergySprintSeconds = v,
+                  1f, 3f, 120f, "0",
+                  "Seconds of flat-out sprinting from a full bar to empty.",
+                  () => _cfg.VitalsEnabled && _cfg.VitalsEnergy, "~y~Turn the energy bar ON first.");
+
+            Float("Energy comes back in", "Vitals", "EnergyRebuildSeconds",
+                  () => _cfg.EnergyRebuildSeconds, v => _cfg.EnergyRebuildSeconds = v,
+                  1f, 2f, 120f, "0",
+                  "Seconds from empty to full, stood still or in a car. Half as fast at a jog.",
+                  () => _cfg.VitalsEnabled && _cfg.VitalsEnergy, "~y~Turn the energy bar ON first.");
+
+            Float("Sprint again at", "Vitals", "EnergySprintAgainAt",
+                  () => _cfg.EnergySprintAgainAt, v => _cfg.EnergySprintAgainAt = v,
+                  0.05f, 0.05f, 1f, "0.00",
+                  "How far back up the bar has to be before you can sprint again.",
+                  () => _cfg.VitalsEnabled && _cfg.VitalsEnergy, "~y~Turn the energy bar ON first.");
+
+            Bool("Minimap frame", "Minimap", "Frame",
+                 () => _cfg.MinimapFrame, v => _cfg.MinimapFrame = v,
+                 "A frame round the minimap in the bars' own black.");
+
+            Bool("Street and suburb", "Minimap", "Label",
+                 () => _cfg.MinimapLabel, v => _cfg.MinimapLabel = v,
+                 "Where you are, always, written into the foot of the minimap's frame.");
+
+            Bool("Compare with the game's bars", "Vitals", "Compare",
+                 () => _cfg.VitalsCompare, v => _cfg.VitalsCompare = v,
+                 "The game's own bars come back, with ours at half strength over them, for lining up.",
+                 () => _cfg.VitalsEnabled, "~y~Turn the vitals ON first.");
+
+            Float("Vitals speed", "Vitals", "Pace",
+                  () => _cfg.VitalsPace, v => _cfg.VitalsPace = v,
+                  0.1f, 0.1f, 4f, "0.0",
+                  "One clock for everything that moves in the three. 1 is normal.",
+                  () => _cfg.VitalsEnabled, "~y~Turn the vitals ON first.");
+
+            Float("Vitals specks", "Vitals", "Particles",
+                  () => _cfg.VitalsParticles, v => _cfg.VitalsParticles = v,
+                  0.1f, 0f, 1f, "0.0",
+                  "Bubbles in health, glints in armour, sparks in energy. 0 is none.",
+                  () => _cfg.VitalsEnabled, "~y~Turn the vitals ON first.");
+
+            Float("Vitals gloss", "Vitals", "Gloss",
+                  () => _cfg.VitalsGloss, v => _cfg.VitalsGloss = v,
+                  0.05f, 0f, 1f, "0.00",
+                  "A lighter band along one side of the fill. 0 is flat.",
+                  () => _cfg.VitalsEnabled, "~y~Turn the vitals ON first.");
+
+            Bool("Low health beats red", "Vitals", "LowHealthPulse",
+                 () => _cfg.VitalsLowHealthPulse, v => _cfg.VitalsLowHealthPulse = v,
+                 "The health bar beats toward red once there is less than a quarter left.",
+                 () => _cfg.VitalsEnabled, "~y~Turn the vitals ON first.");
+
             Group("HUD");
 
 

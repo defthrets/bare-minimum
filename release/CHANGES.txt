@@ -1,6 +1,39 @@
-﻿===============================================================================
+===============================================================================
   BARE MINIMUM  --  changes
 ===============================================================================
+
+
+0.2.0  --  Vitals moves in: health, armour and energy, one row of five
+-------------------------------------------------------------------------------
+
+  VITALS IS PART OF BARE MINIMUM NOW. The health, armour and special ability
+  bars that were a mod of their own stand in the row with the sleep and food
+  bars: five columns, one frame -- the same surround, the same channel, the same
+  plate and mark under every one, drawn through the same code, so the row is one
+  instrument. The order is health, armour, energy, sleep, food. The game's own
+  strip under the minimap goes, and comes back the moment the script unloads or
+  the vitals are switched off. Vitals.dll and Vitals.ini should be removed if
+  you have them; the two would fight over the same bars.
+
+  THE THIRD BAR IS ENERGY. It drains while you sprint, and empty it locks the
+  sprint -- you jog -- until it has come back a third of the way. It refills on
+  its own in a few seconds, faster stood still or in a car than at a jog. The
+  special ability shows through it: the bar lights and beats while the ability
+  runs. Energy = false in [Vitals] puts the special ability's charge back on it.
+
+  THE COLOURS. The stock bars keep their own -- health is green and runs down
+  through amber to red with the level, armour is blue, energy is yellow -- and
+  the two that were here changed to keep clear of them: food is orange now, not
+  green, and sleep is purple, not blue.
+
+  A FRAME ROUND THE MINIMAP, in the bars' own black, with a plate under the map
+  where the game's strip was -- and the plate always says where you are, the
+  street on the left and the suburb on the right. The game's own area and
+  street names are hidden while it is on. [Minimap] Frame and Label.
+
+  The bars' level animation is Vitals' too: a spring in every bar, kicked when
+  something changes the level and left to ring down, and a lean under braking,
+  acceleration and landing. BarSlosh and BarLean in [HUD].
 
 
 0.1.5  --  food can be put down somewhere

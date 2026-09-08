@@ -1,0 +1,306 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Vitals preview</title>
+<style>
+  body { margin: 0; background: #14161a; color: #cfd2d8; font: 13px/1.4 system-ui, sans-serif; }
+  .wrap { padding: 16px; max-width: 980px; }
+  canvas { display: block; background: #000; image-rendering: pixelated; }
+  .row { display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: center; margin: 12px 0; }
+  label { display: inline-flex; gap: 8px; align-items: center; }
+  input[type=range] { width: 140px; }
+  button { background: #2a2e36; color: #e6e8ee; border: 1px solid #444; padding: 4px 10px; border-radius: 3px; cursor: pointer; }
+  button:hover { background: #3a3f4a; }
+  p { max-width: 760px; color: #9aa0ab; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h3 style="margin:0 0 6px">Vitals -- a port of Bars.cs to canvas, at 1:1 pixels for a 2560x1440 screen (bottom-left corner shown at 2x)</h3>
+  <p>The maths is the same as the C#: idle bow/lean/drift on the paced clock, a damped spring per bar for the slosh, bands with a slow warmth, rows at the surface with a crest, and deterministic specks. The grey box is where the minimap sits; the faint flat strip under it (toggle) is the stock bar's size and place; the two upright bars on the right are Bare Minimum's, for thickness.</p>
+  <canvas id="c" width="1440" height="600" style="width:720px;height:300px"></canvas>
+  <div class="row">
+    <label>Health <input id="health" type="range" min="0" max="100" value="100"><span id="healthV">100</span></label>
+    <label>Armour <input id="armour" type="range" min="0" max="100" value="100"><span id="armourV">100</span></label>
+    <label>Special <input id="special" type="range" min="0" max="100" value="100"><span id="specialV">100</span></label>
+  </div>
+  <div class="row">
+    <button id="hit">Take a hit (-15)</button>
+    <button id="heal">Snack (+20)</button>
+    <button id="brake">Brake hard</button>
+    <button id="ability">Special: <span id="abilityV">off</span></button>
+    <label>Pace <input id="pace" type="range" min="10" max="300" value="100"><span id="paceV">1.0</span></label>
+    <label>Wave <input id="wave" type="range" min="0" max="100" value="100"></label>
+    <label>Particles <input id="particles" type="range" min="0" max="100" value="100"></label>
+    <label><input id="stock" type="checkbox" checked> show stock strip</label>
+    <label><input id="lowpulse" type="checkbox" checked> low-health pulse</label>
+  </div>
+</div>
+<script>
+// ---- the screen ----
+const SW = 2560, SH = 1440, ASPECT = SW / SH;
+const ZOOM = 2;                      // canvas pixels per screen pixel
+const VIEW_X0 = 0, VIEW_Y0 = 1440 - 300;   // the crop: screen x 0..720, y 1140..1440
+
+const cv = document.getElementById('c');
+const g = cv.getContext('2d');
+
+// ---- layout, as Layout.cs ----
+const safe = 0.95;
+const insetX = (1 - safe) / 2, insetY = (1 - safe) / 2;
+const BoxX = -0.0045, BoxY = 0.002, BoxW = 0.150, BoxH = 0.188888;
+// aligned units -> screen fractions (16:9 here, so x units are plain width fractions)
+const boxLeft = insetX + BoxX * (16 / 9) / ASPECT, boxBottom = 1 - insetY + BoxY;
+const boxRight = boxLeft + BoxW * (16 / 9) / ASPECT, boxTop = boxBottom - BoxH;
+const MapInset = 12 / 384, StockThick = 10 / 1440, StockGap = 4 / 1440;
+const mapLeft = boxLeft + (boxRight - boxLeft) * MapInset;
+const mapWidth = (boxRight - boxLeft) * (1 - 2 * MapInset);
+const safeBottom = boxBottom - BoxY;
+const stockTop = safeBottom - StockThick;
+const Thickness = 0.0048;                       // [Layout] Thickness, a WIDTH fraction
+const thick = Thickness * ASPECT;                // as a height fraction
+const stripTop = stockTop;
+const Gap = 0.008;
+
+function segments(hasSpecial) {
+  const gap = Gap * mapWidth;
+  const hs = 0.5, ar = 0.25, sp = hasSpecial ? 0.25 : 0;
+  const total = hs + ar + sp, bars = hasSpecial ? 3 : 2;
+  const room = mapWidth - gap * (bars - 1);
+  let x = mapLeft;
+  const H = { left: x, width: room * hs / total }; x += H.width + gap;
+  const A = { left: x, width: room * ar / total }; x += A.width + gap;
+  const S = hasSpecial ? { left: x, width: room * sp / total } : null;
+  return { H, A, S };
+}
+
+// ---- drawing primitives, screen fractions -> canvas ----
+function bar(left, top, w, h, rgba) {
+  if (w <= 0 || h <= 0 || rgba[3] <= 0) return;
+  g.fillStyle = `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3] / 255})`;
+  g.fillRect((left * SW - VIEW_X0) * ZOOM, (top * SH - VIEW_Y0) * ZOOM, w * SW * ZOOM, h * SH * ZOOM);
+}
+const mix = (a, b, k) => k <= 0 ? a : (k > 1 ? [b[0], b[1], b[2], a[3]] : [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k, a[3]]);
+const alpha = (c, a) => [c[0], c[1], c[2], Math.max(0, Math.min(255, a))];
+const clamp = (v, lo, hi) => v < lo ? lo : v > hi ? hi : v;
+const clamp01 = v => clamp(v, 0, 1);
+
+function pulse(u, width) {
+  u -= Math.floor(u);
+  const d = Math.abs(u - 0.5) * 2;
+  if (d >= width) return 0;
+  return 0.5 + 0.5 * Math.cos(d / width * Math.PI);
+}
+function scatter(v) { const x = Math.sin(v * 12.9898) * 43758.5453; return x - Math.floor(x); }
+
+// ---- Motion.cs ----
+class Spring {
+  constructor() { this.S = 0; this.V = 0; }
+  kick(v) { this.V += v; }
+  step(dt, force) {
+    const w = 7.4, c = 2.1, reach = 0.12;
+    this.V += (-w * w * this.S - c * this.V + force) * dt;
+    this.S += this.V * dt;
+    if (this.S > reach) { this.S = reach; if (this.V > 0) this.V = 0; }
+    if (this.S < -reach) { this.S = -reach; if (this.V < 0) this.V = 0; }
+  }
+}
+const springs = { H: new Spring(), A: new Spring(), S: new Spring() };
+let phase = 0, wall = 0, accel = 0, brakeUntil = 0;
+
+// ---- Bars.cs ----
+const Opacity = 0.85, Gloss = 0.18;
+const cfg = () => ({
+  pace: +document.getElementById('pace').value / 100,
+  wave: +document.getElementById('wave').value / 100,
+  particles: +document.getElementById('particles').value / 100,
+});
+
+function body(rgb, strength) { return alpha([rgb[0], rgb[1], rgb[2], 255], 235 * Opacity * strength); }
+
+function one(seg, fraction, bodyC, channel, spring, kind, t, wallT, active, strength, c) {
+  const x0 = seg.left, w = seg.width, y0 = stripTop, h = thick;
+  const thickW = h / ASPECT;
+  bar(x0, y0, w, h, channel);
+  fraction = clamp01(fraction);
+  if (fraction <= 0.002) return;
+  const level = w * fraction;
+  const ph = kind * 0.37, wave = c.wave;
+  const drift = Math.sin((t + ph * 5.3) * (2 * Math.PI / 5.3)) * 0.020 * w * wave;
+  let bow = Math.sin((t + ph * 3.7) * (2 * Math.PI / 3.7)) * 0.26 * thickW * wave;
+  let tilt = Math.sin((t + ph * 7.1) * (2 * Math.PI / 7.1)) * 0.20 * thickW * wave;
+  const thrown = spring.S * w;
+  const speed = clamp(spring.V * 1.8, -1, 1);
+  bow += speed * 0.55 * thickW; tilt += speed * 0.35 * thickW;
+  const surface = clamp(x0 + level + drift + thrown, x0, x0 + w);
+
+  const rows = clamp(Math.round(h * SH / 2), 4, 10);
+  const right = new Array(rows);
+  let bodyRight = x0 + w;
+  const crestW = Math.max(1.6 / SW, 0.10 * thickW);
+  for (let j = 0; j < rows; j++) {
+    const across = ((j + 0.5) / rows - 0.5) * 2, curve = 1 - across * across;
+    right[j] = clamp(surface + bow * curve + tilt * across, x0, x0 + w);
+    if (right[j] - crestW < bodyRight) bodyRight = right[j] - crestW;
+  }
+  if (bodyRight < x0) bodyRight = x0;
+
+  const glossH = Gloss > 0 ? h * 0.36 : 0, glossK = Gloss * 0.45;
+  const white = [255, 252, 244, bodyC[3]], warmTo = [255, 250, 235, bodyC[3]];
+  const inside = t / 7 + ph * 3;
+  const bodyW = bodyRight - x0;
+  if (bodyW > 0) {
+    const bands = clamp(Math.floor(bodyW * SW / 5), 1, 48);
+    for (let i = 0; i < bands; i++) {
+      const bL = x0 + bodyW * i / bands, bR = x0 + bodyW * (i + 1) / bands;
+      const u = (i + 0.5) / bands;
+      const warm = (pulse(u - inside * 0.060, 0.55) * 0.6 + pulse(u - inside * 0.041 + 0.5, 0.75) * 0.4) * 0.16;
+      const tint = mix(bodyC, warmTo, warm);
+      if (glossH > 0) { bar(bL, y0, bR - bL, glossH, mix(tint, white, glossK)); bar(bL, y0 + glossH, bR - bL, h - glossH, tint); }
+      else bar(bL, y0, bR - bL, h, tint);
+    }
+  }
+  const edgeWarm = (pulse(1 - inside * 0.060, 0.55) * 0.6 + pulse(1 - inside * 0.041 + 0.5, 0.75) * 0.4) * 0.16;
+  const edgeTint = mix(bodyC, warmTo, edgeWarm);
+  const crest = mix(bodyC, [255, 250, 240, bodyC[3]], 0.55);
+  for (let j = 0; j < rows; j++) {
+    const rTop = y0 + h * j / rows, rBot = y0 + h * (j + 1) / rows;
+    const tint = rTop - y0 < glossH - 0.00001 ? mix(edgeTint, white, glossK) : edgeTint;
+    const end = right[j] - crestW;
+    if (end > bodyRight) bar(bodyRight, rTop, end - bodyRight, rBot - rTop, tint);
+    const crestL = Math.max(x0, right[j] - crestW);
+    if (right[j] > crestL) bar(crestL, rTop, right[j] - crestL, rBot - rTop, crest);
+  }
+  if (c.particles <= 0.001) return;
+  if (kind === 0) bubbles(x0, y0, h, surface, bodyC, t, strength, c);
+  else if (kind === 1) glints(x0, y0, h, surface, bodyC, t, strength, c);
+  else sparkles(x0, y0, h, surface, t, wallT, active, strength, c);
+}
+
+function bubbles(x0, y0, h, surface, bodyC, t, strength, c) {
+  const count = Math.round(4 * c.particles); if (count < 1) return;
+  const size = h * 0.26, sizeW = size / ASPECT;
+  const span = (surface - x0) - sizeW * 1.5; if (span <= sizeW) return;
+  const tint = mix(bodyC, [255, 255, 255, bodyC[3]], 0.6);
+  for (let i = 0; i < count; i++) {
+    const rate = 0.10 + i * 0.021, raw = t * rate + i * 0.37, cycle = Math.floor(raw), at = raw - cycle;
+    const lane = 0.15 + 0.70 * scatter(i * 3.1 + cycle * 17.3);
+    const sway = Math.sin(t * (0.9 + i * 0.17) + i * 2.1) * 0.08;
+    const px = x0 + sizeW * 0.5 + span * at;
+    const py = clamp(y0 + h * (lane + sway) - size / 2, y0, y0 + h - size);
+    const edge = Math.min(at * 6, Math.min((1 - at) * 3, 1));
+    const a = 150 * edge * strength; if (a <= 4) continue;
+    bar(px, py, sizeW, size, alpha(tint, a));
+  }
+}
+function glints(x0, y0, h, surface, bodyC, t, strength, c) {
+  const count = Math.round(3 * c.particles); if (count < 1) return;
+  const len = h * 1.6 / ASPECT, tall = h * 0.13;
+  const span = (surface - x0) - len; if (span <= len * 0.5) return;
+  const tint = mix(bodyC, [255, 255, 255, bodyC[3]], 0.75);
+  for (let i = 0; i < count; i++) {
+    const rate = 0.22 + i * 0.07, raw = t * rate + i * 0.41, at = raw - Math.floor(raw);
+    const px = x0 + span * at, py = y0 + h * (0.20 + 0.16 * i);
+    const edge = Math.min(at * 4, Math.min((1 - at) * 4, 1));
+    const a = 120 * edge * strength; if (a <= 4) continue;
+    bar(px, py, len, tall, alpha(tint, a));
+  }
+}
+function sparkles(x0, y0, h, surface, t, wallT, active, strength, c) {
+  const count = Math.round(5 * c.particles); if (count < 1) return;
+  const size = h * 0.24, sizeW = size / ASPECT;
+  const span = (surface - x0) - sizeW; if (span <= sizeW) return;
+  const hurry = active ? 2.2 : 1;
+  for (let i = 0; i < count; i++) {
+    const beat = (2.6 + (i % 5) * 0.9) / hurry, raw = t / beat + i * 0.37, cycle = Math.floor(raw), at = raw - cycle;
+    let lit = Math.sin(at * Math.PI); lit = lit * lit * lit;
+    const fast = 0.5 + 0.5 * Math.sin(wallT * 7.3 + i * 2.1), slow = 0.5 + 0.5 * Math.sin(wallT * 4.6 - i * 1.7);
+    const twinkle = 0.34 + 0.66 * (fast * 0.62 + slow * 0.38);
+    const a = 240 * lit * twinkle * (active ? 1 : 0.75) * strength; if (a <= 6) continue;
+    const lane = 0.15 + 0.70 * scatter(i * 3.1 + cycle * 17.3), deep = 0.06 + 0.88 * scatter(i * 7.7 + cycle * 29.1 + 5.5);
+    const px = x0 + span * deep, py = clamp(y0 + h * lane - size / 2, y0, y0 + h - size);
+    bar(px, py, sizeW, size, [255, 250, 225, a]);
+  }
+}
+
+// ---- the scene ----
+const state = { health: 1, armour: 1, special: 1, active: false, full: true, lastHealth: 1, lastArmour: 1 };
+let last = performance.now();
+function frame(now) {
+  let dt = (now - last) / 1000; last = now;
+  if (dt < 0) dt = 0; if (dt > 0.1) dt = 0.1;
+  const c = cfg();
+  wall += dt; phase += dt * c.pace;
+
+  // motion: brake = a steady deceleration for a moment, as Lean() would report
+  const target = now < brakeUntil ? -9 : 0;
+  accel += (target - accel) * Math.min(1, dt * 12);
+  const force = -accel * 0.003 * 7.4 * 7.4;
+  const hd = state.health - state.lastHealth, ad = state.armour - state.lastArmour;
+  state.lastHealth = state.health; state.lastArmour = state.armour;
+  if (hd < -0.001) springs.H.kick(-(0.35 + 0.65 * Math.min(1, -hd * 4))); else if (hd > 0.001) springs.H.kick(0.30 * Math.min(1, hd * 4));
+  if (ad < -0.001) springs.A.kick(-(0.35 + 0.65 * Math.min(1, -ad * 4))); else if (ad > 0.001) springs.A.kick(0.30 * Math.min(1, ad * 4));
+  for (const s of Object.values(springs)) s.step(dt, force);
+
+  // special meter, as SpecialMeter would run it
+  if (state.active) { state.special -= dt / 30; if (state.special < 0.02) { state.special = 0.02; state.active = false; state.special = 0; document.getElementById('abilityV').textContent = 'off'; } }
+  else { state.special = Math.min(1, state.special + dt / 150); }
+  document.getElementById('specialV').textContent = Math.round(state.special * 100);
+  document.getElementById('special').value = Math.round(state.special * 100);
+
+  // background: a bit of "world", the minimap box, the visible map
+  g.fillStyle = '#3a4a3c'; g.fillRect(0, 0, cv.width, cv.height);
+  g.fillStyle = '#2d3137';
+  g.fillRect((mapLeft * SW - VIEW_X0) * ZOOM, ((safeBottom - StockThick - StockGap - (256 - 14) / 1440) * SH - VIEW_Y0) * ZOOM, mapWidth * SW * ZOOM, ((256 - 14) / 1440) * SH * ZOOM);
+  g.fillStyle = '#4a4f57';
+  for (let i = 0; i < 6; i++) g.fillRect((mapLeft * SW - VIEW_X0 + 30 + i * 55) * ZOOM, ((safeBottom - 0.16) * SH - VIEW_Y0) * ZOOM, 14 * ZOOM, 200 * ZOOM);
+
+  // Bare Minimum's two upright bars, for the thickness match
+  const bmW = 0.0048, bmEdge = bmW * 0.22;
+  const bmX = mapLeft + mapWidth + 0.012, bmFoot = safeBottom - StockThick - StockGap, bmH = 0.16;
+  for (let k = 0; k < 2; k++) {
+    const x = bmX + k * bmW * 1.6;
+    bar(x - bmEdge, bmFoot - bmH - bmEdge * ASPECT, bmW + bmEdge * 2, bmH + bmEdge * 2 * ASPECT, [0, 0, 0, 205 * 0.72]);
+    bar(x, bmFoot - bmH, bmW, bmH, [28, 28, 32, 165 * 0.72]);
+    bar(x, bmFoot - bmH * 0.7, bmW, bmH * 0.7, k ? [96, 178, 246, 235 * 0.72] : [104, 234, 140, 235 * 0.72]);
+  }
+
+  // the stock strip, flat, where the game draws it
+  const segs = segments(true);
+  if (document.getElementById('stock').checked) {
+    bar(segs.H.left, stockTop, segs.H.width, StockThick, [114, 204, 114, 110]);
+    bar(segs.A.left, stockTop, segs.A.width, StockThick, [93, 182, 229, 110]);
+    bar(segs.S.left, stockTop, segs.S.width, StockThick, [240, 200, 80, 110]);
+  }
+
+  // ours
+  const strength = 1;
+  const channel = [0, 0, 0, 110 * Opacity * strength];
+  let hc = body([114, 204, 114], strength);
+  if (document.getElementById('lowpulse').checked && state.health > 0 && state.health < 0.25) {
+    const p = Math.abs(Math.sin(wall * 3.4)); hc = mix(hc, [255, 72, 60, hc[3]], 0.30 + 0.40 * p);
+  }
+  let sc = body([240, 200, 80], strength);
+  if (state.active) { const p = Math.abs(Math.sin(wall * 5.5)); sc = mix(sc, [255, 246, 214, sc[3]], 0.25 + 0.30 * p); }
+  else if (state.special >= 0.999) { const b = 0.5 + 0.5 * Math.sin(wall * (2 * Math.PI / 2.4)); sc = mix(sc, [255, 250, 230, sc[3]], 0.08 * b); }
+  one(segs.H, state.health, hc, channel, springs.H, 0, phase, wall, false, strength, c);
+  one(segs.A, state.armour, body([93, 182, 229], strength), channel, springs.A, 1, phase, wall, false, strength, c);
+  one(segs.S, state.special, sc, channel, springs.S, 2, phase, wall, state.active, strength, c);
+
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// ---- controls ----
+const bind = (id, key) => { const el = document.getElementById(id); el.oninput = () => { state[key] = el.value / 100; document.getElementById(id + 'V').textContent = el.value; }; };
+bind('health', 'health'); bind('armour', 'armour');
+document.getElementById('special').oninput = e => { state.special = e.target.value / 100; };
+document.getElementById('hit').onclick = () => { state.health = Math.max(0, state.health - 0.15); document.getElementById('health').value = Math.round(state.health * 100); document.getElementById('healthV').textContent = Math.round(state.health * 100); };
+document.getElementById('heal').onclick = () => { state.health = Math.min(1, state.health + 0.20); document.getElementById('health').value = Math.round(state.health * 100); document.getElementById('healthV').textContent = Math.round(state.health * 100); };
+document.getElementById('brake').onclick = () => { brakeUntil = performance.now() + 900; };
+document.getElementById('ability').onclick = () => { if (!state.active && state.special >= 0.1) { state.active = true; springs.S.kick(-0.45); } else { state.active = false; } document.getElementById('abilityV').textContent = state.active ? 'on' : 'off'; };
+document.getElementById('pace').oninput = e => document.getElementById('paceV').textContent = (e.target.value / 100).toFixed(1);
+</script>
+</body>
+</html>
