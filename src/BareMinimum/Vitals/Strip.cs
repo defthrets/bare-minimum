@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using GTA;
 using BareMinimum.Core;
 
 namespace BareMinimum.Vitals
@@ -207,7 +208,7 @@ namespace BareMinimum.Vitals
 
             switch (kind)
             {
-                case Kind.Health: Pulses(cfg, x0, y0, h, surface, body, m.Wall, r.Health, strength); break;
+                case Kind.Health: Heartbeat(cfg, x0, y0, h, surface, body, spring, m.Wall, r.Health, strength); break;
                 case Kind.Armour: Glints(cfg, x0, y0, h, surface, body, t, strength); break;
                 default: Streaks(cfg, x0, y0, h, surface, body, m.Wall, r, strength); break;
             }
@@ -217,41 +218,61 @@ namespace BareMinimum.Vitals
         // The specks
         // ======================================================================
 
-        /// <summary>HEALTH: the pulse, lying down -- thin bands travelling from the left end to the surface at the heart's rate. See Columns.Pulses.</summary>
-        private static void Pulses(Settings cfg, float x0, float y0, float h, float surface,
-                                   Color body, float wall, float health, float strength)
+        private float _beatPhase;
+        private float _beatWall = -1f;
+        private float _beatAt = -10f;
+        private float _beatPeriod = 1f;
+        private float _exertion = 1f;
+
+        /// <summary>HEALTH: the heartbeat, lying down -- the fill flashes and the level is kicked on each beat. See Columns.Heartbeat.</summary>
+        private void Heartbeat(Settings cfg, float x0, float y0, float h, float surface,
+                               Color body, Momentum.Spring spring, float wall, float health, float strength)
         {
             if (cfg.VitalsParticles <= 0.001f) return;
 
-            var travel = surface - x0;
-            if (travel <= 0.004f) return;
+            var dt = _beatWall < 0f ? 0f : Ink.Clamp(wall - _beatWall, 0f, 0.1f);
+            _beatWall = wall;
 
-            var bpm = 56f + 62f * (1f - Ink.Clamp01(health));
-            var period = 60f / bpm;
-            var life = period * 0.72f;
-
-            var wide = Math.Max(1.6f / Ink.ScreenWidth, h / Ink.Aspect * 0.16f);
-            var tint = Ink.Mix(body, Color.FromArgb(body.A, 255, 255, 255), 0.72f);
-
-            var beat = wall / period;
-
-            for (var i = 0; i < 2; i++)
+            var want = 1f;
+            try
             {
-                var phase = beat - (i == 0 ? 0f : 0.20f);
-                var at = (phase - (float)Math.Floor(phase)) * period / life;
-                if (at > 1f) continue;
-
-                var px = x0 + travel * at - wide * 0.5f;
-                if (px + wide > surface) px = surface - wide;
-
-                var fade = (1f - at) * (1f - at);
-                var edgeIn = Math.Min(1f, at * 6f);
-
-                var alpha = (int)((i == 0 ? 175f : 90f) * fade * edgeIn * cfg.VitalsParticles * strength);
-                if (alpha <= 4) continue;
-
-                Ink.Bar(px, y0, wide, h, Ink.Alpha(tint, alpha));
+                var me = Game.Player.Character;
+                if (me != null && me.Exists() && !me.IsInVehicle())
+                {
+                    if (me.IsSprinting) want = 1.65f;
+                    else if (me.IsRunning) want = 1.3f;
+                }
             }
+            catch { want = 1f; }
+
+            _exertion += (want - _exertion) * Math.Min(1f, dt * 2.5f);
+
+            var bpm = (56f + 62f * (1f - Ink.Clamp01(health))) * _exertion;
+            _beatPeriod = 60f / bpm;
+            _beatPhase += dt / _beatPeriod;
+
+            if (_beatPhase >= 1f)
+            {
+                _beatPhase -= (float)Math.Floor(_beatPhase);
+                _beatAt = wall;
+                spring.Kick(0.09f * Ink.Clamp01(cfg.HudBarSlosh) * cfg.VitalsParticles);
+            }
+
+            var since = wall - _beatAt;
+            var lub = since >= 0f && since < 0.20f ? (1f - since / 0.20f) * (1f - since / 0.20f) : 0f;
+            var dubSince = since - _beatPeriod * 0.20f;
+            var dub = dubSince >= 0f && dubSince < 0.16f ? (1f - dubSince / 0.16f) * (1f - dubSince / 0.16f) * 0.55f : 0f;
+            var glow = Math.Min(1f, lub + dub);
+
+            if (glow <= 0.02f) return;
+
+            var alpha = (int)(58f * glow * cfg.VitalsParticles * strength);
+            if (alpha <= 3) return;
+
+            var wide = surface - x0;
+            if (wide <= 0.002f) return;
+
+            Ink.Bar(x0, y0, wide, h, Ink.Alpha(Ink.Mix(body, Color.FromArgb(body.A, 255, 255, 255), 0.85f), alpha));
         }
 
         /// <summary>ARMOUR: glints, sliding along the upper part of the fill like light down a plate.</summary>
@@ -296,8 +317,8 @@ namespace BareMinimum.Vitals
             if (count < 1) return;
 
             var span = surface - x0;
-            var len = Math.Min(span * 0.35f, h / Ink.Aspect * 1.4f);
-            var tall = h * 0.16f;
+            var len = Math.Min(span * 0.22f, h / Ink.Aspect * 0.9f);
+            var tall = h * 0.09f;
 
             if (span <= len * 1.5f) return;
 

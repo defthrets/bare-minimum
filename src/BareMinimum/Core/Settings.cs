@@ -760,6 +760,25 @@ namespace BareMinimum.Core
         /// </summary>
         public string HudRowOrder = "health, sleep, food, energy";
 
+        /// <summary>
+        /// THE WHOLE LOT AS ONE: an offset, in fractions of the screen, added to the row of bars
+        /// AND to the cash readout, so the two move together. Each keeps its own position under
+        /// it -- X and Y for the row, CashX and CashY for the cash. The minimap and its frame
+        /// stay where the game's safe-zone slider puts them; no native the game exposes will
+        /// move the minimap.
+        /// </summary>
+        public float HudGroupX = 0f;
+        public float HudGroupY = 0f;
+
+        /// <summary>
+        /// The game's cash readout, moved from the top right to sit with the bars. The numbers
+        /// are offsets from where the game had it, in its own units, applied to the total and
+        /// to the change that pops under it alike. Off puts it back where it was.
+        /// </summary>
+        public bool MoveCash = true;
+        public float CashX = -0.60f;
+        public float CashY = 0.90f;
+
         // ---- Vitals ----------------------------------------------------------
         //
         // HEALTH, ARMOUR AND ENERGY, once a mod of their own. The game's strip under the
@@ -814,7 +833,7 @@ namespace BareMinimum.Core
         public bool VitalsEnergy = true;
 
         /// <summary>Seconds of flat-out sprinting from full to empty. 45: "heaps longer" than the 12 it shipped at.</summary>
-        public float EnergySprintSeconds = 45f;
+        public float EnergySprintSeconds = 39f;
 
         /// <summary>Seconds from empty back to full, stood still or in a car. Half as fast at a jog.</summary>
         public float EnergyRebuildSeconds = 10f;
@@ -1376,6 +1395,11 @@ namespace BareMinimum.Core
                 cfg.HudBarSlosh = ini.GetFloat("HUD", "BarSlosh", cfg.HudBarSlosh, 0f, 1f);
                 cfg.HudBarLean = ini.GetFloat("HUD", "BarLean", cfg.HudBarLean, 0f, 1f);
                 cfg.HudRowOrder = ini.GetString("HUD", "RowOrder", cfg.HudRowOrder);
+                cfg.HudGroupX = ini.GetFloat("HUD", "GroupX", cfg.HudGroupX, -1f, 1f);
+                cfg.HudGroupY = ini.GetFloat("HUD", "GroupY", cfg.HudGroupY, -1f, 1f);
+                cfg.MoveCash = ini.GetBool("HUD", "MoveCash", cfg.MoveCash);
+                cfg.CashX = ini.GetFloat("HUD", "CashX", cfg.CashX, -2f, 2f);
+                cfg.CashY = ini.GetFloat("HUD", "CashY", cfg.CashY, -2f, 2f);
 
                 cfg.VitalsEnabled = ini.GetBool("Vitals", "Enabled", cfg.VitalsEnabled);
                 cfg.VitalsStyle = ParseVitalsStyle(ini.GetString("Vitals", "Style", "Upright"), cfg.VitalsStyle);

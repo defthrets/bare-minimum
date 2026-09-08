@@ -867,6 +867,33 @@ namespace BareMinimum.UI
                   () => !_cfg.HudAutoPosition,
                   "~y~Turn HUD auto position OFF first~s~ - this does nothing while it is on.");
 
+            Float("Whole HUD left/right", "HUD", "GroupX",
+                  () => _cfg.HudGroupX, v => _cfg.HudGroupX = v,
+                  0.005f, -1f, 1f, "0.000",
+                  "Moves the bars and the cash readout together. The map stays where the game's " +
+                  "safe zone puts it; the frame follows the map.");
+
+            Float("Whole HUD up/down", "HUD", "GroupY",
+                  () => _cfg.HudGroupY, v => _cfg.HudGroupY = v,
+                  0.005f, -1f, 1f, "0.000",
+                  "Moves the bars and the cash readout together. Positive is down.");
+
+            Bool("Move the cash readout", "HUD", "MoveCash",
+                 () => _cfg.MoveCash, v => _cfg.MoveCash = v,
+                 "The game's money, and the change that pops under it, brought down beside the bars.");
+
+            Float("Cash left/right", "HUD", "CashX",
+                  () => _cfg.CashX, v => _cfg.CashX = v,
+                  0.005f, -2f, 2f, "0.000",
+                  "Where the cash readout sits, from where the game had it. Negative is left.",
+                  () => _cfg.MoveCash, "~y~Turn Move the cash readout ON first.");
+
+            Float("Cash up/down", "HUD", "CashY",
+                  () => _cfg.CashY, v => _cfg.CashY = v,
+                  0.005f, -2f, 2f, "0.000",
+                  "Where the cash readout sits, from where the game had it. Positive is down.",
+                  () => _cfg.MoveCash, "~y~Turn Move the cash readout ON first.");
+
             Group("BARS");
 
 

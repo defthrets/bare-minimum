@@ -413,6 +413,11 @@ namespace BareMinimum.UI
 
             x = _cfg.HudAutoPosition ? MinimapLeft() + MinimapWidth() + wide * 0.45f : _cfg.HudX;
             bottom = _cfg.HudAutoPosition ? 0.955f : _cfg.HudY + side * 2f + gap;
+
+            // THE WHOLE LOT AS ONE. The group offset moves the row with the cash readout, on
+            // top of whatever the row's own position says. See Settings.HudGroupX.
+            x += _cfg.HudGroupX;
+            bottom += _cfg.HudGroupY;
         }
 
         /// <summary>The row as it stands right now, for anything that has to line up with it without drawing it.</summary>
@@ -1886,6 +1891,14 @@ namespace BareMinimum.UI
                 if (Game.IsPaused) return false;
                 if (!Function.Call<bool>(Hash.IS_SCREEN_FADED_IN)) return false;
                 if (Function.Call<bool>(Hash.IS_PLAYER_SWITCH_IN_PROGRESS)) return false;
+
+                // THE WASTED AND BUSTED SCREENS. The bars stayed up over "WASTED" because the
+                // radar is still shown through the first moments of it; the dead and the
+                // arrested have no needs on screen. IS_HUD_HIDDEN catches the rest of the game's
+                // own reasons to take its HUD away.
+                if (Function.Call<bool>(Hash.IS_PLAYER_DEAD, Game.Player.Handle)) return false;
+                if (Function.Call<bool>(Hash.IS_PLAYER_BEING_ARRESTED, Game.Player.Handle, true)) return false;
+                if (Function.Call<bool>(Hash.IS_HUD_HIDDEN)) return false;
 
                 // IS_RADAR_HIDDEN only. There is no IS_RADAR_ENABLED in SHVDN 3.9's Hash
                 // enum despite the native existing in some lists -- checked by reflecting

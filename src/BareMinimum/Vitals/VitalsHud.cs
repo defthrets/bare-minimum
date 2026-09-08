@@ -35,6 +35,7 @@ namespace BareMinimum.Vitals
         private readonly Strip _strip = new Strip();
         private readonly Columns _columns = new Columns();
         private readonly Frame _frame = new Frame();
+        private readonly Placement _placement = new Placement();
 
         private Layout _layout;
         private int _layoutAt;
@@ -89,6 +90,10 @@ namespace BareMinimum.Vitals
             if (dt < 0f || dt > 0.1f) dt = 0f;
 
             var compare = _cfg.VitalsCompare;
+
+            // The cash readout's place is part of the HUD's layout, not of the vitals, and is
+            // kept whether the vitals are on or off.
+            _placement.Update(_cfg);
 
             // THE GAME'S BARS ARE MANAGED WHETHER OR NOT OURS ARE DRAWN. During a fade or a
             // switch nothing of ours is on screen, and that is exactly when the minimap is
@@ -162,6 +167,9 @@ namespace BareMinimum.Vitals
             // the rest of the session.
             try { _energy.Release(); }
             catch (Exception ex) { Log.Error("Lifting the energy cap", ex); }
+
+            try { _placement.Restore(); }
+            catch (Exception ex) { Log.Error("Putting the cash readout back", ex); }
         }
 
         // ======================================================================
@@ -201,6 +209,11 @@ namespace BareMinimum.Vitals
                 if (Game.IsPaused) return false;
                 if (Function.Call<bool>(Hash.IS_PAUSE_MENU_ACTIVE)) return false;
                 if (!Function.Call<bool>(Hash.IS_SCREEN_FADED_IN)) return false;
+
+                // THE WASTED AND BUSTED SCREENS. The radar stays up through the first moments of
+                // both, so the radar alone does not say; a dead man has no vitals to show.
+                if (Function.Call<bool>(Hash.IS_PLAYER_DEAD, Game.Player.Handle)) return false;
+                if (Function.Call<bool>(Hash.IS_PLAYER_BEING_ARRESTED, Game.Player.Handle, true)) return false;
                 if (Function.Call<bool>(Hash.IS_PLAYER_SWITCH_IN_PROGRESS)) return false;
                 if (Function.Call<bool>(Hash.IS_HUD_HIDDEN)) return false;
                 if (Function.Call<bool>(Hash.IS_RADAR_HIDDEN)) return false;

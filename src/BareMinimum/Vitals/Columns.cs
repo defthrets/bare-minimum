@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using GTA;
 using BareMinimum.Core;
 using BareMinimum.UI;
 using Icon = BareMinimum.UI.Icon;
@@ -67,9 +68,9 @@ namespace BareMinimum.Vitals
         // One column
         // ======================================================================
 
-        private static void One(Settings cfg, Gauge gauge, Gauge.Row row, int slot, float fraction,
-                                Color body, Momentum.Spring spring, Kind kind, Icon mark,
-                                Momentum m, Readings r, float strength)
+        private void One(Settings cfg, Gauge gauge, Gauge.Row row, int slot, float fraction,
+                         Color body, Momentum.Spring spring, Kind kind, Icon mark,
+                         Momentum m, Readings r, float strength)
         {
             if (slot < 0) return;
 
@@ -231,9 +232,9 @@ namespace BareMinimum.Vitals
             switch (kind)
             {
                 case Kind.Health:
-                    // Glints while it is armour, a pulse once it is blood.
+                    // Glints while it is armour, a heartbeat once it is blood.
                     if (r.Armour > 0.002f) Glints(cfg, x, w, floor, surface, body, t, strength);
-                    else Pulses(cfg, x, w, floor, surface, body, m.Wall, r.Health, strength);
+                    else Heartbeat(cfg, x, w, floor, surface, body, spring, m.Wall, r.Health, strength);
                     break;
                 case Kind.Armour: Glints(cfg, x, w, floor, surface, body, t, strength); break;
                 default: Streaks(cfg, x, w, floor, surface, body, m.Wall, r, strength); break;
@@ -244,55 +245,88 @@ namespace BareMinimum.Vitals
         // The specks
         // ======================================================================
 
+        /// <summary>The heart's phase, in beats, and when the last one fell. Health only; there is one health bar.</summary>
+        private float _beatPhase;
+        private float _beatWall = -1f;
+        private float _beatAt = -10f;
+        private float _beatPeriod = 1f;
+        private float _exertion = 1f;
+
         /// <summary>
-        /// HEALTH: a pulse. Each beat sends a thin bright band up the column from the floor to
-        /// the surface -- a strong beat and a fainter one a fraction behind it, lub and dub --
-        /// and fades as it climbs.
+        /// HEALTH: a heartbeat. On each beat the whole fill flashes brighter for a moment and
+        /// the level itself is given a small kick, so the surface throbs and rings down -- a
+        /// pulse you see in the liquid rather than a marker travelling through it, which is what
+        /// the first version was and what was asked to be different. A fainter second flash a
+        /// fifth of a beat behind is the dub.
         ///
-        /// THE RATE IS THE HEART'S. About fifty-six a minute at full health, quickening to near
-        /// a hundred and twenty as it drains, on the wall clock so it is a real rate and not the
-        /// animation's pace. Which means the health bar can be read by ear as much as by eye:
-        /// a slow pulse is a well man and a racing one is not, before the level says either.
+        /// THE RATE IS THE HEART'S, and the heart is his. About fifty-six a minute at full
+        /// health, near a hundred and twenty as it drains, and QUICKER FOR RUNNING -- a third
+        /// again at a jog, two thirds at a sprint, eased in and out the way breath is -- on the
+        /// wall clock, so it is a real rate. The phase is accumulated rather than read off the
+        /// clock, so a change of rate never skips or doubles a beat.
         /// </summary>
-        private static void Pulses(Settings cfg, float x, float w, float floor, float surface,
-                                   Color body, float wall, float health, float strength)
+        private void Heartbeat(Settings cfg, float x, float w, float floor, float surface,
+                               Color body, Momentum.Spring spring, float wall, float health, float strength)
         {
             if (cfg.VitalsParticles <= 0.001f) return;
 
-            var travel = floor - surface;
-            if (travel <= 0.004f) return;
+            var dt = _beatWall < 0f ? 0f : Ink.Clamp(wall - _beatWall, 0f, 0.1f);
+            _beatWall = wall;
 
-            var bpm = 56f + 62f * (1f - Ink.Clamp01(health));
-            var period = 60f / bpm;
-
-            // How long a band takes to climb: most of a beat, so the next has started before
-            // the last has quite gone at a racing pulse, and there is a clear pause at rest.
-            var life = period * 0.72f;
-
-            var tall = Math.Max(1.6f / Ink.ScreenHeight, w * Ink.Aspect * 0.16f);
-            var tint = Ink.Mix(body, Color.FromArgb(body.A, 255, 255, 255), 0.72f);
-
-            var beat = wall / period;
-
-            for (var i = 0; i < 2; i++)
+            // How hard he is working, eased.
+            var want = 1f;
+            try
             {
-                // The dub follows the lub by a fifth of a beat, at half the strength.
-                var phase = beat - (i == 0 ? 0f : 0.20f);
-                var at = (phase - (float)Math.Floor(phase)) * period / life;
-                if (at > 1f) continue;
-
-                // Up from the floor, bright at the start, gone by the surface.
-                var py = floor - travel * at - tall * 0.5f;
-                if (py < surface) py = surface;
-
-                var fade = (1f - at) * (1f - at);
-                var edgeIn = Math.Min(1f, at * 6f);
-
-                var alpha = (int)((i == 0 ? 175f : 90f) * fade * edgeIn * cfg.VitalsParticles * strength);
-                if (alpha <= 4) continue;
-
-                Ink.Bar(x, py, w, tall, Ink.Alpha(tint, alpha));
+                var me = Game.Player.Character;
+                if (me != null && me.Exists() && !me.IsInVehicle())
+                {
+                    if (me.IsSprinting) want = 1.65f;
+                    else if (me.IsRunning) want = 1.3f;
+                }
             }
+            catch { want = 1f; }
+
+            _exertion += (want - _exertion) * Math.Min(1f, dt * 2.5f);
+
+            var bpm = (56f + 62f * (1f - Ink.Clamp01(health))) * _exertion;
+            _beatPeriod = 60f / bpm;
+
+            _beatPhase += dt / _beatPeriod;
+
+            if (_beatPhase >= 1f)
+            {
+                _beatPhase -= (float)Math.Floor(_beatPhase);
+                _beatAt = wall;
+
+                // The throb: a small kick up the spring, scaled by the slosh dial so a player
+                // who turned the jolts down gets a quieter heart too.
+                spring.Kick(0.09f * Ink.Clamp01(cfg.HudBarSlosh) * cfg.VitalsParticles);
+            }
+
+            // The flash: quick in, quick out, and the dub behind it.
+            var since = wall - _beatAt;
+            var lub = Flash(since, 0.20f);
+            var dub = Flash(since - _beatPeriod * 0.20f, 0.16f) * 0.55f;
+            var glow = Math.Min(1f, lub + dub);
+
+            if (glow <= 0.02f) return;
+
+            var alpha = (int)(58f * glow * cfg.VitalsParticles * strength);
+            if (alpha <= 3) return;
+
+            var tall = floor - surface;
+            if (tall <= 0.002f) return;
+
+            Ink.Bar(x, surface, w, tall, Ink.Alpha(Ink.Mix(body, Color.FromArgb(body.A, 255, 255, 255), 0.85f), alpha));
+        }
+
+        /// <summary>One flash: nought before it, full at once, gone after <paramref name="life"/> seconds, eased out.</summary>
+        private static float Flash(float since, float life)
+        {
+            if (since < 0f || since >= life) return 0f;
+
+            var k = 1f - since / life;
+            return k * k;
         }
 
         /// <summary>ARMOUR: glints, climbing the left of the fill like light up a plate.</summary>
@@ -344,9 +378,10 @@ namespace BareMinimum.Vitals
             var count = (int)Math.Round(3f * cfg.VitalsParticles);
             if (count < 1) return;
 
+            // THINNER AND SHORTER, on request: a hair of a dash, not a bar within the bar.
             var span = floor - surface;
-            var len = Math.Min(span * 0.35f, w * Ink.Aspect * 1.4f);
-            var wide = w * 0.16f;
+            var len = Math.Min(span * 0.22f, w * Ink.Aspect * 0.9f);
+            var wide = w * 0.09f;
 
             if (span <= len * 1.5f) return;
 

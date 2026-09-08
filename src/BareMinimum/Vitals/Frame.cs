@@ -209,8 +209,9 @@ namespace BareMinimum.Vitals
             var k = cfg.HudOpacity * strength;
             var padX = pad * 1.5f;
 
-            // A text scale that fits the band, from the plate's, shrunk if the band is thinner.
-            var scale = 0.215f;
+            // A text scale that fits the band -- a step up from the plate's, on request -- shrunk
+            // if the band is thinner than that needs.
+            var scale = 0.235f;
             var th = Hud.Height(scale, Hud.FontLabel);
             if (th > h * 0.92f) { scale *= h * 0.92f / th; th = Hud.Height(scale, Hud.FontLabel); }
 
