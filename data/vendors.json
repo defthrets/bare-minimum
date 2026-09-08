@@ -331,12 +331,12 @@
     "restaurant": {
       "name": "Restaurants",
       "sprite": 52,
-      "colour": 49
+      "colour": 41
     },
     "cafe": {
       "name": "Cafes",
       "sprite": 52,
-      "colour": 50
+      "colour": 61
     },
     "store": {
       "name": "Shops",
@@ -346,7 +346,7 @@
     "liquor": {
       "name": "Liquor",
       "sprite": 93,
-      "colour": 52
+      "colour": 2
     },
     "bar": {
       "name": "Bars",
@@ -356,27 +356,27 @@
     "smoke": {
       "name": "Smoke Shops",
       "sprite": 51,
-      "colour": 55
+      "colour": 62
     },
     "servo": {
       "name": "Convenience Store",
       "sprite": 739,
-      "colour": 57
+      "colour": 3
     },
     "pharmacy": {
       "name": "Pharmacy",
       "sprite": 153,
-      "colour": 49
+      "colour": 41
     },
     "produce": {
       "name": "Fruit Stalls",
       "sprite": 52,
-      "colour": 69
+      "colour": 2
     },
     "machine": {
       "name": "Vending Machines",
       "sprite": 52,
-      "colour": 53
+      "colour": 3
     }
   },
   "vendors": [
