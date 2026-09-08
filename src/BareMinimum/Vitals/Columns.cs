@@ -113,14 +113,19 @@ namespace BareMinimum.Vitals
             // EACH BAR ON ITS OWN TEMPO. A phase offset alone left the three on the same
             // frequency, and three bars breathing at one rate read as one instrument breathing
             // in unison -- which was reported. Scaling the clock per bar puts them on different
-            // periods entirely, so no two are ever in step for long. The amplitudes are about
-            // two thirds of what they were: "a little less aggressive".
+            // periods entirely, so no two are ever in step for long.
+            //
+            // AND BARELY MOVING. The idle travel is about a quarter of what it first was: a
+            // surface at rest that is still plainly liquid, and nothing more. The movement you
+            // see is the spring -- a hit, a brake, a landing, running out of breath -- which is
+            // what "settle to a barely moving flat state, and the movement makes them slosh"
+            // asked for.
             var tempo = kind == Kind.Health ? 0.87f : kind == Kind.Armour ? 1f : 1.13f;
             var tt = t * tempo + phase * 11.7f;
 
-            var drift = (float)Math.Sin(tt * (2.0 * Math.PI / 5.3)) * 0.014f * h * wave;
-            var bow = (float)Math.Sin(tt * (2.0 * Math.PI / 3.7)) * 0.18f * thick * wave;
-            var tilt = (float)Math.Sin(tt * (2.0 * Math.PI / 7.1)) * 0.14f * thick * wave;
+            var drift = (float)Math.Sin(tt * (2.0 * Math.PI / 5.3)) * 0.004f * h * wave;
+            var bow = (float)Math.Sin(tt * (2.0 * Math.PI / 3.7)) * 0.05f * thick * wave;
+            var tilt = (float)Math.Sin(tt * (2.0 * Math.PI / 7.1)) * 0.04f * thick * wave;
 
             // ---- the slosh ----
             //

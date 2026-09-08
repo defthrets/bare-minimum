@@ -102,9 +102,9 @@ namespace BareMinimum.Vitals
             var tempo = kind == Kind.Health ? 0.87f : kind == Kind.Armour ? 1f : 1.13f;
             var tt = t * tempo + phase * 11.7f;
 
-            var drift = (float)Math.Sin(tt * (2.0 * Math.PI / 5.3)) * 0.014f * w * wave;
-            var bow = (float)Math.Sin(tt * (2.0 * Math.PI / 3.7)) * 0.18f * thickW * wave;
-            var tilt = (float)Math.Sin(tt * (2.0 * Math.PI / 7.1)) * 0.14f * thickW * wave;
+            var drift = (float)Math.Sin(tt * (2.0 * Math.PI / 5.3)) * 0.004f * w * wave;
+            var bow = (float)Math.Sin(tt * (2.0 * Math.PI / 3.7)) * 0.05f * thickW * wave;
+            var tilt = (float)Math.Sin(tt * (2.0 * Math.PI / 7.1)) * 0.04f * thickW * wave;
 
             // ---- the slosh ----
             //

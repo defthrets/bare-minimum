@@ -712,9 +712,12 @@ namespace BareMinimum.UI
             //
             // 0.0062 puts the travel at four to eight pixels, which is enough rows for the
             // sine to glide through instead of stepping between. [HUD] BarWave scales it.
-            // 0.013 from 0.018: "a little less aggressive", asked for once the five stood
-            // together and the sum of their movement was more than any one of them.
-            var swing = h * 0.013f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
+            // 0.004 FROM 0.018, IN TWO STEPS. "A little less aggressive" took it to 0.013 once
+            // the five stood together; then "settle to a barely moving flat state, and the
+            // movement makes them slosh" took it here. The idle bow is a hair now -- a surface
+            // that is plainly liquid but at rest -- and everything you notice moving is the
+            // spring: a meal, a pill, a brake, a landing.
+            var swing = h * 0.004f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
 
 
             var floor = y + h;
@@ -965,7 +968,7 @@ namespace BareMinimum.UI
             //
             // 0.0062 puts the travel at four to eight pixels, which is enough rows for the
             // sine to glide through instead of stepping between. [HUD] BarWave scales it.
-            var swing = h * 0.013f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
+            var swing = h * 0.004f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
 
 
             // THE SURFACE FIRST, THEN THE BODY UNDER IT: the body starts at the lowest point
@@ -1507,7 +1510,7 @@ namespace BareMinimum.UI
 
             // Vitals' seven seconds, in this clock's units: at BarPace 42, 298 of these is
             // about seven seconds, and it divides into neither of the two above.
-            var tilt = (float)Math.Sin((t + phase) * (2.0 * Math.PI / 298.0)) * 0.14f * thickH * wave;
+            var tilt = (float)Math.Sin((t + phase) * (2.0 * Math.PI / 298.0)) * 0.04f * thickH * wave;
 
             // Up is negative on screen: a surface thrown upward heaps in the middle.
             bow -= speed * 0.40f * thickH;
