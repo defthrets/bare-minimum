@@ -656,9 +656,11 @@ namespace BareMinimum.UI
                  () => _cfg.ShowShopBlips,
                  "~y~Turn shop map markers ON first.");
 
-            Bool("One marker group", "Map", "GroupShopBlips",
+            Bool("Group markers by kind", "Map", "GroupShopBlips",
                  () => _cfg.GroupShopBlips, v => _cfg.GroupShopBlips = v,
-                 "All shops share one row in the map legend. Left and right slide through them.",
+                 "One row in the map legend for each kind -- Liquor, Fast Food, Restaurants, " +
+                 "Cafes, Street Food, Shops, Petrol, Smoke Shops, Bars, Pharmacy. Left and " +
+                 "right slide through the shops inside the row.",
                  () => _cfg.ShowShopBlips,
                  "~y~Turn shop map markers ON first.");
 

@@ -473,12 +473,19 @@ namespace BareMinimum.Core
         /// Everything else has its own, so a hundred shops is a hundred rows, and the legend
         /// went past a hundred and forty entries with the game's own markers in among them.
         ///
-        /// One shared name collapses the lot into a single row. Better than that, the legend's
-        /// left and right keys step through the blips WITHIN the selected row, so one row means
-        /// one place to stand and slide through every shop in the city.
+        /// A shared name collapses them, and the legend's left and right keys step through the
+        /// blips WITHIN the selected row -- so one row is one place to stand and slide through
+        /// every shop of that kind in the city.
+        ///
+        /// BY KIND, NOT ALL AS ONE. It used to be a single name for every shop, which was one
+        /// row and no use at all for finding a liquor store. The name is the group's now --
+        /// Liquor, Bars, Fast Food, Restaurants, Cafes, Street Food, Shops, Petrol, Smoke Shops,
+        /// Pharmacy -- so the legend is a short list of kinds, each paging through its own. The
+        /// groups and what is in them are in vendors.json; anything ungrouped falls back to
+        /// ShopBlipGroupName below.
         ///
         /// WHAT IT COSTS is the name on the marker when you highlight one: it will say the
-        /// group instead of the shop. That is why it is a switch and not a decision. The shop
+        /// kind instead of the shop. That is why it is a switch and not a decision. The shop
         /// still names itself when you walk up to the door, which is where it matters.
         /// </summary>
         public bool GroupShopBlips = true;

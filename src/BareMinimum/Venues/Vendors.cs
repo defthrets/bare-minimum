@@ -15,6 +15,16 @@ namespace BareMinimum.Venues
     {
         public string Id = "";
         public string Name = "Stand";
+
+        /// <summary>
+        /// Which map group this one belongs to -- see vendors.json "groups", and Vendors.Group.
+        ///
+        /// THE GROUP IS A NAME SHARED. The pause map's legend collects blips by their distinct
+        /// name and pages through each name's with left and right, so putting the liquor stores
+        /// under one name and the taco windows under another is the whole of it. Blank falls
+        /// back to [Map] ShopBlipGroupName, which is what every shop used to share.
+        /// </summary>
+        public string Group = "";
         /// <summary>
         /// Everything this vendor might sell. One of them is on offer at a time.
         ///
@@ -422,6 +432,23 @@ namespace BareMinimum.Venues
                     return;
                 }
 
+                // THE GROUPS FIRST, because every vendor read below is dressed by one. A file
+                // with no groups is the file as it was: every shop under one name.
+                Groups.Clear();
+
+                foreach (var key in doc["groups"].Keys)
+                {
+                    var node = doc["groups"][key];
+                    if (node == null || node.IsNull) continue;
+
+                    Groups[key] = new MapGroup
+                    {
+                        Name = node["name"].AsString(key),
+                        Sprite = node["sprite"].AsInt(52),
+                        Colour = node["colour"].AsInt(5)
+                    };
+                }
+
                 foreach (var node in doc["vendors"].Items)
                 {
                     var v = new Vendor
@@ -453,9 +480,17 @@ namespace BareMinimum.Venues
                         Label = node["label"].AsString(""),
                         RoomKey = node["inside"].AsString(""),
                         Blip = node["blip"].AsBool(true),
-                        BlipSprite = node["blipSprite"].AsInt(267),
-                        BlipColour = node["blipColour"].AsInt(47)
+                        Group = node["group"].AsString(""),
+                        BlipSprite = node["blipSprite"].AsInt(0),
+                        BlipColour = node["blipColour"].AsInt(0)
                     };
+
+                    // THE GROUP DRESSES IT unless the vendor says otherwise. Its own sprite and
+                    // colour win when it has them, which is how one odd shop gets to look odd.
+                    var dress = Group(v.Group);
+
+                    if (v.BlipSprite <= 0) v.BlipSprite = dress == null ? 52 : dress.Sprite;
+                    if (v.BlipColour <= 0) v.BlipColour = dress == null ? 5 : dress.Colour;
 
                     if (v.Offers.Length == 0) continue;
 
@@ -899,7 +934,7 @@ namespace BareMinimum.Venues
             // ONE NAME FOR ALL OF THEM, OR EACH ITS OWN. See Settings.GroupShopBlips: the
             // pause map's legend is built from the DISTINCT NAMES of the blips on it, so this
             // is the difference between one row you can slide through and a hundred you scroll.
-            var label = _cfg.GroupShopBlips ? GroupName() : v.Name;
+            var label = _cfg.GroupShopBlips ? Grouped(v) : v.Name;
 
             if (v.Marker != null && v.Marker.Exists())
             {
@@ -969,12 +1004,50 @@ namespace BareMinimum.Venues
             }
         }
 
+        /// <summary>One map group: what its blips are called, and what they look like.</summary>
+        internal sealed class MapGroup
+        {
+            public string Name = "";
+            public int Sprite = 52;
+            public int Colour = 5;
+        }
+
+        /// <summary>The groups, by key, out of vendors.json. Empty when the file has none.</summary>
+        private static readonly Dictionary<string, MapGroup> Groups =
+            new Dictionary<string, MapGroup>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>The group with this key, or null. Static because the table is the file's, not a shop's.</summary>
+        private static MapGroup Group(string key)
+        {
+            if (string.IsNullOrEmpty(key)) return null;
+
+            MapGroup found;
+            return Groups.TryGetValue(key, out found) ? found : null;
+        }
+
         /// <summary>
-        /// The one name every shop marker shares while grouping is on.
+        /// What this shop's marker is called while grouping is on.
         ///
-        /// Falls back rather than trusting the ini: a blank name would give the legend a row
+        /// KIND BY KIND, NOT ALL AS ONE. Every shop used to share a single name, which turned a
+        /// hundred rows of legend into one -- readable, and useless for finding a liquor store.
+        /// Now the name is the group's: Liquor, Fast Food, Restaurants, Petrol, Street Food and
+        /// the rest, so the legend is a short list of kinds and each pages through its own.
+        ///
+        /// Falls back rather than trusting the file: a blank name would give the legend a row
         /// with no label on it, which is worse than the hundred rows this replaces.
         /// </summary>
+        private string Grouped(Vendor v)
+        {
+            var group = Group(v.Group);
+
+            if (group != null && !string.IsNullOrEmpty(group.Name) && group.Name.Trim().Length > 0)
+            {
+                return group.Name.Trim();
+            }
+
+            return GroupName();
+        }
+
         private string GroupName()
         {
             var name = _cfg.ShopBlipGroupName;
