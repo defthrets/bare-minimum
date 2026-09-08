@@ -106,7 +106,7 @@ namespace BareMinimum.Vitals
             var gap = Math.Max(0f, cfg.MinimapFrameGap);
             var gapW = gap / aspect;
 
-            var ink = Ink.Alpha(Color.FromArgb(205, 0, 0, 0), (int)(205f * cfg.HudOpacity * strength + 0.5f));
+            var ink = Ink.Alpha(Color.FromArgb(228, 0, 0, 0), (int)(228f * cfg.HudOpacity * strength + 0.5f));
             var mat = Ink.Alpha(Color.FromArgb(120, 0, 0, 0), (int)(120f * cfg.HudOpacity * strength + 0.5f));
 
             // ON SCREEN, WHATEVER THE SAFE ZONE. With the safe zone at its widest the map sits

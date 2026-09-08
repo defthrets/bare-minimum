@@ -137,7 +137,7 @@ namespace BareMinimum.UI
 
         /// <summary>
         /// The black surround and the channel of one slot: the fuel gauge's own numbers, alphas
-        /// included. A surround at 205 over a channel at 165, and an edge of 0.22 of the bar's
+        /// included. A surround at 228 -- it was 205, and was asked a bit more solid -- over a channel at 165, and an edge of 0.22 of the bar's
         /// width with a floor under it -- a proportional edge alone becomes a hairline on a
         /// narrow bar, and a fixed one becomes a frame thicker than the gauge. Both of those
         /// were argued out in Fumes. Every column in the row comes through here.
@@ -149,7 +149,7 @@ namespace BareMinimum.UI
 
             Hud.Bar(x - row.Edge, row.Top - row.Edge * aspect,
                     row.BarW + row.Edge * 2f, row.BarH + row.Edge * 2f * aspect,
-                    Fade(Color.FromArgb(205, 0, 0, 0), strength));
+                    Fade(Color.FromArgb(228, 0, 0, 0), strength));
 
             Hud.Bar(x, row.Top, row.BarW, row.BarH, Fade(Color.FromArgb(165, 28, 28, 32), strength));
         }
@@ -451,7 +451,7 @@ namespace BareMinimum.UI
             //
             // Those are not the same line and that was the bug. The bar's black frame hangs
             // edge * Aspect() below the foot of the bar itself -- about two pixels -- so a
-            // plate placed at the foot sat ON that overhang. Two rectangles at alpha 205
+            // plate placed at the foot sat ON that overhang. Two rectangles at alpha 228
             // stacked in the same two pixels, and 205 over 205 is far darker than either, so
             // the join read as a black bruise across both gauges.
             //
@@ -599,7 +599,7 @@ namespace BareMinimum.UI
             var plateY = footY + breath;
 
             Hud.Bar(plateX, plateY, plateW, plateH,
-                    Fade(Color.FromArgb(205, 0, 0, 0), strength));
+                    Fade(Color.FromArgb(228, 0, 0, 0), strength));
 
             if (icon == null || icon.Missing) return;
 

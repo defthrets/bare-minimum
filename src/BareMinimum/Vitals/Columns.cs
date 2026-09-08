@@ -12,7 +12,7 @@ namespace BareMinimum.Vitals
     ///
     /// THE FRAME IS THE GAUGE'S, TO THE PIXEL. Every column in the row -- health, armour,
     /// energy, sleep, food -- is framed by the same two methods on Gauge: the black surround
-    /// at alpha 205, the channel at 165, the plate under the foot the exact width of the
+    /// at alpha 228, the channel at 165, the plate under the foot the exact width of the
     /// surround with a white mark inside it. Not the same numbers copied; the same code. That
     /// is the only way five bars come out as one instrument rather than as two families that
     /// nearly agree, and it is what "the border and sizes should be identical" asked for.
