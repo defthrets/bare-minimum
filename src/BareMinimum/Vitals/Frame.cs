@@ -39,9 +39,6 @@ namespace BareMinimum.Vitals
         private const float StreetScale = 0.245f;
         private const float ZoneScale = 0.225f;
 
-        /// <summary>IS_BIGMAP_ACTIVE, by hash: the vendored 3.6.0 enum has only the setter.</summary>
-        private static readonly Hash IsBigMapActive = (Hash)0xFFF65C63UL;
-
         /// <summary>The game's own HUD components for the area and street names.</summary>
         private const int AreaName = 7;
         private const int StreetName = 9;
@@ -54,7 +51,12 @@ namespace BareMinimum.Vitals
         public void Draw(Settings cfg, float strength)
         {
             if (!cfg.MinimapFrame && !cfg.MinimapLabel) return;
-            if (BigMap()) return;
+
+            // NO BIG-MAP CHECK, ON PURPOSE. IS_BIGMAP_ACTIVE is not in the vendored 3.6.0 enum,
+            // and calling it by hash crashed the game: ScriptHookV has no entry for that hash,
+            // and a native it cannot find is a FATAL, not an exception -- no try/catch sees it.
+            // The frame is drawn round the minimap's normal box; while the map is zoomed the
+            // frame sits inside it for the moment the key is held, which is the lesser thing.
 
             float l, t, r, b, safe;
             if (!Layout.Map(out l, out t, out r, out b, out safe)) return;
@@ -163,10 +165,5 @@ namespace BareMinimum.Vitals
             catch { /* then the game says it too */ }
         }
 
-        private static bool BigMap()
-        {
-            try { return Function.Call<bool>(IsBigMapActive); }
-            catch { return false; }
-        }
     }
 }
