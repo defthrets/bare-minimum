@@ -918,6 +918,13 @@ namespace BareMinimum.Core
         /// </summary>
         public float MinimapTopCover = 0.10f;
 
+        /// <summary>A compass tape at the left of the frame's top band, and a speed readout with a rev bar at the right. In a vehicle only, the speedo.</summary>
+        public bool MinimapCompass = true;
+        public bool MinimapSpeedo = true;
+
+        /// <summary>KPH or MPH.</summary>
+        public string MinimapSpeedUnits = "KPH";
+
         /// <summary>"r,g,b" or "r,g,b,a", each 0 to 255. Anything else keeps the default and says so.</summary>
         private static System.Drawing.Color ParseColour(string section, string key, string s, System.Drawing.Color fallback)
         {
@@ -1419,6 +1426,9 @@ namespace BareMinimum.Core
                 cfg.MinimapLabel = ini.GetBool("Minimap", "Label", cfg.MinimapLabel);
                 cfg.MinimapFrameGap = ini.GetFloat("Minimap", "FrameGap", cfg.MinimapFrameGap, 0f, 0.03f);
                 cfg.MinimapTopCover = ini.GetFloat("Minimap", "TopCover", cfg.MinimapTopCover, 0f, 0.5f);
+                cfg.MinimapCompass = ini.GetBool("Minimap", "Compass", cfg.MinimapCompass);
+                cfg.MinimapSpeedo = ini.GetBool("Minimap", "Speedo", cfg.MinimapSpeedo);
+                cfg.MinimapSpeedUnits = ini.GetString("Minimap", "SpeedUnits", cfg.MinimapSpeedUnits);
 
                 cfg.HudAnimate = ini.GetBool("HUD", "Animate", cfg.HudAnimate);
                 cfg.HudShimmer = ini.GetFloat("HUD", "Shimmer", cfg.HudShimmer, 0f, 1f);

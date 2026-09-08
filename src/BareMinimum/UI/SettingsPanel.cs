@@ -719,6 +719,21 @@ namespace BareMinimum.UI
                   "it. 0 is flush to the map.",
                   () => _cfg.MinimapFrame, "~y~Turn the minimap frame ON first.");
 
+            Bool("Compass in the frame", "Minimap", "Compass",
+                 () => _cfg.MinimapCompass, v => _cfg.MinimapCompass = v,
+                 "A compass tape at the top left of the minimap's frame: which way you are heading.",
+                 () => _cfg.MinimapFrame, "~y~Turn the minimap frame ON first.");
+
+            Bool("Speedo in the frame", "Minimap", "Speedo",
+                 () => _cfg.MinimapSpeedo, v => _cfg.MinimapSpeedo = v,
+                 "Your speed and the engine's revs at the top right of the frame, in a vehicle.",
+                 () => _cfg.MinimapFrame, "~y~Turn the minimap frame ON first.");
+
+            Choice("Speed units", "Minimap", "SpeedUnits", new[] { "KPH", "MPH" },
+                   () => string.Equals(_cfg.MinimapSpeedUnits, "MPH", StringComparison.OrdinalIgnoreCase) ? 1 : 0,
+                   v => _cfg.MinimapSpeedUnits = v == 1 ? "MPH" : "KPH",
+                   "What the speedo counts in.");
+
             Float("Frame top band", "Minimap", "TopCover",
                   () => _cfg.MinimapTopCover, v => _cfg.MinimapTopCover = v,
                   0.01f, 0f, 0.5f, "0.00",

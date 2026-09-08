@@ -129,9 +129,14 @@ namespace BareMinimum.Vitals
 
             if (cfg.MinimapFrame)
             {
-                Ink.Bar(outerL, mapTop - topGap - edgeH, outerR - outerL, (cover - mapTop) + topGap + edgeH, ink);
+                var bandTop = mapTop - topGap - edgeH;
+
+                Ink.Bar(outerL, bandTop, outerR - outerL, cover - bandTop, ink);
                 Ink.Bar(outerL, cover, edge, plateTop - cover, ink);
                 Ink.Bar(r + gapW, cover, edge, plateTop - cover, ink);
+
+                // THE CORNERS OF THE BAND: a compass at the left, the speed and revs at the right.
+                Corners(cfg, l, r, bandTop, cover, edge + leftGapW, strength);
 
                 if (leftGapW > 0f) Ink.Bar(l - leftGapW, cover, leftGapW, plateTop - cover, mat);
                 if (gapW > 0f) Ink.Bar(r, cover, gapW, plateTop - cover, mat);
@@ -157,6 +162,179 @@ namespace BareMinimum.Vitals
                          ", plate " + ((foot - plateTop) * Ink.ScreenHeight).ToString("0") + " px tall, top band " +
                          ((cover - mapTop) * Ink.ScreenHeight).ToString("0") + " px, gap " + (gap * Ink.ScreenHeight).ToString("0.0") + " px; " +
                          "the game says the minimap is " + (Rendering() ? "rendering" : "NOT rendering") + ".");
+            }
+        }
+
+        // ======================================================================
+        // The band's corners
+        // ======================================================================
+
+        /// <summary>How wide the compass tape is, as a share of the map's width, and how many degrees it shows.</summary>
+        private const float TapeShare = 0.36f;
+        private const float TapeSpan = 120f;
+
+        /// <summary>The rev bar: how many segments, and how wide each is as a fraction of screen height (squared up on screen).</summary>
+        private const int RevSegments = 7;
+        private const float RevSegment = 0.0036f;
+        private const float RevGap = 0.0012f;
+
+        private static readonly string[] Cardinals = { "N", "E", "S", "W" };
+
+        /// <summary>
+        /// The compass at the left of the band and the speedo at the right, in the band the top
+        /// of the frame makes. Nothing if the band is too thin to hold a line of text: TopCover
+        /// at nought is a plain line, and a plain line has no corners worth writing in.
+        ///
+        /// THE COMPASS IS A TAPE, NOT A LETTER. A letter says "NW" and changes eight times a
+        /// circle; a tape of ticks and letters scrolling under a fixed pointer moves with every
+        /// degree, which is what "telling what direction you are going" looks like on a dash.
+        /// The bearing is the thing you are IN: the car's when driving, yours on foot.
+        ///
+        /// THE SPEED IS IN A VEHICLE ONLY. A man walking at 6 KPH is not information, and a
+        /// zero standing still is a fault light. The revs beside it are seven segments that
+        /// light with the engine, the last two warm and the last red, so the redline reads
+        /// without a number.
+        /// </summary>
+        private void Corners(Settings cfg, float l, float r, float top, float bottom, float pad, float strength)
+        {
+            if (!cfg.MinimapCompass && !cfg.MinimapSpeedo) return;
+
+            var h = bottom - top;
+            if (h < 0.012f) return;
+
+            Ped me;
+            try { me = Game.Player.Character; if (me == null || !me.Exists()) return; }
+            catch { return; }
+
+            var k = cfg.HudOpacity * strength;
+            var padX = pad * 1.5f;
+
+            // A text scale that fits the band, from the plate's, shrunk if the band is thinner.
+            var scale = 0.215f;
+            var th = Hud.Height(scale, Hud.FontLabel);
+            if (th > h * 0.92f) { scale *= h * 0.92f / th; th = Hud.Height(scale, Hud.FontLabel); }
+
+            var midY = top + h * 0.5f;
+
+            Vehicle car = null;
+            try { if (me.IsInVehicle()) car = me.CurrentVehicle; } catch { car = null; }
+
+            if (cfg.MinimapCompass)
+            {
+                Compass(me, car, l + padX, midY, (r - l) * TapeShare, h, scale, k);
+            }
+
+            if (cfg.MinimapSpeedo && car != null && car.Exists())
+            {
+                Speedo(cfg, car, r - padX, midY, h, scale, th, k);
+            }
+        }
+
+        /// <summary>The tape: ticks every fifteen degrees, letters at the cardinals, a pointer in the middle.</summary>
+        private static void Compass(Ped me, Vehicle car, float x, float midY, float w, float h, float scale, float k)
+        {
+            float heading;
+            try { heading = car != null && car.Exists() ? car.Heading : me.Heading; }
+            catch { return; }
+
+            // GTA's heading runs the wrong way for a compass: 0 is north and it grows to the
+            // WEST. A bearing grows to the east.
+            var bearing = (360f - heading) % 360f;
+            if (bearing < 0f) bearing += 360f;
+
+            var tickH = h * 0.26f;
+            var tickW = Math.Max(1f / Ink.ScreenWidth, 0.0008f / Ink.Aspect);
+            var letterScale = scale * 0.78f;
+            var letterH = Hud.Height(letterScale, Hud.FontLabel);
+
+            var tickY = midY + h * 0.5f - tickH - h * 0.06f;
+            var letterY = midY - h * 0.5f + h * 0.02f;
+
+            var ink = Palette.Alpha(Palette.Text, (int)(210f * k));
+            var dim = Palette.Alpha(Palette.TextDim, (int)(150f * k));
+
+            // Every fifteen degrees within the span, each at its place along the tape and
+            // fading toward the ends so the tape has no hard edge.
+            var first = (float)Math.Floor((bearing - TapeSpan / 2f) / 15f) * 15f;
+
+            for (var b = first; b <= bearing + TapeSpan / 2f; b += 15f)
+            {
+                var off = b - bearing;
+                var u = 0.5f + off / TapeSpan;
+                if (u < 0.03f || u > 0.97f) continue;
+
+                var fade = 1f - (float)Math.Pow(Math.Abs(u - 0.5f) * 2f, 2.2);
+                var px = x + w * u;
+
+                var abs = ((b % 360f) + 360f) % 360f;
+                var cardinal = Math.Abs(abs % 90f) < 0.5f;
+                var half = Math.Abs(abs % 45f) < 0.5f;
+
+                var tall = cardinal ? tickH * 1.6f : half ? tickH * 1.2f : tickH;
+
+                Ink.Bar(px - tickW / 2f, tickY + tickH - tall, tickW, tall,
+                        Palette.Alpha(cardinal ? Palette.Text : Palette.TextDim, (int)((cardinal ? 200f : 130f) * fade * k)));
+
+                if (!cardinal) continue;
+
+                var letter = Cardinals[(int)Math.Round(abs / 90f) % 4];
+                Hud.Text(letter, px, letterY, letterScale, Palette.Alpha(ink, (int)(ink.A * fade)), Hud.FontLabel, true, false, false);
+            }
+
+            // The pointer: where you are heading, in the bars' amber.
+            var pw = Math.Max(1.5f / Ink.ScreenWidth, 0.0012f / Ink.Aspect);
+            Ink.Bar(x + w / 2f - pw / 2f, midY - h * 0.5f + h * 0.08f, pw, h * 0.84f, Palette.Alpha(Palette.Brand, (int)(230f * k)));
+        }
+
+        /// <summary>The number right-aligned to the corner, the unit small and dim after it, the rev bar before it.</summary>
+        private static void Speedo(Settings cfg, Vehicle car, float right, float midY, float h, float scale, float th, float k)
+        {
+            float speed, rpm;
+            try { speed = car.Speed; rpm = car.CurrentRPM; }
+            catch { return; }
+
+            var mph = string.Equals(cfg.MinimapSpeedUnits, "MPH", StringComparison.OrdinalIgnoreCase);
+            var shown = (int)Math.Round(speed * (mph ? 2.23694f : 3.6f));
+            var unit = mph ? "MPH" : "KPH";
+
+            var unitScale = scale * 0.62f;
+            var unitW = Hud.Width(unit, unitScale, Hud.FontLabel);
+            var numW = Hud.Width(shown.ToString(), scale, Hud.FontLabel);
+
+            var gap = 0.0012f / Ink.Aspect;
+            var y = midY - th * 0.5f - 0.001f;
+
+            // Unit, then number, then the revs, each to the left of the last.
+            var x = right - unitW;
+            Hud.Text(unit, x, y + (th - Hud.Height(unitScale, Hud.FontLabel)) * 0.85f, unitScale,
+                     Palette.Alpha(Palette.TextDim, (int)(190f * k)), Hud.FontLabel, false, false, false);
+
+            x -= gap + numW;
+            Hud.Text(shown.ToString(), x, y, scale, Palette.Alpha(Palette.Text, (int)(240f * k)), Hud.FontLabel, false, false, false);
+
+            // ---- the revs ----
+            var segW = RevSegment / Ink.Aspect;
+            var segGap = RevGap / Ink.Aspect;
+            var barW = RevSegments * segW + (RevSegments - 1) * segGap;
+            var segH = h * 0.34f;
+            var segY = midY - segH * 0.5f;
+
+            x -= gap * 3f + barW;
+
+            rpm = Ink.Clamp01(rpm);
+
+            for (var i = 0; i < RevSegments; i++)
+            {
+                var lit = rpm >= (i + 0.35f) / RevSegments;
+                var sx = x + i * (segW + segGap);
+
+                Color c;
+                if (!lit) c = Color.FromArgb((int)(70f * k), 200, 205, 200);
+                else if (i >= RevSegments - 1) c = Palette.Alpha(Palette.Danger, (int)(235f * k));
+                else if (i >= RevSegments - 3) c = Palette.Alpha(Palette.Warn, (int)(230f * k));
+                else c = Palette.Alpha(Palette.Cold, (int)(220f * k));
+
+                Ink.Bar(sx, segY, segW, segH, c);
             }
         }
 
