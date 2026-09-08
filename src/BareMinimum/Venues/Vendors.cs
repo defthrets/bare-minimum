@@ -885,7 +885,7 @@ namespace BareMinimum.Venues
             var name = _cfg.ShopBlipGroupName;
 
             return string.IsNullOrEmpty(name) || name.Trim().Length == 0
-                ? "Food & Drink"
+                ? "Food"
                 : name.Trim();
         }
 

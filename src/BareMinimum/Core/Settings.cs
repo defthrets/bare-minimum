@@ -461,9 +461,14 @@ namespace BareMinimum.Core
         /// What that one row is called. Also what a highlighted marker says.
         ///
         /// Kept as a setting because it is the single line of text this mod puts in a list the
-        /// player reads often, and one person's "Food &amp; Drink" is another's "Bare Minimum".
+        /// player reads often, and one person's "Food" is another's "Bare Minimum".
+        ///
+        /// SHORT ON PURPOSE. Grouping is what puts a prev/next pager on the legend row -- the
+        /// row reads name, then "&lt; 25/38 &gt;", then the sprite -- and the game clips the name
+        /// to whatever is left, keeping the END of it. "Food &amp; Drink" came out as "&amp; Drink".
+        /// Anything much past six characters will lose its head the same way.
         /// </summary>
-        public string ShopBlipGroupName = "Food & Drink";
+        public string ShopBlipGroupName = "Food";
 
         // ---- Money -----------------------------------------------------------
 
