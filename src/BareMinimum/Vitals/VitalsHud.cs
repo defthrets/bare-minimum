@@ -64,10 +64,13 @@ namespace BareMinimum.Vitals
         /// <summary>How many columns stand in the row this frame. For the log.</summary>
         public int ColumnsShown => _upright ? (_readings.HasThird ? 2 : 1) : 0;
 
-        /// <summary>A drink holds the energy bar full for this many minutes. Wired from Eating by Main.</summary>
-        public void HoldEnergy(float minutes)
+        /// <summary>
+        /// Holds the energy bar full for this many minutes. Wired from Eating and from Dope by
+        /// Main. <paramref name="wired"/> says it was a stimulant, which sets the bar shimmering.
+        /// </summary>
+        public void HoldEnergy(float minutes, bool wired = false)
         {
-            _energy.Hold(minutes * 60f);
+            _energy.Hold(minutes * 60f, wired);
         }
 
         /// <summary>Whether he has run himself out of breath. For anything else that cares.</summary>

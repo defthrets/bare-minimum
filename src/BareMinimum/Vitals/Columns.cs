@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using GTA;
 using BareMinimum.Core;
@@ -447,6 +447,11 @@ namespace BareMinimum.Vitals
             var count = (int)Math.Round(3f * cfg.VitalsParticles);
             if (count < 1) return;
 
+            // WIRED, THERE ARE MORE OF THEM. A stimulant holds the bar at the top, so the level
+            // says nothing for as long as it rides; the charge running through it is what says
+            // he is up.
+            if (r.Wired) count *= 2;
+
             // THINNER AND SHORTER, on request: a hair of a dash, not a bar within the bar.
             var span = floor - surface;
             var len = Math.Min(span * 0.22f, w * Ink.Aspect * 0.9f);
@@ -462,9 +467,10 @@ namespace BareMinimum.Vitals
             var rate = draining ? 1.6f : filling ? 1.0f : 0.5f;
             if (r.Tired) rate = 0.3f;
             if (r.SpecialActive) rate *= 2.2f;
+            if (r.Wired) rate = 2.8f;
 
             var tint = Ink.Mix(body, Color.FromArgb(body.A, 255, 255, 255), 0.75f);
-            var bright = r.Tired ? 70f : 150f;
+            var bright = r.Tired ? 70f : r.Wired ? 215f : 150f;
 
             for (var i = 0; i < count; i++)
             {

@@ -62,23 +62,34 @@ namespace BareMinimum.Vitals
         public bool JustEmptied;
         public bool JustRecovered;
 
-        /// <summary>Game time, in ms, until which a drink is holding the meter full. See Hold.</summary>
+        /// <summary>Game time, in ms, until which something is holding the meter full. See Hold.</summary>
         private int _holdUntil;
 
-        /// <summary>Whether a drink is holding the meter full right now.</summary>
+        /// <summary>Game time, in ms, until which the thing holding it was a stimulant.</summary>
+        private int _wiredUntil;
+
+        /// <summary>Whether something is holding the meter full right now.</summary>
         public bool Held => Game.GameTime < _holdUntil;
 
         /// <summary>
-        /// Holds the meter full for a while. A later drink extends, never shortens.
+        /// Whether what is holding it is a stimulant. The bar shimmers while this is true --
+        /// see Paint.Third -- because a coffee and a gram of meth should not look the same.
+        /// </summary>
+        public bool Wired => Game.GameTime < _wiredUntil;
+
+        /// <summary>
+        /// Holds the meter full for a while. A later one extends, never shortens.
         ///
         /// Game time rather than the wall clock, so a pause does not eat it.
         /// </summary>
-        public void Hold(float seconds)
+        public void Hold(float seconds, bool wired = false)
         {
             if (seconds <= 0f) return;
 
             var until = Game.GameTime + (int)(seconds * 1000f);
+
             if (until > _holdUntil) _holdUntil = until;
+            if (wired && until > _wiredUntil) _wiredUntil = until;
         }
 
         public void Update(Settings cfg, float dt)
@@ -98,11 +109,13 @@ namespace BareMinimum.Vitals
             if (dt < 0f) dt = 0f;
             if (dt > 0.1f) dt = 0.1f;
 
-            // HELD FULL BY A DRINK. Anything he drank that was not alcohol keeps the meter at
-            // the top for a while, sprinting or not, and lifts the winded cap if it was on --
-            // with the same kick a recovery gets, so the bar says so. Which drinks count is
-            // Main's decision, where the item and the meter both exist. The ability still runs
-            // off the bar while this holds; the bar simply does not go down.
+            // HELD FULL. Anything he drank that was not alcohol keeps the meter at the top for
+            // a while, sprinting or not, and lifts the winded cap if it was on -- with the same
+            // kick a recovery gets, so the bar says so. So does a stimulant, for longer and
+            // with a shimmer on it: see Wired, and Dope's table for how long each one rides.
+            // Which drinks and which drugs count is Main's decision, where the item and the
+            // meter both exist. The ability still runs off the bar while this holds; the bar
+            // simply does not go down, so a man who is up is a man who cannot run out.
             if (Game.GameTime < _holdUntil)
             {
                 Level = 1f;

@@ -79,6 +79,18 @@ namespace BareMinimum.Vitals
             {
                 var e = Body(opacity, cfg.VitalsEnergyColour, strength);
 
+                // WIRED: pinned at the top by whatever he took, and saying so. A shimmer over
+                // the whole bar, about a second a breath -- brighter than the ability's beat
+                // and quicker than anything else in the row, because nothing else in the row is
+                // a drug. The bar is not going anywhere while this runs, so the movement is the
+                // only thing left to read it by. [HUD] Shimmer scales it; 0 leaves it plain.
+                if (r.Wired)
+                {
+                    var shim = 0.5f + 0.5f * (float)Math.Sin(m.Wall * 6.6);
+                    var lift = (0.20f + 0.50f * Ink.Clamp01(cfg.HudShimmer)) * shim;
+                    return Ink.Mix(e, Color.FromArgb(e.A, 255, 252, 244), lift);
+                }
+
                 if (r.Tired)
                 {
                     var beat = 0.5f + 0.5f * (float)Math.Sin(m.Wall * 4.2);

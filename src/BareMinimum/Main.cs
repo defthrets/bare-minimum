@@ -142,6 +142,12 @@ namespace BareMinimum
                 if (item.Booze <= 0f) _vitals.HoldEnergy(_cfg.EnergyDrinkHoldMinutes);
             };
 
+            // AND A STIMULANT PINS IT AT THE TOP AND SETS IT SHIMMERING, for as long as that
+            // one rides -- Dope's table says how long each is worth. Same arrangement as the
+            // drink above and for the same reason: Dope knows the drug, the vitals own the
+            // meter, and neither has to know the other is there.
+            Food.Dope.Rush = minutes => _vitals.HoldEnergy(minutes, true);
+
             Interval = 0;
             Tick += OnTick;
             Aborted += OnAborted;

@@ -334,6 +334,15 @@ namespace BareMinimum.Food
                             effect.Wake < 0f ? -effect.Wake : 0f);
             }
 
+            // UP, AND THE BAR SAYS SO. A stimulant pins the energy at the top and sets it
+            // shimmering for as long as it rides: no drain from sprinting, and none from the
+            // special ability either, because the bar it drinks from is not going down.
+            if (effect.Wired > 0f && Rush != null)
+            {
+                try { Rush(effect.Wired); }
+                catch (Exception ex) { Log.Debug("The rush did not reach the bar: " + ex.Message); }
+            }
+
             Report(id, effect, fedBefore, restedBefore, needs);
 
             return null;
@@ -400,9 +409,25 @@ namespace BareMinimum.Food
         {
             public float Hunger;
             public float Wake;
+
+            /// <summary>Real minutes it holds the energy bar at the top, shimmering. Nought for the downers.</summary>
+            public float Wired;
+
             public Color Tint;
             public string Desc;
         }
+
+        /// <summary>
+        /// What a stimulant does to the energy bar. Wired by Main, because this file knows the
+        /// drug and the vitals own the meter, and neither needs to know the other exists -- the
+        /// same arrangement a drink already has through Eating.Drank.
+        ///
+        /// ONLY WHAT GOES THROUGH THIS POCKET. A dose taken on Posted Up's own phone screen
+        /// never reaches this method, so the bar will not know about it. The other mod does not
+        /// say how long its high runs, so there is nothing to ask; the minutes in the table
+        /// below are this mod's own reckoning of how long each one rides.
+        /// </summary>
+        public static Action<float> Rush;
 
         /// <summary>
         /// What each one does, and it is not a table of medicine.
@@ -466,15 +491,21 @@ namespace BareMinimum.Food
                 Tint = Color.FromArgb(255, 126, 178, 96),
                 Desc = "The munchies, and a heavy head." } },
 
-            // ---- up: wide awake, and a tenth back on the stomach ----
-
+            // ---- up: wide awake, a tenth back on the stomach, and the energy bar pinned ----
+            //
+            // WIRED IS IN REAL MINUTES, and the numbers are the shape of the drug rather than
+            // its strength: meth rides for the best part of a quarter of an hour, ecstasy most
+            // of that, coke is a short hard hit and crack shorter still. While it rides the
+            // energy bar sits at the top and shimmers -- see Energy.Hold and Paint.Third -- so
+            // there is no running out of breath and no running out of special ability. The
+            // downers get none of it; a xanax is not a reason to be able to sprint all day.
             { "meth", new Dose {
-                Hunger = 0.10f, Wake = 1f,
+                Hunger = 0.10f, Wake = 1f, Wired = 13f,
                 Tint = Color.FromArgb(255, 150, 205, 230),
                 Desc = "Days awake. Nothing gets you down." } },
 
             { "coke", new Dose {
-                Hunger = 0.10f, Wake = 1f,
+                Hunger = 0.10f, Wake = 1f, Wired = 6f,
                 Tint = Color.FromArgb(255, 238, 238, 244),
                 Desc = "Wide awake, and suddenly fine." } },
 
@@ -482,12 +513,12 @@ namespace BareMinimum.Food
             // camp and half a rule is worse than either whole one -- a man who has just learnt
             // that uppers stand him up should not find that two of them do not.
             { "crack", new Dose {
-                Hunger = 0.10f, Wake = 1f,
+                Hunger = 0.10f, Wake = 1f, Wired = 4f,
                 Tint = Color.FromArgb(255, 226, 206, 168),
                 Desc = "Sharp and short, and you are up." } },
 
             { "ecstasy", new Dose {
-                Hunger = 0.10f, Wake = 1f,
+                Hunger = 0.10f, Wake = 1f, Wired = 10f,
                 Tint = Color.FromArgb(255, 212, 122, 196),
                 Desc = "Up all night, and glad about it." } },
         };

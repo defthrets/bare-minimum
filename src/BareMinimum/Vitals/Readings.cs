@@ -30,6 +30,9 @@ namespace BareMinimum.Vitals
         /// <summary>Energy: whether he has run himself out and cannot sprint yet.</summary>
         public bool Tired;
 
+        /// <summary>Energy: whether a stimulant is holding the bar at the top. It shimmers while it is.</summary>
+        public bool Wired;
+
         /// <summary>The special ability's own state, read for whoever has one, whatever the third bar shows.</summary>
         public bool SpecialActive;
         public bool SpecialFull;
@@ -117,12 +120,14 @@ namespace BareMinimum.Vitals
                 HasThird = true;
                 Third = energy.Level;
                 Tired = energy.Tired;
+                Wired = energy.Wired;
                 Trend();
                 return;
             }
 
             ThirdIsEnergy = false;
             Tired = false;
+            Wired = false;
 
             switch (cfg.VitalsSpecial)
             {
