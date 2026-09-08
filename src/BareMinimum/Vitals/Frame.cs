@@ -387,8 +387,8 @@ namespace BareMinimum.Vitals
         }
 
         /// <summary>
-        /// The number right-aligned to the corner, the unit small and dim after it with the gear
-        /// stacked over it in the same small dim face, the rev bar before them.
+        /// From the corner inward: the gear at the number's size but the unit's faintness, the
+        /// unit stood on end -- its letters stacked down the band -- the number, the rev bar.
         /// </summary>
         private static void Speedo(Settings cfg, Vehicle car, float right, float midY, float h, float scale, float th, float k)
         {
@@ -401,31 +401,48 @@ namespace BareMinimum.Vitals
             var shown = (int)Math.Round(speed * (mph ? 2.23694f : 3.6f));
             var unit = mph ? "MPH" : "KPH";
 
-            var unitScale = scale * 0.62f;
-            var unitW = Hud.Width(unit, unitScale, Hud.FontLabel);
             var numW = Hud.Width(shown.ToString(), scale, Hud.FontLabel);
 
             var gap = 0.0012f / Ink.Aspect;
             var y = midY - th * 0.5f - 0.001f;
 
-            // Unit, then number, then the revs, each to the left of the last. The unit sits on
-            // the band's foot -- it was a hair higher and was asked down.
-            var unitH = Hud.Height(unitScale, Hud.FontLabel);
-            var unitY = y + (th - unitH);
             var dim = Palette.Alpha(Palette.TextDim, (int)(190f * k));
+            var bright = Palette.Alpha(Palette.Text, (int)(240f * k));
 
-            var x = right - unitW;
-            Hud.Text(unit, x, unitY, unitScale, dim, Hud.FontLabel, false, false, false);
-
-            // THE GEAR, over the unit, to the same right edge, in the same small dim face: a
-            // number, or R backing up. Stacked tight, and never above the band.
+            // THE GEAR, in the corner: the number's size, the unit's faintness -- a figure you
+            // can read at a glance that does not compete with the speed. A number, or R backing up.
             var gearText = gear <= 0 ? "R" : gear.ToString();
-            var gearY = Math.Max(y - 0.0005f, unitY - unitH * 0.92f);
-            Hud.Text(gearText, right - Hud.Width(gearText, unitScale, Hud.FontLabel), gearY, unitScale,
-                     dim, Hud.FontLabel, false, false, false);
+            var x = right - Hud.Width(gearText, scale, Hud.FontLabel);
+            Hud.Text(gearText, x, y, scale, dim, Hud.FontLabel, false, false, false);
 
+            // THE UNIT, STOOD ON END: its letters stacked down the band beside the number, one
+            // to a third of the height, centred in their column, in the same faint face. Small,
+            // but it is a label, not a reading -- the number does the talking. Sized off the
+            // band so the three always fit it exactly.
+            var cell = th / unit.Length;
+            var lineH = Hud.Height(1f, Hud.FontLabel);
+            var letterScale = lineH > 0.0001f ? Math.Max(0.06f, cell * 0.98f / lineH) : scale * 0.4f;
+            var letterH = Hud.Height(letterScale, Hud.FontLabel);
+
+            var colW = 0f;
+            for (var i = 0; i < unit.Length; i++)
+            {
+                colW = Math.Max(colW, Hud.Width(unit.Substring(i, 1), letterScale, Hud.FontLabel));
+            }
+
+            x -= gap * 3f + colW;
+
+            for (var i = 0; i < unit.Length; i++)
+            {
+                var letter = unit.Substring(i, 1);
+                var lx = x + (colW - Hud.Width(letter, letterScale, Hud.FontLabel)) * 0.5f;
+                var ly = y + i * cell + (cell - letterH) * 0.5f;
+                Hud.Text(letter, lx, ly, letterScale, dim, Hud.FontLabel, false, false, false);
+            }
+
+            // THE NUMBER, bright, before the unit.
             x -= gap + numW;
-            Hud.Text(shown.ToString(), x, y, scale, Palette.Alpha(Palette.Text, (int)(240f * k)), Hud.FontLabel, false, false, false);
+            Hud.Text(shown.ToString(), x, y, scale, bright, Hud.FontLabel, false, false, false);
 
             // ---- the revs ----
             var segW = RevSegment / Ink.Aspect;
