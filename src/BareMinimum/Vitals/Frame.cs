@@ -76,12 +76,27 @@ namespace BareMinimum.Vitals
             var edge = row.Edge;
             var edgeH = edge * aspect;
 
-            var l = mapLeft;
-            var r = mapLeft + mapWidth;
+            // WHERE THE MAP IS. The game's alignment maths for the left edge and the safe-zone
+            // line, the radar's own height-based size for the rest -- see Layout.Map. The
+            // gauge's minimap numbers are the fallback: GET_HUD_COMPONENT_POSITION(13) put the
+            // map at four pixels from the edge on a screen where it stands at five hundred,
+            // and the frame sat in the corner with nothing in it.
+            float l, mapTop, r, mapBottom, safeLine;
 
-            var foot = row.Foot + row.Breath + row.PlateH;
-            var mapBottom = foot - Layout.StockThick - Layout.StockGap;
-            var mapTop = foot - Layout.MapTall;
+            if (!Layout.Map(out l, out mapTop, out r, out mapBottom, out safeLine))
+            {
+                l = mapLeft;
+                r = mapLeft + Layout.MapWide / aspect;
+                safeLine = row.Foot + row.Breath + row.PlateH;
+                mapBottom = safeLine - Layout.StockThick - Layout.StockGap;
+                mapTop = safeLine - Layout.MapTall;
+            }
+
+            // The plate stands on the safe-zone line the map does -- and reaches down to the
+            // bars' foot when the bars have been put lower than that, so the two bottoms stay
+            // level, which is the whole point of the frame.
+            var foot = Math.Max(safeLine, row.Foot + row.Breath + row.PlateH);
+            foot = Math.Min(foot, 1f - 1f / Math.Max(720f, Ink.ScreenHeight));
 
             // OUTSIDE THE BLIPS. The game clamps a far-off blip to the edge of the map and half
             // of it pokes over; a frame flush to the map has that half under its line. The gap
@@ -137,6 +152,7 @@ namespace BareMinimum.Vitals
                 _measured = true;
                 Log.Info("Minimap frame: map " + (l * Ink.ScreenWidth).ToString("0") + ".." + (r * Ink.ScreenWidth).ToString("0") +
                          " x " + (mapTop * Ink.ScreenHeight).ToString("0") + ".." + (mapBottom * Ink.ScreenHeight).ToString("0") +
+                         " px, safe line " + (safeLine * Ink.ScreenHeight).ToString("0") + ", foot " + (foot * Ink.ScreenHeight).ToString("0") +
                          " px, frame " + (outerL * Ink.ScreenWidth).ToString("0") + ".." + (outerR * Ink.ScreenWidth).ToString("0") +
                          ", plate " + ((foot - plateTop) * Ink.ScreenHeight).ToString("0") + " px tall, top band " +
                          ((cover - mapTop) * Ink.ScreenHeight).ToString("0") + " px, gap " + (gap * Ink.ScreenHeight).ToString("0.0") + " px; " +

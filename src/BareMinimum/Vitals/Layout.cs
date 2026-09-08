@@ -39,6 +39,10 @@ namespace BareMinimum.Vitals
         /// <summary>The visible map's height, strip included: 256 of 1440 pixels.</summary>
         public const float MapTall = 256f / 1440f;
 
+        /// <summary>The visible map's width, and how far inside the box it starts, as fractions of screen HEIGHT: 360 and 12 of 1440.</summary>
+        public const float MapWide = 360f / 1440f;
+        public const float MapEdge = 12f / 1440f;
+
         /// <summary>The stock strip's own height, as a fraction of screen height: ten pixels at 1440.</summary>
         public const float StockThick = 10f / 1440f;
 
@@ -166,6 +170,36 @@ namespace BareMinimum.Vitals
             }
 
             return lay;
+        }
+
+        /// <summary>
+        /// The VISIBLE map, not the box, in screen fractions, and the safe-zone line it stands on.
+        ///
+        /// THE BOX'S LEFT IS RIGHT AND ITS WIDTH IS NOT. The alignment maths anchors the box to
+        /// the safe zone's corner correctly on any screen, but its width comes out in units
+        /// that stretch with the aspect: on 21:9 the box read a third too wide and the frame ran
+        /// under the bars. The radar itself is sized off screen HEIGHT -- 360 by 256 pixels on
+        /// any 1440-tall screen, starting 12 in from the box -- so the left edge is taken from
+        /// the box and everything else from the height. False when the game will not say where
+        /// the box is.
+        /// </summary>
+        public static bool Map(out float left, out float top, out float right, out float bottom, out float safeLine)
+        {
+            left = top = right = bottom = safeLine = 0f;
+
+            float boxLeft, boxBottom, boxRight, boxTop;
+            if (!Anchor(out boxLeft, out boxBottom, out boxRight, out boxTop)) return false;
+
+            var aspect = Ink.Aspect;
+
+            left = boxLeft + MapEdge / aspect;
+            right = left + MapWide / aspect;
+
+            safeLine = boxBottom - BoxY;
+            bottom = safeLine - StockThick - StockGap;
+            top = safeLine - MapTall;
+
+            return true;
         }
 
         /// <summary>
