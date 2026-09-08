@@ -792,15 +792,45 @@ def _ring(d, cx, cy, r, thick, start=0, end=360):
 
 
 def dash_engine():
-    """An engine block: the body, the head sat forward on it, a sump under, a shaft out the back."""
+    """
+    THE CHECK ENGINE LIGHT -- the ISO 2575 malfunction indicator, the one on every dashboard:
+    a stepped engine seen from the side. Block in the middle; the head up on it towards the
+    front, with the filler cap a step higher again; the fan boss poking out the front low
+    down; the flywheel poking out the back higher up; the sump hanging under; and the block's
+    back-bottom corner notched away. One outline, drawn as a single polygon so the steps meet
+    cleanly, then softened so every corner rounds the way the stamped symbol does.
+    """
+    from PIL import ImageFilter
+
     img, d = canvas()
 
-    d.rounded_rectangle([s(58), s(104), s(198), s(186)], radius=s(12), fill=WHITE)     # the block
-    d.rounded_rectangle([s(88), s(70), s(150), s(112)], radius=s(8), fill=WHITE)       # the head
-    d.rectangle([s(112), s(52), s(126), s(72)], fill=WHITE)                            # the filler neck
-    d.rectangle([s(196), s(126), s(226), s(146)], fill=WHITE)                          # the shaft
-    d.rectangle([s(30), s(120), s(60), s(136)], fill=WHITE)                            # the front mount
-    d.rounded_rectangle([s(84), s(184), s(170), s(206)], radius=s(6), fill=WHITE)      # the sump
+    # Design-space points, clockwise from the block's top-back corner. Wide, not tall --
+    # 220 across by 150 down, centred.
+    pts = [
+        (203, 104),               # block top, back corner
+        (203, 113), (238, 113),   # the flywheel stub out the back...
+        (238, 145), (203, 145),   # ...and back in
+        (203, 152), (180, 152),   # the notch cut from the block's back-bottom corner
+        (180, 168),               # block bottom
+        (163, 168), (163, 191),   # the sump, down...
+        (75, 191), (75, 168),     # ...and back up
+        (44, 168),                # block bottom, front corner
+        (44, 159), (18, 159),     # the fan boss out the front, low...
+        (18, 127), (44, 127),     # ...and back in
+        (44, 104),                # block top, front corner
+        (62, 104), (62, 71),      # up onto the head
+        (84, 71), (84, 53),       # up onto the filler cap
+        (115, 53), (115, 71),     # cap top, back down
+        (146, 71), (146, 104),    # head top, back down onto the block
+    ]
+    d.polygon([(s(x), s(y)) for x, y in pts], fill=WHITE)
+
+    # Round the corners: blur the mask and cut it back at half alpha. Convex corners pull
+    # in, concave ones fill, and the steps stay steps.
+    a = img.split()[3].filter(ImageFilter.GaussianBlur(s(3)))
+    a = a.point(lambda v: 255 if v >= 128 else 0)
+    img = Image.new("RGBA", (W, W), CLEAR)
+    img.paste(WHITE, (0, 0), a)
 
     return img
 
