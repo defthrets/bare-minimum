@@ -44,8 +44,8 @@ namespace BareMinimum.Vitals
         private bool _hidden;
         private bool _ever;
 
-        /// <summary>Until when the big map is kept shut after start-up. See Update.</summary>
-        private int _shrinkUntil;
+        /// <summary>Whether the one-time shut of the big map at start-up has been done.</summary>
+        private bool _shrunk;
 
         private bool _saidHidden;
 
@@ -61,21 +61,19 @@ namespace BareMinimum.Vitals
             {
                 _ever = true;
 
-                // FOR THREE SECONDS, NOT ONCE. Whatever left the big map open -- an earlier
-                // build on its way out, most likely -- this puts it back to the small, zooming
-                // one the game starts with. Asked every frame for a moment rather than a
-                // single time, because a single "shut" that lands while the map is still
-                // opening is ignored: that is the exact failure that made the flick go wrong,
-                // and a script reload is the exact moment the map is mid-opening.
-                if (cfg.VitalsShrinkMapOnStart) _shrinkUntil = Game.GameTime + 3000;
+                // ONCE, NOT FOR THREE SECONDS. It used to be asked every frame for three
+                // seconds after a load, in case a shut that landed mid-opening was ignored --
+                // and a radar told to change state sixty times a second for three seconds
+                // came up BLANK for those three seconds, which read as no minimap at all. This
+                // mod never opens the big map, so one shut for whatever an earlier build left
+                // open is all the protection there is any case for.
+                if (cfg.VitalsShrinkMapOnStart && !_shrunk)
+                {
+                    _shrunk = true;
+                    BigMap(false);
+                }
 
                 if (wantHidden && cfg.VitalsMapFlick) _flickStep = 0;
-            }
-
-            if (_shrinkUntil != 0)
-            {
-                if (Game.GameTime < _shrinkUntil) BigMap(false);
-                else _shrinkUntil = 0;
             }
 
             if (wantHidden != _hidden)

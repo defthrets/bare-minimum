@@ -174,8 +174,11 @@ namespace BareMinimum.Vitals
                 // Eased, so a physics tick that stutters is a lean rather than a rattle.
                 Accel += (a - Accel) * Math.Min(1f, dt * 12f);
 
-                // Braking throws the liquid toward the surface.
-                return -Accel * LeanGain * motion;
+                // BRAKING DROPS THE LEVEL, ACCELERATING LIFTS IT. It was the other way round
+                // and the player felt it as backwards: the whole row jumping UP under braking
+                // reads as the car shoving the liquid the wrong way. Positive acceleration is a
+                // positive throw toward the surface, and a hard stop is a dip that rings back.
+                return Accel * LeanGain * motion;
             }
             catch
             {

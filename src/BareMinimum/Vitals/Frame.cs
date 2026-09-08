@@ -93,8 +93,15 @@ namespace BareMinimum.Vitals
             var ink = Ink.Alpha(Color.FromArgb(205, 0, 0, 0), (int)(205f * cfg.HudOpacity * strength + 0.5f));
             var mat = Ink.Alpha(Color.FromArgb(120, 0, 0, 0), (int)(120f * cfg.HudOpacity * strength + 0.5f));
 
-            var outerL = l - gapW - edge;
+            // ON SCREEN, WHATEVER THE SAFE ZONE. With the safe zone at its widest the map sits
+            // four pixels from the left edge, and a frame drawn outside it falls off the
+            // screen. The gap on that side gives way first, then the line sits flush; the
+            // right-hand side keeps its gap because it has the room.
+            var leftGapW = Math.Min(gapW, Math.Max(0f, l - edge));
+            var outerL = Math.Max(0f, l - leftGapW - edge);
             var outerR = r + gapW + edge;
+
+            var topGap = Math.Min(gap, Math.Max(0f, mapTop - edgeH));
 
             // The plate: as tall as the bars' plates or as tall as a line of text, whichever is
             // more, standing on the bars' foot line and climbing into the foot of the map.
@@ -107,15 +114,12 @@ namespace BareMinimum.Vitals
 
             if (cfg.MinimapFrame)
             {
-                Ink.Bar(outerL, mapTop - gap - edgeH, outerR - outerL, (cover - mapTop) + gap + edgeH, ink);
+                Ink.Bar(outerL, mapTop - topGap - edgeH, outerR - outerL, (cover - mapTop) + topGap + edgeH, ink);
                 Ink.Bar(outerL, cover, edge, plateTop - cover, ink);
                 Ink.Bar(r + gapW, cover, edge, plateTop - cover, ink);
 
-                if (gapW > 0f)
-                {
-                    Ink.Bar(l - gapW, cover, gapW, plateTop - cover, mat);
-                    Ink.Bar(r, cover, gapW, plateTop - cover, mat);
-                }
+                if (leftGapW > 0f) Ink.Bar(l - leftGapW, cover, leftGapW, plateTop - cover, mat);
+                if (gapW > 0f) Ink.Bar(r, cover, gapW, plateTop - cover, mat);
             }
 
             Ink.Bar(outerL, plateTop, outerR - outerL, foot - plateTop, ink);
@@ -135,7 +139,8 @@ namespace BareMinimum.Vitals
                          " x " + (mapTop * Ink.ScreenHeight).ToString("0") + ".." + (mapBottom * Ink.ScreenHeight).ToString("0") +
                          " px, frame " + (outerL * Ink.ScreenWidth).ToString("0") + ".." + (outerR * Ink.ScreenWidth).ToString("0") +
                          ", plate " + ((foot - plateTop) * Ink.ScreenHeight).ToString("0") + " px tall, top band " +
-                         ((cover - mapTop) * Ink.ScreenHeight).ToString("0") + " px, gap " + (gap * Ink.ScreenHeight).ToString("0.0") + " px.");
+                         ((cover - mapTop) * Ink.ScreenHeight).ToString("0") + " px, gap " + (gap * Ink.ScreenHeight).ToString("0.0") + " px; " +
+                         "the game says the minimap is " + (Rendering() ? "rendering" : "NOT rendering") + ".");
             }
         }
 
@@ -198,6 +203,13 @@ namespace BareMinimum.Vitals
             {
                 Log.Once("minimap-names", "Could not read the street and suburb: " + ex.Message);
             }
+        }
+
+        /// <summary>Whether the game is drawing its minimap at all. For the log: a blank radar is not this mod's rectangle.</summary>
+        private static bool Rendering()
+        {
+            try { return Function.Call<bool>(Hash.IS_MINIMAP_RENDERING); }
+            catch { return true; }
         }
 
         private static void Hide(int component)

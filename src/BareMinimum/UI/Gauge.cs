@@ -1452,9 +1452,11 @@ namespace BareMinimum.UI
                 _accel += (a - _accel) * Math.Min(1f, dt * 12f);
                 _heave += (az - _heave) * Math.Min(1f, dt * 12f);
 
-                // Braking lifts it and a landing drops it, both through the spring, so they
-                // ring down rather than snapping back.
-                return (-_accel * 0.6f - _heave) * LeanGain * motion;
+                // BRAKING DROPS IT, ACCELERATING LIFTS IT, and a landing drops it. The brake
+                // was the other way for a day and was felt as backwards -- the whole row
+                // jumping up under braking reads as the liquid going the wrong way. All through
+                // the spring, so they ring down rather than snapping back.
+                return (_accel * 0.6f - _heave) * LeanGain * motion;
             }
             catch
             {
@@ -1508,8 +1510,9 @@ namespace BareMinimum.UI
             bow -= speed * 0.40f * thickH;
             tilt += speed * 0.25f * thickH;
 
-            // Braking leans the liquid up one wall; accelerating, the other.
-            tilt += Clamp(_accel / 10f, -1f, 1f) * 0.30f * thickH * Clamp01(_cfg.HudBarLean);
+            // Braking leans the liquid up one wall; accelerating, the other. The same way round
+            // as the throw, so a stop reads as one motion and not two.
+            tilt -= Clamp(_accel / 10f, -1f, 1f) * 0.30f * thickH * Clamp01(_cfg.HudBarLean);
 
             var columns = Columns(w);
             if (_tops.Length != columns) _tops = new float[columns];
