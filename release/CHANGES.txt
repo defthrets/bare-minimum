@@ -1,10 +1,22 @@
-===============================================================================
+﻿===============================================================================
   BARE MINIMUM  --  changes
 ===============================================================================
 
 
 0.2.0  --  Vitals moves in: health, armour and energy, one row of five
 -------------------------------------------------------------------------------
+
+  THE ROW STOPPED TAKING OTHER MODS' PANELS OFF THE SCREEN. Rectangles come
+  out of one list the game keeps for the whole machine, and once it is full
+  everything handed over after that is dropped -- so the script that pays for
+  a busy frame is whichever draws LAST, whatever it drew. Five bars, each
+  filling its gradient with a band every four pixels, were most of that list
+  on their own: another mod's phone came up in a car with no background at
+  all, because its screen is a rectangle and there was no room left for it.
+  A band every fourteen pixels now, which on a bar this narrow looks the
+  same, and nothing under half a pixel is drawn at all. The row also counts
+  what it spends and writes the worst frame to the log, so the next time
+  something goes missing there is a number to look at.
 
   VITALS IS PART OF BARE MINIMUM NOW. The health, armour and special ability
   bars that were a mod of their own stand in the row with the sleep and food
