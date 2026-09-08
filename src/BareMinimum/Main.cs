@@ -46,6 +46,9 @@ namespace BareMinimum
         private readonly MachineBlips _machineBlips;
         private readonly Vendors _vendors;
 
+        /// <summary>The way into a bar's room, and back out. Nothing without a room in vendors.json.</summary>
+        private readonly Inside _inside;
+
         /// <summary>The shops' voice on Hoodrich's feed. Dormant when Hoodrich is absent.</summary>
         private readonly Social.Socials _socials;
 
@@ -102,6 +105,8 @@ namespace BareMinimum
             _socials.Load();
 
             _vendors = new Vendors(_cfg, _catalogue, _eating, _needs, _socials, _pantry);
+            _inside = new Inside(_cfg, _vendors);
+            _vendors.Doors = _inside;
             _shop = new Shop(_cfg, _catalogue, _counters, _eating, _needs, _pantry);
 
             _bag = new Bag(_cfg, _catalogue, _pantry, _eating, _needs);
@@ -188,9 +193,9 @@ namespace BareMinimum
                 // It reads the same interact key a stall does, so a fridge somehow within
                 // reach of one would otherwise have both of them answering the same press.
                 _fridge.Update(_sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
-                               _vendors.Offering || _bag.IsOpen);
+                               _vendors.Offering || _inside.Offering || _bag.IsOpen);
 
-                if (!menuOpen && !_vendors.Offering) _sleeping.Update();
+                if (!menuOpen && !_vendors.Offering && !_inside.Offering) _sleeping.Update();
 
                 // EVERY OTHER MENU, NEVER ITS OWN. A pass that is told it is suspended closes
                 // whatever it has open -- that is what suspended means -- so handing one the
@@ -204,6 +209,12 @@ namespace BareMinimum
                 _vendors.Update(dt, _sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
                                     _bag.IsOpen || _fridge.IsOpen);
 
+                // The room after the vendors, and never while the bar's own shelf is up -- the
+                // shelf owns the key then, and a hold that leaves with it open is two things
+                // reading one press.
+                _inside.Update(_sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
+                               _bag.IsOpen || _fridge.IsOpen || _vendors.MenuOpen);
+
                 // NOT GATED ON A MENU. It is watching for the GAME's animation, which the
                 // player triggers with nothing of ours open, and a suspended tick would miss
                 // the one frame the clip starts on.
@@ -211,7 +222,7 @@ namespace BareMinimum
                 _machineBlips.Update();
 
                 _shop.Update(_sleeping.Busy || _settings.IsOpen || _bag.IsOpen ||
-                             _fridge.IsOpen || _vendors.Offering);
+                             _fridge.IsOpen || _vendors.Offering || _inside.Offering);
                 _eating.Update();
 
                 // While the sleep sequence owns the screen, the effects and the HUD stand
@@ -316,6 +327,7 @@ namespace BareMinimum
         {
             try { _settings.Shutdown(); } catch (Exception ex) { Log.Error("Settings shutdown", ex); }
             try { _shop.Shutdown(); } catch (Exception ex) { Log.Error("Shop shutdown", ex); }
+            try { _inside.Shutdown(); } catch (Exception ex) { Log.Error("Room shutdown", ex); }
             try { _vendors.Shutdown(); } catch (Exception ex) { Log.Error("Vendor shutdown", ex); }
             try { _eating.Shutdown(); } catch (Exception ex) { Log.Error("Eating shutdown", ex); }
             try { UI.Toast.Clear(); } catch { /* a card is not worth a failed shutdown */ }

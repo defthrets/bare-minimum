@@ -31,6 +31,21 @@ namespace BareMinimum.Venues
         public float Heading;
 
         /// <summary>
+        /// The room this door leads into, by key into vendors.json's "rooms". Empty for the
+        /// ordinary case: a shelf on the pavement and no inside.
+        /// </summary>
+        public string RoomKey = "";
+
+        /// <summary>
+        /// Where the bar is while he is standing in the room, and Zero the rest of the time.
+        ///
+        /// SET BY Inside, READ BY InReach. The vendor's own coordinate is a door across the
+        /// city from the room he is in, so every distance test would say he has walked away
+        /// the moment he arrived. While this is set, the shelf measures to it instead.
+        /// </summary>
+        public Vector3 Counter;
+
+        /// <summary>
         /// Found in the world rather than listed in vendors.json.
         ///
         /// It changes two things and only two: the stand is not built, because it is already
@@ -332,6 +347,21 @@ namespace BareMinimum.Venues
         /// <summary>The vendor currently within reach, if any.</summary>
         private Vendor _at;
 
+        /// <summary>The rooms a door can lead into, by key. See vendors.json "rooms".</summary>
+        public readonly Dictionary<string, Room> Rooms =
+            new Dictionary<string, Room>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>Every vendor, for whoever needs to find one by its room.</summary>
+        public IEnumerable<Vendor> All => _vendors;
+
+        /// <summary>
+        /// The thing that takes him inside. Set by Main once both exist.
+        ///
+        /// A property rather than a constructor argument because the door needs the vendors
+        /// and the vendors need the door, and one of them has to be built first.
+        /// </summary>
+        public Inside Doors { get; set; }
+
         /// <summary>
         /// One shared Random for the whole class.
         ///
@@ -410,6 +440,7 @@ namespace BareMinimum.Venues
                         PropModels = Strings(node["prop"]),
                         PedModels = Strings(node["ped"]),
                         Label = node["label"].AsString(""),
+                        RoomKey = node["inside"].AsString(""),
                         Blip = node["blip"].AsBool(true),
                         BlipSprite = node["blipSprite"].AsInt(267),
                         BlipColour = node["blipColour"].AsInt(47)
@@ -420,7 +451,51 @@ namespace BareMinimum.Venues
                     _vendors.Add(v);
                 }
 
-                Log.Info("Vendors: " + _vendors.Count + " street stand(s) loaded.");
+                // THE ROOMS, read after the vendors so a bad room cannot take the shops down
+                // with it. A vendor naming a room that is not here simply keeps its shelf on
+                // the pavement, which is what it had yesterday.
+                foreach (var node in doc["rooms"].Items)
+                {
+                    var room = new Room
+                    {
+                        Key = node["key"].AsString(""),
+                        Name = node["name"].AsString("the room"),
+                        Ipl = node["ipl"].AsString(""),
+                        Online = node["online"].AsBool(false),
+                        Anchor = new Vector3(node["x"].AsFloat(0f), node["y"].AsFloat(0f), node["z"].AsFloat(0f)),
+                        Heading = node["heading"].AsFloat(0f)
+                    };
+
+                    foreach (var alt in node["also"].Items)
+                    {
+                        var xyz = new List<float>();
+                        foreach (var f in alt.Items) xyz.Add(f.AsFloat(0f));
+                        if (xyz.Count == 3) room.Also.Add(new Vector3(xyz[0], xyz[1], xyz[2]));
+                    }
+
+                    if (room.Key.Length == 0 || room.Anchor == Vector3.Zero) continue;
+
+                    Rooms[room.Key] = room;
+                }
+
+                var doors = 0;
+                foreach (var v in _vendors)
+                {
+                    if (v.RoomKey.Length == 0) continue;
+
+                    if (!Rooms.ContainsKey(v.RoomKey))
+                    {
+                        Log.Warn(v.Name + " names a room '" + v.RoomKey +
+                                 "' that vendors.json does not define; it keeps its shelf outside.");
+                        v.RoomKey = "";
+                        continue;
+                    }
+
+                    doors++;
+                }
+
+                Log.Info("Vendors: " + _vendors.Count + " street stand(s) loaded, " + Rooms.Count +
+                         " room(s), " + doors + " door(s) into them.");
             }
             catch (Exception ex)
             {
@@ -1486,6 +1561,24 @@ namespace BareMinimum.Venues
             // essentially stopped at the window, which is what the real thing asks of you.
             if (driving && !Stopped(me)) return;
 
+            // A BAR WITH A ROOM GOES IN. The key at its door takes him inside rather than
+            // opening the shelf on the pavement; the shelf is at the bar, where it belongs.
+            // Sat here rather than earlier so that everything Nearest already decided --
+            // open, in range, somebody behind it -- still applies to the door.
+            if (_cfg.WalkInBars && Doors != null && !driving &&
+                here.RoomKey.Length > 0 && Rooms.ContainsKey(here.RoomKey))
+            {
+                _at = here;
+
+                Hud.Help("Press ~INPUT_CONTEXT~ to go into ~b~" + here.Name + "~s~.");
+
+                if (!Pressed()) return;
+
+                Hud.ClearHelp();
+                Doors.Enter(here, Rooms[here.RoomKey]);
+                return;
+            }
+
             var item = Find(here.ItemId);
             if (item == null) return;
 
@@ -1660,6 +1753,13 @@ namespace BareMinimum.Venues
         {
             try
             {
+                // Inside, the bar is where he is standing and the vendor's own coordinate is
+                // a door across the city -- so the room's counter is what he has to stay near.
+                if (v.Counter != Vector3.Zero)
+                {
+                    return me.Position.DistanceTo(v.Counter) <= v.Reach + 0.6f;
+                }
+
                 if (!v.InRange || !v.AtPost) return false;
 
                 var at = v.Stand != null && v.Stand.Exists() ? v.Stand.Position : v.Position;
@@ -1675,6 +1775,21 @@ namespace BareMinimum.Venues
         {
             if (_ui.IsOpen) _ui.Close();
             _shopping = null;
+        }
+
+        /// <summary>The bar's shelf, opened from inside its room, measured to where he stands.</summary>
+        public void OpenShelfInside(Vendor v, Vector3 counter)
+        {
+            if (v == null) return;
+
+            v.Counter = counter;
+            OpenShelf(v);
+        }
+
+        /// <summary>Shuts the shelf if it is up. What leaving the room does first.</summary>
+        public void CloseShelf()
+        {
+            Close();
         }
 
         private Vendor Nearest(Vector3 from, bool driving)
