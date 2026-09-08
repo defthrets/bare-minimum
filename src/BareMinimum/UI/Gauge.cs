@@ -435,6 +435,14 @@ namespace BareMinimum.UI
             // top of whatever the row's own position says. See Settings.HudGroupX.
             x += _cfg.HudGroupX;
             bottom += _cfg.HudGroupY;
+
+            // AND A FLOOR UNDER IT. Y is not the foot -- it has the mark's allowance added to
+            // it above -- and a number set as though it were walks the whole row off the bottom
+            // of the screen, plates first, which is exactly what happened. A row hard against
+            // the bottom edge is wrong in a way you can see and fix; a row below it is not.
+            var floor = 1f - 1f / Math.Max(720f, Hud.ScreenHeight);
+            if (bottom > floor) bottom = floor;
+            if (bottom < 0.05f) bottom = 0.05f;
         }
 
         /// <summary>The row as it stands right now, for anything that has to line up with it without drawing it.</summary>

@@ -549,7 +549,7 @@ namespace BareMinimum.Core
         /// 3440x1440 screen with the pair placed by hand: left edge 0.252, foot 0.983.
         /// </summary>
         public float HudX = 0.252f;
-        public float HudY = 0.912f;
+        public float HudY = 0.9873f;
 
         /// <summary>
         /// Icon height as a fraction of screen height. Width follows; the PNGs are square.
@@ -655,7 +655,7 @@ namespace BareMinimum.Core
         /// should agree about how big an instrument is, and Fumes' numbers have been looked
         /// at on this monitor for months, which is worth more than a fresh guess.
         /// </summary>
-        public float HudBarLength = 0.23f;
+        public float HudBarLength = 0.2213f;
 
         /// <summary>How WIDE a bar is, as a fraction of screen width. Fumes' figure.</summary>
         public float HudBarWidth = 0.0048f;
