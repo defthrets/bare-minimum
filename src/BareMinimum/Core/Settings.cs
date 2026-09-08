@@ -832,9 +832,10 @@ namespace BareMinimum.Core
         public bool VitalsMapFlick = true;
 
         /// <summary>
-        /// THE THIRD BAR IS ENERGY: a sprint meter. It drains while you sprint, and empty it
-        /// locks the sprint -- you jog -- until it has come back to EnergySprintAgainAt. Off,
-        /// the third bar is the special ability's charge, worked out, see SpecialMode.
+        /// THE THIRD BAR IS ENERGY: a sprint meter, and the special ability's tank. It drains
+        /// while you sprint and while the ability runs, and empty it locks both -- you jog, and
+        /// there is no ability -- until it has come back to EnergySprintAgainAt. Off, the third
+        /// bar is the special ability's charge, worked out, see SpecialMode.
         /// </summary>
         public bool VitalsEnergy = true;
 
@@ -846,6 +847,17 @@ namespace BareMinimum.Core
 
         /// <summary>How far back up it has to be before the sprint unlocks, 0 to 1.</summary>
         public float EnergySprintAgainAt = 0.35f;
+
+        /// <summary>
+        /// THE SPECIAL ABILITY RUNS ON THE ENERGY BAR. Rage, focus, the slow motion: while it
+        /// is on it drains this bar, and when the bar is out it stops with it and he is winded.
+        /// The game's own meter is kept topped up rather than read, so this bar is the only
+        /// limit -- see Energy.Ability. Off hands the ability back to the game untouched.
+        /// </summary>
+        public bool EnergyPowersSpecial = true;
+
+        /// <summary>Seconds of special ability from a full bar. 30 is about what the game gives at full skill.</summary>
+        public float EnergySpecialSeconds = 30f;
 
         /// <summary>
         /// How long a drink holds the energy bar full, in REAL minutes. 0 turns it off.
@@ -1435,6 +1447,8 @@ namespace BareMinimum.Core
                 cfg.EnergySprintSeconds = ini.GetFloat("Vitals", "EnergySprintSeconds", cfg.EnergySprintSeconds, 1f, 600f);
                 cfg.EnergyRebuildSeconds = ini.GetFloat("Vitals", "EnergyRebuildSeconds", cfg.EnergyRebuildSeconds, 1f, 600f);
                 cfg.EnergySprintAgainAt = ini.GetFloat("Vitals", "EnergySprintAgainAt", cfg.EnergySprintAgainAt, 0.05f, 1f);
+                cfg.EnergyPowersSpecial = ini.GetBool("Vitals", "EnergyPowersSpecial", cfg.EnergyPowersSpecial);
+                cfg.EnergySpecialSeconds = ini.GetFloat("Vitals", "EnergySpecialSeconds", cfg.EnergySpecialSeconds, 1f, 600f);
                 cfg.EnergyDrinkHoldMinutes = ini.GetFloat("Vitals", "EnergyDrinkHoldMinutes", cfg.EnergyDrinkHoldMinutes, 0f, 600f);
                 cfg.VitalsSpecial = ParseSpecial(ini.GetString("Vitals", "Special", "Auto"), cfg.VitalsSpecial);
                 cfg.VitalsHealth = ParseColour("Vitals", "HealthColour", ini.GetString("Vitals", "HealthColour", null), cfg.VitalsHealth);

@@ -704,6 +704,19 @@ namespace BareMinimum.UI
                   "How far back up the bar has to be before you can sprint again.",
                   () => _cfg.VitalsEnabled && _cfg.VitalsEnergy, "~y~Turn the energy bar ON first.");
 
+            Bool("Special ability runs on energy", "Vitals", "EnergyPowersSpecial",
+                 () => _cfg.EnergyPowersSpecial, v => _cfg.EnergyPowersSpecial = v,
+                 "Rage, focus and the slow motion drain the energy bar while they run, and stop " +
+                 "when it is empty. Off leaves the ability to the game.",
+                 () => _cfg.VitalsEnergy, "~y~Turn the energy bar ON first.");
+
+            Float("Ability from a full bar", "Vitals", "EnergySpecialSeconds",
+                  () => _cfg.EnergySpecialSeconds, v => _cfg.EnergySpecialSeconds = v,
+                  1f, 1f, 600f, "0",
+                  "Seconds of special ability a full energy bar is worth.",
+                  () => _cfg.VitalsEnergy && _cfg.EnergyPowersSpecial,
+                  "~y~Turn Special ability runs on energy ON first.");
+
             Bool("Minimap frame", "Minimap", "Frame",
                  () => _cfg.MinimapFrame, v => _cfg.MinimapFrame = v,
                  "A frame round the minimap in the bars' own black.");

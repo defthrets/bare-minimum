@@ -6,7 +6,7 @@ using BareMinimum.Core;
 namespace BareMinimum.Vitals
 {
     /// <summary>
-    /// The sprint meter: the third bar, doubling for the special ability.
+    /// The sprint meter: the third bar, and the special ability's tank.
     ///
     /// THE GAME'S OWN STAMINA IS INVISIBLE AND NEARLY INFINITE. There is a stat, it takes
     /// minutes to run down, and when it does the game hurts you rather than slowing you. This
@@ -14,6 +14,14 @@ namespace BareMinimum.Vitals
     /// see, and when it is empty you JOG -- the sprint button does nothing -- until it has come
     /// back to where you have your breath again. It refills on its own, fairly quickly, faster
     /// stood still than jogging, and always in a car.
+    ///
+    /// AND THE SPECIAL ABILITY RUNS ON THE SAME TANK. Rage, focus, the slow motion -- whichever
+    /// of the three he is -- burns this bar while it is on, at its own rate, and when the bar
+    /// is out the ability stops with it. The game's own meter is not consulted: it is kept
+    /// topped up so its clock never ends the ability and never refuses to start one, and THIS
+    /// bar is the limit. Which is what makes the ability cost something you can see, and what
+    /// makes burning it leave you winded. See Ability. [Vitals] EnergyPowersSpecial turns it off
+    /// and hands the ability back to the game.
     ///
     /// LOCKED AT EMPTY, FREED PART WAY UP. Freeing it the moment it left zero would let a
     /// player tap-sprint along the bottom of the bar forever, a stutter rather than a limit.
@@ -26,7 +34,8 @@ namespace BareMinimum.Vitals
     /// through SET_PED_MAX_MOVE_BLEND_RATIO, the native missions use to hold you at a walk or
     /// a jog: press sprint and you jog, tired, the way the game itself does when its own
     /// stamina runs out. The cap is lifted the moment he has his breath back, and on the way
-    /// out of the script, because unlike a disabled control it would otherwise stay.
+    /// out of the script, because unlike a disabled control it would otherwise stay. The same
+    /// goes for the ability being switched off while winded -- see Release, which lifts both.
     /// </summary>
     internal sealed class Energy
     {
@@ -37,11 +46,17 @@ namespace BareMinimum.Vitals
         /// <summary>The ped the cap was last put on, so it comes off the right one.</summary>
         private int _cappedPed;
 
+        /// <summary>Whether the special ability is switched off at the game's end right now.</summary>
+        private bool _abilityOff;
+
         /// <summary>0 to 1. Starts full.</summary>
         public float Level = 1f;
 
         /// <summary>Whether the sprint is locked off until the level has come back.</summary>
         public bool Tired;
+
+        /// <summary>Whether the special ability is running and drinking from this bar this frame.</summary>
+        public bool Spending;
 
         /// <summary>This frame's events, for the bar to slosh on.</summary>
         public bool JustEmptied;
@@ -70,6 +85,7 @@ namespace BareMinimum.Vitals
         {
             JustEmptied = false;
             JustRecovered = false;
+            Spending = false;
 
             if (!cfg.VitalsEnergy)
             {
@@ -85,7 +101,8 @@ namespace BareMinimum.Vitals
             // HELD FULL BY A DRINK. Anything he drank that was not alcohol keeps the meter at
             // the top for a while, sprinting or not, and lifts the winded cap if it was on --
             // with the same kick a recovery gets, so the bar says so. Which drinks count is
-            // Main's decision, where the item and the meter both exist.
+            // Main's decision, where the item and the meter both exist. The ability still runs
+            // off the bar while this holds; the bar simply does not go down.
             if (Game.GameTime < _holdUntil)
             {
                 Level = 1f;
@@ -96,7 +113,8 @@ namespace BareMinimum.Vitals
                     JustRecovered = true;
                 }
 
-                Release();
+                ReleaseCap();
+                Ability(cfg);
                 return;
             }
 
@@ -109,9 +127,19 @@ namespace BareMinimum.Vitals
                 var sprinting = onFoot && me.IsSprinting && !Tired;
                 var jogging = onFoot && !sprinting && me.IsRunning;
 
-                if (sprinting)
+                Spending = cfg.EnergyPowersSpecial && Running();
+
+                // BOTH DRAIN, AND THEY ADD UP. Sprinting through a rage costs what the sprint
+                // costs and what the rage costs, which is the honest answer and the one the bar
+                // can show. Nothing rebuilds while either is going.
+                var drain = 0f;
+
+                if (Spending) drain += dt / Math.Max(1f, cfg.EnergySpecialSeconds);
+                if (sprinting) drain += dt / Math.Max(1f, cfg.EnergySprintSeconds);
+
+                if (drain > 0f)
                 {
-                    Level -= dt / Math.Max(1f, cfg.EnergySprintSeconds);
+                    Level -= drain;
                 }
                 else
                 {
@@ -148,8 +176,10 @@ namespace BareMinimum.Vitals
                 }
                 else if (_cappedPed != 0)
                 {
-                    Release();
+                    ReleaseCap();
                 }
+
+                Ability(cfg);
             }
             catch (Exception ex)
             {
@@ -157,8 +187,77 @@ namespace BareMinimum.Vitals
             }
         }
 
-        /// <summary>Lifts the cap, if one is on. Safe to call with none; called on the way out too.</summary>
+        /// <summary>Whether the game says the special ability is running.</summary>
+        private static bool Running()
+        {
+            try { return Function.Call<bool>(Hash.IS_SPECIAL_ABILITY_ACTIVE, Game.Player.Handle, 0); }
+            catch { return false; }
+        }
+
+        /// <summary>
+        /// The special ability, run off this bar.
+        ///
+        /// THE GAME'S METER IS KEPT FULL, not read. There is no native that says how full it is
+        /// -- see Readings.SpecialMeter, which had to guess -- and its own clock would end the
+        /// ability on a schedule this bar knows nothing about. So it is topped up whenever it is
+        /// not full, which does two things at once: the ability never ends on the game's terms,
+        /// and it can always be started while this bar has something in it.
+        ///
+        /// WINDED, THERE IS NONE. The ability is switched off at the game's end while the bar is
+        /// locked, so the button does nothing and a running ability is cut off where the bar ran
+        /// out. Switched back on the moment he has his breath back -- and by Release, because a
+        /// disabled ability would otherwise outlive the script.
+        /// </summary>
+        private void Ability(Settings cfg)
+        {
+            if (!cfg.EnergyPowersSpecial)
+            {
+                ReleaseAbility();
+                return;
+            }
+
+            try
+            {
+                var player = Game.Player.Handle;
+
+                if (Tired)
+                {
+                    if (!_abilityOff)
+                    {
+                        Function.Call(Hash.ENABLE_SPECIAL_ABILITY, player, false, 0);
+                        _abilityOff = true;
+                    }
+
+                    Function.Call(Hash.SPECIAL_ABILITY_DEACTIVATE, player, 0);
+                    return;
+                }
+
+                if (_abilityOff)
+                {
+                    Function.Call(Hash.ENABLE_SPECIAL_ABILITY, player, true, 0);
+                    _abilityOff = false;
+                }
+
+                if (!Function.Call<bool>(Hash.IS_SPECIAL_ABILITY_METER_FULL, player, 0))
+                {
+                    Function.Call(Hash.SPECIAL_ABILITY_FILL_METER, player, true, 0);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Once("vitals-special", "The special ability could not be run off the energy bar: " + ex.Message);
+            }
+        }
+
+        /// <summary>Everything this class does to the player, undone. Safe to call with nothing on; called on the way out too.</summary>
         public void Release()
+        {
+            ReleaseCap();
+            ReleaseAbility();
+        }
+
+        /// <summary>Lifts the movement cap, if one is on.</summary>
+        private void ReleaseCap()
         {
             if (_cappedPed == 0) return;
 
@@ -173,6 +272,20 @@ namespace BareMinimum.Vitals
             }
 
             _cappedPed = 0;
+        }
+
+        /// <summary>Switches the special ability back on, if this class switched it off.</summary>
+        private void ReleaseAbility()
+        {
+            if (!_abilityOff) return;
+
+            try { Function.Call(Hash.ENABLE_SPECIAL_ABILITY, Game.Player.Handle, true, 0); }
+            catch
+            {
+                // Nothing more to try.
+            }
+
+            _abilityOff = false;
         }
     }
 }
