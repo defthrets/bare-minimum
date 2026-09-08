@@ -762,6 +762,14 @@ namespace BareMinimum.UI
                   "so the map ends hard. 0 is a plain line.",
                   () => _cfg.MinimapFrame, "~y~Turn the minimap frame ON first.");
 
+            Float("Band above the map", "Minimap", "BandHeight",
+                  () => _cfg.MinimapBandHeight, v => _cfg.MinimapBandHeight = v,
+                  0.002f, 0.004f, 0.15f, "0.000",
+                  "How much room the street, the suburb and the compass have above the map. " +
+                  "The game draws its blips over anything we draw, so the writing has to sit " +
+                  "clear of them. Grow the bars with it.",
+                  () => _cfg.MinimapFrame, "~y~Turn the minimap frame ON first.");
+
             Bool("Compare with the game's bars", "Vitals", "Compare",
                  () => _cfg.VitalsCompare, v => _cfg.VitalsCompare = v,
                  "The game's own bars come back, with ours at half strength over them, for lining up.",

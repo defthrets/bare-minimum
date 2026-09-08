@@ -119,6 +119,20 @@ namespace BareMinimum.Vitals
 
             var topGap = Math.Min(gap, Math.Max(0f, mapTop - edgeH));
 
+            // HOW TALL THE BAND ABOVE THE MAP IS, and why it is not thin.
+            //
+            // THE GAME DRAWS ITS BLIPS OVER ANYTHING A SCRIPT DRAWS. A far-off blip is clamped
+            // to the edge of the map and sits half in and half out of it, and no rectangle of
+            // ours will ever get on top of that -- the band used to reach barely a blip's width
+            // above the map, so a row of clamped shop blips sat squarely on the street name and
+            // neither could be read. Nothing here can hide them. So the writing moves to where
+            // they cannot reach: the band rises a proper distance clear of the map, and the
+            // words and the compass are laid out in the part of it that is above the highest a
+            // clamped blip can climb -- the same half-blip the gap keeps clear at the sides.
+            var bandH = Math.Max(cfg.MinimapBandHeight, topGap + edgeH);
+            var bandTop = Math.Max(0f, mapTop - bandH);
+            var bandClear = Math.Max(bandTop, mapTop - topGap);
+
             // The plate: as tall as the bars' plates or as tall as a line of text, whichever is
             // more, standing on the bars' foot line and climbing into the foot of the map. It
             // carries the speed and the dash lights now, and the words when there is no band.
@@ -139,14 +153,13 @@ namespace BareMinimum.Vitals
 
             if (cfg.MinimapFrame)
             {
-                var bandTop = mapTop - topGap - edgeH;
-
                 Ink.Bar(outerL, bandTop, outerR - outerL, cover - bandTop, ink);
                 Ink.Bar(outerL, cover, edge, plateTop - cover, ink);
                 Ink.Bar(r + gapW, cover, edge, plateTop - cover, ink);
 
-                // THE BAND: the compass in the middle, the street at the left, the suburb at the right.
-                Band(cfg, l, r, outerL, outerR, bandTop, cover, edge + leftGapW, strength);
+                // THE BAND: the compass in the middle, the street at the left, the suburb at the
+                // right -- all in the part of it no clamped blip reaches.
+                Band(cfg, l, r, outerL, outerR, bandTop, bandClear, edge + leftGapW, strength);
 
                 if (leftGapW > 0f) Ink.Bar(l - leftGapW, cover, leftGapW, plateTop - cover, mat);
                 if (gapW > 0f) Ink.Bar(r, cover, gapW, plateTop - cover, mat);
