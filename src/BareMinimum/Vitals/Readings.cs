@@ -39,12 +39,20 @@ namespace BareMinimum.Vitals
         public float HealthDelta;
         public float ArmourDelta;
 
+        /// <summary>This frame's change in the third bar. Negative while energy drains; the streaks read it.</summary>
+        public float ThirdDelta;
+
+        /// <summary>This frame's change in the third bar. Negative while energy drains; the streaks read it.</summary>
+        public float ThirdDelta;
+
         /// <summary>Which of the three the player is, 0 to 2, or -1 for anybody else.</summary>
         public int Character = -1;
 
         private int _ped;
         private int _lastHealth = -1;
         private int _lastArmour = -1;
+        private float _lastThird = -1f;
+        private float _lastThird = -1f;
 
         private int _michael, _franklin, _trevor;
         private bool _hashed;
@@ -63,6 +71,7 @@ namespace BareMinimum.Vitals
                 _ped = handle;
                 _lastHealth = -1;
                 _lastArmour = -1;
+                _lastThird = -1f;
             }
 
             // ---- health ----
@@ -112,6 +121,7 @@ namespace BareMinimum.Vitals
                 HasThird = true;
                 Third = energy.Level;
                 Tired = energy.Tired;
+                Trend();
                 return;
             }
 
@@ -126,6 +136,13 @@ namespace BareMinimum.Vitals
             }
 
             Third = HasThird ? _meter.Update(cfg, dt, Character, SpecialActive, SpecialFull) : 0f;
+            Trend();
+        }
+
+        private void Trend()
+        {
+            ThirdDelta = _lastThird >= 0f ? Third - _lastThird : 0f;
+            _lastThird = Third;
         }
 
         /// <summary>0 Michael, 1 Franklin, 2 Trevor -- the SP0, SP1, SP2 of the stat names -- or -1.</summary>

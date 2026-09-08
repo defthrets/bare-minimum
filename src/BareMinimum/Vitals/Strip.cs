@@ -207,9 +207,9 @@ namespace BareMinimum.Vitals
 
             switch (kind)
             {
-                case Kind.Health: Bubbles(cfg, x0, y0, h, surface, body, t, strength); break;
+                case Kind.Health: Pulses(cfg, x0, y0, h, surface, body, m.Wall, r.Health, strength); break;
                 case Kind.Armour: Glints(cfg, x0, y0, h, surface, body, t, strength); break;
-                default: Sparkles(cfg, x0, y0, h, surface, t, m.Wall, r.SpecialActive, strength); break;
+                default: Streaks(cfg, x0, y0, h, surface, body, m.Wall, r, strength); break;
             }
         }
 
@@ -217,43 +217,40 @@ namespace BareMinimum.Vitals
         // The specks
         // ======================================================================
 
-        /// <summary>HEALTH: bubbles, rising toward the surface, each in a new lane every trip.</summary>
-        private static void Bubbles(Settings cfg, float x0, float y0, float h, float surface,
-                                    Color body, float t, float strength)
+        /// <summary>HEALTH: the pulse, lying down -- thin bands travelling from the left end to the surface at the heart's rate. See Columns.Pulses.</summary>
+        private static void Pulses(Settings cfg, float x0, float y0, float h, float surface,
+                                   Color body, float wall, float health, float strength)
         {
-            var count = (int)Math.Round(4f * cfg.VitalsParticles);
-            if (count < 1) return;
+            if (cfg.VitalsParticles <= 0.001f) return;
 
-            var size = h * 0.26f;
-            var sizeW = size / Ink.Aspect;
+            var travel = surface - x0;
+            if (travel <= 0.004f) return;
 
-            var span = (surface - x0) - sizeW * 1.5f;
-            if (span <= sizeW) return;
+            var bpm = 56f + 62f * (1f - Ink.Clamp01(health));
+            var period = 60f / bpm;
+            var life = period * 0.72f;
 
-            var tint = Ink.Mix(body, Color.FromArgb(body.A, 255, 255, 255), 0.6f);
+            var wide = Math.Max(1.6f / Ink.ScreenWidth, h / Ink.Aspect * 0.16f);
+            var tint = Ink.Mix(body, Color.FromArgb(body.A, 255, 255, 255), 0.72f);
 
-            for (var i = 0; i < count; i++)
+            var beat = wall / period;
+
+            for (var i = 0; i < 2; i++)
             {
-                // Speeds that do not divide into each other, so no two travel together.
-                var rate = 0.10f + i * 0.021f;
+                var phase = beat - (i == 0 ? 0f : 0.20f);
+                var at = (phase - (float)Math.Floor(phase)) * period / life;
+                if (at > 1f) continue;
 
-                var raw = t * rate + i * 0.37f;
-                var cycle = (float)Math.Floor(raw);
-                var at = raw - cycle;
+                var px = x0 + travel * at - wide * 0.5f;
+                if (px + wide > surface) px = surface - wide;
 
-                var lane = 0.15f + 0.70f * Paint.Scatter(i * 3.1f + cycle * 17.3f);
-                var sway = (float)Math.Sin(t * (0.9f + i * 0.17f) + i * 2.1f) * 0.08f;
+                var fade = (1f - at) * (1f - at);
+                var edgeIn = Math.Min(1f, at * 6f);
 
-                var px = x0 + sizeW * 0.5f + span * at;
-                var py = Ink.Clamp(y0 + h * (lane + sway) - size / 2f, y0, y0 + h - size);
-
-                // In quicker than out: a bubble appears and is absorbed at the surface.
-                var edge = Math.Min(at * 6f, Math.Min((1f - at) * 3f, 1f));
-
-                var alpha = (int)(150f * edge * strength);
+                var alpha = (int)((i == 0 ? 175f : 90f) * fade * edgeIn * cfg.VitalsParticles * strength);
                 if (alpha <= 4) continue;
 
-                Ink.Bar(px, py, sizeW, size, Ink.Alpha(tint, alpha));
+                Ink.Bar(px, y0, wide, h, Ink.Alpha(tint, alpha));
             }
         }
 
@@ -291,50 +288,48 @@ namespace BareMinimum.Vitals
             }
         }
 
-        /// <summary>THE THIRD: sparks, each coming up out of nothing somewhere in the fill and going out again.</summary>
-        private static void Sparkles(Settings cfg, float x0, float y0, float h, float surface,
-                                     float t, float wall, bool active, float strength)
+        /// <summary>THE THIRD: charge streaks, lying down -- toward the surface while it fills, away while it drains. See Columns.Streaks.</summary>
+        private static void Streaks(Settings cfg, float x0, float y0, float h, float surface,
+                                    Color body, float wall, Readings r, float strength)
         {
-            var count = (int)Math.Round(5f * cfg.VitalsParticles);
+            var count = (int)Math.Round(3f * cfg.VitalsParticles);
             if (count < 1) return;
 
-            var size = h * 0.24f;
-            var sizeW = size / Ink.Aspect;
+            var span = surface - x0;
+            var len = Math.Min(span * 0.35f, h / Ink.Aspect * 1.4f);
+            var tall = h * 0.16f;
 
-            var span = (surface - x0) - sizeW;
-            if (span <= sizeW) return;
+            if (span <= len * 1.5f) return;
 
-            var hurry = active ? 2.2f : 1f;
+            var draining = r.ThirdIsEnergy && r.ThirdDelta < -0.00001f;
+            var filling = r.ThirdIsEnergy && r.ThirdDelta > 0.00001f;
+
+            var rate = draining ? 1.6f : filling ? 1.0f : 0.5f;
+            if (r.Tired) rate = 0.3f;
+            if (r.SpecialActive) rate *= 2.2f;
+
+            var tint = Ink.Mix(body, Color.FromArgb(body.A, 255, 255, 255), 0.75f);
+            var bright = r.Tired ? 70f : 150f;
 
             for (var i = 0; i < count; i++)
             {
-                var beat = (2.6f + (i % 5) * 0.9f) / hurry;
-
-                var raw = t / beat + i * 0.37f;
+                var raw = wall * rate * (0.85f + 0.15f * i) + i * 0.37f;
                 var cycle = (float)Math.Floor(raw);
                 var at = raw - cycle;
 
-                // A whole life in one half-sine, cubed, because a bar full of half-lit lamps
-                // is a dotted line and sparks are mostly not there.
-                var lit = (float)Math.Sin(at * Math.PI);
-                lit = lit * lit * lit;
+                var prog = draining ? 1f - at : at;
 
-                // Two twinkle rates that are not harmonics of each other, and never fully out
-                // mid-life: a spark that goes dark in the middle is a dead pixel.
-                var fast = 0.5f + 0.5f * (float)Math.Sin(wall * 7.3f + i * 2.1f);
-                var slow = 0.5f + 0.5f * (float)Math.Sin(wall * 4.6f - i * 1.7f);
-                var twinkle = 0.34f + 0.66f * (fast * 0.62f + slow * 0.38f);
+                var lane = 0.12f + 0.76f * Paint.Scatter(i * 3.1f + cycle * 17.3f);
 
-                var alpha = (int)(240f * lit * twinkle * (active ? 1f : 0.75f) * strength);
-                if (alpha <= 6) continue;
+                var py = Ink.Clamp(y0 + h * lane - tall / 2f, y0, y0 + h - tall);
+                var px = x0 + (span - len) * prog;
 
-                var lane = 0.15f + 0.70f * Paint.Scatter(i * 3.1f + cycle * 17.3f);
-                var deep = 0.06f + 0.88f * Paint.Scatter(i * 7.7f + cycle * 29.1f + 5.5f);
+                var edge = Math.Min(at * 4f, Math.Min((1f - at) * 4f, 1f));
 
-                var px = x0 + span * deep;
-                var py = Ink.Clamp(y0 + h * lane - size / 2f, y0, y0 + h - size);
+                var alpha = (int)(bright * edge * strength);
+                if (alpha <= 4) continue;
 
-                Ink.Bar(px, py, sizeW, size, Color.FromArgb(alpha, 255, 250, 225));
+                Ink.Bar(px, py, len, tall, Ink.Alpha(tint, alpha));
             }
         }
 

@@ -19,9 +19,10 @@ namespace BareMinimum.Vitals
     /// THE INSIDE IS THESE THREE BARS' OWN. It is the strip's liquid stood on end: gravity
     /// points down now, the surface is at the top of the fill, it bows across the width like
     /// a meniscus, it leans, drifts, and is thrown up and down by the same springs a hit or a
-    /// hard stop kicks. Bubbles rise through health, glints climb the armour, sparks come and
-    /// go in the energy. The sleep and hunger bars beside these move on their own, slower
-    /// clock; the five are meant to be told apart by that as much as by the marks under them.
+    /// hard stop kicks. A PULSE climbs the health bar at the heart's own rate, glints climb the
+    /// armour, and charge STREAKS run up the energy while it rebuilds and down while it drains.
+    /// The sleep and hunger bars beside these move on their own, slower clock; the five are
+    /// meant to be told apart by that as much as by the marks under them.
     ///
     /// Every edge is computed from one expression and its neighbour from the same one, so no
     /// pixel is covered twice -- these are alpha colours, and an overlap is a bright seam.
@@ -230,12 +231,12 @@ namespace BareMinimum.Vitals
             switch (kind)
             {
                 case Kind.Health:
-                    // Glints while it is armour, bubbles once it is blood.
+                    // Glints while it is armour, a pulse once it is blood.
                     if (r.Armour > 0.002f) Glints(cfg, x, w, floor, surface, body, t, strength);
-                    else Bubbles(cfg, x, w, floor, surface, body, t, strength);
+                    else Pulses(cfg, x, w, floor, surface, body, m.Wall, r.Health, strength);
                     break;
                 case Kind.Armour: Glints(cfg, x, w, floor, surface, body, t, strength); break;
-                default: Sparks(cfg, x, w, floor, surface, t, m.Wall, r.SpecialActive, strength); break;
+                default: Streaks(cfg, x, w, floor, surface, body, m.Wall, r, strength); break;
             }
         }
 
@@ -243,41 +244,54 @@ namespace BareMinimum.Vitals
         // The specks
         // ======================================================================
 
-        /// <summary>HEALTH: bubbles, rising to the surface, each in a new lane every trip.</summary>
-        private static void Bubbles(Settings cfg, float x, float w, float floor, float surface,
-                                    Color body, float t, float strength)
+        /// <summary>
+        /// HEALTH: a pulse. Each beat sends a thin bright band up the column from the floor to
+        /// the surface -- a strong beat and a fainter one a fraction behind it, lub and dub --
+        /// and fades as it climbs.
+        ///
+        /// THE RATE IS THE HEART'S. About fifty-six a minute at full health, quickening to near
+        /// a hundred and twenty as it drains, on the wall clock so it is a real rate and not the
+        /// animation's pace. Which means the health bar can be read by ear as much as by eye:
+        /// a slow pulse is a well man and a racing one is not, before the level says either.
+        /// </summary>
+        private static void Pulses(Settings cfg, float x, float w, float floor, float surface,
+                                   Color body, float wall, float health, float strength)
         {
-            var count = (int)Math.Round(4f * cfg.VitalsParticles);
-            if (count < 1) return;
+            if (cfg.VitalsParticles <= 0.001f) return;
 
-            var sizeW = w * 0.26f;
-            var size = sizeW * Ink.Aspect;
+            var travel = floor - surface;
+            if (travel <= 0.004f) return;
 
-            var span = (floor - surface) - size * 1.5f;
-            if (span <= size) return;
+            var bpm = 56f + 62f * (1f - Ink.Clamp01(health));
+            var period = 60f / bpm;
 
-            var tint = Ink.Mix(body, Color.FromArgb(body.A, 255, 255, 255), 0.6f);
+            // How long a band takes to climb: most of a beat, so the next has started before
+            // the last has quite gone at a racing pulse, and there is a clear pause at rest.
+            var life = period * 0.72f;
 
-            for (var i = 0; i < count; i++)
+            var tall = Math.Max(1.6f / Ink.ScreenHeight, w * Ink.Aspect * 0.16f);
+            var tint = Ink.Mix(body, Color.FromArgb(body.A, 255, 255, 255), 0.72f);
+
+            var beat = wall / period;
+
+            for (var i = 0; i < 2; i++)
             {
-                var rate = 0.10f + i * 0.021f;
+                // The dub follows the lub by a fifth of a beat, at half the strength.
+                var phase = beat - (i == 0 ? 0f : 0.20f);
+                var at = (phase - (float)Math.Floor(phase)) * period / life;
+                if (at > 1f) continue;
 
-                var raw = t * rate + i * 0.37f;
-                var cycle = (float)Math.Floor(raw);
-                var at = raw - cycle;
+                // Up from the floor, bright at the start, gone by the surface.
+                var py = floor - travel * at - tall * 0.5f;
+                if (py < surface) py = surface;
 
-                var lane = 0.15f + 0.70f * Paint.Scatter(i * 3.1f + cycle * 17.3f);
-                var sway = (float)Math.Sin(t * (0.9f + i * 0.17f) + i * 2.1f) * 0.08f;
+                var fade = (1f - at) * (1f - at);
+                var edgeIn = Math.Min(1f, at * 6f);
 
-                var py = floor - size * 0.5f - span * at - size;
-                var px = Ink.Clamp(x + w * (lane + sway) - sizeW / 2f, x, x + w - sizeW);
-
-                var edge = Math.Min(at * 6f, Math.Min((1f - at) * 3f, 1f));
-
-                var alpha = (int)(150f * edge * strength);
+                var alpha = (int)((i == 0 ? 175f : 90f) * fade * edgeIn * cfg.VitalsParticles * strength);
                 if (alpha <= 4) continue;
 
-                Ink.Bar(px, py, sizeW, size, Ink.Alpha(tint, alpha));
+                Ink.Bar(x, py, w, tall, Ink.Alpha(tint, alpha));
             }
         }
 
@@ -315,46 +329,60 @@ namespace BareMinimum.Vitals
             }
         }
 
-        /// <summary>THE THIRD: sparks, coming up out of nothing somewhere in the fill and going out again.</summary>
-        private static void Sparks(Settings cfg, float x, float w, float floor, float surface,
-                                   float t, float wall, bool active, float strength)
+        /// <summary>
+        /// THE THIRD: charge streaks -- short bright dashes racing along the bar in lanes.
+        ///
+        /// THE DIRECTION IS THE FLOW. They rise while the energy rebuilds and fall while it is
+        /// being spent, so a glance says which way the bar is going before the level has moved
+        /// far enough to show it; at rest they drift up slowly. Winded, they crawl and dim.
+        /// While the special ability runs they race, which is the "doubling" showing inside the
+        /// bar as well as in its colour. On the wall clock, so the speed is a speed.
+        /// </summary>
+        private static void Streaks(Settings cfg, float x, float w, float floor, float surface,
+                                    Color body, float wall, Readings r, float strength)
         {
-            var count = (int)Math.Round(5f * cfg.VitalsParticles);
+            var count = (int)Math.Round(3f * cfg.VitalsParticles);
             if (count < 1) return;
 
-            var sizeW = w * 0.24f;
-            var size = sizeW * Ink.Aspect;
+            var span = floor - surface;
+            var len = Math.Min(span * 0.35f, w * Ink.Aspect * 1.4f);
+            var wide = w * 0.16f;
 
-            var span = (floor - surface) - size;
-            if (span <= size) return;
+            if (span <= len * 1.5f) return;
 
-            var hurry = active ? 2.2f : 1f;
+            var draining = r.ThirdIsEnergy && r.ThirdDelta < -0.00001f;
+            var filling = r.ThirdIsEnergy && r.ThirdDelta > 0.00001f;
+
+            // Bars per second, near enough: quick spending, steady rebuilding, a drift at rest;
+            // a crawl when winded; a race while the ability runs.
+            var rate = draining ? 1.6f : filling ? 1.0f : 0.5f;
+            if (r.Tired) rate = 0.3f;
+            if (r.SpecialActive) rate *= 2.2f;
+
+            var tint = Ink.Mix(body, Color.FromArgb(body.A, 255, 255, 255), 0.75f);
+            var bright = r.Tired ? 70f : 150f;
 
             for (var i = 0; i < count; i++)
             {
-                var beat = (2.6f + (i % 5) * 0.9f) / hurry;
-
-                var raw = t / beat + i * 0.37f;
+                // Staggered speeds, so the lanes never fall into step.
+                var raw = wall * rate * (0.85f + 0.15f * i) + i * 0.37f;
                 var cycle = (float)Math.Floor(raw);
                 var at = raw - cycle;
 
-                var lit = (float)Math.Sin(at * Math.PI);
-                lit = lit * lit * lit;
+                var prog = draining ? 1f - at : at;
 
-                var fast = 0.5f + 0.5f * (float)Math.Sin(wall * 7.3f + i * 2.1f);
-                var slow = 0.5f + 0.5f * (float)Math.Sin(wall * 4.6f - i * 1.7f);
-                var twinkle = 0.34f + 0.66f * (fast * 0.62f + slow * 0.38f);
+                // A new lane every trip, from the trip's own number.
+                var lane = 0.12f + 0.76f * Paint.Scatter(i * 3.1f + cycle * 17.3f);
 
-                var alpha = (int)(240f * lit * twinkle * (active ? 1f : 0.75f) * strength);
-                if (alpha <= 6) continue;
+                var px = Ink.Clamp(x + w * lane - wide / 2f, x, x + w - wide);
+                var py = floor - len - (span - len) * prog;
 
-                var lane = 0.15f + 0.70f * Paint.Scatter(i * 3.1f + cycle * 17.3f);
-                var deep = 0.06f + 0.88f * Paint.Scatter(i * 7.7f + cycle * 29.1f + 5.5f);
+                var edge = Math.Min(at * 4f, Math.Min((1f - at) * 4f, 1f));
 
-                var px = Ink.Clamp(x + w * lane - sizeW / 2f, x, x + w - sizeW);
-                var py = floor - size - span * deep;
+                var alpha = (int)(bright * edge * strength);
+                if (alpha <= 4) continue;
 
-                Ink.Bar(px, py, sizeW, size, Color.FromArgb(alpha, 255, 250, 225));
+                Ink.Bar(px, py, wide, len, Ink.Alpha(tint, alpha));
             }
         }
 
