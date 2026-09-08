@@ -421,7 +421,9 @@ namespace BareMinimum.Vitals
             // band so the three always fit it exactly.
             var cell = th / unit.Length;
             var lineH = Hud.Height(1f, Hud.FontLabel);
-            var letterScale = lineH > 0.0001f ? Math.Max(0.06f, cell * 0.98f / lineH) : scale * 0.4f;
+            // The line box overruns its cell by a quarter -- a glyph is about two thirds of its
+            // line, so the letters still clear each other -- which is the "slightly bigger" asked for.
+            var letterScale = lineH > 0.0001f ? Math.Max(0.06f, cell * 1.25f / lineH) : scale * 0.5f;
             var letterH = Hud.Height(letterScale, Hud.FontLabel);
 
             var colW = 0f;
