@@ -275,10 +275,10 @@ namespace BareMinimum.Vitals
             Ink.Bar(x0, y0, wide, h, Ink.Alpha(Ink.Mix(body, Color.FromArgb(body.A, 255, 255, 255), 0.85f), alpha));
         }
 
-        /// <summary>When the armour last took a hit, on the wall clock. For the plate's flash.</summary>
+        /// <summary>When the armour last took a hit, on the wall clock. For the flash.</summary>
         private float _plateHitAt = -10f;
 
-        /// <summary>ARMOUR: plate, lying down -- seams along the fill, a sheen sweeping toward the surface, the end plate flashing on a hit. See Columns.Plating.</summary>
+        /// <summary>ARMOUR: steel, lying down -- a lit top edge and a shadowed bottom edge, one slanted highlight sweeping toward the surface, the fill flashing on a hit. See Columns.Plating.</summary>
         private void Plating(Settings cfg, float x0, float y0, float h, float surface,
                              Color body, float t, float wall, Readings r, float strength)
         {
@@ -289,61 +289,54 @@ namespace BareMinimum.Vitals
 
             if (r.ArmourDelta < -0.001f) _plateHitAt = wall;
 
-            var plateW = Math.Max(3f / Ink.ScreenWidth, h / Ink.Aspect * 0.85f);
-            var seam = Math.Max(1f / Ink.ScreenWidth, plateW * 0.10f);
-
-            var dark = Color.FromArgb((int)(95f * strength), 0, 0, 0);
-            var light = Color.FromArgb((int)(16f * strength), 255, 255, 255);
             var white = Color.FromArgb(body.A, 255, 255, 255);
 
-            var plates = Math.Min(64, (int)Math.Ceiling(span / plateW));
+            var edgeH = Math.Max(1f / Ink.ScreenHeight, h * 0.14f);
 
-            for (var i = 0; i < plates; i++)
+            Ink.Bar(x0, y0, span, edgeH, Color.FromArgb((int)(60f * strength), 255, 255, 255));
+            Ink.Bar(x0, y0 + h - edgeH, span, edgeH, Color.FromArgb((int)(70f * strength), 0, 0, 0));
+
+            var at = t * 0.16f;
+            at -= (float)Math.Floor(at);
+
+            var bandW = Math.Max(3f / Ink.ScreenWidth, Math.Min(span * 0.16f, h / Ink.Aspect * 1.2f));
+            var slant = bandW * 1.1f;
+            var centre = x0 - slant + at * (span + bandW + slant * 2f) - bandW * 0.5f;
+            var ends = Math.Min(at * 4f, Math.Min((1f - at) * 4f, 1f));
+
+            const int slices = 6;
+            var sliceH = h / slices;
+            var sheen = Ink.Mix(body, white, 0.85f);
+
+            for (var i = 0; i < slices; i++)
             {
-                var left = x0 + i * plateW;
-                var right = Math.Min(surface, left + plateW);
-                if (right - left <= 0f) continue;
+                var lean = ((i + 0.5f) / slices - 0.5f) * slant;
+                var sy = y0 + i * sliceH;
 
-                if ((i & 1) == 1) Ink.Bar(left, y0, right - left, h, light);
-
-                if (i > 0 && left + seam * 0.5f < surface)
+                for (var j = 0; j < 3; j++)
                 {
-                    Ink.Bar(left - seam * 0.5f, y0, seam, h, dark);
+                    var share = j == 1 ? 1f : 0.4f;
+                    var sL = centre + lean - bandW * 0.5f + j * (bandW / 3f);
+                    var sR = sL + bandW / 3f;
+
+                    sL = Math.Max(x0, sL);
+                    sR = Math.Min(surface, sR);
+                    if (sR - sL <= 0f) continue;
+
+                    var alpha = (int)(85f * share * ends * strength);
+                    if (alpha <= 3) continue;
+
+                    Ink.Bar(sL, sy, sR - sL, sliceH, Ink.Alpha(sheen, alpha));
                 }
             }
 
-            var at = t * 0.14f;
-            at -= (float)Math.Floor(at);
-
-            var bandW = Math.Max(plateW * 0.9f, span * 0.10f);
-            var centre = x0 + at * (span + bandW) - bandW * 0.5f;
-            var ends = Math.Min(at * 5f, Math.Min((1f - at) * 5f, 1f));
-
-            for (var j = 0; j < 3; j++)
-            {
-                var share = j == 1 ? 1f : 0.45f;
-                var sliceW = bandW / 3f;
-                var sL = centre - bandW * 0.5f + j * sliceW;
-                var sR = sL + sliceW;
-
-                sL = Math.Max(x0, sL);
-                sR = Math.Min(surface, sR);
-                if (sR - sL <= 0f) continue;
-
-                var alpha = (int)(70f * share * ends * strength);
-                if (alpha <= 3) continue;
-
-                Ink.Bar(sL, y0, sR - sL, h, Ink.Alpha(Ink.Mix(body, white, 0.8f), alpha));
-            }
-
             var since = wall - _plateHitAt;
-            if (since >= 0f && since < 0.35f)
+            if (since >= 0f && since < 0.32f)
             {
-                var f = 1f - since / 0.35f;
+                var f = 1f - since / 0.32f;
                 f *= f;
 
-                var flashW = Math.Min(span, plateW * 1.5f);
-                Ink.Bar(surface - flashW, y0, flashW, h, Ink.Alpha(Ink.Mix(body, white, 0.9f), (int)(210f * f * strength)));
+                Ink.Bar(x0, y0, span, h, Ink.Alpha(Ink.Mix(body, Color.FromArgb(body.A, 225, 240, 255), 0.9f), (int)(170f * f * strength)));
             }
         }
 

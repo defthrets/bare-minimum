@@ -329,21 +329,20 @@ namespace BareMinimum.Vitals
             return k * k;
         }
 
-        /// <summary>When the armour last took a hit, on the wall clock. For the plate's flash.</summary>
+        /// <summary>When the armour last took a hit, on the wall clock. For the flash.</summary>
         private float _plateHitAt = -10f;
 
         /// <summary>
-        /// ARMOUR: PLATE. Three things that say metal rather than liquid, since the glints that
-        /// were here read as more of the same wet light the other bars have.
-        ///
-        /// SEAMS across the fill divide it into riveted plates about as tall as the bar is wide,
-        /// fixed to the bar from the floor up -- so the level does not slide the plates, it
-        /// takes them off the top as the armour goes, one at a time, the way plate comes off.
-        /// Every other plate is a shade lighter, which is what makes them plates and not
-        /// stripes. A SHEEN sweeps up the metal every several seconds: one soft band of light,
-        /// the way a highlight travels over a polished surface as it turns, slow, on the paced
-        /// clock. And a HIT FLASHES THE TOP PLATE white for a third of a second -- the blow
-        /// landing on the armour rather than on him, which is the whole point of wearing it.
+        /// ARMOUR: STEEL. The plates and seams that were here looked silly, and the glints before
+        /// them looked like every other bar's wet light. What says metal without drawing a
+        /// picture of it is how light sits on it: A BEVEL -- the wall the light falls on lit, a
+        /// thin bright edge down the left of the fill, and the far wall in shadow, a thin dark
+        /// edge down the right, so the fill stands off the channel like a bar of steel rather
+        /// than lying in it like a liquid -- and A HIGHLIGHT that crosses it now and then, one
+        /// soft SLANTED band sweeping up the metal every several seconds, the way a reflection
+        /// travels over a polished surface as it turns. Slow, on the paced clock. And A HIT
+        /// FLASHES IT, the whole fill white-blue for a third of a second: the blow landing on
+        /// the armour rather than on him, which is the whole point of wearing it.
         /// </summary>
         private void Plating(Settings cfg, float x, float w, float floor, float surface,
                              Color body, float t, float wall, Readings r, float strength)
@@ -355,63 +354,56 @@ namespace BareMinimum.Vitals
 
             if (r.ArmourDelta < -0.001f) _plateHitAt = wall;
 
-            var plateH = Math.Max(3f / Ink.ScreenHeight, w * Ink.Aspect * 0.85f);
-            var seam = Math.Max(1f / Ink.ScreenHeight, plateH * 0.10f);
-
-            var dark = Color.FromArgb((int)(95f * strength), 0, 0, 0);
-            var light = Color.FromArgb((int)(16f * strength), 255, 255, 255);
             var white = Color.FromArgb(body.A, 255, 255, 255);
 
-            // ---- the plates, from the floor up, cut off at the surface ----
-            var plates = Math.Min(64, (int)Math.Ceiling(tall / plateH));
+            // ---- the bevel: lit edge on the left, shadow on the right ----
+            var edgeW = Math.Max(1f / Ink.ScreenWidth, w * 0.14f);
 
-            for (var i = 0; i < plates; i++)
+            Ink.Bar(x, surface, edgeW, tall, Color.FromArgb((int)(60f * strength), 255, 255, 255));
+            Ink.Bar(x + w - edgeW, surface, edgeW, tall, Color.FromArgb((int)(70f * strength), 0, 0, 0));
+
+            // ---- the highlight: one slanted band, up the metal, every ~6 s ----
+            var at = t * 0.16f;
+            at -= (float)Math.Floor(at);
+
+            var bandH = Math.Max(3f / Ink.ScreenHeight, Math.Min(tall * 0.16f, w * Ink.Aspect * 1.2f));
+            var slant = bandH * 1.1f;
+            var centre = floor + slant - at * (tall + bandH + slant * 2f) + bandH * 0.5f;
+            var ends = Math.Min(at * 4f, Math.Min((1f - at) * 4f, 1f));
+
+            const int slices = 6;
+            var sliceW = w / slices;
+            var sheen = Ink.Mix(body, white, 0.85f);
+
+            for (var i = 0; i < slices; i++)
             {
-                var bottom = floor - i * plateH;
-                var top = Math.Max(surface, bottom - plateH);
-                if (bottom - top <= 0f) continue;
+                // Each column of the band a little higher than the last: the band leans.
+                var lift = ((i + 0.5f) / slices - 0.5f) * slant;
+                var sx = x + i * sliceW;
 
-                if ((i & 1) == 1) Ink.Bar(x, top, w, bottom - top, light);
-
-                // The seam under this plate, on every plate but the lowest.
-                if (i > 0 && bottom - seam * 0.5f > surface)
+                for (var j = 0; j < 3; j++)
                 {
-                    Ink.Bar(x, bottom - seam * 0.5f, w, seam, dark);
+                    // Three stacked slices, the middle brightest: a highlight, not a stripe.
+                    var share = j == 1 ? 1f : 0.4f;
+                    var sTop = centre - lift - bandH * 0.5f + j * (bandH / 3f);
+                    var sBot = sTop + bandH / 3f;
+
+                    sTop = Math.Max(surface, sTop);
+                    sBot = Math.Min(floor, sBot);
+                    if (sBot - sTop <= 0f) continue;
+
+                    var alpha = (int)(85f * share * ends * strength);
+                    if (alpha <= 3) continue;
+
+                    Ink.Bar(sx, sTop, sliceW, sBot - sTop, Ink.Alpha(sheen, alpha));
                 }
             }
 
-            // ---- the sheen: one band of light travelling up, soft-edged, every ~7 s ----
-            var at = t * 0.14f;
-            at -= (float)Math.Floor(at);
-
-            var bandH = Math.Max(plateH * 0.9f, tall * 0.10f);
-            var centre = floor - at * (tall + bandH) + bandH * 0.5f;
-            var ends = Math.Min(at * 5f, Math.Min((1f - at) * 5f, 1f));
-
-            for (var j = 0; j < 3; j++)
-            {
-                // Three stacked slices, the middle brightest: a highlight, not a stripe.
-                var share = j == 1 ? 1f : 0.45f;
-                var sliceH = bandH / 3f;
-                var sTop = centre - bandH * 0.5f + j * sliceH;
-                var sBot = sTop + sliceH;
-
-                sTop = Math.Max(surface, sTop);
-                sBot = Math.Min(floor, sBot);
-                if (sBot - sTop <= 0f) continue;
-
-                var alpha = (int)(70f * share * ends * strength);
-                if (alpha <= 3) continue;
-
-                Ink.Bar(x, sTop, w, sBot - sTop, Ink.Alpha(Ink.Mix(body, white, 0.8f), alpha));
-            }
-
-            // ---- the hit: the top plate flashes ----
-            var f = Flash(wall - _plateHitAt, 0.35f);
+            // ---- the hit: the whole fill flashes ----
+            var f = Flash(wall - _plateHitAt, 0.32f);
             if (f > 0f)
             {
-                var flashH = Math.Min(tall, plateH * 1.5f);
-                Ink.Bar(x, surface, w, flashH, Ink.Alpha(Ink.Mix(body, white, 0.9f), (int)(210f * f * strength)));
+                Ink.Bar(x, surface, w, tall, Ink.Alpha(Ink.Mix(body, Color.FromArgb(body.A, 225, 240, 255), 0.9f), (int)(170f * f * strength)));
             }
         }
 
