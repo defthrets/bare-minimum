@@ -522,6 +522,14 @@ namespace BareMinimum.UI
             };
 
             row.Names = Standing();
+
+            // PUBLISHED, NOT COPIED. Fumes' fuel gauge stands in this row and used to be kept
+            // in line by hand-copying these numbers into its own ini; every change to the
+            // minimap frame moved the row and left it behind. See Api.Rack.
+            Api.Rack.Publish(_cfg.ShowHud && _cfg.Style == HudStyle.Bars,
+                             x, bottom, barW, Math.Max(0.004f, _cfg.HudBarLength),
+                             pitch, row.Names.Count, _cfg.HudOpacity);
+
             return row;
         }
 
