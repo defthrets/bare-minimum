@@ -42,16 +42,12 @@ namespace BareMinimum.Vitals
         /// <summary>This frame's change in the third bar. Negative while energy drains; the streaks read it.</summary>
         public float ThirdDelta;
 
-        /// <summary>This frame's change in the third bar. Negative while energy drains; the streaks read it.</summary>
-        public float ThirdDelta;
-
         /// <summary>Which of the three the player is, 0 to 2, or -1 for anybody else.</summary>
         public int Character = -1;
 
         private int _ped;
         private int _lastHealth = -1;
         private int _lastArmour = -1;
-        private float _lastThird = -1f;
         private float _lastThird = -1f;
 
         private int _michael, _franklin, _trevor;
