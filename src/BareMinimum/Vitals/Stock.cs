@@ -17,13 +17,17 @@ namespace BareMinimum.Vitals
     /// The special ability bar has a native of its own, SET_ABILITY_BAR_VISIBILITY, and it
     /// is asked as well, every frame, because a mission script can set it back.
     ///
-    /// THE BIG MAP IS NEVER OPENED FROM HERE. The FiveM version of this trick flicks the big
-    /// map open and shut a frame apart so the minimap re-reads its layout, and the first
-    /// build of Vitals did the same -- and on this game the shut arrived while the map was
-    /// still opening and was ignored, which left the player with a minimap the size of the
-    /// screen. So: the map is collapsed once at start-up in case anything left it open, the
-    /// flick survives only as an off-by-default setting for a strip that will not go, and
-    /// nothing here ever asks for the big map on its own account.
+    /// THE MINIMAP GOES BLANK UNTIL IT IS RE-INITIALISED. Told to use the golf layout, the
+    /// map did not draw at all until the player opened the pause menu once -- which is what
+    /// rebuilds the minimap. Switching the radar off and on for a frame did not do it. The FiveM
+    /// crowd's answer to this exact symptom is to flick the big map open and shut, which makes
+    /// the game rebuild the minimap; the first build of Vitals did that a frame apart and on
+    /// this game the shut arrived while the map was still opening and was ignored, leaving a
+    /// minimap the size of the screen. So the flick here is HELD -- open, a moment, shut, and
+    /// shut again twice more over the next second in case a shut is dropped -- and it runs once,
+    /// after the first layout call has actually gone into the movie, and again whenever the
+    /// strip is re-hidden after the compare view. Expect the big map for a fraction of a second
+    /// when the script loads.
     ///
     /// EVERYTHING HERE IS UNDONE ON THE WAY OUT. A hidden strip is a change to the game's
     /// state, not to ours, and a script reload that left it hidden would be a bug in the mod
@@ -50,15 +54,20 @@ namespace BareMinimum.Vitals
         private bool _saidHidden;
 
         /// <summary>
-        /// The radar refresh: -1 when not running; 0 = switch the radar off this frame; 1 = back
-        /// on the next. Once, after the first layout call has gone in.
+        /// The radar blink: -1 when not running; 0 = switch the radar off this frame; 1 = back
+        /// on the next. The alternative refresh, for an ini that asks for it.
         /// </summary>
         private int _refreshStep = -1;
-        private bool _refreshed;
 
-        /// <summary>When the flick's shut is due, and its second, insurance shut. See Flick.</summary>
+        /// <summary>Whether the minimap still needs rebuilding after the layout call. True at the start and after every re-hide.</summary>
+        private bool _needRefresh = true;
+
+        /// <summary>When the flick's next shut is due. See Flick.</summary>
         private int _flickAt;
-        private const int FlickHoldMs = 250;
+
+        /// <summary>How long the big map is held open before the first shut, and the two insurance shuts after it.</summary>
+        private const int FlickHoldMs = 150;
+        private static readonly int[] FlickAgainMs = { 500, 1200 };
 
         /// <summary>
         /// Called every frame. <paramref name="show"/> asks for the game's bars back -- the
@@ -92,20 +101,21 @@ namespace BareMinimum.Vitals
                 _hidden = wantHidden;
 
                 if (!wantHidden) Show(cfg);
-                if (cfg.VitalsMapFlick) _flickStep = 0;
+                else _needRefresh = true;
             }
 
             if (_hidden)
             {
                 if (cfg.VitalsHideSpecial) AbilityBar(false);
-                if (cfg.VitalsHideHealthArmour && Setup(cfg.VitalsHideType) && !_refreshed && cfg.VitalsRefreshRadar)
+
+                if (cfg.VitalsHideHealthArmour && Setup(cfg.VitalsHideType) && _needRefresh)
                 {
-                    // THE MINIMAP DOES NOT REDRAW ON ITS OWN after the layout changes: it came up
-                    // blank until the player opened the pause menu, which is what refreshes it.
-                    // FiveM refreshes it by flicking the big map; that flick misfired on this
-                    // game, so the radar is blinked off and on for one frame instead, once.
-                    _refreshed = true;
-                    _refreshStep = 0;
+                    // REBUILT ONCE THE LAYOUT CALL IS IN. The flick by default -- see the class
+                    // comment -- or the radar blink for an ini that asks for it instead.
+                    _needRefresh = false;
+
+                    if (cfg.VitalsMapFlick) _flickStep = 0;
+                    else if (cfg.VitalsRefreshRadar) _refreshStep = 0;
                 }
             }
 
@@ -196,13 +206,15 @@ namespace BareMinimum.Vitals
 
             BigMap(false);
 
-            if (_flickStep == 1)
+            // Steps 1 and 2 are followed by another shut; step 3 is the last.
+            if (_flickStep <= FlickAgainMs.Length)
             {
-                _flickAt = now + 1000;
-                _flickStep = 2;
+                _flickAt = now + FlickAgainMs[_flickStep - 1];
+                _flickStep++;
                 return;
             }
 
+            Log.Info("Big map flicked open and shut so the minimap rebuilds in its new layout.");
             _flickStep = -1;
         }
 

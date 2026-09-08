@@ -790,17 +790,21 @@ namespace BareMinimum.Core
         public bool VitalsShrinkMapOnStart = false;
 
         /// <summary>
-        /// Blink the radar off and on for one frame after the layout call, so the minimap
-        /// redraws. Without a refresh it came up blank until the pause menu was opened once.
+        /// The alternative to the flick: the radar off and on for one frame after the layout
+        /// call. It was tried first and did NOT bring the minimap back; kept for an ini that
+        /// would rather have no big-map blink and live with pressing Start. Only used with
+        /// MapFlick off.
         /// </summary>
-        public bool VitalsRefreshRadar = true;
+        public bool VitalsRefreshRadar = false;
 
         /// <summary>
-        /// The FiveM trick of flicking the big map open and shut a frame apart so the minimap
-        /// re-reads its layout. OFF: on this game the shut arrived while the map was still
-        /// opening and was ignored, which left the minimap the size of the screen.
+        /// Flick the big map open and shut after the layout call, so the game rebuilds the
+        /// minimap -- which otherwise stays BLANK until the pause menu is opened once. ON: it
+        /// is the FiveM crowd's answer to exactly this, and the shut is held back and repeated
+        /// so it is not ignored the way a one-frame shut was. Expect the big map for a fraction
+        /// of a second at load.
         /// </summary>
-        public bool VitalsMapFlick = false;
+        public bool VitalsMapFlick = true;
 
         /// <summary>
         /// THE THIRD BAR IS ENERGY: a sprint meter. It drains while you sprint, and empty it
@@ -831,10 +835,15 @@ namespace BareMinimum.Core
         /// <summary>With the energy meter off: when a special ability bar is drawn at all.</summary>
         public SpecialMode VitalsSpecial = SpecialMode.Auto;
 
-        /// <summary>The stock bars' own colours. Health runs to red with the level; the third is energy's yellow or the special's gold.</summary>
+        /// <summary>
+        /// The stock bars' own colours. Health runs to red with the level; armour is the game's
+        /// blue; the third is energy's TEAL or the special's gold. Energy was yellow and yellow
+        /// is what the fuel gauge beside it shows at a full tank; teal is the one family none of
+        /// the six bars on that edge of the screen uses, and it reads as electricity under a bolt.
+        /// </summary>
         public System.Drawing.Color VitalsHealth = System.Drawing.Color.FromArgb(255, 114, 204, 114);
         public System.Drawing.Color VitalsArmour = System.Drawing.Color.FromArgb(255, 93, 182, 229);
-        public System.Drawing.Color VitalsEnergyColour = System.Drawing.Color.FromArgb(255, 244, 208, 72);
+        public System.Drawing.Color VitalsEnergyColour = System.Drawing.Color.FromArgb(255, 70, 225, 205);
         public System.Drawing.Color VitalsSpecialColour = System.Drawing.Color.FromArgb(255, 240, 200, 80);
 
         /// <summary>One clock for everything periodic in the vitals. 1 is normal.</summary>
