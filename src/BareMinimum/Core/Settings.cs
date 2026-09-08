@@ -958,11 +958,14 @@ namespace BareMinimum.Core
         public float MinimapFrameGap = 0.006f;
 
         /// <summary>
-        /// How much of the top of the map the frame's top band covers, as a fraction of the
-        /// map's height. The radar fades out at the top and lets the world through; the band
-        /// buries that so the map ends hard. 0 is a plain line.
+        /// How far DOWN INTO the map the frame's top band reaches, as a fraction of the map's
+        /// height. The radar fades out at the top and lets the world through, and the band
+        /// comes down over that so the map ends hard -- but every bit of it past the fade is
+        /// map you have paid for and cannot see, so it is the smallest number that still buries
+        /// the fade. 0 is a plain line. The room the writing needs is BandHeight, above the map,
+        /// and has nothing to do with this.
         /// </summary>
-        public float MinimapTopCover = 0.10f;
+        public float MinimapTopCover = 0.05f;
 
         /// <summary>
         /// How tall the top band is ABOVE the map, as a fraction of screen height -- the room
