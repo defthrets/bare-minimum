@@ -169,30 +169,6 @@ namespace BareMinimum.Vitals
         }
 
         /// <summary>
-        /// The VISIBLE map -- not the box -- in screen fractions, and the safe-zone line it
-        /// stands on. For the frame drawn round the minimap. False when the game will not say.
-        /// </summary>
-        public static bool Map(out float left, out float top, out float right, out float bottom, out float safeLine)
-        {
-            left = top = right = bottom = safeLine = 0f;
-
-            float boxLeft, boxBottom, boxRight, boxTop;
-            if (!Anchor(out boxLeft, out boxBottom, out boxRight, out boxTop)) return false;
-
-            var boxW = boxRight - boxLeft;
-
-            left = boxLeft + boxW * MapInset;
-            right = boxRight - boxW * MapInset;
-            safeLine = boxBottom - BoxY;
-
-            // The map proper: the 256 less the strip and its hair of clear air.
-            bottom = safeLine - StockThick - StockGap;
-            top = safeLine - MapTall;
-
-            return true;
-        }
-
-        /// <summary>
         /// The minimap's box in screen fractions, from the game's own alignment maths.
         ///
         /// False rather than a guess when the answer is not plausible -- a box in the right

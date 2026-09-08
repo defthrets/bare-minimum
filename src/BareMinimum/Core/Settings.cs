@@ -753,6 +753,13 @@ namespace BareMinimum.Core
         /// </summary>
         public float HudBarLean = 1f;
 
+        /// <summary>
+        /// The five bars, left to right, by name: armour, health, sleep, food, energy. Any
+        /// order; anything left out stands at the end in this order; a name that is not one
+        /// of the five is ignored. See Gauge.Standing.
+        /// </summary>
+        public string HudRowOrder = "armour, health, sleep, food, energy";
+
         // ---- Vitals ----------------------------------------------------------
         //
         // HEALTH, ARMOUR AND ENERGY, once a mod of their own. The game's strip under the
@@ -793,11 +800,11 @@ namespace BareMinimum.Core
         /// </summary>
         public bool VitalsEnergy = true;
 
-        /// <summary>Seconds of flat-out sprinting from full to empty.</summary>
-        public float EnergySprintSeconds = 12f;
+        /// <summary>Seconds of flat-out sprinting from full to empty. 45: "heaps longer" than the 12 it shipped at.</summary>
+        public float EnergySprintSeconds = 45f;
 
         /// <summary>Seconds from empty back to full, stood still or in a car. Half as fast at a jog.</summary>
-        public float EnergyRebuildSeconds = 7f;
+        public float EnergyRebuildSeconds = 10f;
 
         /// <summary>How far back up it has to be before the sprint unlocks, 0 to 1.</summary>
         public float EnergySprintAgainAt = 0.35f;
@@ -869,6 +876,20 @@ namespace BareMinimum.Core
 
         /// <summary>The street and the suburb, always, written into the frame's foot where the game's strip was.</summary>
         public bool MinimapLabel = true;
+
+        /// <summary>
+        /// How far outside the map the frame sits, as a fraction of screen height, with a
+        /// translucent mat filling the gap. The game clamps far-off blips to the edge of the
+        /// map and half of each pokes over it; flush (0) puts that half under the frame line.
+        /// </summary>
+        public float MinimapFrameGap = 0.006f;
+
+        /// <summary>
+        /// How much of the top of the map the frame's top band covers, as a fraction of the
+        /// map's height. The radar fades out at the top and lets the world through; the band
+        /// buries that so the map ends hard. 0 is a plain line.
+        /// </summary>
+        public float MinimapTopCover = 0.10f;
 
         /// <summary>"r,g,b" or "r,g,b,a", each 0 to 255. Anything else keeps the default and says so.</summary>
         private static System.Drawing.Color ParseColour(string section, string key, string s, System.Drawing.Color fallback)
@@ -1320,6 +1341,7 @@ namespace BareMinimum.Core
                 cfg.HudBarEffort = ini.GetFloat("HUD", "BarEffort", cfg.HudBarEffort, 1f, 6f);
                 cfg.HudBarSlosh = ini.GetFloat("HUD", "BarSlosh", cfg.HudBarSlosh, 0f, 1f);
                 cfg.HudBarLean = ini.GetFloat("HUD", "BarLean", cfg.HudBarLean, 0f, 1f);
+                cfg.HudRowOrder = ini.GetString("HUD", "RowOrder", cfg.HudRowOrder);
 
                 cfg.VitalsEnabled = ini.GetBool("Vitals", "Enabled", cfg.VitalsEnabled);
                 cfg.VitalsStyle = ParseVitalsStyle(ini.GetString("Vitals", "Style", "Upright"), cfg.VitalsStyle);
@@ -1367,6 +1389,8 @@ namespace BareMinimum.Core
 
                 cfg.MinimapFrame = ini.GetBool("Minimap", "Frame", cfg.MinimapFrame);
                 cfg.MinimapLabel = ini.GetBool("Minimap", "Label", cfg.MinimapLabel);
+                cfg.MinimapFrameGap = ini.GetFloat("Minimap", "FrameGap", cfg.MinimapFrameGap, 0f, 0.03f);
+                cfg.MinimapTopCover = ini.GetFloat("Minimap", "TopCover", cfg.MinimapTopCover, 0f, 0.5f);
 
                 cfg.HudAnimate = ini.GetBool("HUD", "Animate", cfg.HudAnimate);
                 cfg.HudShimmer = ini.GetFloat("HUD", "Shimmer", cfg.HudShimmer, 0f, 1f);

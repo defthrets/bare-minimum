@@ -712,6 +712,20 @@ namespace BareMinimum.UI
                  () => _cfg.MinimapLabel, v => _cfg.MinimapLabel = v,
                  "Where you are, always, written into the foot of the minimap's frame.");
 
+            Float("Frame gap", "Minimap", "FrameGap",
+                  () => _cfg.MinimapFrameGap, v => _cfg.MinimapFrameGap = v,
+                  0.001f, 0f, 0.03f, "0.000",
+                  "How far outside the map the frame sits, so blips at the edge are not under " +
+                  "it. 0 is flush to the map.",
+                  () => _cfg.MinimapFrame, "~y~Turn the minimap frame ON first.");
+
+            Float("Frame top band", "Minimap", "TopCover",
+                  () => _cfg.MinimapTopCover, v => _cfg.MinimapTopCover = v,
+                  0.01f, 0f, 0.5f, "0.00",
+                  "How much of the top of the map the band covers, burying the radar's fade " +
+                  "so the map ends hard. 0 is a plain line.",
+                  () => _cfg.MinimapFrame, "~y~Turn the minimap frame ON first.");
+
             Bool("Compare with the game's bars", "Vitals", "Compare",
                  () => _cfg.VitalsCompare, v => _cfg.VitalsCompare = v,
                  "The game's own bars come back, with ours at half strength over them, for lining up.",

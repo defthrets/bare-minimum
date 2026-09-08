@@ -19,10 +19,10 @@ namespace BareMinimum.Vitals
     /// you are: the street on the left, the suburb on the right, always, not only for the
     /// three seconds the game shows them when you get into a car.
     ///
-    /// THE MAP IS ASKED WHERE IT IS, through the same alignment maths the strip uses -- see
-    /// Layout.Map -- so the frame lands on the map on any screen and any safe-zone setting.
-    /// The plate has to be tall enough to read, which is taller than the strip's slot was, so
-    /// it climbs into the foot of the map by the difference rather than below the safe-zone
+    /// THE MAP IS WHERE THE GAUGE SAYS IT IS -- the same left edge and measured width that
+    /// place the bars, and the same foot line -- so the frame ends where the bars begin on any
+    /// screen. The plate has to be tall enough to read, which is taller than the strip's slot
+    /// was, so it climbs into the foot of the map by the difference rather than below the
     /// line: the bars' plates end on that line and the frame keeps to it.
     ///
     /// The game's own area and street names are hidden while the label is on; the same words
@@ -48,40 +48,77 @@ namespace BareMinimum.Vitals
         private int _namesAt;
         private bool _measured;
 
-        public void Draw(Settings cfg, float strength)
+        /// <summary>
+        /// Draws the frame and the plate. <paramref name="row"/> is the gauge's row as it stands,
+        /// <paramref name="mapLeft"/> and <paramref name="mapWidth"/> the minimap as the gauge
+        /// measures it.
+        ///
+        /// THE MAP FROM THE GAUGE'S OWN NUMBERS: its left edge asked of the game, its width the
+        /// measured 0.2785 of the screen's height -- the same two that put the bars where they
+        /// are, so the frame ends where the bars begin. The first cut took the map from the
+        /// alignment box the strip uses, which comes out a third too wide on 21:9, and the plate
+        /// ran under the bars with the suburb written across their marks.
+        ///
+        /// The line the bars' plates end on is the line the map stands on, and the edge is the
+        /// bars' edge -- both read off the row rather than recomputed, so a change to either
+        /// moves the frame with them.
+        /// </summary>
+        public void Draw(Settings cfg, Gauge.Row row, float mapLeft, float mapWidth, float strength)
         {
             if (!cfg.MinimapFrame && !cfg.MinimapLabel) return;
+            if (row == null || mapWidth <= 0.001f) return;
 
             // NO BIG-MAP CHECK, ON PURPOSE. IS_BIGMAP_ACTIVE is not in the vendored 3.6.0 enum,
             // and calling it by hash crashed the game: ScriptHookV has no entry for that hash,
             // and a native it cannot find is a FATAL, not an exception -- no try/catch sees it.
-            // The frame is drawn round the minimap's normal box; while the map is zoomed the
-            // frame sits inside it for the moment the key is held, which is the lesser thing.
-
-            float l, t, r, b, safe;
-            if (!Layout.Map(out l, out t, out r, out b, out safe)) return;
 
             var aspect = Ink.Aspect;
-
-            // THE BARS' EDGE, from the same expression Gauge uses for the surround.
-            var edge = Math.Max(0.0005f, cfg.HudBarWidth * 0.22f);
+            var edge = row.Edge;
             var edgeH = edge * aspect;
 
-            var ink = Ink.Alpha(Color.FromArgb(205, 0, 0, 0), (int)(205f * cfg.HudOpacity * strength + 0.5f));
+            var l = mapLeft;
+            var r = mapLeft + mapWidth;
 
-            // The plate: the strip's old slot under the map, made tall enough to read and
-            // climbing into the foot of the map by the difference. Without the label it is the
-            // slot alone, filled, so the frame closes under the map.
-            var plateTop = cfg.MinimapLabel ? Math.Min(b, safe - LabelH) : b;
+            var foot = row.Foot + row.Breath + row.PlateH;
+            var mapBottom = foot - Layout.StockThick - Layout.StockGap;
+            var mapTop = foot - Layout.MapTall;
+
+            // OUTSIDE THE BLIPS. The game clamps a far-off blip to the edge of the map and half
+            // of it pokes over; a frame flush to the map has that half under its line. The gap
+            // puts the line clear of them, and a translucent mat fills the gap so the map's soft
+            // edge is buried rather than showing the world through a seam.
+            var gap = Math.Max(0f, cfg.MinimapFrameGap);
+            var gapW = gap / aspect;
+
+            var ink = Ink.Alpha(Color.FromArgb(205, 0, 0, 0), (int)(205f * cfg.HudOpacity * strength + 0.5f));
+            var mat = Ink.Alpha(Color.FromArgb(120, 0, 0, 0), (int)(120f * cfg.HudOpacity * strength + 0.5f));
+
+            var outerL = l - gapW - edge;
+            var outerR = r + gapW + edge;
+
+            // The plate: as tall as the bars' plates or as tall as a line of text, whichever is
+            // more, standing on the bars' foot line and climbing into the foot of the map.
+            var plateTop = cfg.MinimapLabel ? Math.Min(mapBottom, foot - Math.Max(LabelH, row.PlateH)) : mapBottom;
+
+            // A HARD TOP EDGE. The radar fades out at the top and lets the world through; the
+            // top band comes down over that so the map ends against the frame.
+            var cover = mapTop + (mapBottom - mapTop) * Ink.Clamp(cfg.MinimapTopCover, 0f, 0.5f);
+            if (cover > plateTop) cover = plateTop;
 
             if (cfg.MinimapFrame)
             {
-                Ink.Bar(l - edge, t - edgeH, (r - l) + edge * 2f, edgeH, ink);    // the top, corners included
-                Ink.Bar(l - edge, t, edge, plateTop - t, ink);                     // the left side
-                Ink.Bar(r, t, edge, plateTop - t, ink);                            // the right side
+                Ink.Bar(outerL, mapTop - gap - edgeH, outerR - outerL, (cover - mapTop) + gap + edgeH, ink);
+                Ink.Bar(outerL, cover, edge, plateTop - cover, ink);
+                Ink.Bar(r + gapW, cover, edge, plateTop - cover, ink);
+
+                if (gapW > 0f)
+                {
+                    Ink.Bar(l - gapW, cover, gapW, plateTop - cover, mat);
+                    Ink.Bar(r, cover, gapW, plateTop - cover, mat);
+                }
             }
 
-            Ink.Bar(l - edge, plateTop, (r - l) + edge * 2f, safe - plateTop, ink);
+            Ink.Bar(outerL, plateTop, outerR - outerL, foot - plateTop, ink);
 
             if (!cfg.MinimapLabel) return;
 
@@ -89,20 +126,24 @@ namespace BareMinimum.Vitals
             Hide(StreetName);
 
             Names();
-            Words(cfg, l, r, plateTop, safe - plateTop, edge, strength);
+            Words(cfg, outerL, outerR, plateTop, foot - plateTop, edge + gapW, strength);
 
             if (!_measured)
             {
                 _measured = true;
                 Log.Info("Minimap frame: map " + (l * Ink.ScreenWidth).ToString("0") + ".." + (r * Ink.ScreenWidth).ToString("0") +
-                         " x " + (t * Ink.ScreenHeight).ToString("0") + ".." + (b * Ink.ScreenHeight).ToString("0") +
-                         " px, label plate " + ((safe - plateTop) * Ink.ScreenHeight).ToString("0") + " px tall.");
+                         " x " + (mapTop * Ink.ScreenHeight).ToString("0") + ".." + (mapBottom * Ink.ScreenHeight).ToString("0") +
+                         " px, frame " + (outerL * Ink.ScreenWidth).ToString("0") + ".." + (outerR * Ink.ScreenWidth).ToString("0") +
+                         ", plate " + ((foot - plateTop) * Ink.ScreenHeight).ToString("0") + " px tall, top band " +
+                         ((cover - mapTop) * Ink.ScreenHeight).ToString("0") + " px, gap " + (gap * Ink.ScreenHeight).ToString("0.0") + " px.");
             }
         }
 
         /// <summary>The street on the left, the suburb on the right, on one line in the plate.</summary>
         private void Words(Settings cfg, float l, float r, float top, float h, float edge, float strength)
         {
+            // <paramref name="edge"/> here is the frame's full thickness, line and gap; the words
+            // sit two of those in from the plate's ends.
             var padX = edge * 2f;
             var k = cfg.HudOpacity * strength;
 

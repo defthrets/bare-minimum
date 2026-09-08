@@ -132,6 +132,7 @@ namespace BareMinimum
             // many slots they take before placing its own two, and has them draw after.
             _vitals = new VitalsHud(_cfg);
             _gauge.Vitals = _vitals;
+            _vitals.Gauge = _gauge;
 
             Interval = 0;
             Tick += OnTick;

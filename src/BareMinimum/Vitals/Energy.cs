@@ -20,14 +20,22 @@ namespace BareMinimum.Vitals
     /// So the sprint stays off until the level is back to EnergySprintAgainAt, and the bar's
     /// colour says which state it is in -- dimmed and beating slowly while it is locked.
     ///
-    /// THE LOCK IS THE CONTROL, DISABLED EACH FRAME, which is all a sprint lock needs to be:
-    /// jogging is what the game does when sprint is not pressed, and nothing has to be put
-    /// back when the script goes because a disabled control lasts one frame.
+    /// WINDED IS A JOG, LIKE THE GAME'S OWN. The first cut disabled the sprint button, and
+    /// that read as the wrong thing -- a button that does nothing -- and on some layouts left
+    /// him walking. Now the ped's top movement speed is CAPPED at a run while he is winded,
+    /// through SET_PED_MAX_MOVE_BLEND_RATIO, the native missions use to hold you at a walk or
+    /// a jog: press sprint and you jog, tired, the way the game itself does when its own
+    /// stamina runs out. The cap is lifted the moment he has his breath back, and on the way
+    /// out of the script, because unlike a disabled control it would otherwise stay.
     /// </summary>
     internal sealed class Energy
     {
-        /// <summary>INPUT_SPRINT, by the game's number.</summary>
-        private const int SprintControl = 21;
+        /// <summary>Move blend ratios: 2 is a run, 3 a sprint.</summary>
+        private const float RunCap = 2f;
+        private const float SprintCap = 3f;
+
+        /// <summary>The ped the cap was last put on, so it comes off the right one.</summary>
+        private int _cappedPed;
 
         /// <summary>0 to 1. Starts full.</summary>
         public float Level = 1f;
@@ -48,6 +56,7 @@ namespace BareMinimum.Vitals
             {
                 Level = 1f;
                 Tired = false;
+                Release();
                 return;
             }
 
@@ -93,12 +102,40 @@ namespace BareMinimum.Vitals
                     JustRecovered = true;
                 }
 
-                if (Tired) Function.Call(Hash.DISABLE_CONTROL_ACTION, 0, SprintControl, true);
+                // Every frame while winded, because a respawn or a switch hands us a new ped
+                // with the game's own cap on it; once, and on the right ped, when it lifts.
+                if (Tired)
+                {
+                    Function.Call(Hash.SET_PED_MAX_MOVE_BLEND_RATIO, me.Handle, RunCap);
+                    _cappedPed = me.Handle;
+                }
+                else if (_cappedPed != 0)
+                {
+                    Release();
+                }
             }
             catch (Exception ex)
             {
                 Log.Once("vitals-energy", "The energy meter failed: " + ex.Message);
             }
+        }
+
+        /// <summary>Lifts the cap, if one is on. Safe to call with none; called on the way out too.</summary>
+        public void Release()
+        {
+            if (_cappedPed == 0) return;
+
+            try
+            {
+                var ped = Entity.FromHandle(_cappedPed) as Ped;
+                if (ped != null && ped.Exists()) Function.Call(Hash.SET_PED_MAX_MOVE_BLEND_RATIO, ped.Handle, SprintCap);
+            }
+            catch
+            {
+                // A ped that is gone has no cap to lift.
+            }
+
+            _cappedPed = 0;
         }
     }
 }

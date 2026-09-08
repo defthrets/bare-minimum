@@ -43,15 +43,16 @@ namespace BareMinimum.Vitals
         /// <summary>Draws the three, in slots 0, 1 and 2 of the row -- the left of it.</summary>
         public void Draw(Settings cfg, Gauge gauge, Gauge.Row row, Readings r, Momentum m, float strength)
         {
-            One(cfg, gauge, row, 0, r.Health, Paint.Health(cfg, row.Opacity, r, m, strength),
+            // BY NAME, from the row: [HUD] RowOrder decides where each stands. See Gauge.Standing.
+            One(cfg, gauge, row, row.SlotOf("health"), r.Health, Paint.Health(cfg, row.Opacity, r, m, strength),
                 m.Health, Kind.Health, _heart, m, r, strength);
 
-            One(cfg, gauge, row, 1, r.Armour, Paint.Armour(cfg, row.Opacity, strength),
+            One(cfg, gauge, row, row.SlotOf("armour"), r.Armour, Paint.Armour(cfg, row.Opacity, strength),
                 m.Armour, Kind.Armour, _shield, m, r, strength);
 
             if (r.HasThird)
             {
-                One(cfg, gauge, row, 2, r.Third, Paint.Third(cfg, row.Opacity, r, m, strength),
+                One(cfg, gauge, row, row.SlotOf("energy"), r.Third, Paint.Third(cfg, row.Opacity, r, m, strength),
                     m.Third, Kind.Third, _bolt, m, r, strength);
             }
         }
@@ -64,6 +65,8 @@ namespace BareMinimum.Vitals
                                 Color body, Momentum.Spring spring, Kind kind, Icon mark,
                                 Momentum m, Readings r, float strength)
         {
+            if (slot < 0) return;
+
             var aspect = Ink.Aspect;
 
             var w = row.BarW;
@@ -101,9 +104,18 @@ namespace BareMinimum.Vitals
             // The drift is a share of the bar's LENGTH, the bow and the lean shares of its
             // WIDTH, as on the strip -- so the same numbers give the same feel turned
             // through ninety degrees. Three periods that do not divide into each other.
-            var drift = (float)Math.Sin((t + phase * 5.3f) * (2.0 * Math.PI / 5.3)) * 0.020f * h * wave;
-            var bow = (float)Math.Sin((t + phase * 3.7f) * (2.0 * Math.PI / 3.7)) * 0.26f * thick * wave;
-            var tilt = (float)Math.Sin((t + phase * 7.1f) * (2.0 * Math.PI / 7.1)) * 0.20f * thick * wave;
+            //
+            // EACH BAR ON ITS OWN TEMPO. A phase offset alone left the three on the same
+            // frequency, and three bars breathing at one rate read as one instrument breathing
+            // in unison -- which was reported. Scaling the clock per bar puts them on different
+            // periods entirely, so no two are ever in step for long. The amplitudes are about
+            // two thirds of what they were: "a little less aggressive".
+            var tempo = kind == Kind.Health ? 0.87f : kind == Kind.Armour ? 1f : 1.13f;
+            var tt = t * tempo + phase * 11.7f;
+
+            var drift = (float)Math.Sin(tt * (2.0 * Math.PI / 5.3)) * 0.014f * h * wave;
+            var bow = (float)Math.Sin(tt * (2.0 * Math.PI / 3.7)) * 0.18f * thick * wave;
+            var tilt = (float)Math.Sin(tt * (2.0 * Math.PI / 7.1)) * 0.14f * thick * wave;
 
             // ---- the slosh ----
             //
@@ -112,8 +124,8 @@ namespace BareMinimum.Vitals
             var thrown = spring.S * h;
             var speed = Ink.Clamp(spring.V * 1.8f, -1f, 1f);
 
-            bow += speed * 0.55f * thick;
-            tilt += speed * 0.35f * thick;
+            bow += speed * 0.40f * thick;
+            tilt += speed * 0.25f * thick;
 
             var surface = Ink.Clamp(floor - level - drift - thrown, top, floor);
 

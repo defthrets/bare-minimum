@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using GTA;
 using GTA.Native;
@@ -77,8 +78,58 @@ namespace BareMinimum.UI
             public float BarW, Edge, PlateW, PlateH, Breath, BarH, Top, Foot, Pitch;
             public float Opacity, IconScale;
 
+            /// <summary>The bars standing this frame, left to right, by name. See Gauge.Standing.</summary>
+            public List<string> Names = new List<string>();
+
+            /// <summary>Which slot a bar has, by name -- or -1 when it is not standing this frame.</summary>
+            public int SlotOf(string name) { return Names.IndexOf(name); }
+
             /// <summary>The centre line of a slot. 0 is the leftmost bar.</summary>
             public float Centre(int slot) { return X + BarW / 2f + slot * Pitch; }
+        }
+
+        /// <summary>The five, in the order they take when the ini says nothing else.</summary>
+        private static readonly string[] Defaults = { "armour", "health", "sleep", "food", "energy" };
+
+        /// <summary>
+        /// The bars standing this frame, in the ini's order.
+        ///
+        /// THE ORDER IS THE INI'S -- [HUD] RowOrder -- and it has been asked for three ways in
+        /// one afternoon, which is what makes it a setting rather than a number. Each column
+        /// asks the row for its slot BY NAME, so the two files that draw the row never have to
+        /// agree about a position, only about the names. Whatever the ini leaves out stands at
+        /// the end in the default order; whatever is not on screen this frame -- the vitals
+        /// lying down, a third bar nobody has -- is simply not in the list, and the rest close
+        /// up. A misspelt name is ignored rather than fatal.
+        /// </summary>
+        private List<string> Standing()
+        {
+            var upright = Vitals != null && Vitals.Upright;
+            var third = upright && Vitals.HasThird;
+
+            var names = new List<string>();
+
+            foreach (var raw in (_cfg.HudRowOrder ?? "").Split(','))
+            {
+                var name = raw.Trim().ToLowerInvariant();
+                if (name == "armor") name = "armour";
+                if (name == "hunger") name = "food";
+
+                Stand(names, name, upright, third);
+            }
+
+            foreach (var name in Defaults) Stand(names, name, upright, third);
+
+            return names;
+        }
+
+        private static void Stand(List<string> names, string name, bool upright, bool third)
+        {
+            if (name.Length == 0 || names.Contains(name)) return;
+
+            if (name == "sleep" || name == "food") names.Add(name);
+            else if ((name == "armour" || name == "health") && upright) names.Add(name);
+            else if (name == "energy" && third) names.Add(name);
         }
 
         /// <summary>
@@ -133,7 +184,7 @@ namespace BareMinimum.UI
         /// as the screen gets wider. 0.2785 of the height is the measured figure: 401 px on a
         /// 1440-tall screen, which is also the familiar ~0.157 of the width at 16:9.
         /// </summary>
-        private static float MinimapWidth()
+        internal static float MinimapWidth()
         {
             var aspect = Aspect();
             if (aspect < 1.1f) aspect = 16f / 9f;
@@ -158,7 +209,7 @@ namespace BareMinimum.UI
         /// Falls back to the safe-zone size if the native gives something implausible, and the
         /// whole thing is overridable from the ini and the F7 menu.
         /// </summary>
-        private static float MinimapLeft()
+        internal static float MinimapLeft()
         {
             try
             {
@@ -302,13 +353,8 @@ namespace BareMinimum.UI
                 // believed was the right edge and which was actually about where the map
                 // BEGINS on a 21:9, so the icons sat on the far side of the minimap from the
                 // one they were meant to be on.
-                var x = _cfg.HudAutoPosition
-                    ? MinimapLeft() + MinimapWidth() + wide * 0.45f
-                    : _cfg.HudX;
-
-                // Sat so the PAIR ends level with the foot of the minimap, which is where the
-                // health and armour strips are -- the tidiest line to share.
-                var bottom = _cfg.HudAutoPosition ? 0.955f : _cfg.HudY + side * 2f + gap;
+                float x, bottom;
+                Anchor(out x, out bottom);
                 var top = bottom - (side * 2f + gap);
 
                 Measure(x, top, side);
@@ -347,7 +393,35 @@ namespace BareMinimum.UI
         /// minimap are indistinguishable from each other, and the entire point of this mod's
         /// HUD is knowing at a glance which meter you are looking at.
         /// </summary>
-        private void Bars(Needs.Needs needs, float x, float bottom)
+        /// <summary>
+        /// Where the row starts and the line its plates end on.
+        ///
+        /// Just clear of the minimap's RIGHT-hand edge: its left, plus its width. The width has
+        /// to be added -- a single figure believed to be the right edge was actually about
+        /// where the map BEGINS on a 21:9, and the icons sat on the far side of the minimap.
+        /// The foot is level with the foot of the minimap, which is where the game's own health
+        /// strip was -- the tidiest line to share, and the line the minimap's frame stands on.
+        /// </summary>
+        private void Anchor(out float x, out float bottom)
+        {
+            var side = _cfg.HudSize;
+            var wide = side / Aspect();
+            var gap = side * _cfg.HudGap;
+
+            x = _cfg.HudAutoPosition ? MinimapLeft() + MinimapWidth() + wide * 0.45f : _cfg.HudX;
+            bottom = _cfg.HudAutoPosition ? 0.955f : _cfg.HudY + side * 2f + gap;
+        }
+
+        /// <summary>The row as it stands right now, for anything that has to line up with it without drawing it.</summary>
+        internal Row Rack()
+        {
+            float x, bottom;
+            Anchor(out x, out bottom);
+            return RowFor(x, bottom);
+        }
+
+        /// <summary>Every number a bar in the row is drawn from, from where the row starts and the line its plates end on.</summary>
+        internal Row RowFor(float x, float bottom)
         {
             var barW = Math.Max(0.001f, _cfg.HudBarWidth);
 
@@ -422,13 +496,18 @@ namespace BareMinimum.UI
                 Opacity = _cfg.HudOpacity, IconScale = _cfg.HudBarIconScale
             };
 
-            // THE ORDER OF THE ROW: health, armour, energy, sleep, food. The vitals take the
-            // first slots -- three, or two for somebody with no third bar -- and these two
-            // follow, sleep before food. Asked before either is drawn, so the slots agree.
-            var lead = Vitals != null ? Vitals.ColumnsShown : 0;
+            row.Names = Standing();
+            return row;
+        }
 
-            Column(needs.Sleep, _moon, row, lead, true);
-            Column(needs.Hunger, _food, row, lead + 1, false);
+        private void Bars(Needs.Needs needs, float x, float bottom)
+        {
+            var row = RowFor(x, bottom);
+
+            // THE ORDER OF THE ROW IS THE INI'S. See Standing: each column takes its slot by
+            // name, and the vitals' three do the same in Columns.
+            Column(needs.Sleep, _moon, row, row.SlotOf("sleep"), true);
+            Column(needs.Hunger, _food, row, row.SlotOf("food"), false);
 
             if (Vitals != null) Vitals.DrawColumns(this, row);
         }
@@ -436,6 +515,7 @@ namespace BareMinimum.UI
         /// <summary>One upright bar: the mark above it, the channel, and the level inside.</summary>
         private void Column(Need need, Icon[] set, Row row, int slot, bool sleep)
         {
+            if (slot < 0) return;
             if (_cfg.HudHideWhenFine && need.Value > _cfg.HudFineAbove) return;
 
             var centreX = row.Centre(slot);
@@ -629,7 +709,9 @@ namespace BareMinimum.UI
             //
             // 0.0062 puts the travel at four to eight pixels, which is enough rows for the
             // sine to glide through instead of stepping between. [HUD] BarWave scales it.
-            var swing = h * 0.018f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
+            // 0.013 from 0.018: "a little less aggressive", asked for once the five stood
+            // together and the sum of their movement was more than any one of them.
+            var swing = h * 0.013f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
 
 
             var floor = y + h;
@@ -880,7 +962,7 @@ namespace BareMinimum.UI
             //
             // 0.0062 puts the travel at four to eight pixels, which is enough rows for the
             // sine to glide through instead of stepping between. [HUD] BarWave scales it.
-            var swing = h * 0.018f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
+            var swing = h * 0.013f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
 
 
             // THE SURFACE FIRST, THEN THE BODY UNDER IT: the body starts at the lowest point
@@ -888,7 +970,10 @@ namespace BareMinimum.UI
             // says why this is computed rather than allowed for. The tilt runs on its own
             // phase here so the two bars never lean together.
             var cap = h * 0.008f;
-            var tops = Surface(x, y, w, h, surfaceY, t * hurry, swing, speed, cap, 110f);
+            // ON ITS OWN TEMPO. The same periods run backwards were still the same periods, and
+            // with the food bar level beside it the two breathed together; 1.19 puts every
+            // beat of this bar off every beat of that one.
+            var tops = Surface(x, y, w, h, surfaceY, t * hurry * 1.19f, swing, speed, cap, 110f);
 
             var bodyTop = Lowest(tops, floor);
 
@@ -1208,7 +1293,7 @@ namespace BareMinimum.UI
 
             private const float Omega = 7.4f;    // 2 pi over 0.85 seconds
             private const float Damping = 2.1f;  // 2 zeta omega, zeta about 0.14
-            private const float Reach = 0.12f;
+            private const float Reach = 0.09f;
 
             public void Kick(float velocity)
             {
@@ -1303,8 +1388,8 @@ namespace BareMinimum.UI
         {
             if (k <= 0f) return;
 
-            if (delta > 0.001f) spring.Kick(0.40f * Math.Min(1f, delta * 4f) * k);
-            else if (delta < -0.001f) spring.Kick(-(0.35f + 0.65f * Math.Min(1f, -delta * 4f)) * k);
+            if (delta > 0.001f) spring.Kick(0.32f * Math.Min(1f, delta * 4f) * k);
+            else if (delta < -0.001f) spring.Kick(-(0.28f + 0.52f * Math.Min(1f, -delta * 4f)) * k);
         }
 
         /// <summary>
@@ -1417,14 +1502,14 @@ namespace BareMinimum.UI
 
             // Vitals' seven seconds, in this clock's units: at BarPace 42, 298 of these is
             // about seven seconds, and it divides into neither of the two above.
-            var tilt = (float)Math.Sin((t + phase) * (2.0 * Math.PI / 298.0)) * 0.20f * thickH * wave;
+            var tilt = (float)Math.Sin((t + phase) * (2.0 * Math.PI / 298.0)) * 0.14f * thickH * wave;
 
             // Up is negative on screen: a surface thrown upward heaps in the middle.
-            bow -= speed * 0.55f * thickH;
-            tilt += speed * 0.35f * thickH;
+            bow -= speed * 0.40f * thickH;
+            tilt += speed * 0.25f * thickH;
 
             // Braking leans the liquid up one wall; accelerating, the other.
-            tilt += Clamp(_accel / 10f, -1f, 1f) * 0.35f * thickH * Clamp01(_cfg.HudBarLean);
+            tilt += Clamp(_accel / 10f, -1f, 1f) * 0.30f * thickH * Clamp01(_cfg.HudBarLean);
 
             var columns = Columns(w);
             if (_tops.Length != columns) _tops = new float[columns];

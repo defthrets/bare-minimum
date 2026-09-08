@@ -115,15 +115,17 @@
   THE VITALS
 -------------------------------------------------------------------------------
 
-  Health, armour and energy stand at the left of the same row: five columns in
-  all, reading health, armour, energy, sleep, food, every one in the same frame
+  Health, armour and energy stand in the same row: five columns in all, reading
+  armour, health, sleep, food, energy -- any order you like, [HUD] RowOrder --
+  every one in the same frame
   with a mark on the plate under it -- a heart, a shield, a bolt, a moon, a
   drumstick. The game's own health and armour strip under the minimap is hidden
   while this is on and comes straight back when it is off or the script unloads.
   Nothing on disk is touched.
 
-  ENERGY IS A SPRINT METER. It drains while you sprint. Empty, the sprint locks
-  and you jog until it has come back a third of the way; it refills on its own
+  ENERGY IS A SPRINT METER. It drains while you sprint. Empty, you are held to a
+  tired jog, the way the game's own stamina does, until it has come back a third
+  of the way; it refills on its own
   in a few seconds, faster stood still or in a car than at a jog. The special
   ability shows through it as colour: the bar lights and beats while the ability
   runs. If you would rather see the special ability's charge, set Energy = false

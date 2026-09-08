@@ -36,7 +36,7 @@ namespace BareMinimum.Vitals
             private const float Omega = 7.4f;    // 2 pi over 0.85 seconds
             private const float Damping = 2.1f;  // 2 zeta omega, zeta about 0.14
 
-            private const float Reach = 0.12f;
+            private const float Reach = 0.09f;
 
             public void Kick(float velocity)
             {
@@ -191,36 +191,37 @@ namespace BareMinimum.Vitals
 
             if (k > 0f)
             {
+                // About four fifths of the first kicks: "a little less aggressive".
                 if (r.HealthDelta < -0.001f)
                 {
                     var hit = Math.Min(1f, -r.HealthDelta * 4f);
-                    Health.Kick(-(0.35f + 0.65f * hit) * k);
+                    Health.Kick(-(0.28f + 0.52f * hit) * k);
                 }
                 else if (r.HealthDelta > 0.001f)
                 {
-                    Health.Kick(0.30f * Math.Min(1f, r.HealthDelta * 4f) * k);
+                    Health.Kick(0.24f * Math.Min(1f, r.HealthDelta * 4f) * k);
                 }
 
                 if (r.ArmourDelta < -0.001f)
                 {
                     var hit = Math.Min(1f, -r.ArmourDelta * 4f);
-                    Armour.Kick(-(0.35f + 0.65f * hit) * k);
+                    Armour.Kick(-(0.28f + 0.52f * hit) * k);
                 }
                 else if (r.ArmourDelta > 0.001f)
                 {
-                    Armour.Kick(0.30f * Math.Min(1f, r.ArmourDelta * 4f) * k);
+                    Armour.Kick(0.24f * Math.Min(1f, r.ArmourDelta * 4f) * k);
                 }
 
                 if (r.ThirdIsEnergy)
                 {
                     // Run dry and the last of it slaps the floor; get your breath back and it lifts.
-                    if (energy.JustEmptied) Third.Kick(-0.45f * k);
-                    if (energy.JustRecovered) Third.Kick(0.35f * k);
+                    if (energy.JustEmptied) Third.Kick(-0.36f * k);
+                    if (energy.JustRecovered) Third.Kick(0.28f * k);
                 }
                 else if (r.HasThird)
                 {
-                    if (r.SpecialActive && !_wasActive) Third.Kick(-0.45f * k);
-                    if (r.SpecialFull && !_wasFull) Third.Kick(0.35f * k);
+                    if (r.SpecialActive && !_wasActive) Third.Kick(-0.36f * k);
+                    if (r.SpecialFull && !_wasFull) Third.Kick(0.28f * k);
                 }
             }
 

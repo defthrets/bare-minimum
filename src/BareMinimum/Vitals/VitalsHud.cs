@@ -15,7 +15,7 @@ namespace BareMinimum.Vitals
     /// under the minimap. All of that is here, file for file. What changed is what the merge
     /// made possible: the upright columns are drawn through the gauge's own frame and plate
     /// rather than a copy of them, so the five bars are one row by construction; the row's
-    /// order is health, armour, energy, sleep, food; and the third bar is ENERGY, a sprint
+    /// order is the ini's, [HUD] RowOrder; and the third bar is ENERGY, a sprint
     /// meter this mod runs, with the special ability showing through it as colour.
     ///
     /// THIS RUNS BEFORE THE MOD'S OWN ENABLED GATE. The game's bars are hidden by it and have
@@ -54,15 +54,20 @@ namespace BareMinimum.Vitals
             _cfg = cfg;
         }
 
-        /// <summary>
-        /// How many columns stand in the row this frame: three, two for somebody with no third
-        /// bar, or none when they lie under the minimap or are off. The gauge asks before it
-        /// places its own two, so the slots agree.
-        /// </summary>
+        /// <summary>Whether the three stand in the gauge's row this frame. The gauge asks before it lays the row out.</summary>
+        public bool Upright => _upright;
+
+        /// <summary>Whether there is a third bar this frame -- energy, or a special ability.</summary>
+        public bool HasThird => _readings.HasThird;
+
+        /// <summary>How many columns stand in the row this frame. For the log.</summary>
         public int ColumnsShown => _upright ? (_readings.HasThird ? 3 : 2) : 0;
 
         /// <summary>Whether he has run himself out of breath. For anything else that cares.</summary>
         public bool Tired => _cfg.VitalsEnabled && _energy.Tired;
+
+        /// <summary>The gauge, for the row's geometry: the minimap's frame lines up with it. Set by Main.</summary>
+        public Gauge Gauge { get; set; }
 
         // ======================================================================
 
@@ -102,7 +107,10 @@ namespace BareMinimum.Vitals
 
             _strength = compare ? 0.5f : 1f;
 
-            _frame.Draw(_cfg, _strength);
+            if (Gauge != null)
+            {
+                _frame.Draw(_cfg, Gauge.Rack(), UI.Gauge.MinimapLeft(), UI.Gauge.MinimapWidth(), _strength);
+            }
 
             // UPRIGHT NEEDS A ROW TO STAND IN. With the gauge on its icon style, or hidden,
             // there is none, and the strip under the minimap is what the three become.
@@ -143,6 +151,11 @@ namespace BareMinimum.Vitals
         {
             try { _stock.Restore(_cfg); }
             catch (Exception ex) { Log.Error("Restoring the game's bars", ex); }
+
+            // THE SPEED CAP OUTLIVES THE SCRIPT. A man left winded by a reload would jog for
+            // the rest of the session.
+            try { _energy.Release(); }
+            catch (Exception ex) { Log.Error("Lifting the energy cap", ex); }
         }
 
         // ======================================================================

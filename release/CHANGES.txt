@@ -10,14 +10,15 @@
   bars that were a mod of their own stand in the row with the sleep and food
   bars: five columns, one frame -- the same surround, the same channel, the same
   plate and mark under every one, drawn through the same code, so the row is one
-  instrument. The order is health, armour, energy, sleep, food. The game's own
+  instrument. The order is armour, health, sleep, food, energy -- or whatever
+  [HUD] RowOrder says. The game's own
   strip under the minimap goes, and comes back the moment the script unloads or
   the vitals are switched off. Vitals.dll and Vitals.ini should be removed if
   you have them; the two would fight over the same bars.
 
   THE THIRD BAR IS ENERGY. It drains while you sprint, and empty it locks the
-  sprint -- you jog -- until it has come back a third of the way. It refills on
-  its own in a few seconds, faster stood still or in a car than at a jog. The
+  sprint to a tired jog, the way the game's own stamina does, until it has come
+  back a third of the way. It refills on its own in seconds, faster stood still or in a car than at a jog. The
   special ability shows through it: the bar lights and beats while the ability
   runs. Energy = false in [Vitals] puts the special ability's charge back on it.
 

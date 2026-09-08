@@ -98,9 +98,14 @@ namespace BareMinimum.Vitals
             // the bar's LENGTH, so the health bar drifts further in pixels than the armour
             // bar and both read as the same thing happening; the bow and the lean are shares
             // of the THICKNESS, because that is the span they bend across.
-            var drift = (float)Math.Sin((t + phase * 5.3f) * (2.0 * Math.PI / 5.3)) * 0.020f * w * wave;
-            var bow = (float)Math.Sin((t + phase * 3.7f) * (2.0 * Math.PI / 3.7)) * 0.26f * thickW * wave;
-            var tilt = (float)Math.Sin((t + phase * 7.1f) * (2.0 * Math.PI / 7.1)) * 0.20f * thickW * wave;
+            // Each bar on its own tempo and about two thirds the travel -- see Columns, which
+            // says why.
+            var tempo = kind == Kind.Health ? 0.87f : kind == Kind.Armour ? 1f : 1.13f;
+            var tt = t * tempo + phase * 11.7f;
+
+            var drift = (float)Math.Sin(tt * (2.0 * Math.PI / 5.3)) * 0.014f * w * wave;
+            var bow = (float)Math.Sin(tt * (2.0 * Math.PI / 3.7)) * 0.18f * thickW * wave;
+            var tilt = (float)Math.Sin(tt * (2.0 * Math.PI / 7.1)) * 0.14f * thickW * wave;
 
             // ---- the slosh ----
             //
@@ -110,8 +115,8 @@ namespace BareMinimum.Vitals
             var thrown = spring.S * w;
             var speed = Ink.Clamp(spring.V * 1.8f, -1f, 1f);
 
-            bow += speed * 0.55f * thickW;
-            tilt += speed * 0.35f * thickW;
+            bow += speed * 0.40f * thickW;
+            tilt += speed * 0.25f * thickW;
 
             var surface = Ink.Clamp(x0 + level + drift + thrown, x0, x0 + w);
 
