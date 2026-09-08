@@ -1169,7 +1169,7 @@ namespace BareMinimum.Venues
         ///
         /// KIND BY KIND, NOT ALL AS ONE. Every shop used to share a single name, which turned a
         /// hundred rows of legend into one -- readable, and useless for finding a liquor store.
-        /// Now the name is the group's: Liquor, Fast Food, Restaurants, Petrol, Street Food and
+        /// Now the name is the group's: Liquor, Fast Food, Restaurants, Street Food and
         /// the rest, so the legend is a short list of kinds and each pages through its own.
         ///
         /// Falls back rather than trusting the file: a blank name would give the legend a row

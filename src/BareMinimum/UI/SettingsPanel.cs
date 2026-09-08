@@ -659,7 +659,7 @@ namespace BareMinimum.UI
             Bool("Group markers by kind", "Map", "GroupShopBlips",
                  () => _cfg.GroupShopBlips, v => _cfg.GroupShopBlips = v,
                  "One row in the map legend for each kind -- Liquor, Fast Food, Restaurants, " +
-                 "Cafes, Street Food, Shops, Petrol, Smoke Shops, Bars, Pharmacy. Left and " +
+                 "Cafes, Street Food, Shops, Convenience Store, Smoke Shops, Bars, Pharmacy. " +
                  "right slide through the shops inside the row.",
                  () => _cfg.ShowShopBlips,
                  "~y~Turn shop map markers ON first.");

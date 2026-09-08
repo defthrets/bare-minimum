@@ -320,23 +320,23 @@
   "groups": {
     "stand": {
       "name": "Street Food",
-      "sprite": 52,
-      "colour": 5
+      "sprite": 648,
+      "colour": 1
     },
     "fastfood": {
       "name": "Fast Food",
-      "sprite": 52,
+      "sprite": 89,
       "colour": 5
     },
     "restaurant": {
       "name": "Restaurants",
-      "sprite": 52,
+      "sprite": 546,
       "colour": 5
     },
     "cafe": {
       "name": "Cafes",
-      "sprite": 52,
-      "colour": 5
+      "sprite": 546,
+      "colour": 2
     },
     "store": {
       "name": "Shops",
@@ -359,7 +359,7 @@
       "colour": 2
     },
     "servo": {
-      "name": "Petrol",
+      "name": "Convenience Store",
       "sprite": 739,
       "colour": 3
     },

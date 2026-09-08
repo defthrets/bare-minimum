@@ -479,8 +479,9 @@ namespace BareMinimum.Core
         ///
         /// BY KIND, NOT ALL AS ONE. It used to be a single name for every shop, which was one
         /// row and no use at all for finding a liquor store. The name is the group's now --
-        /// Liquor, Bars, Fast Food, Restaurants, Cafes, Street Food, Shops, Petrol, Smoke Shops,
-        /// Pharmacy -- so the legend is a short list of kinds, each paging through its own. The
+        /// Liquor, Bars, Fast Food, Restaurants, Cafes, Street Food, Shops, Smoke Shops,
+        /// Convenience Store, Pharmacy -- so the legend is a short list of kinds, each paging
+        /// through its own. The
         /// groups and what is in them are in vendors.json; anything ungrouped falls back to
         /// ShopBlipGroupName below.
         ///
