@@ -294,6 +294,18 @@ namespace BareMinimum.Vitals
                 : Ink.Alpha(Ink.Mix(Palette.Warn, Palette.Danger, Ink.Clamp01((hurt - 0.35f) / 0.5f)),
                             (int)((90f + 150f * Ink.Clamp01(hurt / 0.6f)) * k));
 
+            // AND IT FLASHES ONCE THE ENGINE SMOKES. The game starts the smoke at two fifths of
+            // engine health and thickens it at one fifth; the light blinks from there, quicker
+            // as the smoke thickens, so the moment you would smell it is the moment it starts.
+            // A sine rather than a switch, so it beats rather than stutters.
+            if (engine < 0.4f)
+            {
+                var rate = engine < 0.2f ? 8.0 : 5.0;
+                var beat = 0.45f + 0.55f * (float)Math.Abs(Math.Sin(Game.GameTime * 0.001 * rate));
+                engineTint = Ink.Alpha(Ink.Mix(engineTint, Color.FromArgb(255, 255, 120, 100), 0.35f * beat),
+                                       (int)(engineTint.A * (0.45f + 0.55f * beat)));
+            }
+
             // ---- the lamp: lit when the lights are on ----
             var lampTint = !lights ? rest
                 : beams ? Palette.Alpha(Color.FromArgb(255, 200, 232, 255), (int)(245f * k))
