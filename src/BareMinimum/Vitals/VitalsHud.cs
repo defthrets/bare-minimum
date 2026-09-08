@@ -91,9 +91,9 @@ namespace BareMinimum.Vitals
 
             var compare = _cfg.VitalsCompare;
 
-            // The cash readout's place is part of the HUD's layout, not of the vitals, and is
-            // kept whether the vitals are on or off.
-            _placement.Update(_cfg);
+            // The cash readout is part of the HUD's layout, not of the vitals, and is drawn
+            // whether the vitals are on or off.
+            _placement.Update(_cfg, Gauge, Visible(), dt);
 
             // THE GAME'S BARS ARE MANAGED WHETHER OR NOT OURS ARE DRAWN. During a fade or a
             // switch nothing of ours is on screen, and that is exactly when the minimap is

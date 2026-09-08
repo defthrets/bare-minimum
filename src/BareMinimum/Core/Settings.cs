@@ -771,13 +771,18 @@ namespace BareMinimum.Core
         public float HudGroupY = 0f;
 
         /// <summary>
-        /// The game's cash readout, moved from the top right to sit with the bars. The numbers
-        /// are offsets from where the game had it, in its own units, applied to the total and
-        /// to the change that pops under it alike. Off puts it back where it was.
+        /// The cash readout, brought down beside the bars. The game's own cannot be moved there
+        /// -- its Y is fixed by the stack it sits in at the top right -- so it is hidden and
+        /// the same thing drawn off the end of the row: the total in the game's money face, the
+        /// change under it, counting up, holding, fading. CashX and CashY nudge it from its
+        /// place beside the last bar, in fractions of the screen; CashScale is the size of the
+        /// text; CashSeconds how long it stays up after the money moves. Off leaves the game's.
         /// </summary>
         public bool MoveCash = true;
-        public float CashX = -0.60f;
-        public float CashY = 0.90f;
+        public float CashX = 0f;
+        public float CashY = 0f;
+        public float CashScale = 0.55f;
+        public float CashSeconds = 4f;
 
         // ---- Vitals ----------------------------------------------------------
         //
@@ -1403,6 +1408,8 @@ namespace BareMinimum.Core
                 cfg.MoveCash = ini.GetBool("HUD", "MoveCash", cfg.MoveCash);
                 cfg.CashX = ini.GetFloat("HUD", "CashX", cfg.CashX, -2f, 2f);
                 cfg.CashY = ini.GetFloat("HUD", "CashY", cfg.CashY, -2f, 2f);
+                cfg.CashScale = ini.GetFloat("HUD", "CashScale", cfg.CashScale, 0.15f, 1.5f);
+                cfg.CashSeconds = ini.GetFloat("HUD", "CashSeconds", cfg.CashSeconds, 0.5f, 30f);
 
                 cfg.VitalsEnabled = ini.GetBool("Vitals", "Enabled", cfg.VitalsEnabled);
                 cfg.VitalsStyle = ParseVitalsStyle(ini.GetString("Vitals", "Style", "Upright"), cfg.VitalsStyle);

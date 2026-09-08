@@ -887,18 +887,32 @@ namespace BareMinimum.UI
 
             Bool("Move the cash readout", "HUD", "MoveCash",
                  () => _cfg.MoveCash, v => _cfg.MoveCash = v,
-                 "The game's money, and the change that pops under it, brought down beside the bars.");
+                 "The money, and the change that pops under it, drawn beside the bars instead of " +
+                 "at the top right. The game's own cannot be brought down, so it is hidden and " +
+                 "redrawn here in its own face.");
 
             Float("Cash left/right", "HUD", "CashX",
                   () => _cfg.CashX, v => _cfg.CashX = v,
                   0.005f, -2f, 2f, "0.000",
-                  "Where the cash readout sits, from where the game had it. Negative is left.",
+                  "Nudges the cash from its place off the end of the row. Negative is left.",
                   () => _cfg.MoveCash, "~y~Turn Move the cash readout ON first.");
 
             Float("Cash up/down", "HUD", "CashY",
                   () => _cfg.CashY, v => _cfg.CashY = v,
                   0.005f, -2f, 2f, "0.000",
-                  "Where the cash readout sits, from where the game had it. Positive is down.",
+                  "Nudges the cash from level with the tops of the bars. Positive is down.",
+                  () => _cfg.MoveCash, "~y~Turn Move the cash readout ON first.");
+
+            Float("Cash size", "HUD", "CashScale",
+                  () => _cfg.CashScale, v => _cfg.CashScale = v,
+                  0.025f, 0.15f, 1.5f, "0.000",
+                  "The size of the money text. 0.55 is about the game's own.",
+                  () => _cfg.MoveCash, "~y~Turn Move the cash readout ON first.");
+
+            Float("Cash stays for", "HUD", "CashSeconds",
+                  () => _cfg.CashSeconds, v => _cfg.CashSeconds = v,
+                  0.5f, 0.5f, 30f, "0.0",
+                  "Seconds the readout stays up after the money changes, before it fades.",
                   () => _cfg.MoveCash, "~y~Turn Move the cash readout ON first.");
 
             Group("BARS");
