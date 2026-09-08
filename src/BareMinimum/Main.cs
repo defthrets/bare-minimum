@@ -134,6 +134,14 @@ namespace BareMinimum
             _gauge.Vitals = _vitals;
             _vitals.Gauge = _gauge;
 
+            // A DRINK HOLDS THE ENERGY BAR FULL -- a soft drink, a coffee, a water, a juice.
+            // Not alcohol. Wired here because Eating knows the drink and the vitals own the
+            // meter, and neither needs to know the other exists.
+            _eating.Drank = item =>
+            {
+                if (item.Booze <= 0f) _vitals.HoldEnergy(_cfg.EnergyDrinkHoldMinutes);
+            };
+
             Interval = 0;
             Tick += OnTick;
             Aborted += OnAborted;

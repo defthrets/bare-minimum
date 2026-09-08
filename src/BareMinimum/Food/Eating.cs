@@ -49,6 +49,12 @@ namespace BareMinimum.Food
         private Item _item;
         private Prop _held;
         private int _finishAt;
+        /// <summary>
+        /// Told whenever he drinks something, with what it was. Main listens, because the thing
+        /// a drink does to the energy bar is the vitals' business and this class has no vitals.
+        /// </summary>
+        public Action<Item> Drank;
+
         private bool _animStarted;
 
         /// <summary>
@@ -266,6 +272,7 @@ namespace BareMinimum.Food
             if (item.Drink)
             {
                 _needs.Drink(item.Hunger, item.Wake);
+                Drank?.Invoke(item);
             }
             else
             {

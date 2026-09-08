@@ -144,11 +144,11 @@ namespace BareMinimum.Vitals
             var gap = cfg.VitalsStripGap * lay.Width;
 
             var hs = Math.Max(0.01f, cfg.VitalsHealthShare);
-            var ar = Math.Max(0.01f, cfg.VitalsArmourShare);
+            var ar = 0f;   // no armour segment: armour is a state of the health bar
             var sp = showThird ? Math.Max(0.01f, cfg.VitalsThirdShare) : 0f;
 
             var total = hs + ar + sp;
-            var bars = showThird ? 3 : 2;
+            var bars = showThird ? 2 : 1;
             var room = lay.Width - gap * (bars - 1);
 
             if (room < 0.001f) room = 0.001f;
@@ -159,9 +159,9 @@ namespace BareMinimum.Vitals
             lay.Health.Width = room * hs / total;
             x += lay.Health.Width + gap;
 
+            // Kept as a zero-width segment so nothing that names it has to change.
             lay.Armour.Left = x;
-            lay.Armour.Width = room * ar / total;
-            x += lay.Armour.Width + gap;
+            lay.Armour.Width = 0f;
 
             if (showThird)
             {

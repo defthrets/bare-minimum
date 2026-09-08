@@ -47,6 +47,25 @@ namespace BareMinimum.Vitals
         public bool JustEmptied;
         public bool JustRecovered;
 
+        /// <summary>Game time, in ms, until which a drink is holding the meter full. See Hold.</summary>
+        private int _holdUntil;
+
+        /// <summary>Whether a drink is holding the meter full right now.</summary>
+        public bool Held => Game.GameTime < _holdUntil;
+
+        /// <summary>
+        /// Holds the meter full for a while. A later drink extends, never shortens.
+        ///
+        /// Game time rather than the wall clock, so a pause does not eat it.
+        /// </summary>
+        public void Hold(float seconds)
+        {
+            if (seconds <= 0f) return;
+
+            var until = Game.GameTime + (int)(seconds * 1000f);
+            if (until > _holdUntil) _holdUntil = until;
+        }
+
         public void Update(Settings cfg, float dt)
         {
             JustEmptied = false;
@@ -62,6 +81,24 @@ namespace BareMinimum.Vitals
 
             if (dt < 0f) dt = 0f;
             if (dt > 0.1f) dt = 0.1f;
+
+            // HELD FULL BY A DRINK. Anything he drank that was not alcohol keeps the meter at
+            // the top for a while, sprinting or not, and lifts the winded cap if it was on --
+            // with the same kick a recovery gets, so the bar says so. Which drinks count is
+            // Main's decision, where the item and the meter both exist.
+            if (Game.GameTime < _holdUntil)
+            {
+                Level = 1f;
+
+                if (Tired)
+                {
+                    Tired = false;
+                    JustRecovered = true;
+                }
+
+                Release();
+                return;
+            }
 
             try
             {

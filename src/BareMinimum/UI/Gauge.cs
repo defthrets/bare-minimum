@@ -89,7 +89,7 @@ namespace BareMinimum.UI
         }
 
         /// <summary>The five, in the order they take when the ini says nothing else.</summary>
-        private static readonly string[] Defaults = { "armour", "health", "sleep", "food", "energy" };
+        private static readonly string[] Defaults = { "health", "sleep", "food", "energy" };
 
         /// <summary>
         /// The bars standing this frame, in the ini's order.
@@ -128,7 +128,10 @@ namespace BareMinimum.UI
             if (name.Length == 0 || names.Contains(name)) return;
 
             if (name == "sleep" || name == "food") names.Add(name);
-            else if ((name == "armour" || name == "health") && upright) names.Add(name);
+            // NO ARMOUR COLUMN. Armour is a state of the health bar now -- blue and full while
+            // the plate holds -- so an "armour" in RowOrder is read and ignored rather than
+            // stood, and an old ini that names it changes nothing.
+            else if (name == "health" && upright) names.Add(name);
             else if (name == "energy" && third) names.Add(name);
         }
 

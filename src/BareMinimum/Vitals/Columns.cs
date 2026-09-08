@@ -44,11 +44,16 @@ namespace BareMinimum.Vitals
         public void Draw(Settings cfg, Gauge gauge, Gauge.Row row, Readings r, Momentum m, float strength)
         {
             // BY NAME, from the row: [HUD] RowOrder decides where each stands. See Gauge.Standing.
-            One(cfg, gauge, row, row.SlotOf("health"), r.Health, Paint.Health(cfg, row.Opacity, r, m, strength),
-                m.Health, Kind.Health, _heart, m, r, strength);
+            // ONE BAR FOR BOTH. While there is armour the bar is armour's blue and stands full
+            // -- the plate is taking the hits and the man under it is whole -- and the moment
+            // it is gone the same bar is the health, green, running down as it always did. Two
+            // columns said the same thing twice, and the second was usually empty. The mark
+            // under it says which it is: the shield while it is the shield, the heart after.
+            var armoured = r.Armour > 0.002f;
 
-            One(cfg, gauge, row, row.SlotOf("armour"), r.Armour, Paint.Armour(cfg, row.Opacity, strength),
-                m.Armour, Kind.Armour, _shield, m, r, strength);
+            One(cfg, gauge, row, row.SlotOf("health"), armoured ? 1f : r.Health,
+                Paint.Health(cfg, row.Opacity, r, m, strength),
+                m.Health, Kind.Health, armoured ? _shield : _heart, m, r, strength);
 
             if (r.HasThird)
             {
@@ -219,7 +224,11 @@ namespace BareMinimum.Vitals
 
             switch (kind)
             {
-                case Kind.Health: Bubbles(cfg, x, w, floor, surface, body, t, strength); break;
+                case Kind.Health:
+                    // Glints while it is armour, bubbles once it is blood.
+                    if (r.Armour > 0.002f) Glints(cfg, x, w, floor, surface, body, t, strength);
+                    else Bubbles(cfg, x, w, floor, surface, body, t, strength);
+                    break;
                 case Kind.Armour: Glints(cfg, x, w, floor, surface, body, t, strength); break;
                 default: Sparks(cfg, x, w, floor, surface, t, m.Wall, r.SpecialActive, strength); break;
             }

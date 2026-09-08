@@ -61,7 +61,13 @@ namespace BareMinimum.Vitals
         public bool HasThird => _readings.HasThird;
 
         /// <summary>How many columns stand in the row this frame. For the log.</summary>
-        public int ColumnsShown => _upright ? (_readings.HasThird ? 3 : 2) : 0;
+        public int ColumnsShown => _upright ? (_readings.HasThird ? 2 : 1) : 0;
+
+        /// <summary>A drink holds the energy bar full for this many minutes. Wired from Eating by Main.</summary>
+        public void HoldEnergy(float minutes)
+        {
+            _energy.Hold(minutes * 60f);
+        }
 
         /// <summary>Whether he has run himself out of breath. For anything else that cares.</summary>
         public bool Tired => _cfg.VitalsEnabled && _energy.Tired;

@@ -40,11 +40,10 @@ namespace BareMinimum.Vitals
             var opacity = cfg.VitalsStripOpacity;
             var channel = Ink.Alpha(cfg.VitalsChannel, (int)(cfg.VitalsChannel.A * opacity * strength + 0.5f));
 
-            One(cfg, lay, lay.Health, r.Health, Paint.Health(cfg, opacity, r, m, strength), channel,
+            // One bar for health and armour, as in the upright row. See Columns.Draw.
+            One(cfg, lay, lay.Health, r.Armour > 0.002f ? 1f : r.Health,
+                Paint.Health(cfg, opacity, r, m, strength), channel,
                 m.Health, Kind.Health, m, r, strength);
-
-            One(cfg, lay, lay.Armour, r.Armour, Paint.Armour(cfg, opacity, strength), channel,
-                m.Armour, Kind.Armour, m, r, strength);
 
             if (lay.HasThird)
             {

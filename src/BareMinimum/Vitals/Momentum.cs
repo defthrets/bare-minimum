@@ -208,11 +208,11 @@ namespace BareMinimum.Vitals
                 if (r.ArmourDelta < -0.001f)
                 {
                     var hit = Math.Min(1f, -r.ArmourDelta * 4f);
-                    Armour.Kick(-(0.28f + 0.52f * hit) * k);
+                    Health.Kick(-(0.28f + 0.52f * hit) * k);
                 }
                 else if (r.ArmourDelta > 0.001f)
                 {
-                    Armour.Kick(0.24f * Math.Min(1f, r.ArmourDelta * 4f) * k);
+                    Health.Kick(0.24f * Math.Min(1f, r.ArmourDelta * 4f) * k);
                 }
 
                 if (r.ThirdIsEnergy)

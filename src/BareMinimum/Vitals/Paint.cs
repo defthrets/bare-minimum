@@ -32,6 +32,11 @@ namespace BareMinimum.Vitals
         /// </summary>
         public static Color Health(Settings cfg, float opacity, Readings r, Momentum m, float strength)
         {
+            // ARMOUR'S BLUE WHILE THERE IS ARMOUR. The column stands full and blue for as long
+            // as the plate holds, and only turns to the ramp -- and to the low-health beat --
+            // once it is the man himself taking the damage.
+            if (r.Armour > 0.002f) return Body(opacity, cfg.VitalsArmour, strength);
+
             var c = Body(opacity, Ramp(cfg.VitalsHealth, r.Health), strength);
 
             if (cfg.VitalsLowHealthPulse && r.Health > 0f && r.Health < cfg.VitalsLowHealthAt)

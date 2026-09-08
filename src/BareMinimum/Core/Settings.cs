@@ -758,7 +758,7 @@ namespace BareMinimum.Core
         /// order; anything left out stands at the end in this order; a name that is not one
         /// of the five is ignored. See Gauge.Standing.
         /// </summary>
-        public string HudRowOrder = "armour, health, sleep, food, energy";
+        public string HudRowOrder = "health, sleep, food, energy";
 
         // ---- Vitals ----------------------------------------------------------
         //
@@ -808,6 +808,16 @@ namespace BareMinimum.Core
 
         /// <summary>How far back up it has to be before the sprint unlocks, 0 to 1.</summary>
         public float EnergySprintAgainAt = 0.35f;
+
+        /// <summary>
+        /// How long a drink holds the energy bar full, in REAL minutes. 0 turns it off.
+        ///
+        /// Anything he drinks that is not alcohol: a soft drink, a coffee, a water, a juice.
+        /// Sprinting does not run it down while this holds, and being winded is lifted the
+        /// moment it starts. Real minutes rather than game hours, because the energy bar is a
+        /// real-time meter -- it drains in the seconds you hold sprint, not over a game day.
+        /// </summary>
+        public float EnergyDrinkHoldMinutes = 15f;
 
         /// <summary>With the energy meter off: when a special ability bar is drawn at all.</summary>
         public SpecialMode VitalsSpecial = SpecialMode.Auto;
@@ -859,7 +869,6 @@ namespace BareMinimum.Core
 
         /// <summary>How the strip is shared out. The game gives health half and splits the rest.</summary>
         public float VitalsHealthShare = 0.50f;
-        public float VitalsArmourShare = 0.25f;
         public float VitalsThirdShare = 0.25f;
 
         /// <summary>Daylight between two bars of the strip, as a fraction of its width.</summary>
@@ -1356,6 +1365,7 @@ namespace BareMinimum.Core
                 cfg.EnergySprintSeconds = ini.GetFloat("Vitals", "EnergySprintSeconds", cfg.EnergySprintSeconds, 1f, 600f);
                 cfg.EnergyRebuildSeconds = ini.GetFloat("Vitals", "EnergyRebuildSeconds", cfg.EnergyRebuildSeconds, 1f, 600f);
                 cfg.EnergySprintAgainAt = ini.GetFloat("Vitals", "EnergySprintAgainAt", cfg.EnergySprintAgainAt, 0.05f, 1f);
+                cfg.EnergyDrinkHoldMinutes = ini.GetFloat("Vitals", "EnergyDrinkHoldMinutes", cfg.EnergyDrinkHoldMinutes, 0f, 600f);
                 cfg.VitalsSpecial = ParseSpecial(ini.GetString("Vitals", "Special", "Auto"), cfg.VitalsSpecial);
                 cfg.VitalsHealth = ParseColour("Vitals", "HealthColour", ini.GetString("Vitals", "HealthColour", null), cfg.VitalsHealth);
                 cfg.VitalsArmour = ParseColour("Vitals", "ArmourColour", ini.GetString("Vitals", "ArmourColour", null), cfg.VitalsArmour);
@@ -1381,7 +1391,6 @@ namespace BareMinimum.Core
                 cfg.VitalsStripOffsetX = ini.GetFloat("VitalsStrip", "OffsetX", cfg.VitalsStripOffsetX, -0.5f, 0.5f);
                 cfg.VitalsStripOffsetY = ini.GetFloat("VitalsStrip", "OffsetY", cfg.VitalsStripOffsetY, -0.5f, 0.5f);
                 cfg.VitalsHealthShare = ini.GetFloat("VitalsStrip", "HealthShare", cfg.VitalsHealthShare, 0.05f, 1f);
-                cfg.VitalsArmourShare = ini.GetFloat("VitalsStrip", "ArmourShare", cfg.VitalsArmourShare, 0.05f, 1f);
                 cfg.VitalsThirdShare = ini.GetFloat("VitalsStrip", "ThirdShare", cfg.VitalsThirdShare, 0.05f, 1f);
                 cfg.VitalsStripGap = ini.GetFloat("VitalsStrip", "Gap", cfg.VitalsStripGap, 0f, 0.1f);
                 cfg.VitalsChannel = ParseColour("VitalsStrip", "Channel", ini.GetString("VitalsStrip", "Channel", null), cfg.VitalsChannel);
