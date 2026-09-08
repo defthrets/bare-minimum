@@ -120,13 +120,22 @@ namespace BareMinimum.Vitals
             var topGap = Math.Min(gap, Math.Max(0f, mapTop - edgeH));
 
             // The plate: as tall as the bars' plates or as tall as a line of text, whichever is
-            // more, standing on the bars' foot line and climbing into the foot of the map.
-            var plateTop = cfg.MinimapLabel ? Math.Min(mapBottom, foot - Math.Max(LabelH, row.PlateH)) : mapBottom;
+            // more, standing on the bars' foot line and climbing into the foot of the map. It
+            // carries the speed and the dash lights now, and the words when there is no band.
+            var wantPlate = cfg.MinimapLabel || (cfg.MinimapFrame && (cfg.MinimapSpeedo || cfg.MinimapDash));
+            var plateTop = wantPlate ? Math.Min(mapBottom, foot - Math.Max(LabelH, row.PlateH)) : mapBottom;
 
             // A HARD TOP EDGE. The radar fades out at the top and lets the world through; the
             // top band comes down over that so the map ends against the frame.
             var cover = mapTop + (mapBottom - mapTop) * Ink.Clamp(cfg.MinimapTopCover, 0f, 0.5f);
             if (cover > plateTop) cover = plateTop;
+
+            if (cfg.MinimapLabel)
+            {
+                Hide(AreaName);
+                Hide(StreetName);
+                Names();
+            }
 
             if (cfg.MinimapFrame)
             {
@@ -136,8 +145,8 @@ namespace BareMinimum.Vitals
                 Ink.Bar(outerL, cover, edge, plateTop - cover, ink);
                 Ink.Bar(r + gapW, cover, edge, plateTop - cover, ink);
 
-                // THE CORNERS OF THE BAND: a compass at the left, the speed and revs at the right.
-                Corners(cfg, l, r, outerR, bandTop, cover, edge + leftGapW, strength);
+                // THE BAND: the compass in the middle, the street at the left, the suburb at the right.
+                Band(cfg, l, r, outerL, outerR, bandTop, cover, edge + leftGapW, strength);
 
                 if (leftGapW > 0f) Ink.Bar(l - leftGapW, cover, leftGapW, plateTop - cover, mat);
                 if (gapW > 0f) Ink.Bar(r, cover, gapW, plateTop - cover, mat);
@@ -145,13 +154,12 @@ namespace BareMinimum.Vitals
 
             Ink.Bar(outerL, plateTop, outerR - outerL, foot - plateTop, ink);
 
+            // THE PLATE: the dash lights at the left and the speed at the right, in a car -- or,
+            // with no band to hold them, the words, where they used to be.
+            if (cfg.MinimapFrame) Plate(cfg, outerL, outerR, plateTop, foot, edge + leftGapW, strength);
+            else if (cfg.MinimapLabel) Words(cfg, outerL, outerR, plateTop, foot - plateTop, edge + gapW, strength);
+
             if (!cfg.MinimapLabel) return;
-
-            Hide(AreaName);
-            Hide(StreetName);
-
-            Names();
-            Words(cfg, outerL, outerR, plateTop, foot - plateTop, edge + gapW, strength);
 
             if (!_measured)
             {
@@ -190,23 +198,18 @@ namespace BareMinimum.Vitals
         private readonly Icon _brake = new Icon("dash_brake.png");
 
         /// <summary>
-        /// The compass in the middle of the band and the speedo at the right, in the band the top
-        /// of the frame makes. Nothing if the band is too thin to hold a line of text: TopCover
-        /// at nought is a plain line, and a plain line has no corners worth writing in.
+        /// The top band: the compass in the middle, and the words either side of it -- the
+        /// street at the left, the suburb at the right, each cut to the room it has. The
+        /// compass is a tape, ticks every fifteen degrees and the cardinals scrolling under a
+        /// pointer as you turn, and it reads from its centre, which is why it keeps the middle.
         ///
-        /// THE COMPASS IS A TAPE, NOT A LETTER. A letter says "NW" and changes eight times a
-        /// circle; a tape of ticks and letters scrolling under a fixed pointer moves with every
-        /// degree, which is what "telling what direction you are going" looks like on a dash.
-        /// The bearing is the thing you are IN: the car's when driving, yours on foot.
-        ///
-        /// THE SPEED IS IN A VEHICLE ONLY. A man walking at 6 KPH is not information, and a
-        /// zero standing still is a fault light. The revs beside it are seven segments that
-        /// light with the engine, the last two warm and the last red, so the redline reads
-        /// without a number.
+        /// THE SPEED AND THE DASH LIGHTS, WHICH HAD THE BAND'S CORNERS, ARE ON THE PLATE NOW,
+        /// and the words, which had the plate, are up here. Asked for; and it puts the two
+        /// things you read while driving together at the foot, nearest the bars.
         /// </summary>
-        private void Corners(Settings cfg, float l, float r, float outerR, float top, float bottom, float pad, float strength)
+        private void Band(Settings cfg, float l, float r, float outerL, float outerR, float top, float bottom, float pad, float strength)
         {
-            if (!cfg.MinimapCompass && !cfg.MinimapSpeedo && !cfg.MinimapDash) return;
+            if (!cfg.MinimapCompass && !cfg.MinimapLabel) return;
 
             var h = bottom - top;
             if (h < 0.012f) return;
@@ -216,7 +219,6 @@ namespace BareMinimum.Vitals
             catch { return; }
 
             var k = cfg.HudOpacity * strength;
-            var padX = pad * 1.5f;
 
             // A text scale that fits the band -- a step up from the plate's, on request -- shrunk
             // if the band is thinner than that needs.
@@ -229,28 +231,89 @@ namespace BareMinimum.Vitals
             Vehicle car = null;
             try { if (me.IsInVehicle()) car = me.CurrentVehicle; } catch { car = null; }
 
+            // The compass's span, drawn or not: the words keep clear of it.
+            var tapeW = (r - l) * TapeShare;
+            var tapeL = (l + r) * 0.5f - tapeW * 0.5f;
+            var tapeR = tapeL + tapeW;
+
             if (cfg.MinimapCompass)
             {
-                // IN THE MIDDLE OF THE BAND, not the corner: a compass reads from its centre
-                // pointer, and the middle of the map's top edge is where a pointer for "the way
-                // you are facing" belongs. The speedo keeps the right-hand corner.
-                var tapeW = (r - l) * TapeShare;
-                Compass(me, car, (l + r) * 0.5f - tapeW * 0.5f, midY, tapeW, h, scale, k);
+                Compass(me, car, tapeL, midY, tapeW, h, scale, k);
             }
 
-            if (cfg.MinimapSpeedo && car != null && car.Exists())
+            if (cfg.MinimapLabel)
             {
-                // AS FAR RIGHT AS THE FRAME GOES, to match the dash lights at the other end: from
-                // the frame's outer edge, a quarter of its thickness in.
-                Speedo(cfg, car, outerR - pad * 0.25f, midY, h, scale, th, k);
+                // From the frame's outer edges, half its thickness in; up to a thickness short
+                // of the compass, or to the middle when there is none.
+                var inset = pad * 0.5f;
+                var mid = (l + r) * 0.5f;
+                var streetR = cfg.MinimapCompass ? tapeL - pad : mid - inset;
+                var zoneL = cfg.MinimapCompass ? tapeR + pad : mid + inset;
+
+                Label(outerL + inset, streetR, zoneL, outerR - inset, top, h, scale, k);
+            }
+        }
+
+        /// <summary>
+        /// The plate under the map: the dash lights at the left; the speed with its unit, gear
+        /// and revs at the right. In a vehicle only -- on foot the plate is the bars' plate and
+        /// nothing more.
+        /// </summary>
+        private void Plate(Settings cfg, float outerL, float outerR, float top, float bottom, float pad, float strength)
+        {
+            if (!cfg.MinimapSpeedo && !cfg.MinimapDash) return;
+
+            var h = bottom - top;
+            if (h < 0.012f) return;
+
+            Vehicle car;
+            try
+            {
+                var me = Game.Player.Character;
+                if (me == null || !me.Exists() || !me.IsInVehicle()) return;
+                car = me.CurrentVehicle;
+                if (car == null || !car.Exists()) return;
+            }
+            catch { return; }
+
+            var k = cfg.HudOpacity * strength;
+
+            var scale = 0.235f;
+            var th = Hud.Height(scale, Hud.FontLabel);
+            if (th > h * 0.92f) { scale *= h * 0.92f / th; th = Hud.Height(scale, Hud.FontLabel); }
+
+            var midY = top + h * 0.5f;
+
+            // Each as far into its corner as the frame goes: from the frame's own outer edge,
+            // a quarter of its thickness in.
+            if (cfg.MinimapSpeedo) Speedo(cfg, car, outerR - pad * 0.25f, midY, h, scale, th, k);
+            if (cfg.MinimapDash) Dash(car, outerL + pad * 0.25f, midY, h, k);
+        }
+
+        /// <summary>The street, left-aligned in its room; the suburb, right-aligned in its, dimmer and a touch smaller. Each cut to fit.</summary>
+        private void Label(float streetL, float streetR, float zoneL, float zoneR, float top, float h, float scale, float k)
+        {
+            var street = _street;
+            var zone = _zone;
+
+            var zoneScale = scale * 0.92f;
+            var textH = Hud.Height(scale, Hud.FontLabel);
+            var y = top + (h - textH) / 2f - 0.0015f;
+
+            var streetRoom = streetR - streetL;
+            if (!string.IsNullOrEmpty(street) && streetRoom > 0.004f)
+            {
+                street = Kit.Fit(street, streetRoom, scale, Hud.FontLabel);
+                Hud.Text(street, streetL, y, scale,
+                         Palette.Alpha(Palette.Text, (int)(240f * k)), Hud.FontLabel, false, false, false);
             }
 
-            if (cfg.MinimapDash && car != null && car.Exists())
+            var zoneRoom = zoneR - zoneL;
+            if (!string.IsNullOrEmpty(zone) && zoneRoom > 0.004f)
             {
-                // AS FAR LEFT AS THE FRAME GOES: from the frame's own outer edge, not the map's,
-                // with a quarter of the frame's thickness of breathing room. Asked for.
-                var farLeft = Math.Max(0f, l - pad) + pad * 0.25f;
-                Dash(car, farLeft, midY, h, k);
+                zone = Kit.Fit(zone, zoneRoom, zoneScale, Hud.FontLabel);
+                Hud.Text(zone, zoneR, y + 0.001f, zoneScale,
+                         Palette.Alpha(Palette.TextDim, (int)(215f * k)), Hud.FontLabel, false, true, false);
             }
         }
 

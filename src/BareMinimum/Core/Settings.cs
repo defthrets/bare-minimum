@@ -926,7 +926,7 @@ namespace BareMinimum.Core
         /// <summary>A frame round the minimap in the bars' own black, so the map and the row read as one instrument.</summary>
         public bool MinimapFrame = true;
 
-        /// <summary>The street and the suburb, always, written into the frame's foot where the game's strip was.</summary>
+        /// <summary>The street and the suburb, always, written into the frame's top band either side of the compass.</summary>
         public bool MinimapLabel = true;
 
         /// <summary>
@@ -947,7 +947,7 @@ namespace BareMinimum.Core
         public bool MinimapCompass = true;
         public bool MinimapSpeedo = true;
 
-        /// <summary>The dashboard lights at the left of the band, in a vehicle: oil (for the engine), headlamp, handbrake.</summary>
+        /// <summary>The dashboard lights at the left of the plate under the map, in a vehicle: oil (for the engine), headlamp, handbrake.</summary>
         public bool MinimapDash = true;
 
         /// <summary>KPH or MPH.</summary>

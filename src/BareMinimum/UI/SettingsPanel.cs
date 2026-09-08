@@ -710,7 +710,8 @@ namespace BareMinimum.UI
 
             Bool("Street and suburb", "Minimap", "Label",
                  () => _cfg.MinimapLabel, v => _cfg.MinimapLabel = v,
-                 "Where you are, always, written into the foot of the minimap's frame.");
+                 "Where you are, always: the street at the left of the frame's top band, the suburb at " +
+                 "the right, either side of the compass.");
 
             Float("Frame gap", "Minimap", "FrameGap",
                   () => _cfg.MinimapFrameGap, v => _cfg.MinimapFrameGap = v,
@@ -726,12 +727,12 @@ namespace BareMinimum.UI
 
             Bool("Speedo in the frame", "Minimap", "Speedo",
                  () => _cfg.MinimapSpeedo, v => _cfg.MinimapSpeedo = v,
-                 "Your speed and the engine's revs at the top right of the frame, in a vehicle.",
+                 "Your speed, the gear and the engine's revs at the bottom right of the frame, in a vehicle.",
                  () => _cfg.MinimapFrame, "~y~Turn the minimap frame ON first.");
 
             Bool("Dash lights in the frame", "Minimap", "Dash",
                  () => _cfg.MinimapDash, v => _cfg.MinimapDash = v,
-                 "Oil, headlamp and handbrake at the top left of the frame, in a vehicle. The oil " +
+                 "Oil, headlamp and handbrake at the bottom left of the frame, in a vehicle. The oil " +
                  "can carries the engine's health. " +
                  "Dim at rest, in colour when they have something to say.",
                  () => _cfg.MinimapFrame, "~y~Turn the minimap frame ON first.");
