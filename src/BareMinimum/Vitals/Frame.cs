@@ -137,7 +137,7 @@ namespace BareMinimum.Vitals
                 Ink.Bar(r + gapW, cover, edge, plateTop - cover, ink);
 
                 // THE CORNERS OF THE BAND: a compass at the left, the speed and revs at the right.
-                Corners(cfg, l, r, bandTop, cover, edge + leftGapW, strength);
+                Corners(cfg, l, r, outerR, bandTop, cover, edge + leftGapW, strength);
 
                 if (leftGapW > 0f) Ink.Bar(l - leftGapW, cover, leftGapW, plateTop - cover, mat);
                 if (gapW > 0f) Ink.Bar(r, cover, gapW, plateTop - cover, mat);
@@ -202,7 +202,7 @@ namespace BareMinimum.Vitals
         /// light with the engine, the last two warm and the last red, so the redline reads
         /// without a number.
         /// </summary>
-        private void Corners(Settings cfg, float l, float r, float top, float bottom, float pad, float strength)
+        private void Corners(Settings cfg, float l, float r, float outerR, float top, float bottom, float pad, float strength)
         {
             if (!cfg.MinimapCompass && !cfg.MinimapSpeedo && !cfg.MinimapDash) return;
 
@@ -238,7 +238,9 @@ namespace BareMinimum.Vitals
 
             if (cfg.MinimapSpeedo && car != null && car.Exists())
             {
-                Speedo(cfg, car, r - padX, midY, h, scale, th, k);
+                // AS FAR RIGHT AS THE FRAME GOES, to match the dash lights at the other end: from
+                // the frame's outer edge, a quarter of its thickness in.
+                Speedo(cfg, car, outerR - pad * 0.25f, midY, h, scale, th, k);
             }
 
             if (cfg.MinimapDash && car != null && car.Exists())
