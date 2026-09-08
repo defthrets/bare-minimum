@@ -59,6 +59,9 @@ namespace BareMinimum.UI
         /// <summary>How much the chosen picture swells as its plate comes up.</summary>
         private const float PickGrow = 0.10f;
 
+        /// <summary>The band of the item's own colour along the foot of the chosen tile.</summary>
+        private const float FootLight = 0.0026f;
+
         private const int Columns = 5;
 
         /// <summary>Rows on screen. Twenty tiles, which is the default pocket exactly.</summary>
@@ -516,7 +519,15 @@ namespace BareMinimum.UI
                     var show = arrive * land;
                     if (show <= 0.01f) continue;
 
-                    var tx = x + col * tileW;
+                    // CENTRED ON WHAT IS IN THE ROW, not filled from the left. The grid is
+                    // five wide whatever you are carrying, so three things used to sit in the
+                    // corner of a panel built for twenty with the rest of it empty. The panel
+                    // cannot shrink -- the head has to fit "what you are carrying" and the
+                    // count -- so the tiles move to the middle of it instead.
+                    var rowFirst = row * Columns;
+                    var inRow = Math.Min(Columns, onPage - rowFirst);
+
+                    var tx = x + (wide - inRow * tileW) * 0.5f + col * tileW;
                     var ty = y + row * tileH + Theme.EnterRise * 0.5f * (1f - land);
 
                     var picked = at == _index;
@@ -587,11 +598,23 @@ namespace BareMinimum.UI
 
             var tint = dope ? Food.Dope.Effect(id).Tint : item.Tint;
 
+            // A LINE OF ITS OWN COLOUR ALONG THE FOOT of the chosen tile. One rectangle, and
+            // it does the job the cursor frame cannot: the frame says WHICH, this says WHAT,
+            // because it is the only place a taco is orange and a bag of meth is ice blue
+            // before you have read a word.
+            if (picked && lit > 0.01f)
+            {
+                Hud.Bar(tx, ty + th - FootLight, tw, FootLight,
+                        Palette.Alpha(tint, (int)(225f * show * lit)));
+            }
+
             if (icon != null && !icon.Missing)
             {
                 var swell = picked ? 1f + PickGrow * grown : 1f;
 
-                var tall = th * 0.56f * swell;
+                // A LITTLE MORE OF THE TILE THAN IT USED TO TAKE. At 56% there was as much
+                // dead square around the picture as there was picture.
+                var tall = th * 0.62f * swell;
                 var wideIcon = Hud.ToX(tall);
 
                 // The item's own colour on the dark tile, brightening toward white as the
@@ -601,7 +624,14 @@ namespace BareMinimum.UI
 
                 var ink = Theme.Ink(Palette.Alpha(lively, (int)(238f * show)), lit);
 
-                icon.DrawSized(tx + tw / 2f, ty + th * 0.46f, wideIcon, tall, ink);
+                // THE CHOSEN ONE DRIFTS. A slow half-millimetre rise and fall, which is
+                // under the threshold you would call movement and over the one that makes a
+                // grid of pictures look printed on. Off with the rest of the motion.
+                var drift = picked && Theme.Motion
+                    ? (float)Math.Sin(Game.GameTime / 620.0) * 0.0011f * grown
+                    : 0f;
+
+                icon.DrawSized(tx + tw / 2f, ty + th * 0.46f + drift, wideIcon, tall, ink);
             }
 
             // How many, on a chip in the corner. Drawn for every stack including a single one:
@@ -613,13 +643,17 @@ namespace BareMinimum.UI
             // which is which lives in the other mod's drugs.json.
             var n = dope ? Food.Dope.Chip(id) : _pantry.CountOf(id).ToString();
 
-            var chipW = Hud.ToX(0.013f);
+            // SIZED TO THE NUMBER. It was a fixed box, which is too wide round a 1 and too
+            // tight round a 32 -- and a drug counts itself in grams, so three characters and
+            // a decimal point happen.
             const float chipH = 0.013f;
+
+            var chipW = Hud.Width(n, 0.22f, Hud.FontLabel) + Hud.ToX(0.007f);
 
             Hud.Bar(tx + tw - chipW, ty + th - chipH, chipW, chipH,
                     Color.FromArgb((int)(215f * show), 12, 12, 15));
 
-            Hud.TextRight(n, tx + tw - 0.0015f, ty + th - chipH + 0.0005f, 0.22f,
+            Hud.TextRight(n, tx + tw - 0.0022f, ty + th - chipH + 0.0005f, 0.22f,
                           Palette.Alpha(Palette.Text, (int)(255f * show)), Hud.FontLabel, false);
         }
 
@@ -674,12 +708,89 @@ namespace BareMinimum.UI
 
             Theme.Caption(name, tx, y + 0.008f, grown, 0.32f);
 
-            if (!string.IsNullOrEmpty(desc))
+            // WHAT IT DOES, on the right, in its own colour.
+            //
+            // THE ONE FACT THE PANEL DID NOT CARRY. A name and a line of flavour is what a
+            // shelf says; a pocket is opened by somebody deciding which of these to eat, and
+            // the number that decides it was on no screen in this mod outside the shop. It is
+            // right-aligned rather than under the name because the card has one line of room
+            // left and the name already has it.
+            var says = Says(at);
+            var room = wide - 0.014f;
+
+            if (!string.IsNullOrEmpty(says))
             {
-                Hud.Text(Kit.Fit(desc, wide - 0.014f, 0.25f, Hud.FontBody), tx, y + 0.031f, 0.25f,
+                var tone = IsDope(at) ? Food.Dope.Effect(id).Tint
+                                      : (_menu.Find(id) ?? new Item()).Tint;
+
+                var sw = Hud.Width(says, 0.26f, Hud.FontLabel);
+
+                Hud.TextRight(says, x + wide - 0.004f, y + 0.010f, 0.26f,
+                              Palette.Alpha(tone, (int)((150f + 105f * grown) * arrive)),
+                              Hud.FontLabel);
+
+                room -= sw + 0.010f;
+            }
+
+            if (!string.IsNullOrEmpty(desc) && room > 0.02f)
+            {
+                Hud.Text(Kit.Fit(desc, room, 0.25f, Hud.FontBody), tx, y + 0.031f, 0.25f,
                          Palette.Alpha(Palette.TextDim, (int)((110f + 90f * grown) * arrive)),
                          Hud.FontBody);
             }
+        }
+
+        /// <summary>
+        /// The one line that says what taking this will do to you. "" when it does nothing
+        /// worth a word.
+        /// </summary>
+        ///
+        /// <remarks>
+        /// THE METER THAT MOVES MOST, and only that one. Every item touches more than one
+        /// number -- a beer is food and drink and drunk at once -- and a card that listed all
+        /// of them would be a spreadsheet in a corner nobody reads. Whichever moves hardest is
+        /// the reason you would pick this tile over the one beside it.
+        /// </remarks>
+        private string Says(int at)
+        {
+            var id = IdAt(at);
+            if (id == null) return "";
+
+            try
+            {
+                if (IsDope(at))
+                {
+                    var d = Food.Dope.Effect(id);
+
+                    // Whole meter means it fills it, however empty it was -- see Dope.
+                    if (d.Wake >= 1f) return "WIDE AWAKE";
+
+                    if (Math.Abs(d.Wake) >= Math.Abs(d.Hunger))
+                        return d.Wake > 0f ? "+" + Pct(d.Wake) + "% RESTED"
+                             : d.Wake < 0f ? Pct(d.Wake) + "% RESTED" : "";
+
+                    return d.Hunger > 0f ? "+" + Pct(d.Hunger) + "% FED"
+                         : d.Hunger < 0f ? Pct(d.Hunger) + "% FED" : "";
+                }
+
+                var item = _menu.Find(id);
+                if (item == null) return "";
+
+                if (item.Booze > 0f && item.Hunger <= 0.02f) return "A DRINK";
+
+                if (item.Hunger >= Math.Abs(item.Wake) && item.Hunger > 0.001f)
+                    return "+" + Pct(item.Hunger) + "% FED";
+
+                if (item.Wake > 0.001f) return "+" + Pct(item.Wake) + "% RESTED";
+
+                return "";
+            }
+            catch { return ""; }
+        }
+
+        private static string Pct(float v)
+        {
+            return ((int)Math.Round(v * 100f)).ToString();
         }
 
         /// <summary>The keys as caps, with the way out in the same corner as every other screen.</summary>
