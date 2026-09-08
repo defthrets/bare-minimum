@@ -467,6 +467,7 @@ namespace BareMinimum.Venues
                         Name = node["name"].AsString("the room"),
                         Ipl = node["ipl"].AsString(""),
                         Online = node["online"].AsBool(false),
+                        Origin = node["origin"].AsBool(false),
                         Anchor = new Vector3(node["x"].AsFloat(0f), node["y"].AsFloat(0f), node["z"].AsFloat(0f)),
                         Heading = node["heading"].AsFloat(0f)
                     };

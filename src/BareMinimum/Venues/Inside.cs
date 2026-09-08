@@ -49,6 +49,13 @@ namespace BareMinimum.Venues
         public Vector3 Anchor;
         public float Heading;
 
+        /// <summary>
+        /// Whether the interior's own origin is a place to stand. True for a shell parked in
+        /// empty map space, whose origin is the middle of the room; false for any real building,
+        /// whose origin is wherever it was left. Off unless the room says otherwise.
+        /// </summary>
+        public bool Origin;
+
         /// <summary>Other places the room might be, tried in order when the anchor has nothing.</summary>
         public readonly List<Vector3> Also = new List<Vector3>();
     }
@@ -91,9 +98,31 @@ namespace BareMinimum.Venues
         private const int StreamCeilingMs = 8000;
         private const int StreamStepMs = 100;
 
-        /// <summary>How far above the guess the floor is looked for, and how far off it is believed.</summary>
-        private const float FloorProbeUp = 3f;
-        private const float FloorProbeBand = 4f;
+        /// <summary>
+        /// Where the floor is looked for, and what counts as one.
+        /// </summary>
+        /// 
+        /// <remarks>
+        /// THIS PUT A MAN ON A ROOF. The probe used to start three metres above the anchor
+        /// and believe any surface within four, which is right for a shell buried in empty
+        /// space and wrong for a building: Rob's Liquor in Del Perro is one storey, its roof
+        /// is 2.6 m above where you stand at the counter, and a probe that starts above the
+        /// roof finds the roof. The log said it plainly -- in the room, interior found, floor
+        /// 42.78 against a counter at 40.16 -- and the wander-out rule then noticed he was
+        /// not indoors and sent him home eighteen seconds later.
+        /// 
+        /// The anchor is where a PED STOOD, read off the HUD, and a standing ped's position is
+        /// about a metre above its floor. So the probe starts just above him and only believes
+        /// a floor BELOW him, between a third of a metre and two and a half down. A roof is
+        /// above him and a counter top is level with him; neither qualifies. When nothing
+        /// qualifies he stands where the survey stood, which was fine in the first place.
+        /// </remarks>
+        private const float FloorProbeUp = 0.6f;
+        private const float FloorBelowMin = 0.3f;
+        private const float FloorBelowMax = 2.5f;
+
+        /// <summary>A ped's position is its pelvis: this far above the floor it stands on.</summary>
+        private const float StandHeight = 1.0f;
 
         /// <summary>
         /// How far a room's own origin may be from the guess before it is a different room.
@@ -374,10 +403,12 @@ namespace BareMinimum.Venues
 
                 Function.Call(Hash.NEW_LOAD_SCENE_STOP);
 
-                // THE ROOM'S OWN MIDDLE, only if the guess left him outside it. A coordinate
-                // can find a room and still be on the wrong side of one of its walls; the
-                // interior knows its origin, and offset zero from that is somewhere to stand.
-                if (interior != 0 && inRoom == 0)
+                // THE ROOM'S OWN MIDDLE, only if the guess left him outside it -- and only
+                // for a room that says so. Offset zero from a SHELL's origin is the middle of
+                // the room, which is why Posted Up leans on it; offset zero from a real
+                // building's interior is wherever the map artist left it, a corner or the roof
+                // slab as easily as the floor. A walked anchor already knows where to stand.
+                if (room.Origin && interior != 0 && inRoom == 0)
                 {
                     var origin = Function.Call<Vector3>(Hash.GET_OFFSET_FROM_INTERIOR_IN_WORLD_COORDS,
                                                         interior, 0f, 0f, 0f);
@@ -393,17 +424,27 @@ namespace BareMinimum.Venues
                     }
                 }
 
-                // The floor the GAME reports, not the height somebody typed.
+                // The floor the GAME reports, if it reports one BELOW him. See FloorProbeUp.
                 var floorZ = 0f;
                 var floorFound = Ground(to, out floorZ);
 
-                if (floorFound && Math.Abs(floorZ - to.Z) <= FloorProbeBand)
+                var below = to.Z - floorZ;
+                var floorOk = floorFound && below >= FloorBelowMin && below <= FloorBelowMax;
+
+                if (floorOk)
                 {
-                    me.Position = new Vector3(to.X, to.Y, floorZ + 0.05f);
+                    me.Position = new Vector3(to.X, to.Y, floorZ + StandHeight);
+                }
+                else if (floorFound)
+                {
+                    Log.Info(room.Name + ": the surface found at z " + floorZ.ToString("0.00") +
+                             " is not a floor under a man stood at " + to.Z.ToString("0.00") +
+                             " -- standing him where the survey stood.");
                 }
 
                 Log.Info("Into " + room.Name + " for " + v.Name + ": interior=" + interior +
-                         ", he is in interior=" + inRoom + ", floor=" + (floorFound ? floorZ.ToString("0.00") : "none") +
+                         ", he is in interior=" + inRoom + ", stood at z " + to.Z.ToString("0.00") +
+                         ", floor=" + (floorFound ? floorZ.ToString("0.00") + (floorOk ? "" : " (ignored)") : "none") +
                          ", waited " + waited + "ms.");
 
                 // Nothing under him and not in a room is open air. Back out the door he came
