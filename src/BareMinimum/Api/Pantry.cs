@@ -197,6 +197,52 @@ namespace BareMinimum.Api
             catch { return unchecked((int)0xFFEBEBF0); }
         }
 
+        /// <summary>
+        /// EVERYTHING A SHOP WOULD SELL, so another mod can offer the food rather than
+        /// only hand it over.
+        ///
+        /// Ids alone. The name, the picture, the tint, what it does and what it costs are
+        /// each their own call above, so a caller takes what it needs and nothing here has
+        /// to agree with the other side about the shape of a struct -- which across an
+        /// assembly boundary is the thing that breaks.
+        ///
+        /// InShop only. The catalogue carries things a counter does not sell -- what a
+        /// mission hands you, what a fridge starts with -- and a delivery menu with those
+        /// on it would be offering food that has no price.
+        ///
+        /// ADDED WITHOUT BUMPING ApiVersion, for the reason Mark gives: a caller written
+        /// against the old surface never asks for a method it does not know about.
+        /// </summary>
+        public static string[] Menu()
+        {
+            try
+            {
+                if (_menu == null) return new string[0];
+
+                var ids = new System.Collections.Generic.List<string>();
+
+                foreach (var item in _menu.Items)
+                {
+                    if (item == null || !item.InShop || string.IsNullOrEmpty(item.Id)) continue;
+                    ids.Add(item.Id);
+                }
+
+                return ids.ToArray();
+            }
+            catch { return new string[0]; }
+        }
+
+        /// <summary>What one costs over the counter. Nought for anything not in the catalogue.</summary>
+        public static int PriceOf(string id)
+        {
+            try
+            {
+                var item = _menu == null ? null : _menu.Find(id);
+                return item == null ? 0 : item.Price;
+            }
+            catch { return 0; }
+        }
+
         /// <summary>What it is: "Food", "Drinks" or "Snacks".</summary>
         public static string CategoryOf(string id)
         {

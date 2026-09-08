@@ -6,6 +6,12 @@
 0.2.0  --  Vitals moves in: health, armour and energy, one row of five
 -------------------------------------------------------------------------------
 
+  THE MENU GOES OVER THE BRIDGE. Another mod could be handed food and could take
+  it away, but had no way to ask what food EXISTS or what any of it costs -- so
+  it could not offer you a shelf. Two more calls on the API: what a counter
+  would sell, and the price of one. Nothing about this changes anything in this
+  mod; it is what Posted Up's delivery orders from.
+
   THE ROW STOPPED TAKING OTHER MODS' PANELS OFF THE SCREEN. Rectangles come
   out of one list the game keeps for the whole machine, and once it is full
   everything handed over after that is dropped -- so the script that pays for
