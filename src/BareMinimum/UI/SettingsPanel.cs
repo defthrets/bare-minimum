@@ -551,7 +551,7 @@ namespace BareMinimum.UI
                  () => _cfg.SleepInCars, v => _cfg.SleepInCars = v,
                  "Stopped, engine off, no wanted level.");
 
-            Float("Hold to doze off", "Sleeping", "CarHoldSeconds",
+            Float("Hold to sleep in car", "Sleeping", "CarHoldSeconds",
                   () => _cfg.CarSleepHoldSeconds, v => _cfg.CarSleepHoldSeconds = v,
                   0.25f, 0f, 5f, "0.00",
                   "Seconds to HOLD the interact in a car. 0 is a tap. In a car that button " +
@@ -587,7 +587,7 @@ namespace BareMinimum.UI
 
             Float("Car hours", "Sleeping", "CarHours",
                   () => _cfg.CarHours, v => _cfg.CarHours = v,
-                  1f, 1f, 24f, "0", "How long a doze in a car lasts.");
+                  1f, 1f, 24f, "0", "How long a sleep in the car lasts.");
 
             Group("SHOPS");
 

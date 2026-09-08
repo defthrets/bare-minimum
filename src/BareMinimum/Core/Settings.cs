@@ -244,7 +244,7 @@ namespace BareMinimum.Core
         public bool SleepInCars = true;
 
         /// <summary>
-        /// How long the interact has to be HELD to doze off in a car. Seconds; 0 is a tap.
+        /// How long the interact has to be HELD to sleep in a car. Seconds; 0 is a tap.
         ///
         /// A CAR ONLY, and not a bed. In a car the interact is the same button that orders at
         /// a drive-through, so a tap meant for lunch put you to sleep instead -- which is what
@@ -260,7 +260,7 @@ namespace BareMinimum.Core
         /// <summary>Game hours a proper bed advances the clock by.</summary>
         public float BedHours = 8f;
 
-        /// <summary>Game hours dozing in a car advances the clock by.</summary>
+        /// <summary>Game hours a sleep in a car advances the clock by.</summary>
         public float CarHours = 4f;
 
         /// <summary>

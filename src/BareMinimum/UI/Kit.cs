@@ -347,17 +347,20 @@ namespace BareMinimum.UI
         /// </summary>
         ///
         /// <remarks>
-        /// THE ONE LETTER HERE THAT WAS NOT READ OFF A SCREEN. The four above are the frontend
-        /// buttons and this mod's own menus prove them every time one is opened. Context is a
-        /// gameplay control, nothing shipped on this machine maps it to a button, and the
-        /// game's own glyph for it only renders inside the help box -- outside it the token
-        /// came out raw, which is how "b__7" ended up in front of people.
+        /// D-PAD RIGHT, READ OFF A SCREEN. This shipped as "A" for an afternoon, on the guess
+        /// that the interact shares a button with accept. It does not: INPUT_CONTEXT is the
+        /// right of the D-pad on a pad, which is the button the game's own shop doors ask for,
+        /// and the first controller player to see the chip said so.
         ///
-        /// So it is written down in one place, next to the letters that are certain, rather
-        /// than spelled into a prompt somewhere. If it is wrong on a pad it is wrong here and
-        /// nowhere else.
+        /// WORDS, NOT AN ARROW. The obvious cap is a right-pointing triangle, and nothing in
+        /// this mod has ever drawn one -- the condensed face renders a glyph it lacks as a
+        /// blank, and a blank cap is the vanishing-cap bug back in a new coat. The game's own
+        /// name for the button is made of letters the font certainly has, and it is the same
+        /// name on every pad layout, which "A" never was.
+        ///
+        /// Written down in one place, next to the letters that are certain.
         /// </remarks>
-        public static string Interact { get { return Hud.OnPad ? "A" : null; } }
+        public static string Interact { get { return Hud.OnPad ? "D-PAD RIGHT" : null; } }
 
         // ======================================================================
         // Tags and words

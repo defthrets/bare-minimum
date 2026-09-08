@@ -309,7 +309,7 @@ namespace BareMinimum.Needs
 
                 var at = need <= 0 ? 1f : got / (float)need;
 
-                UI.Hint.Show("Dozing off", Core.Pad.Cap(_cfg.InteractKey), at < 0f ? 0f : at);
+                UI.Hint.Show("Sleeping in the car", Core.Pad.Cap(_cfg.InteractKey), at < 0f ? 0f : at);
                 return;
             }
 
@@ -329,7 +329,7 @@ namespace BareMinimum.Needs
             // raw token comes out instead -- "t_E" on a keyboard and "b__7" on a pad. So the
             // chip is handed the KEY and draws its own cap for it.
             UI.Hint.Show((hold ? "Hold " : "Press ") + "to " +
-                         (where == Bunk.Bed ? "sleep" : "doze off"),
+                         (where == Bunk.Bed ? "sleep" : "sleep in the car"),
                          Core.Pad.Cap(_cfg.InteractKey));
         }
 
