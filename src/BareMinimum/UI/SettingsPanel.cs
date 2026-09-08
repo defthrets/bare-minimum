@@ -729,6 +729,12 @@ namespace BareMinimum.UI
                  "Your speed and the engine's revs at the top right of the frame, in a vehicle.",
                  () => _cfg.MinimapFrame, "~y~Turn the minimap frame ON first.");
 
+            Bool("Dash lights in the frame", "Minimap", "Dash",
+                 () => _cfg.MinimapDash, v => _cfg.MinimapDash = v,
+                 "Engine, headlamp, oil and handbrake at the top left of the frame, in a vehicle. " +
+                 "Dim at rest, in colour when they have something to say.",
+                 () => _cfg.MinimapFrame, "~y~Turn the minimap frame ON first.");
+
             Choice("Speed units", "Minimap", "SpeedUnits", new[] { "KPH", "MPH" },
                    () => string.Equals(_cfg.MinimapSpeedUnits, "MPH", StringComparison.OrdinalIgnoreCase) ? 1 : 0,
                    v => _cfg.MinimapSpeedUnits = v == 1 ? "MPH" : "KPH",

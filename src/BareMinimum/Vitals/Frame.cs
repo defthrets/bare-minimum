@@ -5,6 +5,7 @@ using GTA.Native;
 using BareMinimum.Core;
 using BareMinimum.UI;
 using Hud = BareMinimum.UI.Draw;
+using Icon = BareMinimum.UI.Icon;
 
 namespace BareMinimum.Vitals
 {
@@ -180,6 +181,12 @@ namespace BareMinimum.Vitals
 
         private static readonly string[] Cardinals = { "N", "E", "S", "W" };
 
+        /// <summary>The dashboard lights, held open; a CustomSprite keeps a texture handle.</summary>
+        private readonly Icon _engine = new Icon("dash_engine.png");
+        private readonly Icon _lamp = new Icon("dash_lamp.png");
+        private readonly Icon _oil = new Icon("dash_oil.png");
+        private readonly Icon _brake = new Icon("dash_brake.png");
+
         /// <summary>
         /// The compass in the middle of the band and the speedo at the right, in the band the top
         /// of the frame makes. Nothing if the band is too thin to hold a line of text: TopCover
@@ -197,7 +204,7 @@ namespace BareMinimum.Vitals
         /// </summary>
         private void Corners(Settings cfg, float l, float r, float top, float bottom, float pad, float strength)
         {
-            if (!cfg.MinimapCompass && !cfg.MinimapSpeedo) return;
+            if (!cfg.MinimapCompass && !cfg.MinimapSpeedo && !cfg.MinimapDash) return;
 
             var h = bottom - top;
             if (h < 0.012f) return;
@@ -233,6 +240,82 @@ namespace BareMinimum.Vitals
             {
                 Speedo(cfg, car, r - padX, midY, h, scale, th, k);
             }
+
+            if (cfg.MinimapDash && car != null && car.Exists())
+            {
+                Dash(car, l + padX, midY, h, k);
+            }
+        }
+
+        /// <summary>
+        /// The dashboard lights, left to right from the corner: engine, headlamp, oil, handbrake.
+        ///
+        /// A DASH SHOWS ITS LIGHTS DIM, NOT ABSENT. Every symbol is there whenever you are in a
+        /// car, faint, and comes up in colour when it has something to say: the engine warms
+        /// from its resting grey through amber to red as the engine and the body take damage,
+        /// slowly, the way it was asked for; the lamp lights white when the headlights are on
+        /// and blue-white on high beam; the oil comes up amber when the engine is down to two
+        /// fifths and red when it is nearly gone or the oil has run out; the handbrake is red
+        /// for as long as it is pulled. A light that appears from nowhere is a fault the eye has
+        /// to find; a light that changes colour is read in place.
+        /// </summary>
+        private void Dash(Vehicle car, float x, float midY, float h, float k)
+        {
+            var size = h * 0.74f;
+            var wide = size / Ink.Aspect;
+            var step = wide * 1.45f;
+
+            float engine, body, oil;
+            bool lights, beams, brake;
+
+            try
+            {
+                engine = Ink.Clamp01(car.EngineHealth / 1000f);
+                body = Ink.Clamp01(car.BodyHealth / 1000f);
+                oil = car.OilLevel;
+                lights = car.AreLightsOn;
+                beams = car.AreHighBeamsOn;
+                brake = Game.IsControlPressed(Control.VehicleHandbrake);
+            }
+            catch
+            {
+                return;
+            }
+
+            var rest = Palette.Alpha(Color.FromArgb(255, 200, 205, 200), (int)(70f * k));
+
+            // ---- engine: grey at rest, red by the time the car is wrecked ----
+            var hurt = 1f - Math.Min(engine, body);
+            var engineTint = hurt < 0.05f
+                ? rest
+                : Ink.Alpha(Ink.Mix(Palette.Warn, Palette.Danger, Ink.Clamp01((hurt - 0.35f) / 0.5f)),
+                            (int)((90f + 150f * Ink.Clamp01(hurt / 0.6f)) * k));
+
+            // ---- the lamp: lit when the lights are on ----
+            var lampTint = !lights ? rest
+                : beams ? Palette.Alpha(Color.FromArgb(255, 200, 232, 255), (int)(245f * k))
+                        : Palette.Alpha(Color.FromArgb(255, 255, 246, 214), (int)(225f * k));
+
+            // ---- oil: pressure goes with the engine, and out with the oil ----
+            var oilTint = rest;
+            if (oil <= 0.05f || engine < 0.2f) oilTint = Palette.Alpha(Palette.Danger, (int)(235f * k));
+            else if (engine < 0.4f) oilTint = Palette.Alpha(Palette.Warn, (int)(225f * k));
+
+            // ---- handbrake: red while it is on ----
+            var brakeTint = brake ? Palette.Alpha(Palette.Danger, (int)(240f * k)) : rest;
+
+            var cx = x + wide * 0.5f;
+
+            Lamp(_engine, cx, midY, wide, size, engineTint); cx += step;
+            Lamp(_lamp, cx, midY, wide, size, lampTint); cx += step;
+            Lamp(_oil, cx, midY, wide, size, oilTint); cx += step;
+            Lamp(_brake, cx, midY, wide, size, brakeTint);
+        }
+
+        private static void Lamp(Icon icon, float cx, float cy, float w, float h, Color tint)
+        {
+            if (icon == null || icon.Missing) return;
+            icon.DrawSized(cx, cy, w, h, tint);
         }
 
         /// <summary>The tape: ticks every fifteen degrees, letters at the cardinals, a pointer in the middle.</summary>

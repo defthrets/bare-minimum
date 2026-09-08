@@ -941,6 +941,9 @@ namespace BareMinimum.Core
         public bool MinimapCompass = true;
         public bool MinimapSpeedo = true;
 
+        /// <summary>The dashboard lights at the left of the band, in a vehicle: engine, headlamp, oil, handbrake.</summary>
+        public bool MinimapDash = true;
+
         /// <summary>KPH or MPH.</summary>
         public string MinimapSpeedUnits = "KPH";
 
@@ -1452,6 +1455,7 @@ namespace BareMinimum.Core
                 cfg.MinimapTopCover = ini.GetFloat("Minimap", "TopCover", cfg.MinimapTopCover, 0f, 0.5f);
                 cfg.MinimapCompass = ini.GetBool("Minimap", "Compass", cfg.MinimapCompass);
                 cfg.MinimapSpeedo = ini.GetBool("Minimap", "Speedo", cfg.MinimapSpeedo);
+                cfg.MinimapDash = ini.GetBool("Minimap", "Dash", cfg.MinimapDash);
                 cfg.MinimapSpeedUnits = ini.GetString("Minimap", "SpeedUnits", cfg.MinimapSpeedUnits);
 
                 cfg.HudAnimate = ini.GetBool("HUD", "Animate", cfg.HudAnimate);

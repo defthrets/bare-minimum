@@ -778,6 +778,79 @@ def bolt():
     return img
 
 
+
+# ===========================================================================
+# The dashboard lights, for the corner of the minimap's frame: an engine, a headlamp, an oil
+# can and a handbrake, the way a dash draws them. White silhouettes, rim-free like the other
+# plate marks; the colour is the state, put on at draw time.
+# ===========================================================================
+
+def _ring(d, cx, cy, r, thick, start=0, end=360):
+    """A thick arc: the slice of the outer disc less the slice of the inner one."""
+    d.pieslice([s(cx - r), s(cy - r), s(cx + r), s(cy + r)], start, end, fill=WHITE)
+    d.pieslice([s(cx - r + thick), s(cy - r + thick), s(cx + r - thick), s(cy + r - thick)], start - 1, end + 1, fill=CLEAR)
+
+
+def dash_engine():
+    """An engine block: the body, the head sat forward on it, a sump under, a shaft out the back."""
+    img, d = canvas()
+
+    d.rounded_rectangle([s(58), s(104), s(198), s(186)], radius=s(12), fill=WHITE)     # the block
+    d.rounded_rectangle([s(88), s(70), s(150), s(112)], radius=s(8), fill=WHITE)       # the head
+    d.rectangle([s(112), s(52), s(126), s(72)], fill=WHITE)                            # the filler neck
+    d.rectangle([s(196), s(126), s(226), s(146)], fill=WHITE)                          # the shaft
+    d.rectangle([s(30), s(120), s(60), s(136)], fill=WHITE)                            # the front mount
+    d.rounded_rectangle([s(84), s(184), s(170), s(206)], radius=s(6), fill=WHITE)      # the sump
+
+    return img
+
+
+def dash_lamp():
+    """A headlamp: the D of the lens, and three beams going out from it, leaning down a little."""
+    img, d = canvas()
+
+    d.pieslice([s(26), s(70), s(130), s(186)], 90, 270, fill=WHITE)                    # the lens
+    d.rectangle([s(76), s(70), s(94), s(186)], fill=WHITE)                             # its flat back
+
+    for i in range(3):
+        y = 92 + i * 36
+        d.polygon([(s(110), s(y)), (s(226), s(y - 8)), (s(226), s(y + 6)), (s(110), s(y + 14))], fill=WHITE)
+
+    return img
+
+
+def dash_oil():
+    """An oil can: the body, a spout up to the right, a loop of a handle on top, a drop falling from the spout."""
+    img, d = canvas()
+
+    d.rounded_rectangle([s(60), s(122), s(170), s(184)], radius=s(14), fill=WHITE)     # the body
+    d.polygon([(s(160), s(134)), (s(222), s(92)), (s(236), s(108)), (s(176), s(160))], fill=WHITE)  # the spout
+    d.polygon([(s(26), s(146)), (s(62), s(132)), (s(62), s(166))], fill=WHITE)         # the lip at the back
+
+    _ring(d, 112, 116, 30, 14, 180, 360)                                                 # the handle
+    d.rectangle([s(82), s(114), s(96), s(126)], fill=WHITE)
+    d.rectangle([s(128), s(114), s(142), s(126)], fill=WHITE)
+
+    d.ellipse([s(220), s(146), s(240), s(170)], fill=WHITE)                             # the drop
+    d.polygon([(s(230), s(126)), (s(221), s(154)), (s(239), s(154))], fill=WHITE)
+
+    return img
+
+
+def dash_brake():
+    """The handbrake light: a ring with a mark in it, between two brackets."""
+    img, d = canvas()
+
+    _ring(d, 128, 128, 58, 16)                                                          # the ring
+    d.rounded_rectangle([s(120), s(92), s(136), s(140)], radius=s(6), fill=WHITE)      # the mark
+    d.ellipse([s(118), s(150), s(138), s(170)], fill=WHITE)
+
+    _ring(d, 128, 128, 92, 16, 130, 230)                                                # the left bracket
+    _ring(d, 128, 128, 92, 16, 310, 410)                                                # the right bracket
+
+    return img
+
+
 def main():
     print("Writing icons to " + OUT)
 
@@ -813,6 +886,12 @@ def main():
     save(heart(), "heart.png", outline=False)
     save(shield(), "shield.png", outline=False)
     save(bolt(), "bolt.png", outline=False)
+
+    # THE DASHBOARD LIGHTS, for the corner of the minimap's frame. Rim-free as well.
+    save(dash_engine(), "dash_engine.png", outline=False)
+    save(dash_lamp(), "dash_lamp.png", outline=False)
+    save(dash_oil(), "dash_oil.png", outline=False)
+    save(dash_brake(), "dash_brake.png", outline=False)
 
     print("Done. Deploy with:  .\\build.ps1 -Deploy -FreshData")
 
