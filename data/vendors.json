@@ -320,63 +320,63 @@
   "groups": {
     "stand": {
       "name": "Street Food",
-      "sprite": 648,
-      "colour": 1
+      "sprite": 52,
+      "colour": 66
     },
     "fastfood": {
       "name": "Fast Food",
-      "sprite": 89,
-      "colour": 5
+      "sprite": 52,
+      "colour": 51
     },
     "restaurant": {
       "name": "Restaurants",
-      "sprite": 546,
-      "colour": 5
+      "sprite": 52,
+      "colour": 49
     },
     "cafe": {
       "name": "Cafes",
-      "sprite": 546,
-      "colour": 2
+      "sprite": 52,
+      "colour": 50
     },
     "store": {
       "name": "Shops",
       "sprite": 52,
-      "colour": 5
+      "colour": 0
     },
     "liquor": {
       "name": "Liquor",
       "sprite": 93,
-      "colour": 2
+      "colour": 52
     },
     "bar": {
       "name": "Bars",
       "sprite": 93,
-      "colour": 5
+      "colour": 61
     },
     "smoke": {
       "name": "Smoke Shops",
       "sprite": 51,
-      "colour": 2
+      "colour": 55
     },
     "servo": {
       "name": "Convenience Store",
       "sprite": 739,
-      "colour": 3
+      "colour": 57
     },
     "pharmacy": {
       "name": "Pharmacy",
       "sprite": 153,
-      "colour": 1
+      "colour": 49
     },
     "produce": {
       "name": "Fruit Stalls",
       "sprite": 52,
-      "colour": 2
+      "colour": 69
     },
     "machine": {
       "name": "Vending Machines",
       "sprite": 52,
-      "colour": 3
+      "colour": 53
     }
   },
   "vendors": [
