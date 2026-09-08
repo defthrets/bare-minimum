@@ -655,7 +655,7 @@ namespace BareMinimum.Core
         /// should agree about how big an instrument is, and Fumes' numbers have been looked
         /// at on this monitor for months, which is worth more than a fresh guess.
         /// </summary>
-        public float HudBarLength = 0.206f;
+        public float HudBarLength = 0.23f;
 
         /// <summary>How WIDE a bar is, as a fraction of screen width. Fumes' figure.</summary>
         public float HudBarWidth = 0.0048f;
@@ -979,6 +979,18 @@ namespace BareMinimum.Core
         /// stop ending on the same line.
         /// </summary>
         public float MinimapBandHeight = 0.034f;
+
+        /// <summary>
+        /// How far BELOW the map the plate's top edge starts, as a fraction of screen height.
+        ///
+        /// The plate begins at the map's bottom edge and the frame's foot drops far enough to
+        /// keep a line of text under it -- which already reaches within a few pixels of the
+        /// bottom of the screen, because the map's bottom edge is barely above the safe line.
+        /// So there is no room left to clear the half of a clamped blip that hangs under the
+        /// map as well. This buys that clearance out of the plate's own height: raise it and
+        /// the blips come clear, and the writing in the plate shrinks to fit what is left.
+        /// </summary>
+        public float MinimapPlateDrop = 0f;
 
         /// <summary>A compass tape at the left of the frame's top band, and a speed readout with a rev bar at the right. In a vehicle only, the speedo.</summary>
         public bool MinimapCompass = true;
@@ -1502,6 +1514,7 @@ namespace BareMinimum.Core
                 cfg.MinimapFrameGap = ini.GetFloat("Minimap", "FrameGap", cfg.MinimapFrameGap, 0f, 0.03f);
                 cfg.MinimapTopCover = ini.GetFloat("Minimap", "TopCover", cfg.MinimapTopCover, 0f, 0.5f);
                 cfg.MinimapBandHeight = ini.GetFloat("Minimap", "BandHeight", cfg.MinimapBandHeight, 0.004f, 0.15f);
+                cfg.MinimapPlateDrop = ini.GetFloat("Minimap", "PlateDrop", cfg.MinimapPlateDrop, 0f, 0.05f);
                 cfg.MinimapCompass = ini.GetBool("Minimap", "Compass", cfg.MinimapCompass);
                 cfg.MinimapSpeedo = ini.GetBool("Minimap", "Speedo", cfg.MinimapSpeedo);
                 cfg.MinimapDash = ini.GetBool("Minimap", "Dash", cfg.MinimapDash);

@@ -183,6 +183,40 @@ namespace BareMinimum.Vitals
         /// the box and everything else from the height. False when the game will not say where
         /// the box is.
         /// </summary>
+        /// <summary>
+        /// How tall a line of writing in the plate is, as a fraction of screen height.
+        ///
+        /// HERE RATHER THAN IN Frame, because the row of bars has to end on the same line the
+        /// plate does and the plate's height is half of what decides where that line is. Two
+        /// copies of this number is two things that agree until somebody edits one.
+        /// </summary>
+        public const float LabelH = 0.021f;
+
+        /// <summary>
+        /// THE LINE THE WHOLE HUD ENDS ON: the map's bottom edge, plus a plate deep enough to
+        /// write in, never above the safe zone's line and never off the bottom of the screen.
+        ///
+        /// The frame's plate does not climb into the map any more -- the game draws its blips
+        /// over anything we draw, so a plate overlapping the map is a plate with blips on it --
+        /// which means the foot is decided by where the map ends, not by where the safe zone is.
+        /// The row of bars reads the same function so the two end on one line without either
+        /// knowing what the other is doing. False when the game will not say where the map is.
+        /// </summary>
+        public static bool Foot(float plateH, float drop, out float foot)
+        {
+            foot = 0f;
+
+            float l, top, r, bottom, safeLine;
+            if (!Map(out l, out top, out r, out bottom, out safeLine)) return false;
+
+            foot = Math.Max(safeLine, bottom + Math.Max(0f, drop) + Math.Max(LabelH, plateH));
+
+            var floor = 1f - 1f / Math.Max(720f, Ink.ScreenHeight);
+            if (foot > floor) foot = floor;
+
+            return true;
+        }
+
         public static bool Map(out float left, out float top, out float right, out float bottom, out float safeLine)
         {
             left = top = right = bottom = safeLine = 0f;

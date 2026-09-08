@@ -770,6 +770,14 @@ namespace BareMinimum.UI
                   "clear of them. Grow the bars with it.",
                   () => _cfg.MinimapFrame, "~y~Turn the minimap frame ON first.");
 
+            Float("Plate below the map", "Minimap", "PlateDrop",
+                  () => _cfg.MinimapPlateDrop, v => _cfg.MinimapPlateDrop = v,
+                  0.002f, 0f, 0.05f, "0.000",
+                  "Pushes the plate under the map further down, clear of the blips that hang " +
+                  "below the map's edge. There is very little screen left under there, so what " +
+                  "this buys comes out of the plate's own height and the writing shrinks to fit.",
+                  () => _cfg.MinimapFrame, "~y~Turn the minimap frame ON first.");
+
             Bool("Compare with the game's bars", "Vitals", "Compare",
                  () => _cfg.VitalsCompare, v => _cfg.VitalsCompare = v,
                  "The game's own bars come back, with ours at half strength over them, for lining up.",

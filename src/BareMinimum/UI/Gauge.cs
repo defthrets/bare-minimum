@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using GTA;
@@ -412,7 +412,24 @@ namespace BareMinimum.UI
             var gap = side * _cfg.HudGap;
 
             x = _cfg.HudAutoPosition ? MinimapLeft() + MinimapWidth() + wide * 0.45f : _cfg.HudX;
-            bottom = _cfg.HudAutoPosition ? 0.955f : _cfg.HudY + side * 2f + gap;
+
+            // THE LINE THE FRAME ENDS ON, asked for rather than guessed. It used to be a flat
+            // 0.955, which was a number that looked right on one screen and had nothing to do
+            // with where the map actually is -- and the map is what the frame's foot is built
+            // from now. Placed by hand, the setting still wins and the frame comes down to meet
+            // it; see Frame.Draw, which takes whichever of the two is lower.
+            bottom = _cfg.HudY + side * 2f + gap;
+
+            if (_cfg.HudAutoPosition)
+            {
+                var barW = Math.Max(0.001f, _cfg.HudBarWidth);
+                var edge = Math.Max(0.0005f, barW * 0.22f);
+
+                float foot;
+                bottom = BareMinimum.Vitals.Layout.Foot((barW + edge * 2f) * Aspect(), _cfg.MinimapPlateDrop, out foot)
+                             ? foot
+                             : 0.955f;
+            }
 
             // THE WHOLE LOT AS ONE. The group offset moves the row with the cash readout, on
             // top of whatever the row's own position says. See Settings.HudGroupX.

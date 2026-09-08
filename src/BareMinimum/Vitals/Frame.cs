@@ -35,7 +35,7 @@ namespace BareMinimum.Vitals
         private const int NamesEveryMs = 400;
 
         /// <summary>The label plate's height, as a fraction of screen height. Enough for one line.</summary>
-        private const float LabelH = 0.021f;
+        private const float LabelH = Layout.LabelH;
 
         private const float StreetScale = 0.245f;
         private const float ZoneScale = 0.225f;
@@ -97,7 +97,6 @@ namespace BareMinimum.Vitals
             // bars' foot when the bars have been put lower than that, so the two bottoms stay
             // level, which is the whole point of the frame.
             var foot = Math.Max(safeLine, row.Foot + row.Breath + row.PlateH);
-            foot = Math.Min(foot, 1f - 1f / Math.Max(720f, Ink.ScreenHeight));
 
             // OUTSIDE THE BLIPS. The game clamps a far-off blip to the edge of the map and half
             // of it pokes over; a frame flush to the map has that half under its line. The gap
@@ -134,10 +133,31 @@ namespace BareMinimum.Vitals
             var bandClear = Math.Max(bandTop, mapTop - topGap);
 
             // The plate: as tall as the bars' plates or as tall as a line of text, whichever is
-            // more, standing on the bars' foot line and climbing into the foot of the map. It
-            // carries the speed and the dash lights now, and the words when there is no band.
+            // more. It carries the speed and the dash lights now, and the words when there is no
+            // band.
+            //
+            // IT DOES NOT CLIMB INTO THE MAP ANY MORE. It used to hang a line of text above the
+            // frame's foot, and with the foot on the safe zone's line that put its top sixteen
+            // pixels INSIDE the map, over the row of blips the game clamps to the bottom edge --
+            // the same fight the words at the top were losing, and unwinnable for the same
+            // reason: a blip is drawn over anything we draw. So it starts at the map's bottom
+            // edge instead and the FRAME'S FOOT goes down far enough to keep a line of text
+            // under it.
+            //
+            // AND THAT IS AS FAR AS IT GOES. The map's bottom edge is fourteen pixels above the
+            // safe line and the screen ends twenty-two below it, so a full line of text below
+            // the map already reaches within six pixels of the bottom of the screen. The half
+            // of a clamped blip that hangs under the map cannot be cleared as well -- there is
+            // no room left to clear it into. PlateDrop is there for anyone who would rather
+            // have the clearance than the text.
             var wantPlate = cfg.MinimapLabel || (cfg.MinimapFrame && (cfg.MinimapSpeedo || cfg.MinimapDash));
-            var plateTop = wantPlate ? Math.Min(mapBottom, foot - Math.Max(LabelH, row.PlateH)) : mapBottom;
+            var plateH = Math.Max(LabelH, row.PlateH);
+            var plateTop = mapBottom + (wantPlate ? Math.Max(0f, cfg.MinimapPlateDrop) : 0f);
+
+            if (wantPlate) foot = Math.Max(foot, plateTop + plateH);
+
+            foot = Math.Min(foot, 1f - 1f / Math.Max(720f, Ink.ScreenHeight));
+            if (plateTop > foot) plateTop = foot;
 
             // A HARD TOP EDGE. The radar fades out at the top and lets the world through; the
             // top band comes down over that so the map ends against the frame.
