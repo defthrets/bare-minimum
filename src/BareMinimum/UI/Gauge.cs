@@ -470,7 +470,14 @@ namespace BareMinimum.UI
             if (edge < 0.0005f) edge = 0.0005f;
 
             var plateW = barW + edge * 2f;
-            var plateH = plateW * Aspect();
+
+            // AS DEEP AS THE FRAME'S PLATE, not merely square. It was plateW * Aspect() -- a
+            // square on screen -- and the frame's plate under the map is a line of writing deep,
+            // which is more; so the row's marks began a dozen pixels below the band beside them
+            // and the bottom of the HUD had a step in it. Both read Layout.LabelH now, so the
+            // two tops are the same line by construction rather than by two numbers agreeing.
+            // The column above loses what the plate gains: BarLength is the whole instrument.
+            var plateH = Math.Max(BareMinimum.Vitals.Layout.LabelH, plateW * Aspect());
 
             // THE PLATE STARTS WHERE THE SURROUND ENDS, not where the BAR ends.
             //
@@ -536,7 +543,7 @@ namespace BareMinimum.UI
             // minimap frame moved the row and left it behind. See Api.Rack.
             Api.Rack.Publish(_cfg.ShowHud && _cfg.Style == HudStyle.Bars,
                              x, bottom, barW, Math.Max(0.004f, _cfg.HudBarLength),
-                             pitch, row.Names.Count, _cfg.HudOpacity);
+                             pitch, row.Names.Count, _cfg.HudOpacity, plateH);
 
             return row;
         }

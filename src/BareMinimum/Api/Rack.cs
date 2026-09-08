@@ -65,12 +65,24 @@ namespace BareMinimum.Api
         /// <summary>Where the row starts, as a fraction of screen width. For anything that wants to sit beside it.</summary>
         public static float Left { get; private set; }
 
+        /// <summary>
+        /// How deep the black plate under a bar is, as a fraction of screen height.
+        ///
+        /// PUBLISHED BECAUSE IT IS NOT WHAT IT LOOKS LIKE. It used to be the plate's width made
+        /// square on screen, which anybody matching this row would work out for themselves and
+        /// get right; it is a line of writing deep now, so that it ends level with the plate
+        /// under the minimap, and a neighbour squaring its own would sit a dozen pixels low.
+        /// </summary>
+        public static float PlateHeight { get; private set; }
+
         /// <summary>Published by the gauge every time it lays the row out. Nothing else calls this.</summary>
         internal static void Publish(bool ready, float left, float bottom, float barWidth,
-                                     float barLength, float pitch, int slots, float opacity)
+                                     float barLength, float pitch, int slots, float opacity,
+                                     float plateHeight)
         {
             try
             {
+                PlateHeight = plateHeight;
                 Ready = ready;
                 Left = left;
                 Bottom = bottom;
