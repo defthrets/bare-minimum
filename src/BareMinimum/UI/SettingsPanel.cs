@@ -655,6 +655,12 @@ namespace BareMinimum.UI
                  () => _cfg.ShowShopBlips,
                  "~y~Turn shop map markers ON first.");
 
+            Bool("Name card on the map", "Map", "ShopBlipHoverCard",
+                 () => _cfg.ShopBlipHoverCard, v => _cfg.ShopBlipHoverCard = v,
+                 "Hover a shop's marker on the pause map and a card names it, with its hours.",
+                 () => _cfg.ShowShopBlips,
+                 "~y~Turn shop map markers ON first.");
+
             Group("HUD");
 
 

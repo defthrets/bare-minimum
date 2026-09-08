@@ -49,6 +49,9 @@ namespace BareMinimum
         /// <summary>The way into a bar's room, and back out. Nothing without a room in vendors.json.</summary>
         private readonly Inside _inside;
 
+        /// <summary>The card naming whichever shop the cursor is over on the pause map.</summary>
+        private readonly MapCard _mapCard;
+
         /// <summary>The shops' voice on Hoodrich's feed. Dormant when Hoodrich is absent.</summary>
         private readonly Social.Socials _socials;
 
@@ -107,6 +110,7 @@ namespace BareMinimum
             _vendors = new Vendors(_cfg, _catalogue, _eating, _needs, _socials, _pantry);
             _inside = new Inside(_cfg, _vendors);
             _vendors.Doors = _inside;
+            _mapCard = new MapCard(_cfg, _vendors, _machineBlips);
             _shop = new Shop(_cfg, _catalogue, _counters, _eating, _needs, _pantry);
 
             _bag = new Bag(_cfg, _catalogue, _pantry, _eating, _needs);
@@ -221,6 +225,10 @@ namespace BareMinimum
                 // the one frame the clip starts on.
                 _sipping.Update();
                 _machineBlips.Update();
+
+                // Only ever does anything inside the pause menu, which is the one place the
+                // rest of the HUD stands down -- so it is not gated on any of it.
+                _mapCard.Update();
 
                 _shop.Update(_sleeping.Busy || _settings.IsOpen || _bag.IsOpen ||
                              _fridge.IsOpen || _vendors.Offering || _inside.Offering);

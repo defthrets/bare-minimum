@@ -235,6 +235,12 @@ namespace BareMinimum.Venues
         /// </summary>
         public string Named;
 
+        /// <summary>
+        /// Whether the marker is currently flagged for the pause map's hover hook. See MapCard.
+        /// Remembered for the same reason Display and Named are.
+        /// </summary>
+        public bool Creator;
+
         /// <summary>Resolved once the candidate lists have been checked against this build.</summary>
         public Model? PropModel;
         public Model? PedModel;
@@ -924,6 +930,12 @@ namespace BareMinimum.Venues
                     v.Named = label;
                 }
 
+                if (v.Creator != _cfg.ShopBlipHoverCard)
+                {
+                    Creator(v.Marker, _cfg.ShopBlipHoverCard);
+                    v.Creator = _cfg.ShopBlipHoverCard;
+                }
+
                 return;
             }
 
@@ -944,6 +956,9 @@ namespace BareMinimum.Venues
 
                 Label(blip, label);
                 v.Named = label;
+
+                Creator(blip, _cfg.ShopBlipHoverCard);
+                v.Creator = _cfg.ShopBlipHoverCard;
 
                 v.Marker = blip;
             }
@@ -982,6 +997,41 @@ namespace BareMinimum.Venues
             {
                 // An unnamed blip is still a blip in the right place.
             }
+        }
+
+        /// <summary>
+        /// Flags a marker for the pause map's hover hook, which is the only way the map will
+        /// ever say the cursor is over it. Online's job-blip flag, borrowed. See MapCard.
+        /// </summary>
+        private static void Creator(Blip blip, bool on)
+        {
+            try { Function.Call(Hash.SET_BLIP_AS_MISSION_CREATOR_BLIP, blip.Handle, on); }
+            catch { /* then the map has no card for this one */ }
+        }
+
+        /// <summary>The vendor whose map marker this is, or null.</summary>
+        public Vendor ByBlip(int blipHandle)
+        {
+            if (blipHandle == 0) return null;
+
+            foreach (var v in _vendors)
+            {
+                var m = v.Marker;
+                if (m == null) continue;
+
+                try { if (m.Handle == blipHandle) return v; }
+                catch { /* a dead handle is nobody's */ }
+            }
+
+            return null;
+        }
+
+        /// <summary>The hours as the map card says them: open till, shut till, or all hours.</summary>
+        public string Hours(Vendor v)
+        {
+            if (v.OpenHour == v.CloseHour || (v.OpenHour <= 0 && v.CloseHour >= 24)) return "Open all hours";
+
+            return Trading(v) ? "Open till " + Oclock(v.CloseHour) : "Shut till " + Oclock(v.OpenHour);
         }
 
         /// <summary>

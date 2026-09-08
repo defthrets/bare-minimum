@@ -470,6 +470,19 @@ namespace BareMinimum.Core
         /// </summary>
         public string ShopBlipGroupName = "Food";
 
+        /// <summary>
+        /// Whether hovering a shop's marker on the pause map puts up a card naming it.
+        /// </summary>
+        ///
+        /// <remarks>
+        /// THE ONE POPUP THE PAUSE MAP ALLOWS. With the markers grouped the legend says
+        /// "Food 34/160" and nothing about which shop. The game tells scripts which blip the
+        /// cursor is over only for blips flagged the way Online's job blips are, so every shop
+        /// marker is flagged and the card reads the hook. See Venues.MapCard. Off leaves the
+        /// legend as the only name.
+        /// </remarks>
+        public bool ShopBlipHoverCard = true;
+
         // ---- Money -----------------------------------------------------------
 
         /// <summary>Scales every price in foods.json at once, for anybody who finds them wrong.</summary>
@@ -1069,6 +1082,7 @@ namespace BareMinimum.Core
                 cfg.GroupShopBlips = ini.GetBool("Map", "GroupShopBlips", cfg.GroupShopBlips);
                 cfg.ShopBlipGroupName = ini.GetString("Map", "ShopBlipGroupName",
                                                       cfg.ShopBlipGroupName);
+                cfg.ShopBlipHoverCard = ini.GetBool("Map", "ShopBlipHoverCard", cfg.ShopBlipHoverCard);
 
                 cfg.ShowHud = ini.GetBool("HUD", "Show", cfg.ShowHud);
                 cfg.HudAutoPosition = ini.GetBool("HUD", "AutoPosition", cfg.HudAutoPosition);

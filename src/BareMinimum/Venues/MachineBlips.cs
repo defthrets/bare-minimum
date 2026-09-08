@@ -113,6 +113,33 @@ namespace BareMinimum.Venues
             }
         }
 
+        /// <summary>Whether this blip handle is one of the machine markers, and where it stands.</summary>
+        public bool Owns(int blipHandle, out Vector3 at)
+        {
+            at = Vector3.Zero;
+            if (blipHandle == 0) return false;
+
+            foreach (var pair in _blips)
+            {
+                var blip = pair.Value;
+                if (blip == null) continue;
+
+                try
+                {
+                    if (blip.Handle != blipHandle) continue;
+
+                    at = blip.Position;
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+
+            return false;
+        }
+
         private Blip Make(Vector3 at)
         {
             var blip = World.CreateBlip(at);
@@ -129,6 +156,14 @@ namespace BareMinimum.Venues
                 blip.IsShortRange = true;
 
                 Function(blip, _cfg.GroupShopBlips ? _cfg.ShopBlipGroupName : "Vending Machine");
+
+                // For the pause map's hover hook, so the card can name it. See MapCard. Set at
+                // creation only: these markers are rebuilt as he moves, so a flipped setting
+                // reaches them the next time they are.
+                if (_cfg.ShopBlipHoverCard)
+                {
+                    GTA.Native.Function.Call(GTA.Native.Hash.SET_BLIP_AS_MISSION_CREATOR_BLIP, blip.Handle, true);
+                }
             }
             catch (Exception ex)
             {
