@@ -2022,7 +2022,7 @@ namespace BareMinimum.Venues
                 return;
             }
 
-            if (_eating.Begin(item)) return;
+            if (_eating.Begin(item, true)) return;
 
             // Refunded rather than swallowed. Taking the money and producing nothing is the
             // one failure a shop of any kind must never have.

@@ -532,7 +532,7 @@ namespace BareMinimum.UI
 
             if (_at == Counter.Machine) Vend();
 
-            if (!_eating.Begin(item))
+            if (!_eating.Begin(item, true))
             {
                 // Refunded rather than swallowed. Taking the money and not producing the food
                 // is the one failure a shop must never have.

@@ -149,8 +149,17 @@ namespace BareMinimum.Food
 
         // ======================================================================
 
-        /// <summary>Starts consuming an item that has already been paid for.</summary>
-        public bool Begin(Item item)
+        /// <summary>
+        /// Starts consuming an item.
+        ///
+        /// <paramref name="aloud"/> is whether he says anything about it. HE TALKS TO WHOEVER
+        /// SERVED HIM, NOT TO HIMSELF: a line at the window of a taco truck or across a shop
+        /// counter is him thanking somebody, and the game's bank is full of exactly that. The
+        /// same line while he unwraps something he has been carrying around all day is a man
+        /// talking to a burrito. So a purchase is aloud and the pocket, the fridge and anything
+        /// another mod hands him are not.
+        /// </summary>
+        public bool Begin(Item item, bool aloud = false)
         {
             if (item == null || Busy) return false;
 
@@ -165,7 +174,7 @@ namespace BareMinimum.Food
 
             // BEFORE THE PROP AND THE ANIMATION, so the line lands while his hands are
             // still empty. Said after, he is thanking the cashier around a mouthful.
-            _speech.Say(item.Smoke ? "smoke" : item.Booze > 0f ? "booze" : "buy");
+            if (aloud) _speech.Say(item.Smoke ? "smoke" : item.Booze > 0f ? "booze" : "buy");
 
             _item = item;
             _animStarted = false;
