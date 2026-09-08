@@ -247,7 +247,13 @@ namespace BareMinimum.Venues
             if (_models != null) return _models;
 
             var names = new List<string>();
-            if (_cfg.VendingMachines) names.AddRange(Counters.MachineModels);
+
+            if (_cfg.VendingMachines)
+            {
+                names.AddRange(Counters.MachineModels);
+                names.AddRange(Counters.DrinkMachineModels);
+            }
+
             if (_cfg.FruitStalls) names.AddRange(Counters.StallModels);
 
             var good = new List<Model>();

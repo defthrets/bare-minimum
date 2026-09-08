@@ -254,7 +254,7 @@ namespace BareMinimum.UI
 
         private void Begin()
         {
-            _ui.Title = _at == Counter.Machine ? "VENDING MACHINE"
+            _ui.Title = _at == Counter.Machine ? (_counters.DrinksOnly ? "DRINKS MACHINE" : "VENDING MACHINE")
                       : _at == Counter.Stall ? "FRUIT STALL"
                       : "COUNTER";
 
@@ -269,6 +269,12 @@ namespace BareMinimum.UI
                 // A vending machine has no hot food in it. Offering a club sandwich out of a
                 // drinks machine is the sort of detail that quietly says nobody thought about it.
                 if (_at == Counter.Machine && IsHotFood(c)) continue;
+
+                // AND A DRINKS MACHINE HAS ONLY DRINKS IN IT. Same argument one step further:
+                // the front of a soda machine is a column of cans, and a bag of crisps coming
+                // out of it is the detail that says nobody thought about it. See
+                // Counters.DrinkMachineModels.
+                if (_at == Counter.Machine && _counters.DrinksOnly && !IsDrink(c)) continue;
 
                 // A STALL HAS ONE TAB, because the stock is a named list rather than a
                 // category -- an apple is a Snack and a fresh fruit is Food, so filtering by
@@ -315,6 +321,12 @@ namespace BareMinimum.UI
                 Log.Once("brand-mark", "Could not brand the counter: " + ex.Message);
                 return null;
             }
+        }
+
+        /// <summary>Whether this category is what a drinks machine has in it.</summary>
+        private static bool IsDrink(string category)
+        {
+            return string.Equals(category, "Drinks", StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool IsHotFood(string category)
@@ -456,6 +468,7 @@ namespace BareMinimum.UI
                     continue;
 
                 if (_at == Counter.Machine && IsHotFood(item.Category)) continue;
+                if (_at == Counter.Machine && _counters.DrinksOnly && !IsDrink(item.Category)) continue;
 
                 // Vendor-only items never reach a shelf.
                 if (!item.InShop) continue;

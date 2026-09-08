@@ -98,6 +98,34 @@ namespace BareMinimum.Venues
         };
 
         /// <summary>
+        /// The machines that sell a DRINK: soda, water, coffee, and the two glass-fronted
+        /// fridges the newer maps put in lobbies.
+        ///
+        /// KEPT APART FROM THE SNACK MACHINES BECAUSE THE SHELF IS NOT THE SAME. A vending
+        /// machine here used to mean the crisp machine and nothing else, and everything in the
+        /// catalogue that was not hot food was on it -- which was already generous and becomes
+        /// plainly wrong the moment a soda machine is on the list: nobody has ever bought a bag
+        /// of crisps out of the front of a Sprunk machine. See Shop, which shows this one the
+        /// drinks and nothing else.
+        ///
+        /// EVERY NAME CHECKED AGAINST THE GAME'S OWN OBJECT LIST, not remembered. The condom
+        /// machine and the cigarette machine are real and are deliberately not here: this is
+        /// the mod that keeps a stomach, and neither of those goes in one.
+        /// </summary>
+        internal static readonly string[] DrinkMachineModels =
+        {
+            "prop_vend_soda_01",
+            "prop_vend_soda_02",
+            "prop_vend_water_01",
+            "prop_vend_coffe_01",
+            "prop_vend_fridge01",
+            "p_ld_coffee_vend_01",
+            "p_ld_coffee_vend_s",
+            "m23_2_prop_m32_vend_drink_01a",
+            "sf_prop_sf_vend_drink_01a"
+        };
+
+        /// <summary>
         /// Roadside produce stalls. Every one of these is the same canopy in a different
         /// county, which is exactly why they are found by model and not by coordinate.
         /// </summary>
@@ -199,6 +227,7 @@ namespace BareMinimum.Venues
 
         private int[] _tills;
         private int[] _machines;
+        private int[] _drinks;
         private int[] _stalls;
 
         private int _nextScan;
@@ -225,6 +254,11 @@ namespace BareMinimum.Venues
 
         /// <summary>The prop currently being offered, or null.</summary>
         public Prop Found => _found;
+
+        /// <summary>
+        /// Whether the machine in reach is a drinks machine rather than a snack one.
+        /// </summary>
+        public bool DrinksOnly { get; private set; }
 
         // ======================================================================
 
@@ -365,6 +399,20 @@ namespace BareMinimum.Venues
                     {
                         _found = machine;
                         _kind = Counter.Machine;
+                        DrinksOnly = false;
+                        return _kind;
+                    }
+
+                    // The drinks machines, after the snack ones and on their own reach, so a
+                    // bank of both against the same wall still hands you the one you are
+                    // standing at rather than whichever was looked for first.
+                    var drinks = Closest(from, MachineReach,
+                                         Resolve(DrinkMachineModels, "Drinks machines", ref _drinks));
+                    if (drinks != null)
+                    {
+                        _found = drinks;
+                        _kind = Counter.Machine;
+                        DrinksOnly = true;
                         return _kind;
                     }
                 }
