@@ -746,8 +746,14 @@ namespace BareMinimum.Venues
 
             if (_cartHashes.Length == 0) return;
 
+            // AS FAR AS THE ENGINE WILL ADMIT TO. A cart is a map prop and does not exist to
+            // be found until the game has streamed it in, so this cannot be widened into a
+            // directory of every cart in the county however large the number is -- but 160 was
+            // shorter than the streaming radius and was throwing away carts the game had
+            // already loaded. They stay on the list once found, so the map fills in as you
+            // drive rather than only around wherever you are standing.
             Prop[] found;
-            try { found = World.GetNearbyProps(from, 160f, _cartHashes); }
+            try { found = World.GetNearbyProps(from, 300f, _cartHashes); }
             catch (Exception ex)
             {
                 Log.Once("cart-scan", "Could not look for carts: " + ex.Message);
@@ -798,9 +804,18 @@ namespace BareMinimum.Venues
                     SpawnRange = 90f,
                     Label = row[3],
                     Blip = true,
-                    BlipSprite = 52,
-                    BlipColour = 5
+                    Group = "stand"
                 };
+
+                // THE SAME MARKER AS THE LISTED STANDS. A cart the game put down and a cart
+                // this mod put down are the same thing to whoever is buying from it, so they
+                // share a group -- and with them the legend row, the sprite and the colour.
+                // Named on the spot rather than left blank, which would have quietly filed
+                // every discovered cart under the fallback name instead of Street Food.
+                var dressed = Group(made.Group);
+
+                made.BlipSprite = dressed == null ? 52 : dressed.Sprite;
+                made.BlipColour = dressed == null ? 5 : dressed.Colour;
 
                 _vendors.Add(made);
                 Log.Info("Carts: staffed a " + row[2] + " the game had left empty at " +
