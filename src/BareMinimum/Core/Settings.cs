@@ -783,8 +783,17 @@ namespace BareMinimum.Core
         public int VitalsHideType = 3;
         public int VitalsShowType = 0;
 
-        /// <summary>Collapse the big map once at start-up, in case something left it open. This mod never opens it.</summary>
-        public bool VitalsShrinkMapOnStart = true;
+        /// <summary>
+        /// Collapse the big map once at start-up. OFF: the call itself was suspected of leaving
+        /// the radar blank until the pause menu, and this mod never opens the big map anyway.
+        /// </summary>
+        public bool VitalsShrinkMapOnStart = false;
+
+        /// <summary>
+        /// Blink the radar off and on for one frame after the layout call, so the minimap
+        /// redraws. Without a refresh it came up blank until the pause menu was opened once.
+        /// </summary>
+        public bool VitalsRefreshRadar = true;
 
         /// <summary>
         /// The FiveM trick of flicking the big map open and shut a frame apart so the minimap
@@ -1360,6 +1369,7 @@ namespace BareMinimum.Core
                 cfg.VitalsHideType = ini.GetInt("Vitals", "HideType", cfg.VitalsHideType, 0, 10);
                 cfg.VitalsShowType = ini.GetInt("Vitals", "ShowType", cfg.VitalsShowType, 0, 10);
                 cfg.VitalsShrinkMapOnStart = ini.GetBool("Vitals", "ShrinkMapOnStart", cfg.VitalsShrinkMapOnStart);
+                cfg.VitalsRefreshRadar = ini.GetBool("Vitals", "RefreshRadar", cfg.VitalsRefreshRadar);
                 cfg.VitalsMapFlick = ini.GetBool("Vitals", "MapFlick", cfg.VitalsMapFlick);
                 cfg.VitalsEnergy = ini.GetBool("Vitals", "Energy", cfg.VitalsEnergy);
                 cfg.EnergySprintSeconds = ini.GetFloat("Vitals", "EnergySprintSeconds", cfg.EnergySprintSeconds, 1f, 600f);

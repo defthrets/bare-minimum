@@ -50,6 +50,17 @@ namespace BareMinimum.Vitals
         private bool _saidHidden;
 
         /// <summary>
+        /// The radar refresh: -1 when not running; 0 = switch the radar off this frame; 1 = back
+        /// on the next. Once, after the first layout call has gone in.
+        /// </summary>
+        private int _refreshStep = -1;
+        private bool _refreshed;
+
+        /// <summary>When the flick's shut is due, and its second, insurance shut. See Flick.</summary>
+        private int _flickAt;
+        private const int FlickHoldMs = 250;
+
+        /// <summary>
         /// Called every frame. <paramref name="show"/> asks for the game's bars back -- the
         /// compare view, or the vitals switched off.
         /// </summary>
@@ -87,10 +98,44 @@ namespace BareMinimum.Vitals
             if (_hidden)
             {
                 if (cfg.VitalsHideSpecial) AbilityBar(false);
-                if (cfg.VitalsHideHealthArmour) Setup(cfg.VitalsHideType);
+                if (cfg.VitalsHideHealthArmour && Setup(cfg.VitalsHideType) && !_refreshed && cfg.VitalsRefreshRadar)
+                {
+                    // THE MINIMAP DOES NOT REDRAW ON ITS OWN after the layout changes: it came up
+                    // blank until the player opened the pause menu, which is what refreshes it.
+                    // FiveM refreshes it by flicking the big map; that flick misfired on this
+                    // game, so the radar is blinked off and on for one frame instead, once.
+                    _refreshed = true;
+                    _refreshStep = 0;
+                }
             }
 
             Flick();
+            Refresh();
+        }
+
+        /// <summary>The radar off for a frame and on again, so the minimap redraws in its new layout.</summary>
+        private void Refresh()
+        {
+            if (_refreshStep < 0) return;
+
+            try
+            {
+                if (_refreshStep == 0)
+                {
+                    Function.Call(Hash.DISPLAY_RADAR, false);
+                    _refreshStep = 1;
+                    return;
+                }
+
+                Function.Call(Hash.DISPLAY_RADAR, true);
+                _refreshStep = -1;
+                Log.Info("Radar blinked off and on so the minimap redraws in its new layout.");
+            }
+            catch (Exception ex)
+            {
+                _refreshStep = -1;
+                Log.Once("vitals-refresh", "Could not blink the radar: " + ex.Message);
+            }
         }
 
         /// <summary>Puts the game's bars back, once. Used on the way out as well as for the compare view.</summary>
@@ -115,23 +160,49 @@ namespace BareMinimum.Vitals
                 Log.Error("Could not put the game's bars back", ex);
             }
 
+            // A refresh caught half way would leave the radar off.
+            if (_refreshStep == 1) { try { Function.Call(Hash.DISPLAY_RADAR, true); } catch { /* teardown */ } }
+            _refreshStep = -1;
+
             _hidden = false;
             _flickStep = -1;
         }
 
-        /// <summary>The optional FiveM flick: open this frame, shut the next. See the class comment for why it is off.</summary>
+        /// <summary>
+        /// The optional FiveM flick, off by default: the big map open, held a quarter of a
+        /// second, shut, and shut once more a second later.
+        ///
+        /// HELD, NOT A FRAME APART. The first cut opened and shut on consecutive frames, the way
+        /// the FiveM snippet does, and on this game the shut arrived while the map was still
+        /// opening and was ignored -- the minimap stayed the size of the screen. A quarter of a
+        /// second lets the open land first, and the second shut is insurance against the first
+        /// being dropped anyway. Expect a blink.
+        /// </summary>
         private void Flick()
         {
             if (_flickStep < 0) return;
 
+            var now = Game.GameTime;
+
             if (_flickStep == 0)
             {
                 BigMap(true);
+                _flickAt = now + FlickHoldMs;
                 _flickStep = 1;
                 return;
             }
 
+            if (now < _flickAt) return;
+
             BigMap(false);
+
+            if (_flickStep == 1)
+            {
+                _flickAt = now + 1000;
+                _flickStep = 2;
+                return;
+            }
+
             _flickStep = -1;
         }
 
@@ -147,9 +218,10 @@ namespace BareMinimum.Vitals
             }
         }
 
-        private void Setup(int type)
+        /// <summary>Asks the minimap movie for a layout. True when the call went in.</summary>
+        private bool Setup(int type)
         {
-            if (!Ready()) return;
+            if (!Ready()) return false;
 
             try
             {
@@ -162,10 +234,13 @@ namespace BareMinimum.Vitals
                     _saidHidden = true;
                     Log.Info("Minimap movie handle " + _handle + "; asked for layout " + type + ".");
                 }
+
+                return true;
             }
             catch (Exception ex)
             {
                 Log.Once("vitals-setup", "Could not call " + Method + " on the minimap: " + ex.Message);
+                return false;
             }
         }
 
