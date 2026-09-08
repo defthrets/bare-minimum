@@ -338,16 +338,13 @@ namespace BareMinimum.Vitals
         /// <summary>
         /// THE RELIEF: what makes a bar look like a solid thing rather than a coloured strip.
         ///
-        /// A BEVEL -- the wall the light falls on lit, a thin bright edge down the left of the
-        /// fill, and the far wall in shadow, a thin dark edge down the right, so the fill
-        /// stands off the channel instead of lying flat in it. And A SWEEP -- one soft slanted
-        /// band crossing it every six seconds or so, the way a reflection travels over a
-        /// polished surface as it turns.
+        /// A BEVEL, and only the bevel -- the wall the light falls on lit, a thin bright edge
+        /// down the left of the fill, and the far wall in shadow, a thin dark edge down the
+        /// right, so the fill stands off the channel instead of lying flat in it.
         ///
-        /// BOTH WERE THE ARMOUR'S ALONE and are now every bar's, which is what was asked for.
-        /// They are drawn from the same code rather than copied, so the row keeps agreeing with
-        /// itself; what still tells the five apart is what lives INSIDE each fill -- the
-        /// heartbeat, the streaks, the churn, the stars -- and those are untouched.
+        /// THE SWEEP THAT CAME WITH IT WENT BACK TO THE ARMOUR. Shared out across the row it
+        /// made five liquids all look like polished metal, which is the armour's job and not
+        /// theirs; see Plating. The bevel is the half that was worth having everywhere.
         ///
         /// Drawn over the fill and under whatever the bar keeps inside it, so a bubble or a
         /// spark still reads as being in the liquid rather than under glass.
@@ -361,15 +358,36 @@ namespace BareMinimum.Vitals
             if (tall <= 0.004f) return;
 
             var k = Ink.Clamp01(cfg.VitalsRelief);
-            var white = Color.FromArgb(body.A, 255, 255, 255);
 
             // ---- the bevel: lit edge on the left, shadow on the right ----
             var edgeW = Math.Max(1f / Ink.ScreenWidth, w * 0.14f);
 
             Ink.Bar(x, surface, edgeW, tall, Color.FromArgb((int)(60f * strength * k), 255, 255, 255));
             Ink.Bar(x + w - edgeW, surface, edgeW, tall, Color.FromArgb((int)(70f * strength * k), 0, 0, 0));
+        }
 
-            // ---- the highlight: one slanted band, up the fill, every ~6 s ----
+        /// <summary>
+        /// ARMOUR, AND ONLY ARMOUR. A HIGHLIGHT that crosses it now and then -- one soft
+        /// slanted band sweeping up the metal every several seconds, the way a reflection
+        /// travels over a polished surface as it turns -- and A HIT FLASHES IT, the whole fill
+        /// white-blue for a third of a second: the blow landing on the armour rather than on
+        /// him, which is the whole point of wearing it.
+        ///
+        /// THE SWEEP IS WHAT SAYS METAL, so it stays here rather than going on the row. Every
+        /// bar wearing it made five liquids all look polished; the bevel is the part that was
+        /// worth sharing, and that is Relief.
+        /// </summary>
+        private void Plating(Settings cfg, float x, float w, float floor, float surface,
+                             Color body, float t, float wall, Readings r, float strength)
+        {
+            if (cfg.VitalsParticles <= 0.001f) return;
+
+            var tall = floor - surface;
+            if (tall <= 0.004f) return;
+
+            if (r.ArmourDelta < -0.001f) _plateHitAt = wall;
+
+            // ---- the highlight: one slanted band, up the metal, every ~6 s ----
             var at = t * 0.16f;
             at -= (float)Math.Floor(at);
 
@@ -380,7 +398,7 @@ namespace BareMinimum.Vitals
 
             const int slices = 6;
             var sliceW = w / slices;
-            var sheen = Ink.Mix(body, white, 0.85f);
+            var sheen = Ink.Mix(body, Color.FromArgb(body.A, 255, 255, 255), 0.85f);
 
             for (var i = 0; i < slices; i++)
             {
@@ -399,29 +417,12 @@ namespace BareMinimum.Vitals
                     sBot = Math.Min(floor, sBot);
                     if (sBot - sTop <= 0f) continue;
 
-                    var alpha = (int)(85f * share * ends * strength * k);
+                    var alpha = (int)(85f * share * ends * strength);
                     if (alpha <= 3) continue;
 
                     Ink.Bar(sx, sTop, sliceW, sBot - sTop, Ink.Alpha(sheen, alpha));
                 }
             }
-        }
-
-        /// <summary>
-        /// ARMOUR: A HIT FLASHES IT, the whole fill white-blue for a third of a second -- the
-        /// blow landing on the armour rather than on him, which is the whole point of wearing
-        /// it. The bevel and the sweeping highlight that used to live here are Relief now, and
-        /// every bar in the row gets them.
-        /// </summary>
-        private void Plating(Settings cfg, float x, float w, float floor, float surface,
-                             Color body, float t, float wall, Readings r, float strength)
-        {
-            if (cfg.VitalsParticles <= 0.001f) return;
-
-            var tall = floor - surface;
-            if (tall <= 0.004f) return;
-
-            if (r.ArmourDelta < -0.001f) _plateHitAt = wall;
 
             // ---- the hit: the whole fill flashes ----
             var f = Flash(wall - _plateHitAt, 0.32f);

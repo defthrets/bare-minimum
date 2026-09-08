@@ -984,7 +984,7 @@ namespace BareMinimum.UI
         }
 
         /// <summary>
-        /// The bevel and the sweep, for the food and sleep bars. See Vitals.Columns.Relief,
+        /// The bevel, for the food and sleep bars. See Vitals.Columns.Relief,
         /// which is the same drawing against the vitals' own primitives -- these two are drawn
         /// through Hud and Fade, so the code cannot simply be shared, and the numbers are kept
         /// identical instead. A change to one wants the same change to the other.
@@ -997,48 +997,11 @@ namespace BareMinimum.UI
             if (tall <= 0.004f) return;
 
             var k = Clamp01(_cfg.VitalsRelief);
-            var aspect = Aspect();
 
             var edgeW = Math.Max(1f / (_screenW > 0 ? _screenW : 1920f), w * 0.14f);
 
             Hud.Bar(x, surface, edgeW, tall, Fade(Color.FromArgb((int)(60f * k), 255, 255, 255)));
             Hud.Bar(x + w - edgeW, surface, edgeW, tall, Fade(Color.FromArgb((int)(70f * k), 0, 0, 0)));
-
-            var at = t * 0.16f;
-            at -= (float)Math.Floor(at);
-
-            var bandH = Math.Max(3f / (_screenH > 0 ? _screenH : 1080f),
-                                 Math.Min(tall * 0.16f, w * aspect * 1.2f));
-            var slant = bandH * 1.1f;
-            var centre = floor + slant - at * (tall + bandH + slant * 2f) + bandH * 0.5f;
-            var ends = Math.Min(at * 4f, Math.Min((1f - at) * 4f, 1f));
-
-            const int slices = 6;
-            var sliceW = w / slices;
-            var sheen = Mix(body, Color.FromArgb(body.A, 255, 255, 255), 0.85f);
-
-            for (var i = 0; i < slices; i++)
-            {
-                var lift = ((i + 0.5f) / slices - 0.5f) * slant;
-                var sx = x + i * sliceW;
-
-                for (var j = 0; j < 3; j++)
-                {
-                    var share = j == 1 ? 1f : 0.4f;
-                    var sTop = centre - lift - bandH * 0.5f + j * (bandH / 3f);
-                    var sBot = sTop + bandH / 3f;
-
-                    sTop = Math.Max(surface, sTop);
-                    sBot = Math.Min(floor, sBot);
-                    if (sBot - sTop <= 0f) continue;
-
-                    var alpha = (int)(85f * share * ends * k);
-                    if (alpha <= 3) continue;
-
-                    Hud.Bar(sx, sTop, sliceW, sBot - sTop,
-                            Fade(Color.FromArgb(alpha, sheen.R, sheen.G, sheen.B)));
-                }
-            }
         }
 
         /// <summary>
