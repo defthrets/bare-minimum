@@ -880,6 +880,15 @@ namespace BareMinimum.Core
         /// <summary>A lighter band along one side of the fill, 0 to 1. 0 is flat.</summary>
         public float VitalsGloss = 0.18f;
 
+        /// <summary>
+        /// The bevel and the sweeping highlight on every bar, 0 to 1. 0 is flat.
+        ///
+        /// A lit edge down the left of the fill and a shadowed one down the right, with a soft
+        /// slanted band crossing every six seconds or so. It was the armour's alone; it is the
+        /// whole row's now, and this is the dial for it.
+        /// </summary>
+        public float VitalsRelief = 1f;
+
         public bool VitalsLowHealthPulse = true;
         public float VitalsLowHealthAt = 0.25f;
 
@@ -1435,6 +1444,7 @@ namespace BareMinimum.Core
                 cfg.VitalsPace = ini.GetFloat("Vitals", "Pace", cfg.VitalsPace, 0.05f, 10f);
                 cfg.VitalsParticles = ini.GetFloat("Vitals", "Particles", cfg.VitalsParticles, 0f, 1f);
                 cfg.VitalsGloss = ini.GetFloat("Vitals", "Gloss", cfg.VitalsGloss, 0f, 1f);
+                cfg.VitalsRelief = ini.GetFloat("Vitals", "Relief", cfg.VitalsRelief, 0f, 1f);
                 cfg.VitalsLowHealthPulse = ini.GetBool("Vitals", "LowHealthPulse", cfg.VitalsLowHealthPulse);
                 cfg.VitalsLowHealthAt = ini.GetFloat("Vitals", "LowHealthAt", cfg.VitalsLowHealthAt, 0f, 1f);
                 cfg.VitalsActivePulse = ini.GetBool("Vitals", "ActivePulse", cfg.VitalsActivePulse);

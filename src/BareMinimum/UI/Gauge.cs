@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using GTA;
@@ -641,10 +641,22 @@ namespace BareMinimum.UI
                 catch { _screenH = 1080; }
             }
 
-            var n = (int)(h * _screenH / 4f);
+            // ONE EVERY FOURTEEN PIXELS, WHICH USED TO BE ONE EVERY FOUR.
+            //
+            // The gradient this draws is two humps on a fourteen- and a twenty-two-second lap,
+            // wide enough that neighbouring bands differ by a hair -- which is the whole
+            // argument for banding it, and also the reason the number of bands hardly shows.
+            // Six bands and twenty-four look the same on a bar this narrow.
+            //
+            // What they do not cost the same is the frame. Rectangles come out of one list the
+            // whole machine shares and the game drops whatever is handed over once it is full,
+            // so a bar spending twenty-four on a gradient nobody can count is twenty-four
+            // another script does not get. Six bars of them took the phone's background off
+            // the screen in a car.
+            var n = (int)(h * _screenH / 14f);
 
-            if (n < 12) n = 12;
-            if (n > 64) n = 64;
+            if (n < 5) n = 5;
+            if (n > 18) n = 18;
 
             return n;
         }
@@ -746,6 +758,8 @@ namespace BareMinimum.UI
 
                 Hud.Bar(left, topY, right - left, crestH, crest);
             }
+
+            Relief(x, w, floor, surfaceY, body, t / PaceOf());
 
             Sediment(x, y, w, h, surfaceY, inside, empty);
         }
@@ -964,6 +978,66 @@ namespace BareMinimum.UI
 
                 Hud.Bar(left, topY - cap * 0.6f, right - left, cap * 0.6f, shadow);
                 Hud.Bar(left, topY, right - left, cap, capC);
+            }
+
+            Relief(x, w, y + h, surfaceY, body, t / PaceOf());
+        }
+
+        /// <summary>
+        /// The bevel and the sweep, for the food and sleep bars. See Vitals.Columns.Relief,
+        /// which is the same drawing against the vitals' own primitives -- these two are drawn
+        /// through Hud and Fade, so the code cannot simply be shared, and the numbers are kept
+        /// identical instead. A change to one wants the same change to the other.
+        /// </summary>
+        private void Relief(float x, float w, float floor, float surface, Color body, float t)
+        {
+            if (_cfg.VitalsRelief <= 0.001f) return;
+
+            var tall = floor - surface;
+            if (tall <= 0.004f) return;
+
+            var k = Clamp01(_cfg.VitalsRelief);
+            var aspect = Aspect();
+
+            var edgeW = Math.Max(1f / (_screenW > 0 ? _screenW : 1920f), w * 0.14f);
+
+            Hud.Bar(x, surface, edgeW, tall, Fade(Color.FromArgb((int)(60f * k), 255, 255, 255)));
+            Hud.Bar(x + w - edgeW, surface, edgeW, tall, Fade(Color.FromArgb((int)(70f * k), 0, 0, 0)));
+
+            var at = t * 0.16f;
+            at -= (float)Math.Floor(at);
+
+            var bandH = Math.Max(3f / (_screenH > 0 ? _screenH : 1080f),
+                                 Math.Min(tall * 0.16f, w * aspect * 1.2f));
+            var slant = bandH * 1.1f;
+            var centre = floor + slant - at * (tall + bandH + slant * 2f) + bandH * 0.5f;
+            var ends = Math.Min(at * 4f, Math.Min((1f - at) * 4f, 1f));
+
+            const int slices = 6;
+            var sliceW = w / slices;
+            var sheen = Mix(body, Color.FromArgb(body.A, 255, 255, 255), 0.85f);
+
+            for (var i = 0; i < slices; i++)
+            {
+                var lift = ((i + 0.5f) / slices - 0.5f) * slant;
+                var sx = x + i * sliceW;
+
+                for (var j = 0; j < 3; j++)
+                {
+                    var share = j == 1 ? 1f : 0.4f;
+                    var sTop = centre - lift - bandH * 0.5f + j * (bandH / 3f);
+                    var sBot = sTop + bandH / 3f;
+
+                    sTop = Math.Max(surface, sTop);
+                    sBot = Math.Min(floor, sBot);
+                    if (sBot - sTop <= 0f) continue;
+
+                    var alpha = (int)(85f * share * ends * k);
+                    if (alpha <= 3) continue;
+
+                    Hud.Bar(sx, sTop, sliceW, sBot - sTop,
+                            Fade(Color.FromArgb(alpha, sheen.R, sheen.G, sheen.B)));
+                }
             }
         }
 

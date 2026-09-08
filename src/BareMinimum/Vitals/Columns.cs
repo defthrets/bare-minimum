@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using GTA;
 using BareMinimum.Core;
@@ -227,6 +227,9 @@ namespace BareMinimum.Vitals
             }
 
             // ---- what lives inside ----
+            // THE RELIEF ON EVERY BAR, before whatever this one keeps inside it.
+            Relief(cfg, x, w, floor, surface, body, t, strength);
+
             if (cfg.VitalsParticles <= 0.001f) return;
 
             switch (kind)
@@ -333,36 +336,40 @@ namespace BareMinimum.Vitals
         private float _plateHitAt = -10f;
 
         /// <summary>
-        /// ARMOUR: STEEL. The plates and seams that were here looked silly, and the glints before
-        /// them looked like every other bar's wet light. What says metal without drawing a
-        /// picture of it is how light sits on it: A BEVEL -- the wall the light falls on lit, a
-        /// thin bright edge down the left of the fill, and the far wall in shadow, a thin dark
-        /// edge down the right, so the fill stands off the channel like a bar of steel rather
-        /// than lying in it like a liquid -- and A HIGHLIGHT that crosses it now and then, one
-        /// soft SLANTED band sweeping up the metal every several seconds, the way a reflection
-        /// travels over a polished surface as it turns. Slow, on the paced clock. And A HIT
-        /// FLASHES IT, the whole fill white-blue for a third of a second: the blow landing on
-        /// the armour rather than on him, which is the whole point of wearing it.
+        /// THE RELIEF: what makes a bar look like a solid thing rather than a coloured strip.
+        ///
+        /// A BEVEL -- the wall the light falls on lit, a thin bright edge down the left of the
+        /// fill, and the far wall in shadow, a thin dark edge down the right, so the fill
+        /// stands off the channel instead of lying flat in it. And A SWEEP -- one soft slanted
+        /// band crossing it every six seconds or so, the way a reflection travels over a
+        /// polished surface as it turns.
+        ///
+        /// BOTH WERE THE ARMOUR'S ALONE and are now every bar's, which is what was asked for.
+        /// They are drawn from the same code rather than copied, so the row keeps agreeing with
+        /// itself; what still tells the five apart is what lives INSIDE each fill -- the
+        /// heartbeat, the streaks, the churn, the stars -- and those are untouched.
+        ///
+        /// Drawn over the fill and under whatever the bar keeps inside it, so a bubble or a
+        /// spark still reads as being in the liquid rather than under glass.
         /// </summary>
-        private void Plating(Settings cfg, float x, float w, float floor, float surface,
-                             Color body, float t, float wall, Readings r, float strength)
+        private static void Relief(Settings cfg, float x, float w, float floor, float surface,
+                                   Color body, float t, float strength)
         {
-            if (cfg.VitalsParticles <= 0.001f) return;
+            if (cfg.VitalsRelief <= 0.001f) return;
 
             var tall = floor - surface;
             if (tall <= 0.004f) return;
 
-            if (r.ArmourDelta < -0.001f) _plateHitAt = wall;
-
+            var k = Ink.Clamp01(cfg.VitalsRelief);
             var white = Color.FromArgb(body.A, 255, 255, 255);
 
             // ---- the bevel: lit edge on the left, shadow on the right ----
             var edgeW = Math.Max(1f / Ink.ScreenWidth, w * 0.14f);
 
-            Ink.Bar(x, surface, edgeW, tall, Color.FromArgb((int)(60f * strength), 255, 255, 255));
-            Ink.Bar(x + w - edgeW, surface, edgeW, tall, Color.FromArgb((int)(70f * strength), 0, 0, 0));
+            Ink.Bar(x, surface, edgeW, tall, Color.FromArgb((int)(60f * strength * k), 255, 255, 255));
+            Ink.Bar(x + w - edgeW, surface, edgeW, tall, Color.FromArgb((int)(70f * strength * k), 0, 0, 0));
 
-            // ---- the highlight: one slanted band, up the metal, every ~6 s ----
+            // ---- the highlight: one slanted band, up the fill, every ~6 s ----
             var at = t * 0.16f;
             at -= (float)Math.Floor(at);
 
@@ -392,12 +399,29 @@ namespace BareMinimum.Vitals
                     sBot = Math.Min(floor, sBot);
                     if (sBot - sTop <= 0f) continue;
 
-                    var alpha = (int)(85f * share * ends * strength);
+                    var alpha = (int)(85f * share * ends * strength * k);
                     if (alpha <= 3) continue;
 
                     Ink.Bar(sx, sTop, sliceW, sBot - sTop, Ink.Alpha(sheen, alpha));
                 }
             }
+        }
+
+        /// <summary>
+        /// ARMOUR: A HIT FLASHES IT, the whole fill white-blue for a third of a second -- the
+        /// blow landing on the armour rather than on him, which is the whole point of wearing
+        /// it. The bevel and the sweeping highlight that used to live here are Relief now, and
+        /// every bar in the row gets them.
+        /// </summary>
+        private void Plating(Settings cfg, float x, float w, float floor, float surface,
+                             Color body, float t, float wall, Readings r, float strength)
+        {
+            if (cfg.VitalsParticles <= 0.001f) return;
+
+            var tall = floor - surface;
+            if (tall <= 0.004f) return;
+
+            if (r.ArmourDelta < -0.001f) _plateHitAt = wall;
 
             // ---- the hit: the whole fill flashes ----
             var f = Flash(wall - _plateHitAt, 0.32f);
@@ -487,10 +511,14 @@ namespace BareMinimum.Vitals
         /// <summary>How many bands the body is drawn in: one per five pixels of height, 1 to 48.</summary>
         private static int Bands(float h)
         {
-            var n = (int)(h * Ink.ScreenHeight / 5f);
+            // ONE EVERY FOURTEEN PIXELS, WHICH USED TO BE ONE EVERY FIVE. Rectangles come
+            // out of one list the whole machine shares, and three columns of them beside
+            // the minimap were part of what took the background off Hoodrich's phone in a
+            // car. The gradient is broad and slow enough that the count does not show.
+            var n = (int)(h * Ink.ScreenHeight / 14f);
 
             if (n < 1) n = 1;
-            if (n > 48) n = 48;
+            if (n > 18) n = 18;
 
             return n;
         }

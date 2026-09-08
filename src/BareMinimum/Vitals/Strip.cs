@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using GTA;
 using BareMinimum.Core;
@@ -403,10 +403,14 @@ namespace BareMinimum.Vitals
         /// <summary>How many bands the body is drawn in: one per five pixels of length, 1 to 48.</summary>
         private static int Bands(float w)
         {
-            var n = (int)(w * Ink.ScreenWidth / 5f);
+            // ONE EVERY FOURTEEN PIXELS, WHICH USED TO BE ONE EVERY FIVE. Rectangles come
+            // out of one list the whole machine shares, and three columns of them beside
+            // the minimap were part of what took the background off Hoodrich's phone in a
+            // car. The gradient is broad and slow enough that the count does not show.
+            var n = (int)(w * Ink.ScreenWidth / 14f);
 
             if (n < 1) n = 1;
-            if (n > 48) n = 48;
+            if (n > 18) n = 18;
 
             return n;
         }
