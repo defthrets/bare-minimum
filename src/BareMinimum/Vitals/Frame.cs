@@ -243,7 +243,10 @@ namespace BareMinimum.Vitals
 
             if (cfg.MinimapDash && car != null && car.Exists())
             {
-                Dash(car, l + padX, midY, h, k);
+                // AS FAR LEFT AS THE FRAME GOES: from the frame's own outer edge, not the map's,
+                // with a quarter of the frame's thickness of breathing room. Asked for.
+                var farLeft = Math.Max(0f, l - pad) + pad * 0.25f;
+                Dash(car, farLeft, midY, h, k);
             }
         }
 
