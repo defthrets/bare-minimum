@@ -893,6 +893,22 @@ namespace BareMinimum.Core
         public bool BagPad = true;
 
         /// <summary>
+        /// What the prompt's key cap says on a controller. Any text.
+        /// </summary>
+        ///
+        /// <remarks>
+        /// THE WORD, NOT THE BUTTON. Every interact reads the game's own context control on a
+        /// pad, and that stays: it is the button the game's own prompts point at. What it is
+        /// CALLED depends on the pad, the layout and the person holding it, and this mod
+        /// shipped two wrong guesses for it in one afternoon -- "A", then a name that is right
+        /// on an Xbox layout and means nothing on a PlayStation one. So the player says.
+        ///
+        /// Free text on purpose. The menu offers the common names, and anything else typed in
+        /// here is shown as itself.
+        /// </remarks>
+        public string PadInteractLabel = "D-PAD RIGHT";
+
+        /// <summary>
         /// Whether drugs carried in Posted Up show in this mod's pocket and can be taken from
         /// it.
         /// </summary>
@@ -1083,6 +1099,11 @@ namespace BareMinimum.Core
                 cfg.BagKey = ini.GetKey("Keys", "Bag", cfg.BagKey);
                 cfg.MenuPad = ini.GetBool("Keys", "MenuPad", cfg.MenuPad);
                 cfg.BagPad = ini.GetBool("Keys", "BagPad", cfg.BagPad);
+
+                var padLabel = ini.GetString("Keys", "PadInteractLabel", cfg.PadInteractLabel);
+                cfg.PadInteractLabel = string.IsNullOrEmpty(padLabel) || padLabel.Trim().Length == 0
+                    ? "D-PAD RIGHT"
+                    : padLabel.Trim();
 
                 cfg.DrugsInPocket = ini.GetBool("General", "DrugsInPocket", cfg.DrugsInPocket);
 

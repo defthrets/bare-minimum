@@ -551,6 +551,18 @@ namespace BareMinimum.UI
                  () => _cfg.SleepInCars, v => _cfg.SleepInCars = v,
                  "Stopped, engine off, no wanted level.");
 
+            // WHAT THE CAP SAYS ON A PAD. The list is the common names; whatever the ini
+            // holds is always on it too, so a name typed in there is shown as itself rather
+            // than snapped to the nearest thing this list happened to know about.
+            var padNames = PadNames(_cfg.PadInteractLabel);
+
+            Choice("Pad button cap", "Keys", "PadInteractLabel", padNames,
+                   () => IndexOf(padNames, _cfg.PadInteractLabel),
+                   v => _cfg.PadInteractLabel = padNames[v],
+                   "What every prompt's key cap says when you are on a controller. The button " +
+                   "itself is the game's own context control; this is only its name. Any text " +
+                   "typed into the ini is offered here as well.");
+
             Float("Hold to sleep in car", "Sleeping", "CarHoldSeconds",
                   () => _cfg.CarSleepHoldSeconds, v => _cfg.CarSleepHoldSeconds = v,
                   0.25f, 0f, 5f, "0.00",
@@ -795,6 +807,35 @@ namespace BareMinimum.UI
         /// needs no new row type to display it. Wraps at both ends, because a two-item list
         /// that stops at the edges gives you a left arrow that does nothing.
         /// </summary>
+        /// <summary>The usual names for a pad's buttons, with whatever the ini says first if it is not one of them.</summary>
+        private static string[] PadNames(string current)
+        {
+            var usual = new[]
+            {
+                "D-PAD RIGHT", "D-PAD LEFT", "D-PAD UP", "D-PAD DOWN",
+                "A", "B", "X", "Y", "LB", "RB", "LT", "RT", "L3", "R3",
+                "CROSS", "CIRCLE", "SQUARE", "TRIANGLE", "L1", "R1"
+            };
+
+            if (string.IsNullOrEmpty(current) || IndexOf(usual, current) >= 0) return usual;
+
+            var all = new string[usual.Length + 1];
+            all[0] = current.Trim();
+            Array.Copy(usual, 0, all, 1, usual.Length);
+            return all;
+        }
+
+        private static int IndexOf(string[] names, string value)
+        {
+            for (var i = 0; i < names.Length; i++)
+            {
+                if (string.Equals(names[i], value == null ? "" : value.Trim(),
+                                  StringComparison.OrdinalIgnoreCase)) return i;
+            }
+
+            return 0;
+        }
+
         private void Choice(string name, string section, string key, string[] names,
                             Func<int> get, Action<int> set, string note)
         {

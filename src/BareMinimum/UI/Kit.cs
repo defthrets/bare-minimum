@@ -360,7 +360,14 @@ namespace BareMinimum.UI
         ///
         /// Written down in one place, next to the letters that are certain.
         /// </remarks>
-        public static string Interact { get { return Hud.OnPad ? "D-PAD RIGHT" : null; } }
+        public static string Interact { get { return Hud.OnPad ? PadInteract : null; } }
+
+        /// <summary>
+        /// The word on the cap for the pad's interact, pushed in from the ini every tick by
+        /// Main -- the same way Theme.Motion is -- so a change in the settings menu shows on
+        /// the very next prompt rather than after a reload. See Settings.PadInteractLabel.
+        /// </summary>
+        public static string PadInteract = "D-PAD RIGHT";
 
         // ======================================================================
         // Tags and words

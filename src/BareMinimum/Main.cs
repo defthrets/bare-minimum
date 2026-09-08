@@ -152,6 +152,7 @@ namespace BareMinimum
                 // Whether the panels move at all: the same switch the HUD icons obey, read
                 // every tick so flipping it in the settings menu takes effect in that menu.
                 UI.Theme.Motion = _cfg.HudAnimate;
+                UI.Kit.PadInteract = _cfg.PadInteractLabel;
 
                 // THE SETTINGS MENU RUNS EVEN WHEN THE MOD IS SWITCHED OFF, and it has to:
                 // "Mod enabled" is a row inside it, so gating it behind that flag would make
