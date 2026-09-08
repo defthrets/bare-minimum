@@ -151,6 +151,8 @@ namespace BareMinimum.UI
                     return;
                 }
 
+                Chording();
+
                 if (Toggled())
                 {
                     if (IsOpen) Close();
@@ -173,6 +175,8 @@ namespace BareMinimum.UI
 
         public void Open()
         {
+            if (_byChord) OutOfCover();
+
             Refill();
 
             _index = 0;
@@ -228,8 +232,65 @@ namespace BareMinimum.UI
 
         private bool _padWas;
 
+        /// <summary>Whether the toggle that just fired came off the pad chord rather than the key.</summary>
+        private bool _byChord;
+
+        /// <summary>
+        /// The frames on which both halves of the chord are down: cover and jump are switched
+        /// off for that frame.
+        /// </summary>
+        ///
+        /// <remarks>
+        /// RB IS THE COVER BUTTON ON FOOT AND X IS JUMP, and the game acts on each on the frame
+        /// it is pressed. A control disabled during a script's tick is disabled for the rest
+        /// of that frame, which is how every menu in this mod keeps a gun from firing -- so
+        /// when the two are pressed together, the frame they land on has cover and jump off
+        /// and he does neither. It cannot help when RB lands a frame or two before X: by the
+        /// time both are down he is already dropping. That case is OutOfCover's.
+        ///
+        /// Only the frames with BOTH down. Disabling cover whenever RB is held would take the
+        /// cover button away from a man who is only holding it to take cover.
+        /// </remarks>
+        private void Chording()
+        {
+            if (!_cfg.BagPad) return;
+
+            try
+            {
+                if (!Core.Pad.Down(GTA.Control.FrontendRb) || !Core.Pad.Down(GTA.Control.FrontendX)) return;
+
+                Game.DisableControlThisFrame(GTA.Control.Cover);
+                Game.DisableControlThisFrame(GTA.Control.Jump);
+            }
+            catch { /* then the frame plays as the game would have it */ }
+        }
+
+        /// <summary>
+        /// If the RB half got in first and he is already going into cover, stand him back up.
+        ///
+        /// Cover is a task, and clearing it a frame or two into the drop is a twitch rather
+        /// than a duck. Called only when the pocket opened off the chord: a man who took cover
+        /// on purpose and then opened his pocket with the key is left where he chose to be.
+        /// </summary>
+        private static void OutOfCover()
+        {
+            try
+            {
+                var me = Game.Player.Character;
+                if (me == null || !me.Exists()) return;
+
+                var dropping = GTA.Native.Function.Call<bool>(GTA.Native.Hash.IS_PED_GOING_INTO_COVER, me.Handle);
+                var down = GTA.Native.Function.Call<bool>(GTA.Native.Hash.IS_PED_IN_COVER, me.Handle, false);
+
+                if (dropping || down) GTA.Native.Function.Call(GTA.Native.Hash.CLEAR_PED_TASKS, me.Handle);
+            }
+            catch { /* he ducks, which is what he did yesterday */ }
+        }
+
         private bool Toggled()
         {
+            _byChord = false;
+
             var down = false;
 
             try { down = Game.IsKeyPressed(_cfg.BagKey); }
@@ -244,11 +305,13 @@ namespace BareMinimum.UI
             // BOTH HALVES ARE BUSY ON FOOT -- RB takes cover and X sprints -- which is true
             // of every pair on a pad and is why this is a chord at all. Holding RB and
             // tapping X is not a thing the game does together, which is the test that
-            // matters; what it costs is that the cover press still registers underneath.
+            // matters. What it used to cost was the cover press registering underneath --
+            // see Chording and OutOfCover for the two halves of not paying that.
             if (_cfg.BagPad &&
                 Core.Pad.Chord(GTA.Control.FrontendRb, GTA.Control.FrontendX, ref _padWas))
             {
                 edge = true;
+                _byChord = true;
             }
 
             if (!edge) return false;
