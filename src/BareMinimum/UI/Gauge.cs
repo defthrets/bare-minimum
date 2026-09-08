@@ -682,49 +682,6 @@ namespace BareMinimum.UI
 
             var surfaceY = Clamp(y + h - level - thrown, y, y + h);
 
-            // HOW FAR THE SURFACE TRAVELS. 0.007 of the bar's height was the number that
-            // came out of killing the jitter, and it was an overcorrection: on a bar two
-            // hundred and thirty-five pixels tall that is under two pixels, which is
-            // certainly smooth and very nearly invisible.
-            //
-            // The jitter was never the amplitude anyway -- it was a wave rolling ACROSS
-            // fifteen pixels of width. Now that the surface swells and tips as a whole
-            // instead, it can travel a proper distance and stay perfectly smooth, because
-            // a straight line moving slowly is smooth however far it moves.
-            // AMPLITUDE, NOT ONLY PERIOD. Six rounds of "still too fast" have all been
-            // answered by halving the clock, and that has clearly not been the whole story: a
-            // crest travelling five pixels reads as quick even when it takes a minute to do
-            // it, because what the eye measures is how far the line has jumped since it last
-            // looked. Cutting the distance calms it as much as cutting the rate.
-            // TRAVEL IS A FRACTION OF THE SCREEN, NOT OF THE BAR.
-            //
-            // It was h * 0.018, and the period is fixed, so the amplitude WAS the speed: make
-            // the gauge taller and the surface covers more ground in the same 144 seconds and
-            // reads faster. Taking BarLength from 0.1635 to 0.184 -- which is a height
-            // decision, made by eye against the minimap -- sped this up by thirteen and a half
-            // per cent as a side effect, and undid a good part of the tuning that got it calm
-            // in the first place.
-            //
-            // 0.00273 is exactly what h * 0.018 came to at the height it was tuned at, so the
-            // motion is unchanged there and now stays put at every other height too. One
-            // thing, one effect: BarLength sets how big the gauge is and HudBarWave sets how
-            // much the surface moves, and neither reaches into the other any more.
-            // ROOM TO MOVE. At 0.00273 the crest travelled about 1.2 to 1.8 pixels, so it
-            // could only ever occupy two or three pixel rows -- it held still, snapped a
-            // pixel, held still. That reads as broken however fast the clock runs, and no
-            // amount of shortening the period fixes it, which is why three rounds of doing
-            // exactly that did not help.
-            //
-            // 0.0062 puts the travel at four to eight pixels, which is enough rows for the
-            // sine to glide through instead of stepping between. [HUD] BarWave scales it.
-            // 0.004 FROM 0.018, IN TWO STEPS. "A little less aggressive" took it to 0.013 once
-            // the five stood together; then "settle to a barely moving flat state, and the
-            // movement makes them slosh" took it here. The idle bow is a hair now -- a surface
-            // that is plainly liquid but at rest -- and everything you notice moving is the
-            // spring: a meal, a pill, a brake, a landing.
-            var swing = h * 0.004f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
-
-
             var floor = y + h;
 
             // THE SURFACE FIRST, THEN THE BODY UNDER IT. Every column's top is worked out
@@ -733,10 +690,10 @@ namespace BareMinimum.UI
             // frame. It used to be allowed for with a margin under the swing; the spring can
             // throw the surface a good deal further than the swing, so it is computed now.
             //
-            // The rate still climbs as the meter empties -- hunger drains faster while you
-            // sprint (Needs.Exertion), so running yourself hungry makes this visibly livelier.
-            var hurry = 1f + 0.85f * empty;
-            var tops = Surface(x, y, w, h, surfaceY, t * hurry, swing, speed, h * 0.007f, 0f);
+            //
+            // THE VITALS' MOTION, TO THE NUMBER -- see Surface -- on this bar's own tempo, so
+            // no two bars in the row breathe in step.
+            var tops = Surface(x, y, w, h, surfaceY, 1.06f, 1.48f, speed, h * 0.007f);
 
             var bodyTop = Lowest(tops, floor);
 
@@ -949,42 +906,13 @@ namespace BareMinimum.UI
 
             var surfaceY = Clamp(y + h - level - thrown, y, floor);
 
-            // Backwards, which is the whole difference from the food bar.
-            var hurry = -(1f + 0.85f * empty);
-
-            // TRAVEL IS A FRACTION OF THE SCREEN, NOT OF THE BAR.
-            //
-            // It was h * 0.018, and the period is fixed, so the amplitude WAS the speed: make
-            // the gauge taller and the surface covers more ground in the same 144 seconds and
-            // reads faster. Taking BarLength from 0.1635 to 0.184 -- which is a height
-            // decision, made by eye against the minimap -- sped this up by thirteen and a half
-            // per cent as a side effect, and undid a good part of the tuning that got it calm
-            // in the first place.
-            //
-            // 0.00273 is exactly what h * 0.018 came to at the height it was tuned at, so the
-            // motion is unchanged there and now stays put at every other height too. One
-            // thing, one effect: BarLength sets how big the gauge is and HudBarWave sets how
-            // much the surface moves, and neither reaches into the other any more.
-            // ROOM TO MOVE. At 0.00273 the crest travelled about 1.2 to 1.8 pixels, so it
-            // could only ever occupy two or three pixel rows -- it held still, snapped a
-            // pixel, held still. That reads as broken however fast the clock runs, and no
-            // amount of shortening the period fixes it, which is why three rounds of doing
-            // exactly that did not help.
-            //
-            // 0.0062 puts the travel at four to eight pixels, which is enough rows for the
-            // sine to glide through instead of stepping between. [HUD] BarWave scales it.
-            var swing = h * 0.004f * Clamp01(_cfg.HudBarWave) * (0.35f + 0.65f * empty);
-
-
             // THE SURFACE FIRST, THEN THE BODY UNDER IT: the body starts at the lowest point
             // of the surface, so nothing above it can draw over ground it has covered. Churn
             // says why this is computed rather than allowed for. The tilt runs on its own
             // phase here so the two bars never lean together.
             var cap = h * 0.008f;
-            // ON ITS OWN TEMPO. The same periods run backwards were still the same periods, and
-            // with the food bar level beside it the two breathed together; 1.19 puts every
-            // beat of this bar off every beat of that one.
-            var tops = Surface(x, y, w, h, surfaceY, t * hurry * 1.19f, swing, speed, cap, 110f);
+            // THE VITALS' MOTION, on this bar's own tempo -- see Surface.
+            var tops = Surface(x, y, w, h, surfaceY, 0.94f, 1.11f, speed, cap);
 
             var bodyTop = Lowest(tops, floor);
 
@@ -1262,6 +1190,10 @@ namespace BareMinimum.UI
 
             _phase += step / 1000f * PaceOf() * lift;
 
+            // AND THE VITALS' CLOCK, for the surfaces: seconds at the vitals' pace, the very
+            // thing Momentum.Time is over there, so the five surfaces share one tempo scale.
+            _liquid += step / 1000f * Math.Max(0.05f, _cfg.VitalsPace);
+
             // AND THE LIQUID, on the same step. See Slosh.
             Momentum(needs, step / 1000f);
 
@@ -1269,10 +1201,14 @@ namespace BareMinimum.UI
             // short of this, so the wrap is invisible -- and a float grown past a million has
             // lost the precision the shortest of them need.
             if (_phase > 1000000f) _phase -= 1000000f;
+            if (_liquid > 1000000f) _liquid -= 1000000f;
         }
 
         /// <summary>Where the animation has got to, and when it was last moved on.</summary>
         private float _phase;
+
+        /// <summary>The surfaces' clock: seconds at the vitals' pace. See Surface.</summary>
+        private float _liquid;
         private int _last;
         private bool _ticking;
 
@@ -1477,53 +1413,48 @@ namespace BareMinimum.UI
         }
 
         /// <summary>
-        /// Where the surface is, column by column: the meniscus, the drift, the lean, and what
-        /// the spring is doing to all three. Screen y per column, clamped into the bar.
+        /// Where the surface is, column by column: the vitals' liquid, exactly.
         ///
-        /// A MENISCUS THAT BREATHES. The bow is a parabola pinned at both walls, which cannot
-        /// have a corner in it at any amplitude, and under it the whole surface drifts on a
-        /// period that does not divide into the bow's -- 144 and 208 on the paced clock, which
-        /// BarPace at 42 turns into three and a half seconds and five. Those two are the food
-        /// bar's own tuning, arrived at over many rounds, and are not touched here. NOT A
-        /// TRAVELLING WAVE, still: a wave rolling across fifteen pixels is eight columns taking
-        /// turns to jump, and there is not the width for a wavelength to live in.
+        /// THE SAME MOTION AS THE HEALTH AND ENERGY BARS, TO THE NUMBER. These two bars had a
+        /// surface of their own -- a bow and a drift on the paced clock, sized by how empty the
+        /// meter was, hurried as it emptied, run backwards for sleep -- tuned over many rounds
+        /// and, stood in a row with the vitals, visibly a different liquid: slower, smaller,
+        /// wetter in a different way. "Same flow and movements" ends that. What is here is
+        /// Vitals.Columns.One's idle and slosh, copied: the drift is a share of the bar's
+        /// LENGTH, the bow and the lean shares of its WIDTH, on three periods in seconds that
+        /// do not divide into each other, read off a seconds clock that runs at the vitals'
+        /// pace and nothing else's. The spring's speed heaps the surface toward the wall it
+        /// is moving at and leans it behind, off the same two numbers.
         ///
-        /// THE TILT IS BACK, ON VITALS' TERMS. It went once because a surface leaning one way
-        /// and then the other on its own clock is two diagonals swapping over -- a metronome.
-        /// What Vitals does is different in kind: the lean is small, a fifth of the width, and
-        /// most of it is CAUSED -- by the liquid's own speed as the spring throws it, and by
-        /// braking, accelerating and landing. A lean with a reason reads as liquid; a lean on
-        /// a timer reads as a mechanism.
+        /// EACH BAR ON ITS OWN TEMPO. The clock is scaled per bar -- health 0.87, energy 1.13,
+        /// sleep 0.94, food 1.06 -- so the five are on different periods entirely and no two
+        /// are in step for long; the phase offsets them further. A row breathing in unison
+        /// reads as one instrument breathing, which was reported once and is not wanted.
         ///
-        /// THE SPRING'S SPEED BENDS THE SURFACE. Liquid moving fast toward a wall piles up
-        /// against it: a bow in the direction of travel and a lean behind it, both off the
-        /// spring's velocity, so a jolt is not a flat line jumping but a surface that heaps up
-        /// and settles. This is the part of Vitals that makes its levels look wet.
+        /// AND BARELY MOVING. The idle travel is a surface at rest that is still plainly
+        /// liquid, and nothing more; the movement you notice is the spring -- a meal, a pill,
+        /// a brake, a landing -- as it is on the bars beside these.
         /// </summary>
-        private float[] Surface(float x, float y, float w, float h, float surfaceY, float t,
-                                float swing, float speed, float capH, float phase)
+        private float[] Surface(float x, float y, float w, float h, float surfaceY,
+                                float tempo, float phase, float speed, float capH)
         {
             var floor = y + h;
             var wave = Clamp01(_cfg.HudBarWave);
 
             // The width as a HEIGHT fraction, for anything measured across the bar in the same
             // unit as along it.
-            var thickH = w * Aspect();
+            var thick = w * Aspect();
 
-            var bow = (float)Math.Sin(t * (2.0 * Math.PI / 144.0)) * swing;
-            var lift = (float)Math.Sin(t * (2.0 * Math.PI / 208.0)) * swing * 0.40f;
+            var tt = _liquid * tempo + phase * 11.7f;
 
-            // Vitals' seven seconds, in this clock's units: at BarPace 42, 298 of these is
-            // about seven seconds, and it divides into neither of the two above.
-            var tilt = (float)Math.Sin((t + phase) * (2.0 * Math.PI / 298.0)) * 0.04f * thickH * wave;
+            var drift = (float)Math.Sin(tt * (2.0 * Math.PI / 5.3)) * 0.004f * h * wave;
+            var bow = (float)Math.Sin(tt * (2.0 * Math.PI / 3.7)) * 0.05f * thick * wave;
+            var tilt = (float)Math.Sin(tt * (2.0 * Math.PI / 7.1)) * 0.04f * thick * wave;
 
-            // Up is negative on screen: a surface thrown upward heaps in the middle.
-            bow -= speed * 0.40f * thickH;
-            tilt += speed * 0.25f * thickH;
-
-            // Braking leans the liquid up one wall; accelerating, the other. The same way round
-            // as the throw, so a stop reads as one motion and not two.
-            tilt -= Clamp(_accel / 10f, -1f, 1f) * 0.30f * thickH * Clamp01(_cfg.HudBarLean);
+            // Positive is toward the surface, which is UP: a surface thrown upward heaps in the
+            // middle and leans behind its own travel.
+            bow += speed * 0.40f * thick;
+            tilt += speed * 0.25f * thick;
 
             var columns = Columns(w);
             if (_tops.Length != columns) _tops = new float[columns];
@@ -1534,7 +1465,7 @@ namespace BareMinimum.UI
                 var across = ((i + 0.5f) / columns - 0.5f) * 2f;
                 var curve = 1f - across * across;
 
-                var topY = surfaceY + lift + bow * curve + tilt * across;
+                var topY = surfaceY - drift - bow * curve - tilt * across;
 
                 if (topY < y) topY = y;
                 if (topY > floor - capH) topY = floor - capH;
