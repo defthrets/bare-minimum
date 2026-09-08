@@ -1820,7 +1820,7 @@ namespace BareMinimum.Venues
             _shopping = null;
         }
 
-        /// <summary>The bar's shelf, opened from inside its room, measured to where he stands.</summary>
+        /// <summary>The shop's shelf, opened from inside its room; the counter is wherever he stood to open it.</summary>
         public void OpenShelfInside(Vendor v, Vector3 counter)
         {
             if (v == null) return;
@@ -2088,6 +2088,22 @@ namespace BareMinimum.Venues
                        Function.Call<bool>(Hash.IS_DISABLED_CONTROL_PRESSED, 0, (int)GTA.Control.Context);
             }
             catch { return false; }
+        }
+
+        /// <summary>
+        /// The key is still down from a hold that just did something somewhere else -- coming
+        /// out of a room -- and nothing here acts until it has been let go.
+        ///
+        /// Without this the hold that brought him out of the shop lands him at its door with
+        /// the key down: a fresh hold starts on the spot and walks him straight back in, or
+        /// the release a moment later reads as a press and opens the pavement shelf. Either
+        /// is one press doing a second thing.
+        /// </summary>
+        public void HoldOver()
+        {
+            _doorWasDown = true;
+            _keyWasDown = true;
+            _doorHeldSince = 0;
         }
 
         private bool Pressed()

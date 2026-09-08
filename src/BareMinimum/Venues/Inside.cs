@@ -78,16 +78,16 @@ namespace BareMinimum.Venues
     /// nothing else. The linked mod's vanishing-blip reports are what a GLOBAL online-map
     /// switch does to a story game, and this never makes one.
     ///
-    /// ONE MARK INSIDE, NOT THREE. Where he lands is where he orders and where he leaves from:
-    /// press to open the bar's shelf, hold to go back out the door. Two more coordinates per
-    /// room -- a counter and an exit -- would be two more numbers somebody has to stand on to
-    /// get right, for rooms this mod cannot see. The hold is the same idiom the bed uses.
+    /// THE WHOLE ROOM IS THE MARK. Anywhere inside, tap to open the shop's shelf and hold to
+    /// go back out the door. There used to be a ring on the floor where he landed and a reach
+    /// round it, and it hovered, because the floor of a room this mod has never seen is not
+    /// where a coordinate says it is; a zone that is simply "in the room" has no floor to get
+    /// wrong and nothing to draw. The hold is the same idiom the bed uses.
+    ///
+    /// THE ROOM'S OWN DOORS ARE LOCKED while he is in it, and put back after. See Bolt.
     /// </remarks>
     internal sealed class Inside
     {
-        /// <summary>How close to the mark before it offers the bar and the way out.</summary>
-        private const float MarkRange = 2.4f;
-
         /// <summary>How long the key is held to leave. A press is an order.</summary>
         private const int LeaveHoldMs = 1100;
 
@@ -145,15 +145,22 @@ namespace BareMinimum.Venues
         /// <summary>How often the room is asked whether he is standing in it uninvited.</summary>
         private const int RecoverEveryMs = 2000;
 
-        private const float RingRange = 30f;
+        /// <summary>
+        /// How long the room must read as no room at all before he counts as out of it.
+        ///
+        /// A doorway reads as no interior for a step or two, and with the doors locked the
+        /// doorway is exactly where a man trying them stands.
+        /// </summary>
+        private const int OutForMs = 1500;
 
         private readonly Settings _cfg;
         private readonly Vendors _vendors;
+        private readonly Bolt _bolt = new Bolt();
 
         private Vendor _in;
         private Room _room;
 
-        /// <summary>Where he actually landed. Everything inside is measured from here.</summary>
+        /// <summary>Where he actually landed. What wandering out is measured from.</summary>
         private Vector3 _mark;
 
         /// <summary>The pavement he stepped in from, and the way he was facing.</summary>
@@ -166,6 +173,7 @@ namespace BareMinimum.Venues
         private bool _wasDown;
         private int _heldSince;
         private int _nextRecover;
+        private int _outSince;
 
         /// <summary>The file that remembers which bar he is in across a reload.</summary>
         private static string Sidecar => Path.Combine(Paths.Writable, "inside.txt");
@@ -212,11 +220,11 @@ namespace BareMinimum.Venues
 
                 if (WanderedOut(me)) return;
 
-                Ring(me);
+                _bolt.Update();
 
                 if (suspended) { _wasDown = false; _heldSince = 0; return; }
 
-                AtTheBar(me);
+                InTheRoom(me);
             }
             catch (Exception ex)
             {
@@ -225,22 +233,17 @@ namespace BareMinimum.Venues
         }
 
         /// <summary>
-        /// The one mark: order on a press, leave on a hold.
+        /// Anywhere in the room: order on a tap, leave on a hold.
         ///
         /// ACTED ON AT RELEASE for the order, so a hold does not open the shelf on its first
-        /// frame and then leave with it open. The chip fills while the key is down, the same
-        /// way the bed's does, so a hold is visibly a hold.
+        /// frame and then leave with it open; and a hold that matures into leaving tells the
+        /// vendor outside that the key is still down, so the same press cannot open the
+        /// pavement shelf -- or walk him straight back in -- the moment he lands. The chip
+        /// fills while the key is down, the same way the bed's does, so a hold is visibly a hold.
         /// </summary>
-        private void AtTheBar(Ped me)
+        private void InTheRoom(Ped me)
         {
             var now = Game.GameTime;
-
-            if (me.Position.DistanceTo(_mark) > MarkRange)
-            {
-                _wasDown = false;
-                _heldSince = 0;
-                return;
-            }
 
             Offering = true;
 
@@ -259,6 +262,7 @@ namespace BareMinimum.Venues
                     _heldSince = 0;
                     _wasDown = false;
                     Leave(me);
+                    _vendors.HoldOver();
                     return;
                 }
             }
@@ -272,7 +276,7 @@ namespace BareMinimum.Venues
             {
                 _heldSince = 0;
                 Hud.ClearHelp();
-                _vendors.OpenShelfInside(_in, _mark);
+                _vendors.OpenShelfInside(_in, me.Position);
             }
 
             if (!down) _heldSince = 0;
@@ -478,6 +482,9 @@ namespace BareMinimum.Venues
 
                 Remember(v.Id);
 
+                // With the screen still black, so the doors are shut before he can see them.
+                _bolt.Lock(me.Position);
+
                 Function.Call(Hash.FREEZE_ENTITY_POSITION, me.Handle, false);
                 frozen = false;
 
@@ -626,7 +633,12 @@ namespace BareMinimum.Venues
             try { room = Function.Call<int>(Hash.GET_INTERIOR_FROM_ENTITY, me.Handle); }
             catch { return false; }
 
-            if (room != 0) return false;
+            if (room != 0) { _outSince = 0; return false; }
+
+            // Not on the first frame it says so. See OutForMs.
+            var now = Game.GameTime;
+            if (_outSince == 0) { _outSince = now; return false; }
+            if (now - _outSince < OutForMs) return false;
 
             var away = me.Position.DistanceTo(_mark);
 
@@ -688,6 +700,8 @@ namespace BareMinimum.Venues
                 _enteredAt = now;
                 _cameFrom = Vector3.Zero;      // the doorway went with the memory; the door is the way out
 
+                _bolt.Lock(me.Position);
+
                 Log.Info("Found him already in " + r.Name + "; the way out is " + v.Name + "'s door.");
                 return;
             }
@@ -724,6 +738,9 @@ namespace BareMinimum.Venues
 
         private void Forget(string why)
         {
+            _bolt.Release();
+            _outSince = 0;
+
             if (why != null && _in != null)
             {
                 Log.Info("No longer in " + (_room == null ? "the room" : _room.Name) + ": " + why + ".");
@@ -749,31 +766,15 @@ namespace BareMinimum.Venues
             }
             catch { /* teardown */ }
 
+            // THE DOORS ARE GAME STATE and outlive a script reload; left locked, the shop stays
+            // shut for the rest of the session. Put back now; Recover locks them again if he is
+            // still standing in the room when the script comes back.
+            try { _bolt.Release(); } catch { /* teardown */ }
+
             if (_room != null && _room.Online) Mp(false);
         }
 
         // ======================================================================
-
-        /// <summary>A ring on the floor at the mark, so the way out is findable from across the room.</summary>
-        private void Ring(Ped me)
-        {
-            if (me.Position.DistanceTo(_mark) > RingRange) return;
-
-            try
-            {
-                var c = UI.Palette.Brand;
-
-                Function.Call(Hash.DRAW_MARKER, 1, _mark.X, _mark.Y, _mark.Z - 1.0f,
-                              0f, 0f, 0f, 0f, 0f, 0f,
-                              1.1f, 1.1f, 0.30f,
-                              (int)c.R, (int)c.G, (int)c.B, 105,
-                              false, false, 2, false, 0, 0, false);
-            }
-            catch
-            {
-                // A room without its ring is still a room.
-            }
-        }
 
         /// <summary>The ground under a point, through the native -- World.GetGroundHeight's mode enum is not in 3.6.0.</summary>
         private static bool Ground(Vector3 at, out float z)

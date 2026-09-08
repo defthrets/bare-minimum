@@ -384,6 +384,7 @@ if ($Package) {
         'scripts\BareMinimum.ini',
         'scripts\BareMinimum\foods.json',
         'scripts\BareMinimum\vendors.json',
+        'scripts\BareMinimum\doors.txt',
         'scripts\BareMinimum\brands.json',
         'scripts\BareMinimum\socials.json',
         'README.txt',

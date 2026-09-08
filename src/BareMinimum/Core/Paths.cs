@@ -200,6 +200,9 @@ namespace BareMinimum.Core
         /// </summary>
         public static string VendorsFile => Path.Combine(Data, "vendors.json");
 
+        /// <summary>Every door model name in the game, one a line. See Venues.Bolt.</summary>
+        public static string DoorsFile => Path.Combine(Data, "doors.txt");
+
         /// <summary>Shop chains and their marks, for the counter header.</summary>
         public static string BrandsFile => Path.Combine(Data, "brands.json");
 
