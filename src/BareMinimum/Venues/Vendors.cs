@@ -793,10 +793,15 @@ namespace BareMinimum.Venues
                     Heading = prop.Heading,
                     Discovered = true,
                     Stand = prop,
+                    // A COOK, NOT WHOEVER WAS FREE. The list used to open with a street
+                    // vendor and carry three ordinary pedestrians as fallbacks, so every cart
+                    // in the game got a man in a t-shirt standing behind a griddle. The line
+                    // cook comes first -- apron and cap, which is what somebody serving food
+                    // off a cart looks like -- the chef behind him, and the two street vendors
+                    // after that. Nobody who is not dressed for the job is on the list at all.
                     PedModels = new[]
                     {
-                        "s_m_m_strvend_01", "s_m_y_chef_01", "s_m_m_linecook",
-                        "s_m_m_migrant_01", "a_m_m_eastsa_02"
+                        "s_m_m_linecook", "s_m_y_chef_01", "s_m_m_strvend_01", "s_m_y_strvend_01"
                     },
                     PedBack = 0.7f,
                     Scenario = "WORLD_HUMAN_STAND_IMPATIENT",
@@ -822,10 +827,10 @@ namespace BareMinimum.Venues
             }
         }
 
-        /// <summary>Every cart written down so far, so a second sighting is not a second line.</summary>
-        private readonly List<string> _harvest = new List<string>();
-        private readonly List<Vector3> _harvestAt = new List<Vector3>();
-        private bool _harvestRead;
+        /// <summary>Every stall written down so far, so a second sighting is not a second line.</summary>
+        private static readonly List<string> _harvest = new List<string>();
+        private static readonly List<Vector3> _harvestAt = new List<Vector3>();
+        private static bool _harvestRead;
 
         /// <summary>
         /// Writes a found cart down, once, forever.
@@ -851,6 +856,18 @@ namespace BareMinimum.Venues
                      Num(made.Position.X) + ", " + Num(made.Position.Y) + ", " +
                      Num(made.Position.Z) + " facing " + Num(made.Heading) + ".");
 
+            Note(row[0], row[1], row[2], row[3], made.Position, made.Heading);
+        }
+
+        /// <summary>
+        /// One roadside thing written down, once, forever. Called for the carts this staffs and
+        /// for the produce stalls the counter code finds by model -- anything the game placed
+        /// and this mod had to go looking for, so that one drive around the map turns the lot
+        /// into ordinary listed entries and the looking can stop.
+        /// </summary>
+        internal static void Note(string model, string item, string name, string label,
+                                  Vector3 at, float heading)
+        {
             try
             {
                 if (!_harvestRead)
@@ -861,27 +878,27 @@ namespace BareMinimum.Venues
 
                 foreach (var seen in _harvestAt)
                 {
-                    if (seen.DistanceTo(made.Position) <= 3f) return;
+                    if (seen.DistanceTo(at) <= 3f) return;
                 }
 
-                _harvestAt.Add(made.Position);
-                _harvest.Add("    { \"model\": \"" + row[0] + "\", \"item\": \"" + row[1] +
-                             "\", \"name\": \"" + row[2] + "\", \"label\": \"" + row[3] +
-                             "\", \"x\": " + Num(made.Position.X) +
-                             ", \"y\": " + Num(made.Position.Y) +
-                             ", \"z\": " + Num(made.Position.Z) +
-                             ", \"heading\": " + Num(made.Heading) + " }");
+                _harvestAt.Add(at);
+                _harvest.Add("    { \"model\": \"" + model + "\", \"item\": \"" + item +
+                             "\", \"name\": \"" + name + "\", \"label\": \"" + label +
+                             "\", \"x\": " + Num(at.X) +
+                             ", \"y\": " + Num(at.Y) +
+                             ", \"z\": " + Num(at.Z) +
+                             ", \"heading\": " + Num(heading) + " }");
 
                 WriteHarvest();
             }
             catch (Exception ex)
             {
-                Log.Once("cart-harvest", "Could not write the cart list: " + ex.Message);
+                Log.Once("cart-harvest", "Could not write the stall list: " + ex.Message);
             }
         }
 
         /// <summary>What was written down in earlier sessions, so this one adds rather than replaces.</summary>
-        private void ReadHarvest()
+        private static void ReadHarvest()
         {
             var path = Paths.CartsFile;
             if (!System.IO.File.Exists(path)) return;
@@ -903,7 +920,7 @@ namespace BareMinimum.Venues
             Log.Info("Carts: " + _harvest.Count + " already written down in " + path + ".");
         }
 
-        private void WriteHarvest()
+        private static void WriteHarvest()
         {
             var text = new System.Text.StringBuilder();
 
@@ -1154,6 +1171,26 @@ namespace BareMinimum.Venues
         /// <summary>The groups, by key, out of vendors.json. Empty when the file has none.</summary>
         private static readonly Dictionary<string, MapGroup> Groups =
             new Dictionary<string, MapGroup>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// One group's name and dress, for anything outside this class that puts a marker on the
+        /// map -- the machines and the produce stalls, which have no line in vendors.json but
+        /// belong in its legend all the same. False when the file has no such group.
+        /// </summary>
+        internal static bool GroupLook(string key, out string name, out int sprite, out int colour)
+        {
+            name = "";
+            sprite = 52;
+            colour = 5;
+
+            var group = Group(key);
+            if (group == null) return false;
+
+            name = group.Name;
+            sprite = group.Sprite;
+            colour = group.Colour;
+            return true;
+        }
 
         /// <summary>The group with this key, or null. Static because the table is the file's, not a shop's.</summary>
         private static MapGroup Group(string key)

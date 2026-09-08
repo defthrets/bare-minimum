@@ -95,7 +95,7 @@ namespace BareMinimum.Venues
                 if (_blips.TryGetValue(prop.Handle, out blip) && blip != null && blip.Exists())
                     continue;
 
-                _blips[prop.Handle] = Make(prop.Position);
+                _blips[prop.Handle] = Make(prop);
             }
 
             // Anything that streamed out, or that walked past our radius, loses its marker.
@@ -140,14 +140,66 @@ namespace BareMinimum.Venues
             return false;
         }
 
-        private Blip Make(Vector3 at)
+        /// <summary>
+        /// The produce stall model this prop is, or null for a snack machine.
+        ///
+        /// The NAME rather than a yes: the harvest file is meant to be pasted into vendors.json
+        /// and a line saying which model it was is the difference between an entry somebody can
+        /// read and a hash nobody can look up.
+        /// </summary>
+        private static string StallModel(Prop prop)
         {
+            try
+            {
+                var hash = prop.Model.Hash;
+
+                foreach (var name in Counters.StallModels)
+                {
+                    if (new Model(name).Hash == hash) return name;
+                }
+            }
+            catch { /* a model that will not answer is treated as a machine */ }
+
+            return null;
+        }
+
+        private Blip Make(Prop prop)
+        {
+            var at = prop.Position;
+            var model = StallModel(prop);
+            var stall = model != null;
+
+            // A ROW OF ITS OWN IN THE LEGEND. These two used to wear whichever name every shop
+            // shared, which was fine while that was one name and wrong the moment the legend
+            // was sorted by kind: a fruit stall filed under the fallback is the one roadside
+            // thing you cannot find by looking for it. The groups are in vendors.json with the
+            // rest, so all of this is described in one place.
+            var key = stall ? "produce" : "machine";
+
+            string label;
+            int sprite, colour;
+
+            if (!Vendors.GroupLook(key, out label, out sprite, out colour))
+            {
+                label = stall ? "Fruit Stall" : "Vending Machine";
+                sprite = 52;
+                colour = 5;
+            }
+
+            if (!_cfg.GroupShopBlips) label = stall ? "Fruit Stall" : "Vending Machine";
+
+            // WRITTEN DOWN WHILE YOU DRIVE PAST. A stall has no line in vendors.json -- it is
+            // found by model, like the hot dog carts -- so the same harvest that turns the
+            // carts into listed entries takes these too, and one drive around the map is the
+            // whole list of both. See Vendors.Note.
+            if (stall) Vendors.Note(model, "fruit", "Fruit Stall", "fruit", at, prop.Heading);
+
             var blip = World.CreateBlip(at);
 
             try
             {
-                blip.Sprite = (BlipSprite)52;
-                blip.Color = (BlipColor)5;
+                blip.Sprite = (BlipSprite)sprite;
+                blip.Color = (BlipColor)colour;
                 blip.Scale = 0.7f;
 
                 // SHORT RANGE, ALWAYS. A machine is somewhere you notice because you are
@@ -155,7 +207,7 @@ namespace BareMinimum.Venues
                 // on the pause map is the clutter the shops are already grouped to avoid.
                 blip.IsShortRange = true;
 
-                Function(blip, _cfg.GroupShopBlips ? _cfg.ShopBlipGroupName : "Vending Machine");
+                Function(blip, label);
 
                 // For the pause map's hover hook, so the card can name it. See MapCard. Set at
                 // creation only: these markers are rebuilt as he moves, so a flipped setting

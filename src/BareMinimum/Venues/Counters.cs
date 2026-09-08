@@ -216,7 +216,12 @@ namespace BareMinimum.Venues
         /// is looser -- the same figure the hot dog stands use.
         /// </summary>
         public float MachineReach = 1.5f;
-        public float StallReach = 2.6f;
+
+        // A TRESTLE IS WIDE AND ITS ORIGIN IS IN THE MIDDLE OF IT. Two and a half metres is
+        // measured from that origin, so standing at the end of a produce stall -- which is
+        // where the crates are, and where anybody would stand -- was often out of reach of a
+        // stall you were touching. The hot dog carts ask for 2.6 and are half the width.
+        public float StallReach = 3.4f;
 
         /// <summary>The prop currently being offered, or null.</summary>
         public Prop Found => _found;
