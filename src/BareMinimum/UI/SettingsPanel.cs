@@ -549,7 +549,14 @@ namespace BareMinimum.UI
 
             Bool("Sleep in cars", "Sleeping", "InCars",
                  () => _cfg.SleepInCars, v => _cfg.SleepInCars = v,
-                 "Stopped, engine off, no wanted level.");
+                 "Stopped, engine off, no wanted level. The offer shows once a sit.");
+
+            Bool("Even with the engine on", "Sleeping", "EngineOn",
+                 () => _cfg.SleepEngineOn, v => _cfg.SleepEngineOn = v,
+                 "Sleep in a stopped car without switching it off. Off by default: an " +
+                 "idling engine is the difference between parking up and pausing.",
+                 () => _cfg.SleepInCars,
+                 "~y~Turn sleeping in cars ON first.");
 
             // WHAT THE CAP SAYS ON A PAD. The list is the common names; whatever the ini
             // holds is always on it too, so a name typed in there is shown as itself rather

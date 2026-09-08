@@ -244,6 +244,13 @@ namespace BareMinimum.Core
         public bool SleepInCars = true;
 
         /// <summary>
+        /// Whether a car with its engine RUNNING is somewhere you can sleep. Off: the car has
+        /// to be stopped and switched off, which is the difference between parking up and
+        /// pausing at the lights. On is for anybody who would rather not have to turn the key.
+        /// </summary>
+        public bool SleepEngineOn = false;
+
+        /// <summary>
         /// How long the interact has to be HELD to sleep in a car. Seconds; 0 is a tap.
         ///
         /// A CAR ONLY, and not a bed. In a car the interact is the same button that orders at
@@ -1027,6 +1034,7 @@ namespace BareMinimum.Core
 
                 cfg.SleepInBeds = ini.GetBool("Sleeping", "InBeds", cfg.SleepInBeds);
                 cfg.SleepInCars = ini.GetBool("Sleeping", "InCars", cfg.SleepInCars);
+                cfg.SleepEngineOn = ini.GetBool("Sleeping", "EngineOn", cfg.SleepEngineOn);
                 cfg.CarSleepHoldSeconds = ini.GetFloat("Sleeping", "CarHoldSeconds",
                                                        cfg.CarSleepHoldSeconds, 0f, 5f);
                 cfg.BedHours = ini.GetFloat("Sleeping", "BedHours", cfg.BedHours, 1f, 24f);

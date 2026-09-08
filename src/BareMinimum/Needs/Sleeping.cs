@@ -158,6 +158,10 @@ namespace BareMinimum.Needs
 
                 if (Exhausted(me)) return;
 
+                // Out of the car is what resets the once-per-sit offer, not the offer lapsing:
+                // driving off and stopping again is the same sit.
+                if (_carPrompted && !me.IsInVehicle()) _carPrompted = false;
+
                 var where = Offer(me);
 
                 if (where == Bunk.None)
@@ -171,7 +175,13 @@ namespace BareMinimum.Needs
                 {
                     _offering = true;
                     _offeredAt = Game.GameTime;
-                    _promptDone = false;
+
+                    // THE CAR SAYS IT ONCE A SIT. Every stop is an offer -- every set of lights,
+                    // with the engine switch on -- and a chip that came up at each of them would
+                    // be the mod talking over the drive. The first stop of a sit gets the words;
+                    // the key works at every one. A bed says it each time you come to it.
+                    _promptDone = where == Bunk.Car && _carPrompted;
+                    if (where == Bunk.Car) _carPrompted = true;
                 }
 
                 // ASKED BEFORE THE PROMPT IS DRAWN, so the hold meter on screen is this
@@ -213,9 +223,10 @@ namespace BareMinimum.Needs
                 // next odd vehicle and a whitelist just declines it.
                 if (!Enclosed(v)) return Bunk.None;
 
-                // Stopped AND switched off. Dozing off at the lights is not a nap, and an
-                // idling engine is the difference between parking up and pausing.
-                if (v.IsEngineRunning) return Bunk.None;
+                // Stopped AND, unless the ini says otherwise, switched off. Dozing off at the
+                // lights is not a nap, and an idling engine is the difference between parking
+                // up and pausing; the switch is for anybody who would rather not turn the key.
+                if (v.IsEngineRunning && !_cfg.SleepEngineOn) return Bunk.None;
                 if (!Function.Call<bool>(Hash.IS_VEHICLE_STOPPED, v.Handle)) return Bunk.None;
 
                 // Not while being shot at or chased. A wanted level is the one state where a
@@ -276,9 +287,19 @@ namespace BareMinimum.Needs
         /// </summary>
         private const int PromptMs = 3000;
 
+        /// <summary>
+        /// The car's offer is briefer still. It comes up every time you stop somewhere you
+        /// could sleep, which is a lot of stops; two seconds is long enough to read "hold" and
+        /// short enough to be gone before the lights change.
+        /// </summary>
+        private const int CarPromptMs = 2000;
+
         private bool _offering;
         private int _offeredAt;
         private bool _promptDone;
+
+        /// <summary>Whether this sit in a vehicle has had its offer said. See Update.</summary>
+        private bool _carPrompted;
 
         /// <summary>
         /// The offer: the button, the verb, and nothing else.
@@ -315,7 +336,7 @@ namespace BareMinimum.Needs
 
             if (_promptDone) return;
 
-            if (Game.GameTime - _offeredAt >= PromptMs)
+            if (Game.GameTime - _offeredAt >= (where == Bunk.Car ? CarPromptMs : PromptMs))
             {
                 _promptDone = true;
                 return;
