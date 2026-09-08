@@ -803,6 +803,18 @@ namespace BareMinimum.UI
                   "How fast the specks inside the bars move. 0 stops them.",
                   () => _cfg.Style == HudStyle.Bars, "Bars only.");
 
+            Float("Jolt on a change", "HUD", "BarSlosh",
+                  () => _cfg.HudBarSlosh, v => _cfg.HudBarSlosh = v,
+                  0.05f, 0f, 1f, "0.00",
+                  "How hard a level sloshes when a meal, a pill or a sleep moves it. 0 is never.",
+                  () => _cfg.Style == HudStyle.Bars, "Bars only.");
+
+            Float("Moves with you", "HUD", "BarLean",
+                  () => _cfg.HudBarLean, v => _cfg.HudBarLean = v,
+                  0.05f, 0f, 1f, "0.00",
+                  "How much the levels lift and lean when you brake, accelerate or land. 0 is off.",
+                  () => _cfg.Style == HudStyle.Bars, "Bars only.");
+
             Float("Bar mark size", "HUD", "BarIconScale",
                   () => _cfg.HudBarIconScale, v => _cfg.HudBarIconScale = v,
                   0.05f, 0.20f, 1.00f, "0.00",

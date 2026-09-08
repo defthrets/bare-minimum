@@ -721,6 +721,20 @@ namespace BareMinimum.Core
         public float HudBarDrift = 1f;
 
         /// <summary>
+        /// How hard a bar jolts when its level changes in a step, 0 to 1. 0 is never.
+        ///
+        /// VITALS' SLOSH. A meal, a pill or a night's sleep throws the level and lets it ring
+        /// down like liquid; the slow drain moves too little a frame to register. See Gauge.Slosh.
+        /// </summary>
+        public float HudBarSlosh = 1f;
+
+        /// <summary>
+        /// How much the liquid moves with the player's own motion, 0 to 1. Brake hard and the
+        /// levels lift and lean, then settle; land from a height and they drop. 0 turns it off.
+        /// </summary>
+        public float HudBarLean = 1f;
+
+        /// <summary>
         /// The mark under the bar, as a share of its BLACK PLATE. 1 fills the plate edge to
         /// edge; the default leaves a margin, which is what makes it read as a badge rather
         /// than a cropped picture.
@@ -1108,6 +1122,8 @@ namespace BareMinimum.Core
                 cfg.HudBarDrift = ini.GetFloat("HUD", "BarDrift", cfg.HudBarDrift, 0f, 1f);
                 cfg.HudBarPace = ini.GetFloat("HUD", "BarPace", cfg.HudBarPace, 0.15f, 120f);
                 cfg.HudBarEffort = ini.GetFloat("HUD", "BarEffort", cfg.HudBarEffort, 1f, 6f);
+                cfg.HudBarSlosh = ini.GetFloat("HUD", "BarSlosh", cfg.HudBarSlosh, 0f, 1f);
+                cfg.HudBarLean = ini.GetFloat("HUD", "BarLean", cfg.HudBarLean, 0f, 1f);
 
                 cfg.HudAnimate = ini.GetBool("HUD", "Animate", cfg.HudAnimate);
                 cfg.HudShimmer = ini.GetFloat("HUD", "Shimmer", cfg.HudShimmer, 0f, 1f);
