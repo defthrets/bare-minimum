@@ -174,6 +174,9 @@ namespace BareMinimum.Vitals
         private const float TapeShare = 0.36f;
         private const float TapeSpan = 120f;
 
+        /// <summary>The rev bar's low colour: green, then amber, then red -- a tachometer's, not the bars' cold blue.</summary>
+        private static readonly Color RevGreen = Color.FromArgb(255, 96, 200, 110);
+
         /// <summary>The rev bar: how many segments, and how wide each is as a fraction of screen height (squared up on screen).</summary>
         private const int RevSegments = 7;
         private const float RevSegment = 0.0036f;
@@ -383,11 +386,15 @@ namespace BareMinimum.Vitals
             Ink.Bar(x + w / 2f - pw / 2f, midY - h * 0.5f + h * 0.08f, pw, h * 0.84f, Palette.Alpha(Palette.Brand, (int)(230f * k)));
         }
 
-        /// <summary>The number right-aligned to the corner, the unit small and dim after it, the rev bar before it.</summary>
+        /// <summary>
+        /// The number right-aligned to the corner, the unit small and dim after it with the gear
+        /// stacked over it in the same small dim face, the rev bar before them.
+        /// </summary>
         private static void Speedo(Settings cfg, Vehicle car, float right, float midY, float h, float scale, float th, float k)
         {
             float speed, rpm;
-            try { speed = car.Speed; rpm = car.CurrentRPM; }
+            int gear;
+            try { speed = car.Speed; rpm = car.CurrentRPM; gear = car.CurrentGear; }
             catch { return; }
 
             var mph = string.Equals(cfg.MinimapSpeedUnits, "MPH", StringComparison.OrdinalIgnoreCase);
@@ -401,10 +408,21 @@ namespace BareMinimum.Vitals
             var gap = 0.0012f / Ink.Aspect;
             var y = midY - th * 0.5f - 0.001f;
 
-            // Unit, then number, then the revs, each to the left of the last.
+            // Unit, then number, then the revs, each to the left of the last. The unit sits on
+            // the band's foot -- it was a hair higher and was asked down.
+            var unitH = Hud.Height(unitScale, Hud.FontLabel);
+            var unitY = y + (th - unitH);
+            var dim = Palette.Alpha(Palette.TextDim, (int)(190f * k));
+
             var x = right - unitW;
-            Hud.Text(unit, x, y + (th - Hud.Height(unitScale, Hud.FontLabel)) * 0.85f, unitScale,
-                     Palette.Alpha(Palette.TextDim, (int)(190f * k)), Hud.FontLabel, false, false, false);
+            Hud.Text(unit, x, unitY, unitScale, dim, Hud.FontLabel, false, false, false);
+
+            // THE GEAR, over the unit, to the same right edge, in the same small dim face: a
+            // number, or R backing up. Stacked tight, and never above the band.
+            var gearText = gear <= 0 ? "R" : gear.ToString();
+            var gearY = Math.Max(y - 0.0005f, unitY - unitH * 0.92f);
+            Hud.Text(gearText, right - Hud.Width(gearText, unitScale, Hud.FontLabel), gearY, unitScale,
+                     dim, Hud.FontLabel, false, false, false);
 
             x -= gap + numW;
             Hud.Text(shown.ToString(), x, y, scale, Palette.Alpha(Palette.Text, (int)(240f * k)), Hud.FontLabel, false, false, false);
@@ -429,7 +447,7 @@ namespace BareMinimum.Vitals
                 if (!lit) c = Color.FromArgb((int)(70f * k), 200, 205, 200);
                 else if (i >= RevSegments - 1) c = Palette.Alpha(Palette.Danger, (int)(235f * k));
                 else if (i >= RevSegments - 3) c = Palette.Alpha(Palette.Warn, (int)(230f * k));
-                else c = Palette.Alpha(Palette.Cold, (int)(220f * k));
+                else c = Palette.Alpha(RevGreen, (int)(220f * k));
 
                 Ink.Bar(sx, segY, segW, segH, c);
             }

@@ -776,9 +776,10 @@ namespace BareMinimum.Core
         /// the same thing drawn off the end of the row: the total in the game's money face, the
         /// change under it, counting up, holding, fading. CashX and CashY nudge it from its
         /// place beside the last bar, in fractions of the screen; CashScale is the size of the
-        /// text; CashSeconds how long it stays up after the money moves. Off leaves the game's.
+        /// text; CashSeconds how long it stays up after the money moves. Off leaves the game's --
+        /// and it is off: the game's readout at the top right was preferred once this was seen.
         /// </summary>
-        public bool MoveCash = true;
+        public bool MoveCash = false;
         public float CashX = 0f;
         public float CashY = 0f;
         public float CashScale = 0.55f;
