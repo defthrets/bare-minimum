@@ -956,6 +956,19 @@ namespace BareMinimum.UI
                   "How tall the bars are, as a fraction of the screen.",
                   () => _cfg.Style == HudStyle.Bars, "Bars only.");
 
+            Float("Draw budget", "HUD", "DrawBudget",
+                  () => _cfg.HudDrawBudget,
+                  v =>
+                  {
+                      _cfg.HudDrawBudget = (int)Math.Round(v);
+                      BareMinimum.UI.Draw.Budget = _cfg.HudDrawBudget;
+                  },
+                  10f, 40f, 350f, "0",
+                "The most this HUD will draw in one frame. The machine has ONE list of " +
+                "rectangles for every mod on it, and past about 350 the game drops the rest of " +
+                "the frame's -- which is why somebody else's panel comes up with no background. " +
+                "Past this number our specks and sheen stop and the bars carry on.");
+
             Float("Bar width", "HUD", "BarWidth",
                   () => _cfg.HudBarWidth, v => _cfg.HudBarWidth = v,
                   0.0004f, 0.0010f, 0.0400f, "0.0000",

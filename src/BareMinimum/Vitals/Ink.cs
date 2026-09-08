@@ -75,15 +75,14 @@ namespace BareMinimum.Vitals
         /// </summary>
         public static void Rect(float centreX, float centreY, float width, float height, Color colour)
         {
-            try
-            {
-                Function.Call(Hash.DRAW_RECT, centreX, centreY, width, height,
-                              colour.R, colour.G, colour.B, colour.A, false);
-            }
-            catch (Exception ex)
-            {
-                Log.Once("vitals-rect", "DRAW_RECT failed: " + ex.Message);
-            }
+            // THROUGH THE ONE DOOR, NOT ROUND THE BACK OF IT. This called DRAW_RECT itself, so
+            // the five bars -- far and away the biggest spender in the mod -- were the one thing
+            // the draw counter could not see. It logged a peak of a hundred while the real
+            // figure was three times that, which is worse than not counting at all: a budget
+            // that reads healthy while the frame is being dropped sends you looking at the
+            // wrong mod. Everything now goes through UI.Draw, which counts it, throws away
+            // anything under half a pixel, and knows when to stop. See UI.Draw.Counted.
+            UI.Draw.Rect(centreX, centreY, width, height, colour);
         }
 
         /// <summary>A rectangle drawn from its top-left, which is how a bar is actually thought about.</summary>

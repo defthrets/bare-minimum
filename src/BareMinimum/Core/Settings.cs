@@ -664,6 +664,24 @@ namespace BareMinimum.Core
         /// </summary>
         public float HudBarLength = 0.2213f;
 
+        /// <summary>
+        /// THE MOST THIS MOD WILL DRAW IN ONE FRAME, in rectangles.
+        ///
+        /// THERE IS NO SUCH THING AS A PRIVATE BUDGET. Rectangles come out of ONE list the whole
+        /// machine shares -- every script and the game's own HUD together -- and past about
+        /// three hundred and fifty on this install the game silently drops the rest of the
+        /// frame's. Which is why another mod's panel comes up with no background while this
+        /// HUD is on screen: it asked after the list was empty. Nothing a script can call
+        /// divides that list up, so a mod cannot be given its own; it can only be held to a
+        /// share of the one there is, and this is that share.
+        ///
+        /// THE TRIMMING GIVES WAY, NEVER THE INSTRUMENT. Past this the specks, the sheen, the
+        /// gloss's neighbours and the crumbs stop and the bars, their frames and their levels
+        /// carry on. Lower it if something else on your screen is flickering; the cost is
+        /// sparkle, and only while the frame is busy.
+        /// </summary>
+        public int HudDrawBudget = 200;
+
         /// <summary>How WIDE a bar is, as a fraction of screen width. Fumes' figure.</summary>
         public float HudBarWidth = 0.0048f;
 
@@ -1450,6 +1468,8 @@ namespace BareMinimum.Core
                 cfg.HudOpacity = ini.GetFloat("HUD", "Opacity", cfg.HudOpacity, 0.05f, 1f);
                 cfg.Style = ParseStyle(ini.GetString("HUD", "Style", ""), cfg.Style);
                 cfg.HudBarLength = ini.GetFloat("HUD", "BarLength", cfg.HudBarLength, 0.004f, 0.6f);
+                cfg.HudDrawBudget = ini.GetInt("HUD", "DrawBudget", cfg.HudDrawBudget, 40, 350);
+                UI.Draw.Budget = cfg.HudDrawBudget;
                 cfg.HudBarWidth = ini.GetFloat("HUD", "BarWidth", cfg.HudBarWidth, 0.001f, 0.2f);
                 cfg.HudBarIconScale = ini.GetFloat("HUD", "BarIconScale",
                                                    cfg.HudBarIconScale, 0.2f, 1f);

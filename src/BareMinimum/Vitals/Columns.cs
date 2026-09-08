@@ -192,17 +192,12 @@ namespace BareMinimum.Vitals
                     var warm = (Paint.Pulse(u - inside * 0.060f, 0.55f) * 0.6f +
                                 Paint.Pulse(u - inside * 0.041f + 0.5f, 0.75f) * 0.4f) * 0.16f;
 
-                    var tint = Ink.Mix(body, warmTo, warm);
-
-                    if (glossW > 0f)
-                    {
-                        Ink.Bar(x, bTop, glossW, bBot - bTop, Ink.Mix(tint, white, glossK));
-                        Ink.Bar(x + glossW, bTop, w - glossW, bBot - bTop, tint);
-                    }
-                    else
-                    {
-                        Ink.Bar(x, bTop, w, bBot - bTop, tint);
-                    }
+                    // ONE RECTANGLE A BAND. The gloss used to split every one of them in two --
+                    // a lit left third and a plain right two thirds -- which doubled the most
+                    // expensive loop in the mod to buy an eight per cent lift in colour. It is
+                    // laid over the whole fill in a single pass below instead, and looks the
+                    // same. Rectangles come out of one list the whole machine shares.
+                    Ink.Bar(x, bTop, w, bBot - bTop, Ink.Mix(body, warmTo, warm));
                 }
             }
 
@@ -217,16 +212,31 @@ namespace BareMinimum.Vitals
                 var cL = x + w * j / cols;
                 var cR = x + w * (j + 1) / cols;
 
-                var tint = cL - x < glossW - 0.00001f ? Ink.Mix(edgeTint, white, glossK) : edgeTint;
-
                 var start = colTop[j] + crestH;
-                if (bodyTop > start) Ink.Bar(cL, start, cR - cL, bodyTop - start, tint);
+                if (bodyTop > start) Ink.Bar(cL, start, cR - cL, bodyTop - start, edgeTint);
 
                 var crestBot = Math.Min(floor, colTop[j] + crestH);
                 if (crestBot > colTop[j]) Ink.Bar(cL, colTop[j], cR - cL, crestBot - colTop[j], crest);
             }
 
+            // THE GLOSS, ONCE, OVER ALL OF IT. A pale strip down the side the light comes from,
+            // laid over the fill in one pass instead of one rectangle per band. It starts at the
+            // lowest point of the surface so it can never poke out of the liquid at a wall.
+            if (glossW > 0f && floor > bodyTop)
+            {
+                Ink.Bar(x, bodyTop, glossW, floor - bodyTop,
+                        Color.FromArgb((int)(body.A * glossK), white.R, white.G, white.B));
+            }
+
             // ---- what lives inside ----
+            //
+            // AND ONLY IF THE FRAME CAN AFFORD IT. Everything above is the instrument and is
+            // drawn whatever happens; everything from here down is decoration. Past this mod's
+            // share of the machine's one list of rectangles the decoration stops and the bars
+            // carry on, because a bar with no sparkle is a bar and half a bar is a bug. See
+            // BareMinimum.UI.Draw.Room, which is where the share is kept.
+            if (!BareMinimum.UI.Draw.Room) return;
+
             // THE RELIEF ON EVERY BAR, before whatever this one keeps inside it.
             Relief(cfg, x, w, floor, surface, body, t, strength);
 

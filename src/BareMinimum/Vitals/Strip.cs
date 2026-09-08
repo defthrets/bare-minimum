@@ -204,7 +204,11 @@ namespace BareMinimum.Vitals
             }
 
             // ---- what lives inside ----
-            if (cfg.VitalsParticles <= 0.001f) return;
+            //
+            // ONLY IF THE FRAME CAN AFFORD IT. Everything above is the instrument; this is
+            // decoration, and decoration is what gives way when this mod's share of the
+            // machine's one list of rectangles runs out. See BareMinimum.UI.Draw.Room.
+            if (cfg.VitalsParticles <= 0.001f || !BareMinimum.UI.Draw.Room) return;
 
             switch (kind)
             {

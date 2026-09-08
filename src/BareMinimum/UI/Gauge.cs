@@ -801,7 +801,8 @@ namespace BareMinimum.UI
 
             Relief(x, w, floor, surfaceY, body, t / PaceOf());
 
-            Sediment(x, y, w, h, surfaceY, inside, empty);
+            // The crumbs are decoration and yield when the frame's share has gone. See Draw.Room.
+            if (Hud.Room) Sediment(x, y, w, h, surfaceY, inside, empty);
         }
 
         /// <summary>

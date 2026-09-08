@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using GTA;
 using GTA.Native;
@@ -142,38 +142,91 @@ namespace BareMinimum.UI
         /// <summary>Where this install starts dropping them. The real figure is the game's and is not published.</summary>
         private const int Ceiling = 350;
 
-        private static int _frame;
+        /// <summary>
+        /// WHAT THIS MOD IS ALLOWED TO SPEND IN A FRAME, and why it cannot be more than that.
+        ///
+        /// THERE IS NO SUCH THING AS OUR OWN LIST. The rectangles come out of ONE list the whole
+        /// machine shares -- every script, and the game's own HUD with them -- and it is emptied
+        /// once a frame by the engine, not by us. Nothing a script can call partitions it. So a
+        /// mod cannot be given a private budget; it can only be held to a small share of the
+        /// one budget there is, and that is what this number is: the most this mod will hand
+        /// over before it starts leaving things out, chosen well under the ceiling so there is
+        /// always room left for whoever draws after us.
+        ///
+        /// WHAT GOES FIRST IS THE TRIMMING, NEVER THE INSTRUMENT. Past the allowance the specks,
+        /// the sheen, the sediment and the stars stop and the bars, their frames and their
+        /// levels carry on, because a bar with no sparkle is a bar and half a bar is a bug. See
+        /// Room, which is the question every decorative draw in this mod asks first.
+        /// </summary>
+        public static int Budget = 200;
 
-        private static void Counted()
+        /// <summary>
+        /// Whether there is room in this frame's share for something that is only decoration.
+        ///
+        /// Asked BEFORE the work, not before each rectangle: a speck that draws three of them
+        /// should not get one and stop.
+        /// </summary>
+        public static bool Room
+        {
+            get
+            {
+                Sync();
+                return RectsThisFrame < Budget;
+            }
+        }
+
+        /// <summary>How many of this frame's share are left. For anything that wants to draw fewer rather than none.</summary>
+        public static int Spare
+        {
+            get
+            {
+                Sync();
+
+                var left = Budget - RectsThisFrame;
+                return left < 0 ? 0 : left;
+            }
+        }
+
+        /// <summary>
+        /// Rolls the count over when the frame has. Called by the counter and by anybody asking
+        /// how much room is left, so a question asked before this frame's first rectangle gets
+        /// this frame's answer rather than the last one's.
+        /// </summary>
+        private static void Sync()
         {
             int frame;
 
             try { frame = Game.FrameCount; }
-            catch { frame = 0; }
+            catch { return; }
 
-            if (frame != _frame)
+            if (frame == _frame) return;
+
+            _frame = frame;
+
+            if (RectsThisFrame > PeakRects)
             {
-                _frame = frame;
+                PeakRects = RectsThisFrame;
 
-                if (RectsThisFrame > PeakRects)
+                if (PeakRects >= Ceiling)
                 {
-                    PeakRects = RectsThisFrame;
-
-                    if (PeakRects >= Ceiling)
-                    {
-                        Log.Warn("Draw budget: " + PeakRects + " rectangles in a frame. Past about " +
-                                 Ceiling + " the game drops the rest of the frame's -- for every " +
-                                 "script on the machine, not only this one.");
-                    }
-                    else
-                    {
-                        Log.Info("Draw budget: " + PeakRects + " rectangles in a frame (new peak).");
-                    }
+                    Log.Warn("Draw budget: " + PeakRects + " rectangles in a frame. Past about " +
+                             Ceiling + " the game drops the rest of the frame's -- for every " +
+                             "script on the machine, not only this one.");
                 }
-
-                RectsThisFrame = 0;
+                else
+                {
+                    Log.Info("Draw budget: " + PeakRects + " rectangles in a frame (new peak).");
+                }
             }
 
+            RectsThisFrame = 0;
+        }
+
+        private static int _frame;
+
+        private static void Counted()
+        {
+            Sync();
             RectsThisFrame++;
         }
 
