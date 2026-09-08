@@ -268,7 +268,8 @@ namespace BareMinimum.Vitals
         {
             var size = h * 0.74f;
             var wide = size / Ink.Aspect;
-            var step = wide * 1.45f;
+            // TIGHT, so the row hugs the frame's left end: a sliver of air between the lamps, no more.
+            var step = wide * 1.12f;
 
             float engine, body, oil;
             bool lights, beams, brake;
