@@ -235,7 +235,7 @@ namespace BareMinimum.Venues
             }
             else
             {
-                Hud.Help("Press ~INPUT_CONTEXT~ to order at the bar.  Hold it to leave.");
+                Hud.Help("Press ~INPUT_CONTEXT~ to buy here.  Hold it to leave.");
             }
 
             // Let go before the hold matured: that is an order.

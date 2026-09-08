@@ -828,16 +828,17 @@ namespace BareMinimum.Core
         public bool DiscoverCarts = true;
 
         /// <summary>
-        /// Whether a bar with a room in vendors.json takes you inside when you press the key
-        /// at its door, rather than opening its shelf on the pavement.
+        /// Whether a shop with a room in vendors.json can be walked into: hold the key at its
+        /// door to go in, hold it inside to come out.
         /// </summary>
         ///
         /// <remarks>
-        /// THE ROOMS ARE THE GAME'S OWN and are not where the bar is: the door warps you across
-        /// the city into one of the story map's real interiors and back again when you leave.
-        /// Off keeps every bar as a pavement shelf, which is what it was before rooms existed.
+        /// THE ROOMS ARE THE GAME'S OWN and are not where the shop is: the door warps you across
+        /// the city into one of the story map's real interiors -- a real 24/7, a real Rob's
+        /// Liquor, a real bar -- and back again when you leave. The pavement shelf stays either
+        /// way; a press is the shelf and a hold is the door. Off makes every door a shelf only.
         /// </remarks>
-        public bool WalkInBars = true;
+        public bool WalkIns = true;
 
         /// <summary>
         /// Extra fridge model names to look for, comma-separated, on top of the built-in list.
@@ -1124,7 +1125,7 @@ namespace BareMinimum.Core
                                                     cfg.VendingSipHunger, 0f, 0.5f);
                 cfg.MachineBlips = ini.GetBool("Counters", "MachineBlips", cfg.MachineBlips);
                 cfg.DiscoverCarts = ini.GetBool("Counters", "DiscoverCarts", cfg.DiscoverCarts);
-                cfg.WalkInBars = ini.GetBool("Counters", "WalkInBars", cfg.WalkInBars);
+                cfg.WalkIns = ini.GetBool("Counters", "WalkIns", cfg.WalkIns);
 
                 cfg.FoodSpinX = ini.GetFloat("Eating", "FoodSpinX", cfg.FoodSpinX, -180f, 180f);
                 cfg.FoodSpinY = ini.GetFloat("Eating", "FoodSpinY", cfg.FoodSpinY, -180f, 180f);

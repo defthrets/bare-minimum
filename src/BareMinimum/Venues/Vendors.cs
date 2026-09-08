@@ -37,6 +37,11 @@ namespace BareMinimum.Venues
         public string RoomKey = "";
 
         /// <summary>
+        /// Whether the door has been asked, once, if it is already indoors. See Vendors.Door.
+        /// </summary>
+        public bool DoorChecked;
+
+        /// <summary>
         /// Where the bar is while he is standing in the room, and Zero the rest of the time.
         ///
         /// SET BY Inside, READ BY InReach. The vendor's own coordinate is a door across the
@@ -1561,24 +1566,6 @@ namespace BareMinimum.Venues
             // essentially stopped at the window, which is what the real thing asks of you.
             if (driving && !Stopped(me)) return;
 
-            // A BAR WITH A ROOM GOES IN. The key at its door takes him inside rather than
-            // opening the shelf on the pavement; the shelf is at the bar, where it belongs.
-            // Sat here rather than earlier so that everything Nearest already decided --
-            // open, in range, somebody behind it -- still applies to the door.
-            if (_cfg.WalkInBars && Doors != null && !driving &&
-                here.RoomKey.Length > 0 && Rooms.ContainsKey(here.RoomKey))
-            {
-                _at = here;
-
-                Hud.Help("Press ~INPUT_CONTEXT~ to go into ~b~" + here.Name + "~s~.");
-
-                if (!Pressed()) return;
-
-                Hud.ClearHelp();
-                Doors.Enter(here, Rooms[here.RoomKey]);
-                return;
-            }
-
             var item = Find(here.ItemId);
             if (item == null) return;
 
@@ -1599,6 +1586,61 @@ namespace BareMinimum.Venues
             var what = string.IsNullOrEmpty(here.Label)
                 ? item.Name.ToLowerInvariant()
                 : here.Label.ToLowerInvariant();
+
+            // A DOOR AS WELL AS A SHELF. Press for the shelf on the pavement, as ever; HOLD
+            // to go inside -- the same hold the bed uses, and the same one that brings you
+            // back out of the room. The first cut made the key at a bar go straight in, which
+            // was right for a bar and wrong for a corner store, whose pavement shelf is the
+            // thing people actually use. Sat after Nearest's own gates, so a shut or
+            // unmanned shop is neither a shelf nor a door.
+            if (Door(here, driving))
+            {
+                var now = Game.GameTime;
+                var down = InteractDown();
+
+                if (down && !_doorWasDown) _doorHeldSince = now;
+
+                if (down && _doorHeldSince != 0)
+                {
+                    var held = now - _doorHeldSince;
+
+                    UI.Hint.Show("Going into " + here.Name, Core.Pad.Cap(_cfg.InteractKey),
+                                 Math.Min(1f, held / (float)DoorHoldMs));
+
+                    if (held >= DoorHoldMs)
+                    {
+                        _doorHeldSince = 0;
+                        _doorWasDown = false;
+                        _keyWasDown = false;
+
+                        Hud.ClearHelp();
+                        Doors.Enter(here, Rooms[here.RoomKey]);
+                        return;
+                    }
+                }
+                else
+                {
+                    Hud.Help("Press ~INPUT_CONTEXT~ to shop at ~b~" + here.Name +
+                             "~s~.  Hold it to go inside.");
+                }
+
+                // Let go before the hold matured: that is the press, and it is the shelf.
+                // Acted on at RELEASE so a hold does not open the shelf on its first frame
+                // and then walk through the door with it still up.
+                var released = !down && _doorWasDown && _doorHeldSince != 0;
+
+                _doorWasDown = down;
+                _keyWasDown = down;
+                if (!down) _doorHeldSince = 0;
+
+                if (!released || UI.Menu.Quiet) return;
+
+                Hud.ClearHelp();
+
+                if (here.UseMenu) { OpenShelf(here); return; }
+                if (afford) Buy(here, item);
+                return;
+            }
 
             // The game's own help box, top left. That is where a player already looks for an
             // instruction, and it is the only place where ~INPUT_CONTEXT~ resolves to the
@@ -1986,6 +2028,67 @@ namespace BareMinimum.Venues
         /// for a fifth of a second it is true across a dozen frames, which would buy a dozen
         /// hot dogs.
         /// </summary>
+        /// <summary>How long the key is held at a door to go through it. A press is the shelf.</summary>
+        private const int DoorHoldMs = 1100;
+
+        private bool _doorWasDown;
+        private int _doorHeldSince;
+
+        /// <summary>
+        /// Whether this vendor's door is a door right now.
+        ///
+        /// A SHOP YOU ARE ALREADY INSIDE GETS NONE. Eleven of the vendors in the file were
+        /// surveyed from inside a real interior, at the counter, and the room their door would
+        /// warp you into is the room you are already standing in. So the first time a door
+        /// comes within reach, the game is asked whether there is an interior round the
+        /// vendor's own coordinate; if there is, the room key is dropped for the session and
+        /// the log says which one. Asked once, because the answer does not change.
+        /// </summary>
+        private bool Door(Vendor v, bool driving)
+        {
+            if (!_cfg.WalkIns || Doors == null || driving) return false;
+            if (v.RoomKey.Length == 0 || !Rooms.ContainsKey(v.RoomKey)) return false;
+
+            if (!v.DoorChecked)
+            {
+                v.DoorChecked = true;
+
+                try
+                {
+                    var room = Function.Call<int>(Hash.GET_INTERIOR_AT_COORDS,
+                                                  v.Position.X, v.Position.Y, v.Position.Z);
+                    if (room != 0)
+                    {
+                        Log.Info(v.Name + " (" + v.Id + ") is already inside an interior; no door.");
+                        v.RoomKey = "";
+                        return false;
+                    }
+                }
+                catch
+                {
+                    // Then it is a door, and the room's own checks judge the rest.
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Whether the interact is down right now, by key or by pad, enabled or disabled.
+        /// A level rather than an edge, because a hold is a level.
+        /// </summary>
+        private bool InteractDown()
+        {
+            try
+            {
+                if (Game.IsKeyPressed(_cfg.InteractKey)) return true;
+
+                return Function.Call<bool>(Hash.IS_CONTROL_PRESSED, 0, (int)GTA.Control.Context) ||
+                       Function.Call<bool>(Hash.IS_DISABLED_CONTROL_PRESSED, 0, (int)GTA.Control.Context);
+            }
+            catch { return false; }
+        }
+
         private bool Pressed()
         {
             // NOT WHILE A MENU HAS JUST CLOSED. See UI.Menu.Quiet.

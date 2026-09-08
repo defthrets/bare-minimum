@@ -202,6 +202,33 @@
       "online": false,
       "x": -1387.08, "y": -588.4, "z": 30.32, "heading": 90.0,
       "also": [[-1388.001, -618.420, 30.820], [-1387.5, -603.4, 30.5]]
+    },
+    {
+      "_note": "the walk-in 24/7 at Vinewood Plaza, at its counter; the other four walked 24/7s as fallbacks",
+      "key": "store247",
+      "name": "24/7",
+      "ipl": "",
+      "online": false,
+      "x": 152.572, "y": 237.123, "z": 106.830, "heading": 339.231,
+      "also": [[-3040.898, 585.720, 7.909], [-3239.606, 1004.546, 12.618], [1731.084, 6410.733, 34.474], [544.004, 2675.336, 41.605]]
+    },
+    {
+      "_note": "Rob's Liquor, Del Perro, at its counter; Vespucci, Ace and Harmony as fallbacks",
+      "key": "robs",
+      "name": "Rob's Liquor",
+      "ipl": "",
+      "online": false,
+      "x": -1487.678, "y": -379.288, "z": 40.163, "heading": 324.563,
+      "also": [[-1222.721, -906.850, 12.326], [1392.620, 3604.079, 34.449], [1166.531, 2703.357, 38.179]]
+    },
+    {
+      "_note": "the LTD on Ginger Street, Little Seoul, at its counter; the Route 68 fuel shop as fallback",
+      "key": "ltd",
+      "name": "LTD Gasoline",
+      "ipl": "",
+      "online": false,
+      "x": -707.433, "y": -914.111, "z": 19.216, "heading": 275.896,
+      "also": [[-2544.354, 2316.191, 32.686]]
     }
   ],
   "vendors": [
@@ -336,6 +363,7 @@
       "_note3": "stall that had what it had today; with a pocket to carry things in, that",
       "_note4": "reads as a shop refusing to sell you the rest of its stock.",
       "id": "gabrielles_market",
+      "inside": "store247",
       "name": "Gabrielle's Market",
       "item": [
         "bagel",
@@ -447,6 +475,7 @@
       "_note2": "the 24/7 counters already stock, plus two off its own wall -- junk food IS",
       "_note3": "sold in both places, so it is not duplicated.",
       "id": "cosas_baratas",
+      "inside": "store247",
       "name": "Cosas Baratas",
       "item": [
         "crisps",
@@ -475,6 +504,7 @@
       "_note2": "in a menu, but cheap drinks in the mix here, since 99c stores sell them and",
       "_note3": "it gives the two shops different shelves.",
       "id": "save_a_cent",
+      "inside": "store247",
       "name": "Save-a-Cent",
       "item": [
         "crisps",
@@ -562,6 +592,7 @@
     {
       "_note": "Del Perro corner store: liquor and junk, whatever is on the shelf.",
       "id": "corner_store_1",
+      "inside": "store247",
       "name": "Corner Store",
       "item": [
         "beer",
@@ -589,6 +620,7 @@
     {
       "_note": "Rancho corner store: same idea, different shelf.",
       "id": "corner_store_2",
+      "inside": "store247",
       "name": "Corner Store",
       "item": [
         "beer",
@@ -615,6 +647,7 @@
     {
       "_note": "Liquor store 1, now live. Spirits and beer, plus something to eat.",
       "id": "liquor_1",
+      "inside": "robs",
       "name": "Liquor Store",
       "item": [
         "beer",
@@ -639,6 +672,7 @@
     {
       "_note": "Liquor store 2. Mount Whiskey is on its own door, so it always has it.",
       "id": "liquor_2",
+      "inside": "robs",
       "name": "Liquor Store",
       "item": [
         "whiskey",
@@ -663,6 +697,7 @@
     {
       "_note": "Liquor store 3. Mount Whiskey on the door again.",
       "id": "liquor_3",
+      "inside": "robs",
       "name": "Liquor Store",
       "item": [
         "whiskey",
@@ -690,6 +725,7 @@
       "_note2": "BEER & WINE, FOOD and ICE -- so the shelf is a mix rather than one thing.",
       "_note3": "Coordinate is the DOOR, not the vantage point the sign was read from.",
       "id": "long_pig",
+      "inside": "store247",
       "name": "Long Pig Mini Market",
       "item": [
         "taco",
@@ -716,6 +752,7 @@
     {
       "_note": "Liquor store 4, Rancho. BEER & WINE over the door, Mount Whiskey on it.",
       "id": "liquor_4",
+      "inside": "robs",
       "name": "Beer and Wine",
       "item": [
         "beer",
@@ -744,6 +781,7 @@
       "_note3": "sundries -- so: the drink, the smokes, and the junk food a corner store keeps by",
       "_note4": "the till. Door coordinate.",
       "id": "liquor_5",
+      "inside": "robs",
       "name": "Beer and Wine",
       "item": [
         "beer",
@@ -925,6 +963,7 @@
       "_note2": "a petrol station carries hot food, snacks AND the whole drinks fridge, which",
       "_note3": "is exactly what it is for at 3am when nothing else is open.",
       "id": "xero_24",
+      "inside": "store247",
       "name": "Xero 24",
       "item": [
         "sandwich",
@@ -978,6 +1017,7 @@
     {
       "_note": "24-hour store at the gas station. Garage shelf: hot food, snacks, the fridge.",
       "id": "gas_station_24",
+      "inside": "store247",
       "name": "24 Hour Store",
       "ui": true,
       "item": [
@@ -1074,6 +1114,7 @@
       "_note3": "one of them -- so it sells junk food, beer and cigarettes at 30 cents",
       "_note4": "in the dollar. The discount is the whole point of the place.",
       "id": "bargains_galore",
+      "inside": "store247",
       "name": "Bargains Galore",
       "item": [
         "crisps",
@@ -1105,6 +1146,7 @@
       "_note2": "is an apple on the sign, so it sells groceries rather than the crisps",
       "_note3": "and beer every other door on this list sells. Coordinate is the DOOR.",
       "id": "beans_market",
+      "inside": "store247",
       "name": "Bean's Market",
       "item": [
         "beans_tin",
@@ -1168,6 +1210,7 @@
       "_note3": "hard, and it sells a deli counter and a drinks shelf rather than junk",
       "_note4": "food, so the two closing-down shops are not one shop twice.",
       "id": "downtown_liquor_deli",
+      "inside": "robs",
       "name": "Downtown Liquor & Deli",
       "item": [
         "deli_sub",
@@ -1284,6 +1327,7 @@
       "_note3": "REPOSSESSION SALE, so it is discounted more gently. One shop shutting",
       "_note4": "and one shop having a sale is the difference between the two.",
       "id": "downtown_liquor_deli_east",
+      "inside": "robs",
       "name": "Downtown Liquor & Deli",
       "item": [
         "deli_sub",
@@ -1531,6 +1575,7 @@
       "_note2": "most filling thing anywhere on this list, which is what a weekly shop",
       "_note3": "should be. Door coordinate.",
       "id": "food_market",
+      "inside": "store247",
       "name": "Food Market",
       "item": [
         "fm_shop",
@@ -1553,6 +1598,7 @@
       "_note": "Mama's Grocery. A family grocer with a hot counter, which is what",
       "_note2": "keeps it from being a third version of Bean's. Door coordinate.",
       "id": "mamas_grocery",
+      "inside": "store247",
       "name": "Mama's Grocery",
       "item": [
         "mg_meatloaf",
@@ -1579,6 +1625,7 @@
       "_note5": "not spawn him -- he is already there, and NeedsSeller is false for a",
       "_note6": "vendor with no ped of its own, so the shelf opens.",
       "id": "market_kiosk",
+      "inside": "store247",
       "name": "Market Kiosk",
       "item": [
         "kiosk_sundae",
@@ -1771,6 +1818,7 @@
       "_note2": "board, awning underneath. A corner liquor store, so the drink, the smokes",
       "_note3": "and what a corner store keeps by the till.",
       "id": "mirror_liquor",
+      "inside": "robs",
       "name": "Liquor",
       "item": [
         "beer",
@@ -1803,6 +1851,7 @@
       "_note2": "rather than a certainty: two doors that close together on one strip are one",
       "_note3": "shop. No blip -- the front already has it.",
       "id": "mirror_liquor_side",
+      "inside": "robs",
       "name": "Liquor",
       "item": [
         "beer",
@@ -2020,6 +2069,7 @@
       "_note2": "at the other -- which is the shelf, more or less. A grocery that is also the",
       "_note3": "off-licence, so both, plus the milk and the freezer. The first of its two doors.",
       "id": "chicos_hypermarket",
+      "inside": "store247",
       "name": "Chico's Hypermarket",
       "item": [
         "wine",
@@ -2054,6 +2104,7 @@
       "_note": "The other door, eight metres down the same frontage -- the one with Jakey's",
       "_note2": "Lager and Dusche Gold in the glass and FREE DELIVERY / BACK 2AM taped up.",
       "id": "chicos_hypermarket_side",
+      "inside": "store247",
       "name": "Chico's Hypermarket",
       "item": [
         "wine",
@@ -2086,6 +2137,7 @@
       "_note": "LIQUOR MARKET, and the strapline under it does the work: Cold Beer, Soft",
       "_note2": "Drinks, Food. OPEN 24 HOURS on the side panel. Door coordinate.",
       "id": "liquor_market_davis",
+      "inside": "robs",
       "name": "Liquor Market",
       "item": [
         "beer",
@@ -2120,6 +2172,7 @@
       "_note2": "INSTANTLY, an ATM MACHINE sign and a NO PARKING notice -- which is the whole",
       "_note3": "genre. Bread, milk, tins and the till shelf.",
       "id": "bjs_market",
+      "inside": "store247",
       "name": "B.J.'s Market",
       "item": [
         "beans_bread",
@@ -2203,6 +2256,7 @@
       "_note2": "the windows and Benedict and Dusche Gold neons behind them. ATM AVAILABLE",
       "_note3": "INSIDE either side of the door.",
       "id": "vinewood_liquor",
+      "inside": "robs",
       "name": "Vinewood Liquor",
       "item": [
         "beer",
@@ -2258,6 +2312,7 @@
       "_note": "FRUIT OF THE VINE, with WINE MERCHANT across the glass in purple and 20-50%",
       "_note2": "OFF / SALE! taped inside. A wine shop, so wine first and the rest after.",
       "id": "fruit_of_the_vine",
+      "inside": "robs",
       "name": "Fruit of the Vine",
       "item": [
         "wine",
@@ -2536,6 +2591,7 @@
       "_note2": "ATM MACHINE under it and Pisswasser and Redwood in the window. The door",
       "_note3": "carries the full set: NO WEAPONS, NO DRUG DEALS, NO LOITERING, NO DRINKING.",
       "id": "ellens_liquor",
+      "inside": "robs",
       "name": "Ellen's Liquor Lover",
       "item": [
         "beer",
@@ -2569,6 +2625,7 @@
       "_note3": "as the two downtown liqour.delis, so the same stock. NO DISCOUNT: its",
       "_note4": "windows say CASH CHECKS HERE, not the closing-down signage those two got.",
       "id": "eclipse_liquor_deli",
+      "inside": "robs",
       "name": "Eclipse Liquor & Deli",
       "item": [
         "deli_sub",
@@ -3423,6 +3480,7 @@
     {
       "_note": "Mirror Park. Surveyed in game; inherits 24/7's menu -- one chain, one menu.",
       "id": "24_7_supermarket_mirrorpark",
+      "inside": "store247",
       "name": "24/7 Supermarket",
       "x": 528.116,
       "y": -152.119,
@@ -3476,6 +3534,7 @@
     {
       "_note": "Vinewood. Surveyed in game; inherits 24/7's menu -- one chain, one menu.",
       "id": "24_7_supermarket_vinewood",
+      "inside": "store247",
       "name": "24/7 Supermarket",
       "x": 202.153,
       "y": -26.138,
@@ -3531,6 +3590,7 @@
     {
       "_note": "Burton. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
       "id": "liquor_burton",
+      "inside": "robs",
       "name": "Liquor",
       "x": -58.365,
       "y": -91.909,
@@ -3604,6 +3664,7 @@
     {
       "_note": "Textile City. Surveyed in game; inherits 24/7's menu -- one chain, one menu.",
       "id": "24_7_supermarket_textile",
+      "inside": "store247",
       "name": "24/7 Supermarket",
       "x": 82.312,
       "y": -219.387,
@@ -3719,6 +3780,7 @@
     {
       "_note": "Vespucci Beach. Surveyed in game; inherits Bean's Market's menu -- one chain, one menu.",
       "id": "beachfront_market_vespuccibeach",
+      "inside": "store247",
       "name": "Beachfront Market",
       "x": -1478.409,
       "y": -950.511,
@@ -3764,6 +3826,7 @@
     {
       "_note": "Vespucci Beach, fruit/juice/soda/coffee. Surveyed in game; inherits Food Market's menu -- one chain, one menu.",
       "id": "market_vespuccibeach",
+      "inside": "store247",
       "name": "Market",
       "x": -1538.072,
       "y": -902.082,
@@ -3785,6 +3848,7 @@
     {
       "_note": "wine, beer, food. Surveyed in game; inherits Bean's Market's menu -- one chain, one menu.",
       "id": "a_r_market_vespucci",
+      "inside": "store247",
       "name": "A&R Market",
       "x": -1359.937,
       "y": -963.692,
@@ -3809,6 +3873,7 @@
     {
       "_note": "Vespucci, wine. Surveyed in game; inherits Fruit of the Vine's menu -- one chain, one menu.",
       "id": "fruit_of_the_vine_vespucci",
+      "inside": "robs",
       "name": "Fruit of the Vine",
       "x": -1264.284,
       "y": -1163.164,
@@ -3927,6 +3992,7 @@
     {
       "_note": "juice and smoothies. Surveyed in game; inherits Limey's's menu -- one chain, one menu.",
       "id": "limey_s_juice_bar_vespucci",
+      "inside": "bahama",
       "name": "Limey's Juice Bar",
       "x": -1183.175,
       "y": -1248.321,
@@ -4035,6 +4101,7 @@
     {
       "_note": "Chumash, deli counter. Surveyed in game; inherits Rob's Liquor's menu -- one chain, one menu.",
       "id": "rob_s_liquor_market_chumash",
+      "inside": "robs",
       "name": "Rob's Liquor & Market",
       "x": -2975.469,
       "y": 384.115,
@@ -4164,6 +4231,7 @@
     {
       "_note": "Paleto Bay, fresh food daily + produce crates outside. Surveyed in game; inherits Bean's Market's menu -- one chain, one menu.",
       "id": "don_s_country_store_paleto",
+      "inside": "store247",
       "name": "Don's Country Store",
       "x": 162.54,
       "y": 6635.688,
@@ -4188,6 +4256,7 @@
     {
       "_note": "Paleto Bay. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
       "id": "del_vecchio_liquor_paleto",
+      "inside": "robs",
       "name": "Del Vecchio Liquor",
       "x": -155.675,
       "y": 6327.88,
@@ -4218,6 +4287,7 @@
     {
       "_note": "Paleto Bay, supermarket AND pharmacy under one sign. Surveyed in game; inherits Chico's Hypermarket's menu -- one chain, one menu.",
       "id": "willie_s_supermarket_paleto",
+      "inside": "store247",
       "name": "Willie's Supermarket",
       "x": -58.162,
       "y": 6523.444,
@@ -4251,6 +4321,7 @@
     {
       "_note": "Paleto Bay, liquor + lotto + hot coffee + check cashing. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
       "id": "liquor_paleto",
+      "inside": "robs",
       "name": "Liquor",
       "x": -407.342,
       "y": 6062.478,
@@ -4343,6 +4414,7 @@
     {
       "_note": "Alamo Sea, self-service produce market. Surveyed in game; inherits Bean's Market's menu -- one chain, one menu.",
       "id": "alamo_fruit_market_alamo",
+      "inside": "store247",
       "name": "Alamo Fruit Market",
       "x": 1792.619,
       "y": 4592.074,
@@ -4367,6 +4439,7 @@
     {
       "_note": "Grapeseed: carniceria, tortilleria, verduras, panaderia. Surveyed in game; inherits Chico's Hypermarket's menu -- one chain, one menu.",
       "id": "carniceria_supermarket_grapeseed",
+      "inside": "store247",
       "name": "Carniceria Supermarket",
       "x": 1695.685,
       "y": 4785.413,
@@ -4400,6 +4473,7 @@
     {
       "_note": "market and store. Surveyed in game; inherits Bean's Market's menu -- one chain, one menu.",
       "id": "grape_seed_farmers_market_grapeseed",
+      "inside": "store247",
       "name": "Grape Seed Farmers Market",
       "x": 1678.037,
       "y": 4881.818,
@@ -4424,6 +4498,7 @@
     {
       "_note": "Sandy Shores. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
       "id": "liquor_sandy",
+      "inside": "robs",
       "name": "Liquor",
       "x": 2482.45,
       "y": 4100.175,
@@ -4454,6 +4529,7 @@
     {
       "_note": "Sandy Shores, open 24 hours. Surveyed in game; inherits Liquor Market's menu -- one chain, one menu.",
       "id": "liquor_market_sandy",
+      "inside": "robs",
       "name": "Liquor Market",
       "x": 2456.338,
       "y": 4058.12,
@@ -4486,6 +4562,7 @@
     {
       "_note": "FUEL STATION shop, Sandy Shores. Surveyed in game; inherits 24/7's menu -- one chain, one menu.",
       "id": "sandy_s_gas_station_sandy",
+      "inside": "ltd",
       "name": "Sandy's Gas Station",
       "x": 2001.535,
       "y": 3779.583,
@@ -4550,6 +4627,7 @@
     {
       "_note": "Sandy Shores, liquor + grocery + beer under one roof. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
       "id": "liquor_grocery_sandy",
+      "inside": "robs",
       "name": "Liquor & Grocery",
       "x": 1952.805,
       "y": 3842.281,
@@ -4610,6 +4688,7 @@
     {
       "_note": "Alamo Sea, open 24 hours, wine + beer. Surveyed in game; inherits Liquor Market's menu -- one chain, one menu.",
       "id": "liquor_market_alamo",
+      "inside": "robs",
       "name": "Liquor Market",
       "x": 911.291,
       "y": 3643.841,
@@ -4748,6 +4827,7 @@
     {
       "_note": "Harmony: groceries, ice, beer, wine, deli. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
       "id": "jr_market_liquor_harmony",
+      "inside": "robs",
       "name": "JR Market Liquor",
       "x": 578.93,
       "y": 2679.033,
@@ -5469,6 +5549,7 @@
     {
       "_note": "Little Seoul. The branch whose sign is in Hangul; the banners in the window read as newspapers, toiletries and tobacco.",
       "id": "24_7_littleseoul",
+      "inside": "store247",
       "name": "24/7",
       "item": [
         "sandwich",
@@ -5546,6 +5627,7 @@
     {
       "_note": "Korean Plaza, Little Seoul. Two doors on one corner; this is the north one.",
       "id": "24_7_koreanplaza",
+      "inside": "store247",
       "name": "24/7 Supermarket",
       "item": [
         "sandwich",
@@ -5579,6 +5661,7 @@
     {
       "_note": "The same shop's other door, four metres round the corner. Both are walked to, and at 2.2 m of reach they cannot both catch you at once.",
       "id": "24_7_koreanplaza_side",
+      "inside": "store247",
       "name": "24/7 Supermarket",
       "item": [
         "sandwich",
@@ -5612,6 +5695,7 @@
     {
       "_note": "Little Seoul. Green sign, a leaf mark, ORGANIC FOOD MARKET under the Hangul.",
       "id": "organic_food_market",
+      "inside": "store247",
       "name": "Organic Food Market",
       "item": [
         "fruit",
@@ -5635,6 +5719,7 @@
     {
       "_note": "Little Seoul. Brown and gold sign; the Hangul down the left lists tobacco, cigars and news, which is what the shelves behind the glass are.",
       "id": "convenience_grocer",
+      "inside": "store247",
       "name": "Convenience Store and Grocer",
       "item": [
         "sandwich",
@@ -5661,6 +5746,7 @@
     {
       "_note": "Morningwood, on the corner under the VITAMINS sign. Same chain and same shelf as the one already listed.",
       "id": "fruit_of_the_vine_morningwood",
+      "inside": "robs",
       "name": "Fruit of the Vine",
       "item": [
         "wine",
