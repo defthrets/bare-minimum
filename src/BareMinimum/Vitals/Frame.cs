@@ -181,7 +181,7 @@ namespace BareMinimum.Vitals
         private static readonly string[] Cardinals = { "N", "E", "S", "W" };
 
         /// <summary>
-        /// The compass at the left of the band and the speedo at the right, in the band the top
+        /// The compass in the middle of the band and the speedo at the right, in the band the top
         /// of the frame makes. Nothing if the band is too thin to hold a line of text: TopCover
         /// at nought is a plain line, and a plain line has no corners worth writing in.
         ///
@@ -222,7 +222,11 @@ namespace BareMinimum.Vitals
 
             if (cfg.MinimapCompass)
             {
-                Compass(me, car, l + padX, midY, (r - l) * TapeShare, h, scale, k);
+                // IN THE MIDDLE OF THE BAND, not the corner: a compass reads from its centre
+                // pointer, and the middle of the map's top edge is where a pointer for "the way
+                // you are facing" belongs. The speedo keeps the right-hand corner.
+                var tapeW = (r - l) * TapeShare;
+                Compass(me, car, (l + r) * 0.5f - tapeW * 0.5f, midY, tapeW, h, scale, k);
             }
 
             if (cfg.MinimapSpeedo && car != null && car.Exists())
