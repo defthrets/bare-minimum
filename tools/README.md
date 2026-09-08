@@ -32,5 +32,14 @@ Produces:
 - `tools\roslyn\tasks\net472\csc.exe` -- the C# compiler
 - `tools\refasm\build\.NETFramework\v4.8\*.dll` -- net48 reference assemblies
 
-The only other thing the build needs is `ScriptHookVDotNet3.dll`, which it takes from
-whichever GTA V install is present. Both editions ship the identical file.
+The only other thing the build needs is `ScriptHookVDotNet3.dll`, and it takes the
+**vendored 3.6.0** at `tools\shvdn\3.6.0\`, NOT whichever install happens to be present.
+
+That is not a preference. SHVDN resolves a script's references in its own AppDomain and
+declines one newer than itself, so a dll built against the installed 3.9 fork does not load
+on 3.6 or a 3.7 nightly at all -- "Could not load file or assembly", and nothing in the mod
+runs. Built against 3.6.0 every host is newer than the reference, which is the case every
+loader handles, and it still binds by name on 3.9.
+
+`build.ps1` reads the stamp back out of the dll it just produced and fails if it is above
+3.6.0.0, because nothing else in the build can see this go wrong.

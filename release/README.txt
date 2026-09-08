@@ -45,8 +45,9 @@
     ScriptHookVDotNet 3  https://github.com/scripthookvdotnet/scripthookvdotnet
 
   If you run any other .NET script mod you already have both. This was built
-  against ScriptHookVDotNet 3.9.0. GTA V Enhanced needs 3.6 or newer; an older
-  copy may load on Legacy only and Bare Minimum will simply not start.
+  against ScriptHookVDotNet 3.6.0, so ANY build from 3.6.0 upwards runs it --
+  nightlies and the Enhanced fork included. GTA V Enhanced needs the Enhanced
+  fork, because nothing else runs on that edition at all.
 
   Works on both editions from the same files.
 

@@ -266,9 +266,9 @@ namespace BareMinimum
                 //
                 // The key comes from the settings rather than being written out, so rebinding
                 // it in the ini changes what the greeting says.
-                GTA.UI.Notification.PostTicker(
+                Core.Compat.Ticker(
                     "~b~" + Build.Name + " " + Build.Version + " - by " + Build.By + "~s~ loaded.  " +
-                    "Press ~b~" + _cfg.MenuKey + "~s~ for settings.", false, false);
+                    "Press ~b~" + _cfg.MenuKey + "~s~ for settings.");
             }
             catch
             {
@@ -289,8 +289,8 @@ namespace BareMinimum
 
             try
             {
-                GTA.UI.Notification.PostTicker(
-                    "~r~" + Build.Name + " stopped~s~ - see " + Paths.Stem + ".log.", false, false);
+                Core.Compat.Ticker(
+                    "~r~" + Build.Name + " stopped~s~ - see " + Paths.Stem + ".log.");
             }
             catch
             {

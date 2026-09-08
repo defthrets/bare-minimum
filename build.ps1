@@ -58,13 +58,29 @@ $outDll = Join-Path $outDir 'BareMinimum.dll'
 if (-not (Test-Path $csc))    { throw "Compiler missing: $csc  (see tools\README.md)" }
 if (-not (Test-Path $refDir)) { throw "net48 reference assemblies missing: $refDir" }
 
-# SHVDN is taken from whichever install is actually there. It is the same file in both.
-$shvdn = $null
-foreach ($dir in @($GtaDir, $EnhancedDir)) {
-    $candidate = Join-Path $dir 'ScriptHookVDotNet3.dll'
-    if (Test-Path $candidate) { $shvdn = $candidate; break }
+# SHVDN IS THE VENDORED 3.6.0, NOT WHATEVER THE INSTALL HAPPENS TO HOLD.
+#
+# Building against the installed Enhanced fork stamps a reference to Version=3.9.0.0 into the
+# dll, and SHVDN resolves a script's references in its own AppDomain and DECLINES one newer
+# than itself -- so a genuine 3.6 or a 3.7 nightly does not load the mod at all. Not a missing
+# feature: "Could not load file or assembly", and nothing else runs.
+#
+# The other direction is the case every loader handles: compiled against 3.6.0.0, every host
+# is newer than the reference, and the dll still binds by simple name on 3.9.
+#
+# Learned on Fumes the hard way -- it claimed 3.6 support for four releases while every
+# confirmation came from somebody on the 3.9 fork.
+$shvdn = Join-Path $root 'tools\shvdn\3.6.0\ScriptHookVDotNet3.dll'
+
+if (-not (Test-Path $shvdn)) {
+    Write-Host "WARN  vendored SHVDN 3.6.0 missing at $shvdn -- falling back to an install, which stamps THAT version in and will not load on anything older" -ForegroundColor Yellow
+    $shvdn = $null
+    foreach ($dir in @($GtaDir, $EnhancedDir)) {
+        $candidate = Join-Path $dir 'ScriptHookVDotNet3.dll'
+        if (Test-Path $candidate) { $shvdn = $candidate; break }
+    }
+    if (-not $shvdn) { throw "ScriptHookVDotNet3.dll not found vendored or in either install." }
 }
-if (-not $shvdn) { throw "ScriptHookVDotNet3.dll not found in either install." }
 
 New-Item -ItemType Directory -Force $outDir | Out-Null
 
@@ -123,6 +139,32 @@ $sw.Stop()
 
 if ($exit -ne 0) { throw "Compilation failed (csc exit $exit)." }
 Write-Host ("OK  {0:N0} bytes in {1:N1}s" -f (Get-Item $outDll).Length, $sw.Elapsed.TotalSeconds) -ForegroundColor Green
+
+# --- what SHVDN did we actually stamp? ---------------------------------------
+# READ BACK, NOT ASSUMED. A dll built against 3.9 compiles, deploys and runs perfectly on the
+# machine that built it, and does not load at all on 3.6 or a 3.7 nightly -- SHVDN declines a
+# reference newer than itself. Nothing else in this build can see that, and the only symptom
+# is a line in a stranger's log. So the output is opened and asked.
+$stamped = $null
+$fs = [IO.File]::OpenRead($outDll)
+try {
+    $pe = [System.Reflection.PortableExecutable.PEReader]::new($fs)
+    $mr = [System.Reflection.Metadata.PEReaderExtensions]::GetMetadataReader($pe)
+    foreach ($h in $mr.AssemblyReferences) {
+        $a = $mr.GetAssemblyReference($h)
+        if ($mr.GetString($a.Name) -eq 'ScriptHookVDotNet3') { $stamped = $a.Version }
+    }
+} finally { $fs.Dispose() }
+
+if (-not $stamped) { throw "The dll references no ScriptHookVDotNet3 at all." }
+
+if ($stamped -gt [version]'3.6.0.0') {
+    throw ("Stamped ScriptHookVDotNet3 $stamped -- anything above 3.6.0.0 will not load on " +
+           "3.6 or a 3.7 nightly. Check tools\shvdn\3.6.0\ScriptHookVDotNet3.dll is present " +
+           "and that no source file uses a newer API.")
+}
+
+Write-Host "     needs ScriptHookVDotNet3 $stamped or newer" -ForegroundColor DarkGray
 
 # --- deploy -----------------------------------------------------------------
 function Get-ReloadKey([string]$gameDir) {

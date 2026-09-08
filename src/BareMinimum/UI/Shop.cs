@@ -569,7 +569,7 @@ namespace BareMinimum.UI
 
         private static void Notify(string message)
         {
-            try { GTA.UI.Notification.PostTicker(message, false, false); }
+            try { Core.Compat.Ticker(message); }
             catch { /* nothing to do about it */ }
         }
 

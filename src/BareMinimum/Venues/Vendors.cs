@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using GTA;
-using GTA.Chrono;
 using GTA.Math;
 using GTA.Native;
 using BareMinimum.Core;
@@ -141,7 +140,7 @@ namespace BareMinimum.Venues
         public Duty Doing = Duty.Working;
 
         /// <summary>When the next smoke is due, on the game clock.</summary>
-        public GameClockDateTime NextSmoke;
+        public long NextSmoke;
         public bool SmokeScheduled;
 
         /// <summary>When the current smoke ends, or a walk gives up. Real milliseconds.</summary>
@@ -1182,7 +1181,7 @@ namespace BareMinimum.Venues
             if (v.Offers.Length == 1) return v.Offers[0].Id;
 
             int hour;
-            try { hour = GameClock.Hour; }
+            try { hour = Core.Clock.Hour; }
             catch { hour = 12; }
 
             var open = new List<Offer>();
@@ -1208,7 +1207,7 @@ namespace BareMinimum.Venues
             if (v.OpenHour == v.CloseHour) return true;
 
             int hour;
-            try { hour = GameClock.Hour; }
+            try { hour = Core.Clock.Hour; }
             catch { return true; }
 
             if (v.OpenHour < v.CloseHour) return hour >= v.OpenHour && hour < v.CloseHour;
@@ -1229,13 +1228,13 @@ namespace BareMinimum.Venues
             if (v.Seller == null || !v.Seller.Exists()) return;
             if (v.SmokeEveryHours <= 0f) return;
 
-            GameClockDateTime now;
-            try { now = GameClock.Now; }
-            catch { return; }
+            // Game-clock minutes, through the native. See Core.Clock.
+            var now = Core.Clock.Minutes;
+            if (now == 0L) return;
 
             if (!v.SmokeScheduled)
             {
-                v.NextSmoke = now + GameClockDuration.FromMinutes((long)(v.SmokeEveryHours * 60f));
+                v.NextSmoke = now + (long)(v.SmokeEveryHours * 60f);
                 v.SmokeScheduled = true;
                 return;
             }
@@ -1297,7 +1296,7 @@ namespace BareMinimum.Venues
                     // False so Work() puts him back on the grill on the next sweep.
                     v.AnimStarted = false;
 
-                    v.NextSmoke = now + GameClockDuration.FromMinutes((long)(v.SmokeEveryHours * 60f));
+                    v.NextSmoke = now + (long)(v.SmokeEveryHours * 60f);
                     return;
             }
         }
@@ -1576,7 +1575,7 @@ namespace BareMinimum.Venues
             var money = Money();
 
             var hour = 12;
-            try { hour = GameClock.Hour; }
+            try { hour = Core.Clock.Hour; }
             catch { /* the shelf is worth more than the hours */ }
 
             foreach (var offer in _shopping.Offers)
@@ -1861,7 +1860,7 @@ namespace BareMinimum.Venues
 
         private static void Notify(string message)
         {
-            try { GTA.UI.Notification.PostTicker(message, false, false); }
+            try { Core.Compat.Ticker(message); }
             catch { /* nothing to do about it */ }
         }
 

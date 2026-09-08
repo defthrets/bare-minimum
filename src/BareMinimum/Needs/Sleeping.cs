@@ -1,6 +1,5 @@
 using System;
 using GTA;
-using GTA.Chrono;
 using GTA.Native;
 using BareMinimum.Core;
 using BareMinimum.Venues;
@@ -99,11 +98,28 @@ namespace BareMinimum.Needs
         /// <summary>
         /// The flags used to take control away and to give it back, in ONE place.
         ///
-        /// None, deliberately: it is the exact equivalent of the old setter without the bug.
+        /// Zero, deliberately: it is the exact equivalent of the old setter without the bug.
         /// It lives here as a constant rather than being written out at both call sites
         /// because the documented failure mode is the two calls disagreeing.
+        ///
+        /// A PLAIN INT THROUGH THE NATIVE, because SetPlayerControlFlags arrived after 3.6.0
+        /// and naming it in a signature is enough to stop the whole mod loading there.
         /// </summary>
-        private const SetPlayerControlFlags ControlFlags = SetPlayerControlFlags.None;
+        private const int ControlFlags = 0;
+
+        /// <summary>Hands control to the player, or takes it. SET_PLAYER_CONTROL, nothing more.</summary>
+        private static void Control(bool has)
+        {
+            try
+            {
+                GTA.Native.Function.Call(GTA.Native.Hash.SET_PLAYER_CONTROL,
+                                         Game.Player, has, ControlFlags);
+            }
+            catch (Exception ex)
+            {
+                Log.Once("sleep-control", "Could not set player control: " + ex.Message);
+            }
+        }
 
         private readonly Knock _knock;
 
@@ -204,13 +220,13 @@ namespace BareMinimum.Needs
 
                 // Not while being shot at or chased. A wanted level is the one state where a
                 // fade to black is actively unfair.
-                if (Game.Player.Wanted.WantedLevel > 0) return Bunk.None;
+                if (Core.Compat.Wanted > 0) return Bunk.None;
 
                 return Bunk.Car;
             }
 
             if (!_cfg.SleepInBeds) return Bunk.None;
-            if (Game.Player.Wanted.WantedLevel > 0) return Bunk.None;
+            if (Core.Compat.Wanted > 0) return Bunk.None;
 
             var bed = _beds.Nearest(me.Position, _cfg.BedReach);
             return bed != null ? Bunk.Bed : Bunk.None;
@@ -456,7 +472,7 @@ namespace BareMinimum.Needs
             {
                 Function.Call(Hash.DO_SCREEN_FADE_OUT, FadeMs);
 
-                Game.Player.SetControlState(false, ControlFlags);
+                Control(false);
                 _tookControl = true;
             }
             catch (Exception ex)
@@ -511,9 +527,8 @@ namespace BareMinimum.Needs
 
                 try
                 {
-                    GTA.UI.Notification.PostTicker(
-                        "~y~You can barely keep your eyes open.~s~ Find somewhere to sleep.",
-                        false, false);
+                    Core.Compat.Ticker(
+                        "~y~You can barely keep your eyes open.~s~ Find somewhere to sleep.");
                 }
                 catch
                 {
@@ -541,7 +556,7 @@ namespace BareMinimum.Needs
 
                 // Unconscious and wanted is an arrest, which is a far bigger punishment than
                 // this is meant to be.
-                if (Game.Player.Wanted.WantedLevel > 0) return false;
+                if (Core.Compat.Wanted > 0) return false;
 
                 // In a car is allowed -- he slumps at the wheel, and that is the one place the
                 // wake-up scene already knows what to do about. See Waking.
@@ -667,7 +682,7 @@ namespace BareMinimum.Needs
                 var whole = (int)_hours;
                 var minutes = (int)Math.Round((_hours - whole) * 60f);
 
-                GameClock.AddToCurrentTime(whole, minutes, 0);
+                Core.Clock.Add(whole, minutes);
             }
             catch (Exception ex)
             {
@@ -844,7 +859,7 @@ namespace BareMinimum.Needs
             if (!_tookControl) return;
             _tookControl = false;
 
-            try { Game.Player.SetControlState(true, ControlFlags); }
+            try { Control(true); }
             catch (Exception ex) { Log.Error("Could not hand control back after sleeping", ex); }
         }
 

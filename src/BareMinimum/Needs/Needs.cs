@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using GTA;
-using GTA.Chrono;
 using GTA.Native;
 using BareMinimum.Core;
 
@@ -52,11 +51,11 @@ namespace BareMinimum.Needs
         /// <summary>
         /// The game clock as of the previous tick, for working out the step.
         ///
-        /// GameClockDateTime rather than DateTime: World.CurrentDate is obsolete in SHVDN 3.9
+        /// Game-clock MINUTES rather than a date type: GTA.Chrono arrived after 3.6.0 and a
         /// because DateTime cannot represent the year range the game supports, and building on
         /// a deprecation that already warns at compile time is borrowing a problem.
         /// </summary>
-        private GameClockDateTime _lastClock;
+        private long _lastClock;
         private bool _clockPrimed;
 
         private bool _dirty;
@@ -125,18 +124,16 @@ namespace BareMinimum.Needs
         {
             jumped = false;
 
-            GameClockDateTime now;
-
-            try
+            // THROUGH THE NATIVE, not GTA.Chrono. See Core.Clock: that namespace does not
+            // exist before SHVDN 3.7, and a dll referencing it is refused by an older loader
+            // outright rather than losing this one feature.
+            if (!Core.Clock.Ready)
             {
-                now = GameClock.Now;
-            }
-            catch (Exception ex)
-            {
-                Log.Once("needs-clock", "Could not read the game clock: " + ex.Message +
-                                        " - the needs will not move.");
+                Log.Once("needs-clock", "Could not read the game clock - the needs will not move.");
                 return 0f;
             }
+
+            var now = Core.Clock.Minutes;
 
             if (!_clockPrimed)
             {
@@ -145,10 +142,8 @@ namespace BareMinimum.Needs
                 return 0f;
             }
 
-            var span = now - _lastClock;
+            var hours = Core.Clock.HoursBetween(_lastClock, now);
             _lastClock = now;
-
-            var hours = (float)span.TotalHours;
 
             if (hours <= 0f) return 0f;
 
@@ -474,9 +469,8 @@ namespace BareMinimum.Needs
 
                 try
                 {
-                    GTA.UI.Notification.PostTicker(
-                        "~r~You are starving.~s~ It is costing you health. Eat something.",
-                        false, false);
+                    Core.Compat.Ticker(
+                        "~r~You are starving.~s~ It is costing you health. Eat something.");
                 }
                 catch
                 {
@@ -569,7 +563,7 @@ namespace BareMinimum.Needs
             // re-primed or the NEXT tick sees the whole night as its own step and ignores it --
             // which is harmless, but it also would not re-prime, and the step after that would
             // be wrong too.
-            try { _lastClock = GameClock.Now; } catch { _clockPrimed = false; }
+            try { _lastClock = Core.Clock.Minutes; } catch { _clockPrimed = false; }
 
             _dirty = true;
             SaveNow();

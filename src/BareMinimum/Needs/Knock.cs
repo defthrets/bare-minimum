@@ -1,6 +1,5 @@
-﻿using System;
+using System;
 using GTA;
-using GTA.Chrono;
 using GTA.Math;
 using GTA.Native;
 using BareMinimum.Core;
@@ -587,7 +586,7 @@ namespace BareMinimum.Needs
             {
                 // ONE STAR. Enough that they come after you and the radio lights up; not
                 // enough to bring a helicopter to a parking offence.
-                if (Game.Player.WantedLevel < 1) Game.Player.WantedLevel = 1;
+                if (Core.Compat.Wanted < 1) Core.Compat.SetWanted(1);
             }
             catch (Exception ex) { Log.Debug("Could not set the wanted level: " + ex.Message); }
         }
@@ -808,7 +807,7 @@ namespace BareMinimum.Needs
         {
             try
             {
-                var h = GameClock.Hour;
+                var h = Core.Clock.Hour;
                 return h >= 20 || h < 7;
             }
             catch { return false; }
