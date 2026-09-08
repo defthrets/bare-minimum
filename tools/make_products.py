@@ -1128,17 +1128,56 @@ def noodleplate():
     return img
 
 
-def burrito():
-    """A foil-wrapped cylinder with the paper peeled down one end."""
-    img, d = canvas()
-    d.polygon([(s(50), s(212)), (s(98), s(246)), (s(232), s(64)), (s(184), s(30))], fill=WHITE)
-    el(d, (36, 190, 112, 252))
-    d.polygon([(s(148), s(116)), (s(198), s(152)), (s(118), s(252)), (s(62), s(224))], fill=WHITE)
-    for i in range(3):
-        d.line([s(92 + i * 27), s(234 - i * 5), s(138 + i * 27), s(168 - i * 5)],
-               fill=CLEAR, width=s(6))
-    return img
+def whiten(img):
+    """
+    Every pixel white, alpha kept.
 
+    A rotate resamples the colour channels as well as the alpha, and blends the edge of a
+    white shape with the transparent black round it -- a grey fringe that the rim mostly
+    hides and the tint then colours wrong. The alpha is the drawing; the colour is put back.
+    """
+    alpha = img.split()[3]
+    solid = Image.new("RGBA", img.size, WHITE)
+    solid.putalpha(alpha)
+    return solid
+
+
+def burrito():
+    """
+    A fat roll lying down, foil round its back half, the cut end showing the filling.
+
+    THE FIRST ONE WAS A PIPE. A thin tube with three slashes on it reads as a cigarette or a
+    lighter at row size. What says burrito is BULK -- a roll as thick as a forearm -- and the
+    two textures against each other: the torn edge of the foil halfway along, and a cut end
+    with beans in it. Drawn lying flat and then turned, because a rotated image is straighter
+    than any tilted polygon plotted by hand, and the first version was the proof.
+    """
+    img, d = canvas()
+
+    # The roll: a capsule, and a chunky one.
+    rr(d, (30, 82, 236, 174), 46)
+
+    # The cut end: a face narrower than it is tall, with the filling as holes in it. Two
+    # beans and a bit of something, staggered, so it is a cross-section and not a target.
+    el(d, (18, 82, 74, 174))
+    el(d, (30, 100, 56, 120), CLEAR)
+    el(d, (38, 126, 64, 146), CLEAR)
+    el(d, (28, 148, 50, 164), CLEAR)
+
+    # The torn edge of the foil, halfway along: one zigzag cut right through the white, wider
+    # than the roll so it goes edge to edge.
+    zig = []
+    for i in range(9):
+        zig.append((s(124 + (8 if i % 2 else -8)), s(76 + i * 13)))
+    d.line(zig, fill=CLEAR, width=s(7), joint="curve")
+
+    # Crinkles down the foil: three creases, leaning the way foil gets pushed on.
+    for x0 in (154, 178, 202):
+        d.line([(s(x0 + 9), s(100)), (s(x0 - 7), s(160))], fill=CLEAR, width=s(5))
+
+    # Lying at an angle, cut end up, which is how one is held out to you.
+    img = img.rotate(-18, resample=Image.BICUBIC, fillcolor=CLEAR)
+    return whiten(img)
 
 SHAPES = {
     "can": can,
