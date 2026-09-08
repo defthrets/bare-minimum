@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -141,7 +141,7 @@ namespace BareMinimum.Core
     /// </summary>
     internal static class Build
     {
-        public const string Version = "0.1.4";
+        public const string Version = "0.1.5";
         public const string Name = "Bare Minimum";
         public const string By = "spitmux";
     }

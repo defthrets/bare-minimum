@@ -1,7 +1,14 @@
-===============================================================================
+﻿===============================================================================
   BARE MINIMUM  --  changes
 ===============================================================================
 
+
+0.1.5  --  food can be put down somewhere
+
+  Pantry.Take(id, howMany) on the API: another mod can take food OUT of the bag
+  without eating it, so it has somewhere to put it. Posted Up's car boot is the
+  one that asked. Short by any amount and nothing moves. ApiVersion is still 1;
+  an older caller never asks for it.
 
 0.1.4  --  seventy-six more doors, and food for the ones that needed it
 -------------------------------------------------------------------------------

@@ -306,5 +306,35 @@ namespace BareMinimum.Api
             }
             catch { return false; }
         }
+
+        /// <summary>
+        /// Takes some out WITHOUT eating them. For a mod that gives you somewhere to put food
+        /// down -- Posted Up's car boot is the one that asked. False, and nothing moved, when
+        /// he has not got that many.
+        ///
+        /// ADDED WITHOUT BUMPING ApiVersion, the same way Mark was: a caller that asks for
+        /// this is newer than the surface, and an older caller never asks.
+        /// </summary>
+        public static bool Take(string id, int howMany = 1)
+        {
+            try
+            {
+                if (_bag == null || howMany < 1) return false;
+                if (_bag.CountOf(id) < howMany) return false;
+
+                var taken = 0;
+                for (; taken < howMany; taken++)
+                {
+                    if (!_bag.Take(id)) break;
+                }
+
+                if (taken == howMany) return true;
+
+                // Short. Back in, so the count is what it was before the ask.
+                if (taken > 0) _bag.Add(id, taken);
+                return false;
+            }
+            catch { return false; }
+        }
     }
 }
