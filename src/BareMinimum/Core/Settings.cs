@@ -941,7 +941,7 @@ namespace BareMinimum.Core
         public bool MinimapCompass = true;
         public bool MinimapSpeedo = true;
 
-        /// <summary>The dashboard lights at the left of the band, in a vehicle: engine, headlamp, oil, handbrake.</summary>
+        /// <summary>The dashboard lights at the left of the band, in a vehicle: oil (for the engine), headlamp, handbrake.</summary>
         public bool MinimapDash = true;
 
         /// <summary>KPH or MPH.</summary>

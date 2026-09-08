@@ -731,7 +731,8 @@ namespace BareMinimum.UI
 
             Bool("Dash lights in the frame", "Minimap", "Dash",
                  () => _cfg.MinimapDash, v => _cfg.MinimapDash = v,
-                 "Engine, headlamp, oil and handbrake at the top left of the frame, in a vehicle. " +
+                 "Oil, headlamp and handbrake at the top left of the frame, in a vehicle. The oil " +
+                 "can carries the engine's health. " +
                  "Dim at rest, in colour when they have something to say.",
                  () => _cfg.MinimapFrame, "~y~Turn the minimap frame ON first.");
 
