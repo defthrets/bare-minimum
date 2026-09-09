@@ -1649,6 +1649,26 @@ namespace BareMinimum.Core
         /// </remarks>
         public bool DrugsInPocket = true;
 
+        /// <summary>
+        /// Whether two bars start blacking the screen out for a second at a time.
+        ///
+        /// A SETTING BECAUSE IT TAKES THE SCREEN. Everything else this mod does to the player
+        /// can be seen through and driven through; this one cannot, and anybody who does not
+        /// want a mod deciding when they stop being able to see should be able to say so
+        /// without giving up the rest of it.
+        /// </summary>
+        public bool BlackoutsEnabled = true;
+
+        /// <summary>
+        /// The SHORTEST gap between blackouts, in real seconds. The actual wait is this to about
+        /// two and a half times it, picked fresh each time.
+        ///
+        /// RANDOM ON PURPOSE AND WIDELY SO. A lapse on a timer you can feel coming is a mechanic
+        /// you play around; one you cannot is a thing that happens to you, which is the whole
+        /// point of it.
+        /// </summary>
+        public float BlackoutEverySeconds = 22f;
+
         // ======================================================================
 
         /// <summary>
@@ -1938,6 +1958,9 @@ namespace BareMinimum.Core
                     : padLabel.Trim();
 
                 cfg.DrugsInPocket = ini.GetBool("General", "DrugsInPocket", cfg.DrugsInPocket);
+                cfg.BlackoutsEnabled = ini.GetBool("Effects", "Blackouts", cfg.BlackoutsEnabled);
+                cfg.BlackoutEverySeconds = ini.GetFloat("Effects", "BlackoutEverySeconds",
+                                                        cfg.BlackoutEverySeconds, 3f, 600f);
 
                 cfg.BuyToPantry = ini.GetBool("Money", "BuyToPantry", cfg.BuyToPantry);
                 cfg.PantrySlots = (int)ini.GetFloat("Money", "PantrySlots", cfg.PantrySlots, 1f, 200f);

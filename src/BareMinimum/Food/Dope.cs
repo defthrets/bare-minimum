@@ -343,6 +343,25 @@ namespace BareMinimum.Food
                 catch (Exception ex) { Log.Debug("The rush did not reach the bar: " + ex.Message); }
             }
 
+            // ANOTHER BAR ON TOP OF WHATEVER IS LEFT OF THE LAST ONE. Sedative() is read first
+            // so the decay since the last dose is taken out before this one is added -- adding
+            // to a stale figure would let somebody stack to the threshold over an afternoon.
+            if (effect.Sedative > 0f)
+            {
+                try
+                {
+                    _sedative = Sedative() + effect.Sedative;
+                    _sedativeAt = Game.GameTime;
+
+                    Log.Info("Sedative load: " + _sedative.ToString("0.#") + " dose(s)" +
+                             (_sedative >= 2f ? " -- he will start going under." : "."));
+                }
+                catch
+                {
+                    // A load that cannot be counted is a load that does nothing.
+                }
+            }
+
             // AND WHAT IT COSTS ON THE WAY DOWN. The crash is armed the moment the dose lands
             // rather than watched for: the rush's length is known here and nothing else has to
             // notice the bar letting go. See Dose.Crash.
@@ -472,6 +491,17 @@ namespace BareMinimum.Food
             /// </summary>
             public float Crash;
 
+            /// <summary>
+            /// How much SEDATIVE LOAD one of these adds. Two is where the lights start going
+            /// out; see Needs.Blackout.
+            ///
+            /// A NUMBER ON THE DRUG RATHER THAN A CHECK ON ITS NAME. The rule is "enough of a
+            /// sedative", not "xanax specifically", and writing it as an id comparison would
+            /// mean the next thing that ought to count quietly does not -- which is the failure
+            /// this whole table exists to avoid. Only the bars carry it today.
+            /// </summary>
+            public float Sedative;
+
             public Color Tint;
             public string Desc;
         }
@@ -487,6 +517,53 @@ namespace BareMinimum.Food
         /// below are this mod's own reckoning of how long each one rides.
         /// </summary>
         public static Action<float> Rush;
+
+        /// <summary>
+        /// HOW MUCH SEDATIVE IS IN HIM, in doses, and when it was last topped up.
+        ///
+        /// IT WEARS OFF ON A CLOCK RATHER THAN BEING COUNTED AND FORGOTTEN. Two bars is the
+        /// threshold, and if the count never came down then two taken an hour apart would be
+        /// the same as two taken together -- which is not what a sedative does and, worse, would
+        /// mean a player who ever took two was blacking out for the rest of the session with no
+        /// way back. It drains at a dose every SedativeMinutes, so the state is something you
+        /// are in and then are not.
+        /// </summary>
+        private static float _sedative;
+        private static int _sedativeAt;
+
+        /// <summary>Real minutes for one dose to wear off. Long enough to stack two on purpose.</summary>
+        private const float SedativeMinutes = 9f;
+
+        /// <summary>
+        /// Whether there is enough in him for the screen to start going. Two doses.
+        ///
+        /// READ RATHER THAN PUSHED, so nothing has to be told when it stops being true -- the
+        /// load is a number and a clock, and this is a comparison against it.
+        /// </summary>
+        public static bool Blacking
+        {
+            get { return Sedative() >= 2f; }
+        }
+
+        /// <summary>The load right now, with whatever has worn off since it was last touched taken out.</summary>
+        private static float Sedative()
+        {
+            if (_sedative <= 0f) return 0f;
+
+            int now;
+            try { now = Game.GameTime; }
+            catch { return _sedative; }
+
+            var minutes = (now - _sedativeAt) / 60000f;
+            if (minutes <= 0f) return _sedative;
+
+            _sedativeAt = now;
+            _sedative -= minutes / Math.Max(0.1f, SedativeMinutes);
+
+            if (_sedative < 0f) _sedative = 0f;
+
+            return _sedative;
+        }
 
         /// <summary>When the comedown starts and when it lets go. Wall clock, in game-time ms.</summary>
         private static int _crashFrom;
@@ -586,7 +663,7 @@ namespace BareMinimum.Food
             // ---- down: under, and hungry with it ----
 
             { "xanax", new Dose {
-                Hunger = -0.08f, Wake = -0.35f,
+                Hunger = -0.08f, Wake = -0.35f, Sedative = 1f,
                 Tint = Color.FromArgb(255, 190, 206, 232),
                 Desc = "Puts you under. You will not stay up." } },
 

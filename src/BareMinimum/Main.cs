@@ -46,6 +46,7 @@ namespace BareMinimum
         /// <summary>Marks the machines and stalls, which have no coordinate to blip.</summary>
         private readonly MachineBlips _machineBlips;
         private readonly Needs.Parched _parched;
+        private readonly Needs.Blackout _blackout;
         private readonly Survey _survey;
         private readonly Vendors _vendors;
 
@@ -120,6 +121,7 @@ namespace BareMinimum
             _sipping = new Sipping(_cfg, _needs);
             _machineBlips = new MachineBlips(_cfg);
             _parched = new Needs.Parched(_cfg, _speech);
+            _blackout = new Needs.Blackout(_cfg);
             _survey = new Survey(_cfg);
             _socials = new Social.Socials(_cfg);
             _socials.Load();
@@ -347,6 +349,11 @@ namespace BareMinimum
                 _needs.Update(dt, suspended);
                 _effects.Update(_needs, suspended);
                 _parched.Update(_needs, suspended);
+                // THE FULL LIST, NOT JUST THE SLEEP. This one takes the whole screen, so
+                // anything else that fades or opens has to hold it off -- see Blackout, which
+                // also drops a lapse already in progress the moment one of these becomes true.
+                _blackout.Update(suspended || _shop.IsOpen || _settings.IsOpen || _bag.IsOpen ||
+                                 _fridge.IsOpen || _vendors.MenuOpen || _inside.IsInside);
 
                 // ON THE SAME dt EVERYTHING ELSE USES, so the distance flown is real seconds
                 // rather than frames -- a survey that moved per frame would cover twice the
@@ -476,6 +483,10 @@ namespace BareMinimum
             // BEFORE ANYTHING ELSE ON THE WAY OUT. It has the player frozen, intangible and
             // invisible sixty metres over Los Santos, and every other line here can afford to
             // fail where this one cannot.
+            // THE SCREEN COMES BACK FIRST OF ALL. A reload while a blackout is up would
+            // otherwise leave it up with nothing running that knows how to end it.
+            try { _blackout.Shutdown(); } catch (Exception ex) { Log.Error("Blackout shutdown", ex); }
+
             try { _survey.Stop("the script unloaded"); } catch (Exception ex) { Log.Error("Survey shutdown", ex); }
 
             try { _machineBlips.Shutdown(); } catch (Exception ex) { Log.Error("Machine shutdown", ex); }
