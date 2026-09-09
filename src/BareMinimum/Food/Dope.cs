@@ -343,6 +343,28 @@ namespace BareMinimum.Food
                 catch (Exception ex) { Log.Debug("The rush did not reach the bar: " + ex.Message); }
             }
 
+            // AND WHAT IT COSTS ON THE WAY DOWN. The crash is armed the moment the dose lands
+            // rather than watched for: the rush's length is known here and nothing else has to
+            // notice the bar letting go. See Dose.Crash.
+            if (effect.Crash > 0f)
+            {
+                try
+                {
+                    var now = Game.GameTime;
+
+                    _crashFrom = now + (int)(effect.Wired * 60000f);
+                    _crashTo = _crashFrom + (int)(effect.Crash * 60000f);
+                    _crashSaid = false;
+
+                    Log.Info("Comedown armed: " + id + " rides " + effect.Wired.ToString("0.#") +
+                             " min, then " + effect.Crash.ToString("0.#") + " min down.");
+                }
+                catch
+                {
+                    _crashFrom = _crashTo = 0;
+                }
+            }
+
             if (Reacted != null)
             {
                 // Weed is its own thing: it is the one on the list that is neither an upper
@@ -429,6 +451,21 @@ namespace BareMinimum.Food
             /// <summary>Real minutes it holds the energy bar at the top, shimmering. Nought for the downers.</summary>
             public float Wired;
 
+            /// <summary>
+            /// Real minutes of COMEDOWN once the rush ends. Nought for anything you do not come
+            /// down off.
+            ///
+            /// SHORTER THAN THE HIGH, WHICH IS A LIE, and a deliberate one. A real crash off
+            /// meth outlasts the high several times over and is measured in days; a mod that
+            /// modelled that honestly would leave the player moving like a corpse for the rest
+            /// of the session over one decision made twenty minutes ago, which is a punishment
+            /// rather than a consequence. It is long enough that you have to live with it and
+            /// short enough that you can wait it out, and the SHAPE is right even where the
+            /// scale is not: the harder and shorter the hit, the worse the fall relative to it.
+            /// Crack rides four minutes and costs three; meth rides thirteen and costs eight.
+            /// </summary>
+            public float Crash;
+
             public Color Tint;
             public string Desc;
         }
@@ -444,6 +481,54 @@ namespace BareMinimum.Food
         /// below are this mod's own reckoning of how long each one rides.
         /// </summary>
         public static Action<float> Rush;
+
+        /// <summary>When the comedown starts and when it lets go. Wall clock, in game-time ms.</summary>
+        private static int _crashFrom;
+        private static int _crashTo;
+
+        private static bool _crashSaid;
+
+        /// <summary>
+        /// Whether he is coming down off something right now.
+        ///
+        /// ONE MAN, ONE COMEDOWN, so this is static alongside the rest of the bridge rather
+        /// than per-anything: there is one player and he is either on the way down or he is
+        /// not. Taking a second stimulant while the first is still riding pushes the whole
+        /// thing back rather than queueing a second crash behind the first -- which is both
+        /// simpler and truer, since that is what taking another one actually does.
+        /// </summary>
+        public static bool Crashing
+        {
+            get
+            {
+                if (_crashTo == 0) return false;
+
+                int now;
+                try { now = Game.GameTime; }
+                catch { return false; }
+
+                if (now >= _crashTo) { _crashTo = 0; _crashFrom = 0; return false; }
+
+                return now >= _crashFrom;
+            }
+        }
+
+        /// <summary>
+        /// True on the ONE frame the comedown begins, and false ever after. For the grunt.
+        ///
+        /// READ AND CLEARED, because a caller that had to remember whether it had already
+        /// reacted is a caller with a bug in it the first time somebody adds a second one.
+        /// </summary>
+        public static bool JustCrashed
+        {
+            get
+            {
+                if (_crashSaid || !Crashing) return false;
+
+                _crashSaid = true;
+                return true;
+            }
+        }
 
         /// <summary>
         /// What he says about what he has just taken. Wired by Main, for the reason above.
@@ -526,12 +611,12 @@ namespace BareMinimum.Food
             // there is no running out of breath and no running out of special ability. The
             // downers get none of it; a xanax is not a reason to be able to sprint all day.
             { "meth", new Dose {
-                Hunger = 0.10f, Wake = 1f, Wired = 13f,
+                Hunger = 0.10f, Wake = 1f, Wired = 13f, Crash = 8f,
                 Tint = Color.FromArgb(255, 150, 205, 230),
                 Desc = "Days awake. Nothing gets you down." } },
 
             { "coke", new Dose {
-                Hunger = 0.10f, Wake = 1f, Wired = 6f,
+                Hunger = 0.10f, Wake = 1f, Wired = 6f, Crash = 3.5f,
                 Tint = Color.FromArgb(255, 238, 238, 244),
                 Desc = "Wide awake, and suddenly fine." } },
 
@@ -539,12 +624,12 @@ namespace BareMinimum.Food
             // camp and half a rule is worse than either whole one -- a man who has just learnt
             // that uppers stand him up should not find that two of them do not.
             { "crack", new Dose {
-                Hunger = 0.10f, Wake = 1f, Wired = 4f,
+                Hunger = 0.10f, Wake = 1f, Wired = 4f, Crash = 3f,
                 Tint = Color.FromArgb(255, 226, 206, 168),
                 Desc = "Sharp and short, and you are up." } },
 
             { "ecstasy", new Dose {
-                Hunger = 0.10f, Wake = 1f, Wired = 10f,
+                Hunger = 0.10f, Wake = 1f, Wired = 10f, Crash = 6f,
                 Tint = Color.FromArgb(255, 212, 122, 196),
                 Desc = "Up all night, and glad about it." } },
         };

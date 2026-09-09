@@ -18,6 +18,10 @@ namespace BareMinimum.Needs
     ///    Deliberately mild -- the brief was a slight drunk effect, and the game's own
     ///    verydrunk set is a stagger that makes doorways impossible.
     ///  - DRINK does the same thing harder, and escalates from merry to properly gone.
+    ///  - A COMEDOWN off a stimulant moves you the same way thirst does, for a few minutes
+    ///    after the high lets go. Same set on purpose: he has run himself into the ground
+    ///    either way, and asking the eye to tell two exhaustions apart is asking it for
+    ///    nothing. See Food.Dope.Crashing.
     ///  - THIRST takes your WIND, which is the part you feel, and moves you like a man who has
     ///    run himself into the ground, which is the part you see. It does NOT slow you down: it
     ///    did, and three needs each multiplying the same number gave a man walking at a third
@@ -49,6 +53,14 @@ namespace BareMinimum.Needs
         private readonly System.Collections.Generic.HashSet<string> _requested =
             new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// Set by Main: the comedown has just started. For the noise he makes about it.
+        ///
+        /// A DELEGATE RATHER THAN A Speech, the same arrangement Vitals.Winded uses: this class
+        /// is about what a body DOES, and handing it a voice would be handing it a second job.
+        /// </summary>
+        public Action Crashed;
+
         public Effects(Settings cfg)
         {
             _cfg = cfg;
@@ -73,6 +85,14 @@ namespace BareMinimum.Needs
                 var sleep = needs.Sleep.Value;
                 var thirst = needs.Thirst.Value;
                 var drunk = _cfg.BoozeEnabled ? needs.Drunk : 0f;
+
+                // ONE FRAME, ONCE. Dope.JustCrashed clears itself when it is read, so this has
+                // to be asked every tick and cannot be asked twice.
+                if (Food.Dope.JustCrashed && Crashed != null)
+                {
+                    try { Crashed(); }
+                    catch { /* a missing grunt is not worth failing the effects over */ }
+                }
 
                 MoveRate(me, hunger, sleep, thirst);
                 Clipset(me, hunger, sleep, thirst, drunk);
@@ -264,6 +284,17 @@ namespace BareMinimum.Needs
             if (drunk > 0.0001f && drunk >= _cfg.BoozeDrunkAt)
             {
                 want = drunk >= _cfg.BoozeHeavyAt ? _cfg.BoozeClipsetHeavy : _cfg.BoozeClipset;
+            }
+            else if (Food.Dope.Crashing)
+            {
+                // COMING DOWN OFF A STIMULANT, and above the needs for the same reason drink is
+                // above them: it is the thing the player DID, twenty minutes ago, and it is the
+                // one state on this list with a cause he can name. Being told he looks hungry
+                // while he is crashing off meth would read as the drug having done nothing.
+                //
+                // The same set being dry uses -- he has run himself into the ground either way,
+                // and the ear and the eye should not be asked to tell two exhaustions apart.
+                want = _cfg.ThirstClipset;
             }
             else if (_cfg.HungerEnabled && hunger < _cfg.HungerHurtAt)
             {

@@ -202,6 +202,16 @@ namespace BareMinimum
             // reacting to what he has just taken is not thanking a cashier.
             Food.Dope.Reacted = set => _speech.Say(set);
 
+            // AND WHAT HE SOUNDS LIKE WHEN IT LETS GO. The comedown arrives as a grunt out of
+            // the game's own non-verbal set with a flat line behind it -- the SAME "downer" set
+            // a sedative gets, because that is what coming down is: the drug has stopped being
+            // the up one. See Needs.Effects.Crashed and Food.Dope.Crashing.
+            _effects.Crashed = () =>
+            {
+                _speech.Noise(Food.Speech.Pain.Exhaustion);
+                _speech.Say("downer");
+            };
+
             Interval = 0;
             Tick += OnTick;
             Aborted += OnAborted;
