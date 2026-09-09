@@ -91,7 +91,22 @@ namespace BareMinimum.Vitals
         /// <summary>Once a frame, from Main, before the gauge draws. <paramref name="on"/> is the mod's switch and ours together.</summary>
         public void Update(bool on)
         {
-            _upright = false;
+            // DECIDED FIRST, BECAUSE EVERYTHING THAT LAYS A ROW OUT ASKS FOR IT.
+            //
+            // It used to be cleared here and set true at the very bottom of this method, and
+            // three things in between build a row: the cash readout, the minimap's frame, and
+            // Api.Rack, which publishes the row for Fumes to stand in. Gauge.Standing reads
+            // this flag to decide whether health and energy are in the row at all, so all three
+            // saw a row of two columns instead of four -- the cash landed two pitches left, on
+            // top of the food and energy bars, and the number published to the neighbour was
+            // wrong whenever the gauge's own draw returned early and did not correct it.
+            //
+            // Nothing in the method changes the answer; it is three settings and they are all
+            // known on the first line.
+            _upright = on
+                       && _cfg.VitalsStyle == VitalsStyle.Upright
+                       && _cfg.Style == HudStyle.Bars
+                       && _cfg.ShowHud;
 
             var dt = Game.LastFrameTime;
 
@@ -114,6 +129,7 @@ namespace BareMinimum.Vitals
 
             if (!on)
             {
+                _upright = false;
                 _motion.Rest();
 
                 // EVERYTHING THE METER DID TO HIM, UNDONE. The movement cap and the switched-off
@@ -127,6 +143,7 @@ namespace BareMinimum.Vitals
 
             if (!Visible())
             {
+                _upright = false;
                 _motion.Rest();
                 return;
             }
@@ -150,12 +167,10 @@ namespace BareMinimum.Vitals
             }
 
             // UPRIGHT NEEDS A ROW TO STAND IN. With the gauge on its icon style, or hidden,
-            // there is none, and the strip under the minimap is what the three become.
-            if (_cfg.VitalsStyle == VitalsStyle.Upright && _cfg.Style == HudStyle.Bars && _cfg.ShowHud)
-            {
-                _upright = true;
-                return;
-            }
+            // there is none, and the strip under the minimap is what the three become. The
+            // flag itself was worked out at the top; this is where it decides which of the two
+            // this method draws.
+            if (_upright) return;
 
             var lay = LayoutFor(_readings.HasThird);
             _strip.Draw(_cfg, lay, _readings, _motion, _strength);

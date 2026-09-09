@@ -54,7 +54,22 @@ namespace BareMinimum.UI
         private const float CapH = 0.028f;
 
         /// <summary>The card under the grids: the chosen thing, said properly.</summary>
-        private const float CardH = 0.052f;
+        /// <summary>
+        /// The card under the grid, as tall as what goes on it.
+        ///
+        /// MEASURED, NOT EYEBALLED -- the same fix the pocket had, which was applied there and
+        /// not here. A flat 0.052 leaves less room than a line of body text at this scale
+        /// actually occupies, so the line of flavour under an item's name was drawn below the
+        /// bottom of its own plate and onto the footer rule.
+        /// </summary>
+        private static float CardH
+        {
+            get { return DescTop + Hud.Height(DescScale, Hud.FontBody) + 0.008f; }
+        }
+
+        /// <summary>Where the line under the name starts, from the top of the card, and how big it is.</summary>
+        private const float DescTop = 0.030f;
+        private const float DescScale = 0.25f;
 
         /// <summary>The seam between the two panes, so they read as two things.</summary>
         private const float Gutter = 0.010f;
@@ -752,7 +767,7 @@ namespace BareMinimum.UI
                 Hud.Text("Nothing here to take.", tx, y + 0.008f, 0.30f,
                          Palette.Alpha(Palette.TextDim, (int)(210f * arrive)), Hud.FontBody);
 
-                Hud.Text("Buy something and it turns up in your pocket.", tx, y + 0.030f, 0.25f,
+                Hud.Text("Buy something and it turns up in your pocket.", tx, y + DescTop, DescScale,
                          Palette.Alpha(Palette.TextDim, (int)(170f * arrive)), Hud.FontBody);
                 return;
             }

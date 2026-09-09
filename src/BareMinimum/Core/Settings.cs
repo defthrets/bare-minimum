@@ -570,7 +570,7 @@ namespace BareMinimum.Core
         /// 3440x1440 screen with the pair placed by hand: left edge 0.252, foot 0.983.
         /// </summary>
         public float HudX = 0.252f;
-        public float HudY = 0.9873f;
+        public float HudY = 0.996f;
 
         /// <summary>
         /// Icon height as a fraction of screen height. Width follows; the PNGs are square.
@@ -1510,7 +1510,7 @@ namespace BareMinimum.Core
                 cfg.HudAutoPosition = ini.GetBool("HUD", "AutoPosition", cfg.HudAutoPosition);
                 cfg.HudX = ini.GetFloat("HUD", "X", cfg.HudX, -0.2f, 1.2f);
                 cfg.HudY = ini.GetFloat("HUD", "Y", cfg.HudY, -0.2f, 1.2f);
-                cfg.HudSize = ini.GetFloat("HUD", "Size", cfg.HudSize, 0.005f, 0.30f);
+                cfg.HudSize = ini.GetFloat("HUD", "Size", cfg.HudSize, 0.001f, 0.30f);
                 cfg.HudGap = ini.GetFloat("HUD", "Gap", cfg.HudGap, 0f, 3f);
                 cfg.HudOpacity = ini.GetFloat("HUD", "Opacity", cfg.HudOpacity, 0.05f, 1f);
                 cfg.Style = ParseStyle(ini.GetString("HUD", "Style", ""), cfg.Style);
@@ -1520,7 +1520,7 @@ namespace BareMinimum.Core
                 UI.Draw.Budget = cfg.HudDrawBudget;
                 cfg.HudBarWidth = ini.GetFloat("HUD", "BarWidth", cfg.HudBarWidth, 0.001f, 0.2f);
                 cfg.HudBarIconScale = ini.GetFloat("HUD", "BarIconScale",
-                                                   cfg.HudBarIconScale, 0.2f, 1f);
+                                                   cfg.HudBarIconScale, 0.2f, 2f);
                 cfg.HudBarWave = ini.GetFloat("HUD", "BarWave", cfg.HudBarWave, 0f, 1f);
                 cfg.HudBarDrift = ini.GetFloat("HUD", "BarDrift", cfg.HudBarDrift, 0f, 1f);
                 cfg.HudBarPace = ini.GetFloat("HUD", "BarPace", cfg.HudBarPace, 0.15f, 120f);

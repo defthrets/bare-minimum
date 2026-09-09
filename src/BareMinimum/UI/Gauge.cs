@@ -418,7 +418,19 @@ namespace BareMinimum.UI
             // with where the map actually is -- and the map is what the frame's foot is built
             // from now. Placed by hand, the setting still wins and the frame comes down to meet
             // it; see Frame.Draw, which takes whichever of the two is lower.
-            bottom = _cfg.HudY + side * 2f + gap;
+            // Y IS THE FOOT. IT USED TO BE THE FOOT PLUS THE ICONS' ALLOWANCE.
+            //
+            // Size is the icon style's icon height, and on the bar style there are no icons --
+            // so all it did there was shove the whole row down the screen by twice itself plus
+            // the gap. The field's own comment says so, and says not to reach for it to move
+            // the bars. People reach for it anyway, because it is the only number that visibly
+            // moves them: this install had Size wound down to 0.004 and the log said it was
+            // being clamped back to 0.005 three hundred and sixty-two times.
+            //
+            // One thing, one effect, which is the rule this file states everywhere else. Size
+            // is the icon size. Y is the foot. HudY was moved on by the allowance it used to
+            // carry so that nothing actually moves on screen.
+            bottom = _cfg.HudY;
 
             if (_cfg.HudAutoPosition)
             {

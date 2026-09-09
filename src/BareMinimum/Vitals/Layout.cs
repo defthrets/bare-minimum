@@ -217,12 +217,46 @@ namespace BareMinimum.Vitals
             return true;
         }
 
+        /// <summary>Last frame's answer, and when it is worth asking again. See Map.</summary>
+        private static bool _cached;
+        private static bool _cachedOk;
+        private static float _cl, _ct, _cr, _cb, _cs;
+        private static int _askAt;
+
         public static bool Map(out float left, out float top, out float right, out float bottom, out float safeLine)
         {
+            // ASKED A FEW TIMES A SECOND, NOT THREE OR FOUR TIMES A FRAME.
+            //
+            // Anchor costs four natives and, worse, MUTATES the script's global draw alignment
+            // to get its answer. Between the cash readout, the minimap's frame, the row the
+            // bars stand in and the row published for Fumes, this was being asked three or four
+            // times every frame -- about sixteen alignment natives a frame -- for a number that
+            // changes only when the resolution or the safe-zone slider does.
+            //
+            // The same query is already cached on a 500 ms clock a few classes away, with a
+            // comment saying there is no reason to spend it, and Ink does the same for the
+            // screen size. This is that, in the one place every caller comes through.
+            var now = Environment.TickCount & int.MaxValue;
+
+            if (_cached && now < _askAt)
+            {
+                left = _cl; top = _ct; right = _cr; bottom = _cb; safeLine = _cs;
+                return _cachedOk;
+            }
+
+            _cached = true;
+            _askAt = now + 250;
+
             left = top = right = bottom = safeLine = 0f;
 
             float boxLeft, boxBottom, boxRight, boxTop;
-            if (!Anchor(out boxLeft, out boxBottom, out boxRight, out boxTop)) return false;
+
+            if (!Anchor(out boxLeft, out boxBottom, out boxRight, out boxTop))
+            {
+                _cachedOk = false;
+                _cl = _ct = _cr = _cb = _cs = 0f;
+                return false;
+            }
 
             var aspect = Ink.Aspect;
 
@@ -232,6 +266,9 @@ namespace BareMinimum.Vitals
             safeLine = boxBottom - BoxY;
             bottom = safeLine - StockThick - StockGap;
             top = safeLine - MapTall;
+
+            _cachedOk = true;
+            _cl = left; _ct = top; _cr = right; _cb = bottom; _cs = safeLine;
 
             return true;
         }

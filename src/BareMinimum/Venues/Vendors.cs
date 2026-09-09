@@ -744,9 +744,18 @@ namespace BareMinimum.Venues
         {
             if (!_cfg.DiscoverCarts) return;
 
+            // AND IT STOPS. This looked every three seconds for the whole session, walking a
+            // list that only ever grows and allocating a model per prop per row -- so it did
+            // the most work at exactly the point it had nothing left to find. Twenty sweeps in
+            // a row that turn up nothing new means the carts round here are all staffed; any
+            // fresh ground restarts it, because Stream calls Woke when he has moved on.
+            if (_cartsDone) return;
+
             var now = Game.GameTime;
             if (now < _nextCartScan) return;
             _nextCartScan = now + 3000;
+
+            var had = _vendors.Count;
 
             if (_cartHashes == null)
             {
@@ -847,6 +856,34 @@ namespace BareMinimum.Venues
                 _vendors.Add(made);
                 Record(row, made);
             }
+
+            _cartDry = _vendors.Count == had ? _cartDry + 1 : 0;
+
+            if (_cartDry >= 20)
+            {
+                _cartsDone = true;
+                Log.Info("Carts: nothing new in a minute of looking; the sweep is resting.");
+            }
+        }
+
+        /// <summary>How many sweeps in a row found nothing, whether it has stopped, and from where.</summary>
+        private int _cartDry;
+        private bool _cartsDone;
+        private Vector3 _lastSweep;
+
+        /// <summary>
+        /// Somewhere new: the cart sweep is worth running again.
+        ///
+        /// Called when the player has moved far enough that the props around him are not the
+        /// ones the sweep gave up on. Without this, driving to the other end of the map after
+        /// the sweep rested would find nothing there for the rest of the session.
+        /// </summary>
+        private void Woke()
+        {
+            if (!_cartsDone) return;
+
+            _cartsDone = false;
+            _cartDry = 0;
         }
 
         /// <summary>Every stall written down so far, so a second sighting is not a second line.</summary>
@@ -989,6 +1026,12 @@ namespace BareMinimum.Venues
         /// <summary>Creates what is near, removes what is not, and keeps the map markers.</summary>
         private void Stream(Vector3 from)
         {
+            // FRESH GROUND WAKES THE CART SWEEP. Two hundred metres is further than the sweep
+            // itself reaches, so anywhere that far from where it last looked is somewhere it
+            // has not looked. See Discover, which rests once it stops finding anything.
+            if (_lastSweep != Vector3.Zero && _lastSweep.DistanceTo(from) > 200f) Woke();
+            _lastSweep = from;
+
             Discover(from);
 
             foreach (var v in _vendors)
@@ -1322,7 +1365,13 @@ namespace BareMinimum.Venues
         {
             if (!v.Resolved)
             {
-                v.PropModel = Pick(v.PropModels, "stand prop", v.Name);
+                // A CART FOUND IN THE WORLD ALREADY HAS ITS STAND. Asking the picker for one
+                // anyway handed it an empty list, which it correctly reported as "no usable
+                // stand prop, put a model name into vendors.json" -- for a cart that has no
+                // vendors.json entry at all. Forty-two of those in one log, each pointing at a
+                // file that could not have fixed it.
+                if (!v.Discovered) v.PropModel = Pick(v.PropModels, "stand prop", v.Name);
+
                 v.PedModel = Pick(v.PedModels, "vendor ped", v.Name);
                 v.Resolved = true;
             }
@@ -1402,36 +1451,18 @@ namespace BareMinimum.Venues
             }
         }
 
-        private void Spawn(Vendor v)
-        {
-            if (!v.Resolved)
-            {
-                v.PropModel = Pick(v.PropModels, "stand prop", v.Name);
-                v.PedModel = Pick(v.PedModels, "vendor ped", v.Name);
-                v.Resolved = true;
-            }
-
-            try
-            {
-                // A discovered cart keeps the prop it was found as. Building another on top
-                // would put two carts in one place, and the second one would be ours to
-                // delete while the first was not.
-                if (!v.Discovered && v.PropModel.HasValue) v.Stand = MakeStand(v);
-                if (v.PedModel.HasValue) v.Seller = MakeSeller(v);
-            }
-            catch (Exception ex)
-            {
-                Log.Once("vendor-spawn-" + v.Id, "Could not build " + v.Name + ": " + ex.Message);
-            }
-        }
-
         private static Prop MakeStand(Vendor v)
         {
             var model = v.PropModel.Value;
             if (!Stream(model)) return null;
 
             var prop = World.CreateProp(model, v.Position, false, false);
-            if (prop == null || !prop.Exists()) return null;
+
+            // RELEASED ON THE WAY OUT TOO. Stream locks the model in memory and only the
+            // success path below let it go, so every stand that failed to spawn -- and every
+            // vendor that came inside its range and was despawned a second later as you drove
+            // past -- left one pinned for the session.
+            if (prop == null || !prop.Exists()) { model.MarkAsNoLongerNeeded(); return null; }
 
             prop.Heading = v.Heading;
 
@@ -1467,7 +1498,10 @@ namespace BareMinimum.Venues
             v.SmokeAt = v.Position + forward * (v.PedBack + v.SmokeBack);
 
             var ped = World.CreatePed(model, where, v.Heading + 180f);
-            if (ped == null || !ped.Exists()) return null;
+
+            // As the stand: the model is locked in by Stream and only the success path let it
+            // go, so a seller that failed to spawn left one pinned for the session.
+            if (ped == null || !ped.Exists()) { model.MarkAsNoLongerNeeded(); return null; }
 
             ped.IsPersistent = true;
             ped.BlockPermanentEvents = true;     // ignores gunfire, panic, ambient events

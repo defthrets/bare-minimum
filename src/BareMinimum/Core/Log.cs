@@ -70,12 +70,16 @@ namespace BareMinimum.Core
                     var path = Paths.LogFile;
                     if (!_started)
                     {
+                        _rollAt = 0;
                         RollIfLarge(path);
                         _started = true;
                         AppendLine(path, "");
                         AppendLine(path, "=== " + Build.Name + " " + Build.Version + " by " + Build.By + " started " +
                                          DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture) + " ===");
                     }
+
+                    // Checked as the session runs, not only when it starts. See RollIfLarge.
+                    RollIfLarge(path);
 
                     var sb = new StringBuilder();
                     sb.Append('[').Append(DateTime.Now.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture)).Append("] ");
@@ -113,10 +117,27 @@ namespace BareMinimum.Core
             File.AppendAllText(path, line + Environment.NewLine, Encoding.UTF8);
         }
 
+        /// <summary>When the size was last checked, so the check is cheap enough to keep making.</summary>
+        private static int _rollAt;
+
+        /// <summary>
+        /// Rolls the log over once it is big enough, DURING a session and not only at the start
+        /// of one.
+        ///
+        /// This used to sit inside the first-write branch, so the size was looked at once when
+        /// the script loaded and never again -- a long session at Debug grew the file without
+        /// any bound at all, and Paths.CartsFile still carries a comment written on the opposite
+        /// assumption. Stat'ing the file on every line would be silly, so it is asked at most
+        /// once every thirty seconds; nothing writes two megabytes in thirty seconds.
+        /// </summary>
         private static void RollIfLarge(string path)
         {
             try
             {
+                var now = Environment.TickCount;
+                if (_rollAt != 0 && now - _rollAt < 30000 && now >= _rollAt) return;
+                _rollAt = now;
+
                 var fi = new FileInfo(path);
                 if (!fi.Exists || fi.Length < MaxBytes) return;
 

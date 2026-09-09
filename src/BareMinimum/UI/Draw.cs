@@ -230,21 +230,20 @@ namespace BareMinimum.UI
             RectsThisFrame++;
         }
 
-        /// <summary>The screen's height in pixels, for the sub-pixel test. Read once.</summary>
+        /// <summary>
+        /// The screen's height in pixels, for the sub-pixel test.
+        ///
+        /// THE SAME NUMBER ScreenHeight ALREADY KEEPS, rather than a second copy read once and
+        /// held for the session. ScreenHeight's own note says the resolution can change while
+        /// the game is running and the text-advance cache is thrown away when it does; this was
+        /// the one place that did not care, so changing from 4K to 1080p left the cull threshold
+        /// at half its proper size and every row now under half a pixel was still handed to the
+        /// game -- spending budget on rows nobody can see.
+        /// </summary>
         private static int Tall
         {
-            get
-            {
-                if (_tall > 0) return _tall;
-
-                try { _tall = GTA.UI.Screen.Resolution.Height; }
-                catch { _tall = 1080; }
-
-                return _tall;
-            }
+            get { return ScreenHeight; }
         }
-
-        private static int _tall;
 
         /// <summary>
         /// A filled rectangle, positioned by its CENTRE.
@@ -351,7 +350,14 @@ namespace BareMinimum.UI
         {
             if (steps <= 0) return 1;
 
-            return Math.Max(1, (int)Math.Round(r * 2f * ScreenHeight / steps));
+            // THE COUNT IS WHAT COSTS, NOT THE HEIGHT. This returned a band height rounded to
+            // the nearest pixel, so on a taller screen the same corner was drawn in more bands:
+            // at a radius of 0.018 and forty steps it is nineteen rows at 1080p and twenty-six
+            // at 1440p, and a panel went from about seventy-nine rectangles to a hundred and
+            // seven for no visible gain. Rounding UP the height of one band instead fixes the
+            // count at half the step number on every screen, which is what the number was
+            // always meant to mean. Rectangles come out of one list the whole machine shares.
+            return Math.Max(1, (int)Math.Ceiling(r * ScreenHeight / (steps * 0.5f)));
         }
 
         /// <summary>

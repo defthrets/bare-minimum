@@ -130,7 +130,13 @@ namespace BareMinimum.Venues
                 if (!m.IsLoaded)
                 {
                     m.Request(1500);
-                    if (!m.IsLoaded) return null;
+
+                    // RELEASED EVEN WHEN IT DID NOT ARRIVE. Asking for a model locks it in
+                    // memory until somebody says otherwise, and this used to return here with
+                    // the request still standing -- so every dancer that missed its window was
+                    // a ped model pinned for the session, and going in while the streamer was
+                    // still catching up left several.
+                    if (!m.IsLoaded) { m.MarkAsNoLongerNeeded(); return null; }
                 }
 
                 var ped = World.CreatePed(m, at, heading);
