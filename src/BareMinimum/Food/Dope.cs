@@ -455,14 +455,20 @@ namespace BareMinimum.Food
             /// Real minutes of COMEDOWN once the rush ends. Nought for anything you do not come
             /// down off.
             ///
-            /// SHORTER THAN THE HIGH, WHICH IS A LIE, and a deliberate one. A real crash off
-            /// meth outlasts the high several times over and is measured in days; a mod that
+            /// MUCH SHORTER THAN THE HIGH, WHICH IS A LIE, and a deliberate one. A real crash
+            /// off meth outlasts the high several times over and is measured in days; a mod that
             /// modelled that honestly would leave the player moving like a corpse for the rest
             /// of the session over one decision made twenty minutes ago, which is a punishment
-            /// rather than a consequence. It is long enough that you have to live with it and
-            /// short enough that you can wait it out, and the SHAPE is right even where the
-            /// scale is not: the harder and shorter the hit, the worse the fall relative to it.
-            /// Crack rides four minutes and costs three; meth rides thirteen and costs eight.
+            /// rather than a consequence.
+            ///
+            /// HALVED AGAIN AFTER PLAYING IT. Eight minutes off meth was still long enough to
+            /// stop being a comedown and start being the state you are simply in, and a penalty
+            /// you cannot remember the cause of is indistinguishable from a bug. Four is long
+            /// enough to be worth avoiding and short enough to sit through.
+            ///
+            /// The SHAPE is right even where the scale is not: the harder and shorter the hit,
+            /// the worse the fall relative to it. Crack rides four minutes and costs a minute
+            /// and a half; meth rides thirteen and costs four.
             /// </summary>
             public float Crash;
 
@@ -589,7 +595,27 @@ namespace BareMinimum.Food
                 Tint = Color.FromArgb(255, 168, 130, 96),
                 Desc = "A nod, and nothing else matters." } },
 
-            // Not in Posted Up's drugs.json today. Here so that it behaves the day it is.
+            // OXYCODONE, AND IT IS FILED UNDER "ecstasy" IN THE OTHER MOD.
+            //
+            // Posted Up's drugs.json has id "ecstasy" carrying the name Oxycodone, the tag OXY,
+            // the code word "blues", counted in PILLS, pressed and repressed, tier 1 at $25.
+            // Every field a player can see says opioid; only the key says otherwise, and the key
+            // is plainly a leftover from whatever the entry used to be.
+            //
+            // This mod was keying off the key, so an oxy woke him up, pinned the energy bar for
+            // ten minutes and crashed him afterwards -- the exact opposite of what he took.
+            // BEHAVIOUR FOLLOWS THE LABEL, NOT THE ID: the label is the only one of the two the
+            // player will ever read, and a mod arguing with the packet is a mod that is wrong.
+            //
+            // BOTH KEYS POINT HERE. "ecstasy" is what the file says today and "oxycodone" is
+            // what it should say, so correcting it over there changes nothing over here -- and
+            // if a real ecstasy is ever added under its own id it gets the uppers' entry as it
+            // should, rather than inheriting this by accident.
+            { "ecstasy", new Dose {
+                Hunger = -0.12f, Wake = -0.30f,
+                Tint = Color.FromArgb(255, 228, 212, 158),
+                Desc = "A warm nod. Everything slows down." } },
+
             { "oxycodone", new Dose {
                 Hunger = -0.12f, Wake = -0.30f,
                 Tint = Color.FromArgb(255, 228, 212, 158),
@@ -611,27 +637,25 @@ namespace BareMinimum.Food
             // there is no running out of breath and no running out of special ability. The
             // downers get none of it; a xanax is not a reason to be able to sprint all day.
             { "meth", new Dose {
-                Hunger = 0.10f, Wake = 1f, Wired = 13f, Crash = 8f,
+                Hunger = 0.10f, Wake = 1f, Wired = 13f, Crash = 4f,
                 Tint = Color.FromArgb(255, 150, 205, 230),
                 Desc = "Days awake. Nothing gets you down." } },
 
             { "coke", new Dose {
-                Hunger = 0.10f, Wake = 1f, Wired = 6f, Crash = 3.5f,
+                Hunger = 0.10f, Wake = 1f, Wired = 6f, Crash = 2f,
                 Tint = Color.FromArgb(255, 238, 238, 244),
                 Desc = "Wide awake, and suddenly fine." } },
 
-            // CRACK AND ECSTASY WERE NOT NAMED and are here anyway, because they are the same
-            // camp and half a rule is worse than either whole one -- a man who has just learnt
-            // that uppers stand him up should not find that two of them do not.
+            // CRACK WAS NOT NAMED and is here anyway, because it is the same camp and half a
+            // rule is worse than either whole one -- a man who has just learnt that uppers stand
+            // him up should not find that one of them does not.
+            //
+            // ECSTASY USED TO BE ON THIS LIST AND IS NOT ANY MORE. The id belongs to the pills
+            // the other mod calls Oxycodone; see the downers above for the whole of it.
             { "crack", new Dose {
-                Hunger = 0.10f, Wake = 1f, Wired = 4f, Crash = 3f,
+                Hunger = 0.10f, Wake = 1f, Wired = 4f, Crash = 1.5f,
                 Tint = Color.FromArgb(255, 226, 206, 168),
                 Desc = "Sharp and short, and you are up." } },
-
-            { "ecstasy", new Dose {
-                Hunger = 0.10f, Wake = 1f, Wired = 10f, Crash = 6f,
-                Tint = Color.FromArgb(255, 212, 122, 196),
-                Desc = "Up all night, and glad about it." } },
         };
 
         /// <summary>
