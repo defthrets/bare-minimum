@@ -504,8 +504,8 @@ namespace BareMinimum.UI
             Float("Thirst: hours to empty", "Thirst", "HoursToEmpty",
                   () => _cfg.ThirstHoursToEmpty, v => _cfg.ThirstHoursToEmpty = v,
                   1f, 2f, 200f, "0",
-                  "18 is under a game day -- a third of hunger's, so a drink is its own " +
-                  "errand rather than something that comes with lunch.");
+                  "24 is exactly a game day, so this empties about as often as you sleep " +
+                  "and well over twice as often as you get hungry.");
 
             Float("Thirst: sip from machines", "Counters", "VendingSipThirst",
                   () => _cfg.VendingSipThirst, v => _cfg.VendingSipThirst = v,

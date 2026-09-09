@@ -122,18 +122,24 @@ namespace BareMinimum.Core
         /// <summary>
         /// GAME hours from a full glass to a dry mouth.
         ///
-        /// A THIRD OF HUNGER'S, DELIBERATELY. The whole point of a third bar is that it does not
-        /// move at the same speed as the two beside it -- if it emptied on hunger's clock it
-        /// would just be a second hunger bar and you would fix both at the same counter, which
-        /// is a bar that tells you nothing. Eighteen game hours is under a game day, so a drink
-        /// is a thing you go and get on its own rather than something that happens to come with
-        /// lunch, and the corner shop fridge and every vending machine on the map earn their
-        /// place.
+        /// EXACTLY ONE GAME DAY, and well under half of hunger's 54. The whole point of a third
+        /// bar is that it does not move at the same speed as the two beside it -- if it emptied
+        /// on hunger's clock it would just be a second hunger bar, you would fix both at the
+        /// same counter, and it would tell you nothing. What matters is the ratio, not the
+        /// figure: at 24 you are still going dry about twice for every time you go hungry, so
+        /// the corner-shop fridge and every vending machine on the map still earn their place.
         ///
-        /// It is also the cheapest need to fix, which is what stops that being a chore: a can is
-        /// a couple of dollars and fills most of the meter, where a day's food is several meals.
+        /// RAISED FROM 18, which was a third of hunger and turned out to be a third too keen.
+        /// Eighteen put a drink somewhere in the middle of most sessions whether or not
+        /// anything else was happening; a round day lines the bar up with the game's own clock,
+        /// so it empties about as often as you sleep, and a player who has any sense of what
+        /// time it is has some sense of where this bar is without looking.
+        ///
+        /// It is also the cheapest need to fix, which is what stops any of that being a chore:
+        /// a can is a couple of dollars and fills most of the meter, where a day's food is
+        /// several meals.
         /// </summary>
-        public float ThirstHoursToEmpty = 18f;
+        public float ThirstHoursToEmpty = 24f;
 
         /// <summary>
         /// Multiplier on the drain while asleep. Higher than hunger's.

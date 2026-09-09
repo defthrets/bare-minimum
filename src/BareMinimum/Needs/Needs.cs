@@ -310,8 +310,8 @@ namespace BareMinimum.Needs
             if (_cfg.ThirstEnabled)
             {
                 // WORK MAKES YOU THIRSTY, and harder than it makes you hungry -- the same
-                // exertion the stomach reads, on a meter that empties three times faster, so a
-                // sprint across the city is felt here first and by a long way.
+                // exertion the stomach reads, on a meter that empties well over twice as fast,
+                // so a sprint across the city is felt here first and by some margin.
                 Thirst.Drain(hours, _cfg.ThirstHoursToEmpty, Exertion());
             }
 
