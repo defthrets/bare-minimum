@@ -2054,7 +2054,8 @@ namespace BareMinimum.UI
         // have been the very confusion this ramp was once moved to avoid. Food is orange the
         // whole way, deep at empty and bright at full: a warm, edible colour, and the one
         // family none of the other four uses -- health runs green to red, armour is blue,
-        // energy is yellow, sleep is purple. It still darkens as it empties, so the two habits
+        // energy is a fluorescent green-yellow, sleep is purple. It still darkens as it empties,
+        // so the two habits
         // the eye has learned -- darker is worse, hue says which -- both hold.
         private static readonly Color[] Ramp =
         {
@@ -2093,8 +2094,9 @@ namespace BareMinimum.UI
 
         // THIRST IS CYAN, WHICH IS THE LAST FAMILY LEFT AND ALSO THE RIGHT ONE.
         //
-        // The row runs health green-to-red, armour blue, energy yellow, sleep purple and food
-        // orange, and the argument that moved food into the oranges applies again: a sixth bar
+        // The row runs health green-to-red, armour blue, energy fluorescent green-yellow, sleep
+        // purple and food orange, and the argument that moved food into the oranges applies
+        // again: a sixth bar
         // has to be unmistakably none of the other five from colour alone, because the order is
         // configurable and the mark under it is four millimetres of white.
         //
@@ -2104,6 +2106,12 @@ namespace BareMinimum.UI
         // about 0.58 of the way round the wheel where this sits at 0.51 and carries far more
         // green; the closest any two levels of the two come measures dE 34, where 30 is already
         // unmistakable, and that bar is only blue at all while a plate is holding.
+        //
+        // ENERGY MOVED OUT OF THE TEALS FOR THIS. It was 70,225,205 and this bar stood straight
+        // next to it -- two cyan columns, and the only thing telling them apart was a bolt and a
+        // drop four millimetres across. It is now a fluorescent green-yellow; see
+        // Settings.VitalsEnergyColour. Which of the two moved was decided by meaning: cyan is
+        // what water is, and a charge is not any particular colour.
         //
         // DEEP AT EMPTY like every other ramp here, so the two habits the eye has learned --
         // darker is worse, hue says which -- hold across the whole row.

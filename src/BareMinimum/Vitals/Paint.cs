@@ -11,7 +11,8 @@ namespace BareMinimum.Vitals
     ///
     /// THE STOCK BARS KEEP THEIR OWN COLOURS. Health is the game's green, and it runs down
     /// through amber to red with the level, the way the eye expects a health bar to; armour
-    /// is the game's blue; the third bar is yellow -- energy -- or the special ability's gold.
+    /// is the game's blue; the third bar is energy's fluorescent green-yellow, or the special
+    /// ability's gold. See Settings.VitalsEnergyColour for why that colour and not another.
     /// The hunger and sleep bars beside these went orange and purple so that no two of the
     /// five share a family.
     /// </summary>

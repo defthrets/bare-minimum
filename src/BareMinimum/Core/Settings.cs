@@ -962,13 +962,23 @@ namespace BareMinimum.Core
 
         /// <summary>
         /// The stock bars' own colours. Health runs to red with the level; armour is the game's
-        /// blue; the third is energy's TEAL or the special's gold. Energy was yellow and yellow
-        /// is what the fuel gauge beside it shows at a full tank; teal is the one family none of
-        /// the six bars on that edge of the screen uses, and it reads as electricity under a bolt.
+        /// blue; the third is energy's FLUORESCENT GREEN-YELLOW or the special's gold.
+        ///
+        /// THIS HAS MOVED TWICE AND BOTH TIMES FOR THE SAME REASON. It was plain yellow, which
+        /// is what the fuel gauge beside it shows at a full tank; it went teal, which was the
+        /// one family nothing on that edge of the screen used -- and then thirst arrived in the
+        /// cyans and the two stood next to each other as the same bar twice, which is exactly
+        /// what putting it in the teals was meant to avoid.
+        ///
+        /// Green-yellow is the gap that is left, and it is a better answer than either: far too
+        /// acid to be mistaken for the fuel gauge's warm yellow, far too yellow and far too
+        /// bright to be mistaken for health's muted green, and it is what a charge reads as
+        /// under a lightning bolt. It is also the only genuinely FLUORESCENT colour in the row,
+        /// which does the separating on its own before hue is even considered.
         /// </summary>
         public System.Drawing.Color VitalsHealth = System.Drawing.Color.FromArgb(255, 114, 204, 114);
         public System.Drawing.Color VitalsArmour = System.Drawing.Color.FromArgb(255, 93, 182, 229);
-        public System.Drawing.Color VitalsEnergyColour = System.Drawing.Color.FromArgb(255, 70, 225, 205);
+        public System.Drawing.Color VitalsEnergyColour = System.Drawing.Color.FromArgb(255, 196, 246, 40);
         public System.Drawing.Color VitalsSpecialColour = System.Drawing.Color.FromArgb(255, 240, 200, 80);
 
         /// <summary>One clock for everything periodic in the vitals. 1 is normal.</summary>
