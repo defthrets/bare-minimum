@@ -635,6 +635,23 @@ namespace BareMinimum.Core
         public HudSide HudSide = HudSide.Left;
 
         /// <summary>
+        /// Whether the row is exactly as tall as the minimap frame beside it: the bars start on
+        /// the top of the frame's band and end on the top of its plate.
+        ///
+        /// ASKED OF THE FRAME, NOT SET TO A NUMBER THAT MATCHES IT. Both of those lines move --
+        /// the band's height is the greater of a setting and however far a clamped blip can
+        /// climb, and the plate's top is the map's own bottom edge, which depends on the safe
+        /// zone. A BarLength typed to match today is a BarLength that stops matching the next
+        /// time the frame changes, and that has already happened twice in this pair.
+        ///
+        /// IT OWNS THE HEIGHT AND THE FOOT TOGETHER, because they are one measurement: fixing
+        /// the top and the bottom of a bar leaves nothing for a length setting to say. So
+        /// BarLength is unused while this is on, and so are Y and AutoPosition -- the foot
+        /// follows from the frame's plate. Turn it off to place the row by hand again.
+        /// </summary>
+        public bool HudMatchFrame = true;
+
+        /// <summary>
         /// Whether the row's FOOT is worked out from the minimap rather than taken from HudY.
         ///
         /// VERTICAL ONLY, SINCE HudSide. It used to place the row in both directions, and the
@@ -1633,6 +1650,7 @@ namespace BareMinimum.Core
                 cfg.HudOpacity = ini.GetFloat("HUD", "Opacity", cfg.HudOpacity, 0.05f, 1f);
                 cfg.Style = ParseStyle(ini.GetString("HUD", "Style", ""), cfg.Style);
                 cfg.HudSide = ParseSide(ini.GetString("HUD", "Side", ""), cfg.HudSide);
+                cfg.HudMatchFrame = ini.GetBool("HUD", "MatchFrame", cfg.HudMatchFrame);
                 cfg.HudBarLength = ini.GetFloat("HUD", "BarLength", cfg.HudBarLength, 0.004f, 0.6f);
                 cfg.HudDrawBudget = ini.GetInt("HUD", "DrawBudget", cfg.HudDrawBudget, 40, 350);
                 cfg.HudNotifyLift = ini.GetFloat("HUD", "NotifyLift", cfg.HudNotifyLift, -0.5f, 0.5f);

@@ -471,7 +471,20 @@ namespace BareMinimum.UI
             // carry so that nothing actually moves on screen.
             bottom = _cfg.HudY;
 
-            if (_cfg.HudAutoPosition)
+            float spanTop, spanFoot;
+
+            if (Span(out spanTop, out spanFoot))
+            {
+                // THE BAR'S FOOT IS THE FRAME'S PLATE TOP, so the row's own plate hangs below
+                // that line exactly as the frame's does -- the two bottoms end level without
+                // either knowing about the other, which is what the frame's foot already
+                // arranges from the other direction.
+                float plateH, breath;
+                PlateSize(out plateH, out breath);
+
+                bottom = spanFoot + breath + plateH;
+            }
+            else if (_cfg.HudAutoPosition)
             {
                 var barW = Math.Max(0.001f, _cfg.HudBarWidth);
                 var edge = Math.Max(0.0005f, barW * 0.22f);
@@ -591,6 +604,45 @@ namespace BareMinimum.UI
         /// and it is the fallback the frame uses too, so on a screen where the answer is bad
         /// the two are at least wrong in the same direction.
         /// </summary>
+        /// <summary>
+        /// The black plate under a bar and the breath above it, which two callers need before
+        /// there is a Row to ask. RowFor's expressions, once, so they cannot drift.
+        /// </summary>
+        private void PlateSize(out float plateH, out float breath)
+        {
+            var barW = Math.Max(0.001f, _cfg.HudBarWidth);
+
+            var edge = Math.Max(0.0005f, barW * 0.22f);
+
+            plateH = Math.Max(BareMinimum.Vitals.Layout.LabelH, (barW + edge * 2f) * Aspect());
+            breath = edge * Aspect();
+        }
+
+        /// <summary>
+        /// The two lines the bars reach between when they are matched to the frame: the top of
+        /// its band and the top of its plate. See Settings.HudMatchFrame.
+        ///
+        /// False when the frame is off or the map cannot be found, and then BarLength and the
+        /// foot are the answer, exactly as they were.
+        /// </summary>
+        private bool Span(out float top, out float foot)
+        {
+            top = foot = 0f;
+
+            if (!_cfg.HudMatchFrame || !_cfg.MinimapFrame) return false;
+
+            var edge = Math.Max(0.0005f, Math.Max(0.001f, _cfg.HudBarWidth) * 0.22f);
+
+            // The same question Frame.Draw asks itself about whether it is drawing a plate at
+            // all -- there is no plate to line up with when nothing is written on one.
+            var wantPlate = _cfg.MinimapLabel ||
+                            (_cfg.MinimapFrame && (_cfg.MinimapSpeedo || _cfg.MinimapDash));
+
+            return BareMinimum.Vitals.Layout.Frame(edge, _cfg.MinimapBandHeight,
+                                                   _cfg.MinimapFrameGap, _cfg.MinimapPlateDrop,
+                                                   wantPlate, out top, out foot);
+        }
+
         private void Sides(out float left, out float right)
         {
             var edge = Math.Max(0.0005f, Math.Max(0.001f, _cfg.HudBarWidth) * 0.22f);
@@ -685,7 +737,13 @@ namespace BareMinimum.UI
             // figure. It used to be the bar alone, so an identical number gave a taller
             // instrument here than there and the two would not line up however carefully
             // either was set.
-            var barH = Math.Max(0.004f, _cfg.HudBarLength - plateH - breath);
+            // MATCHED TO THE FRAME WHEN IT CAN BE. Both ends are then the frame's own lines
+            // and BarLength has nothing left to say; see Settings.HudMatchFrame.
+            float spanTop, spanFoot;
+
+            var barH = Span(out spanTop, out spanFoot)
+                           ? Math.Max(0.004f, spanFoot - spanTop)
+                           : Math.Max(0.004f, _cfg.HudBarLength - plateH - breath);
 
             // ANCHORED TO THE FOOT, and to nothing else. It used to be reconstructed as
             // top + side * 2 + gap, which is the same number in auto position and is NOT in
@@ -728,8 +786,14 @@ namespace BareMinimum.UI
             // PUBLISHED, NOT COPIED. Fumes' fuel gauge stands in this row and used to be kept
             // in line by hand-copying these numbers into its own ini; every change to the
             // minimap frame moved the row and left it behind. See Api.Rack.
+            // THE HEIGHT THE ROW ACTUALLY CAME OUT, NOT THE SETTING. This published
+            // _cfg.HudBarLength, which is the same number right up until it is not -- the
+            // clamp, and now MatchFrame, both make the instrument a different height from what
+            // the ini says, and the gauge standing in this row would have been the only thing
+            // on screen still the old size. Bar, breath and plate, which is what BarLength
+            // means and what Fumes calls Height.
             Api.Rack.Publish(_cfg.ShowHud && _cfg.Style == HudStyle.Bars,
-                             x, bottom, barW, Math.Max(0.004f, _cfg.HudBarLength),
+                             x, bottom, barW, barH + breath + plateH,
                              pitch, row.Names.Count, _cfg.HudOpacity, plateH,
                              SpareX(), _cfg.HudSide == HudSide.Left);
 

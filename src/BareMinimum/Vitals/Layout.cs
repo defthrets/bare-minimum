@@ -248,6 +248,43 @@ namespace BareMinimum.Vitals
             return true;
         }
 
+        /// <summary>
+        /// THE FRAME'S TWO INNER LINES: the top of the band above the map, and the top of the
+        /// plate below it. What anything standing beside the frame has to reach between.
+        ///
+        /// FRAME.DRAW OWNS THESE EXPRESSIONS AND THIS IS THEM, here for the same reason Outer
+        /// is: the row that stands next to the frame and the frame itself must not each work
+        /// out where it ends. That has already gone wrong twice in this pair -- the row's foot
+        /// and the frame's plate, and then the gauge's side and the frame's edge -- and both
+        /// times the symptom was one of them moving and the other not.
+        ///
+        /// The band is not a thin line and its height is not a setting alone: the game draws
+        /// its blips over anything a script draws, and a blip clamped to the top edge of the
+        /// map hangs half above it, so the band has to rise clear of where one can reach before
+        /// there is anywhere safe to write. Hence the max. Frame's own comment has the whole of
+        /// that argument.
+        ///
+        /// False when the map cannot be found, and then there is nothing to line up with.
+        /// </summary>
+        public static bool Frame(float edge, float bandHeight, float frameGap, float drop,
+                                 bool wantPlate, out float bandTop, out float plateTop)
+        {
+            bandTop = plateTop = 0f;
+
+            float l, mapTop, r, mapBottom, safeLine;
+            if (!Map(out l, out mapTop, out r, out mapBottom, out safeLine)) return false;
+
+            var edgeH = edge * Ink.Aspect;
+
+            var topGap = Math.Min(Math.Max(0f, frameGap), Math.Max(0f, mapTop - edgeH));
+            var bandH = Math.Max(bandHeight, topGap + edgeH);
+
+            bandTop = Math.Max(0f, mapTop - bandH);
+            plateTop = mapBottom + (wantPlate ? Math.Max(0f, drop) : 0f);
+
+            return plateTop > bandTop;
+        }
+
         /// <summary>Last frame's answer, and when it is worth asking again. See Map.</summary>
         private static bool _cached;
         private static bool _cachedOk;
