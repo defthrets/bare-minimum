@@ -343,6 +343,7 @@ namespace BareMinimum
                 // ground on a fast machine and outrun the streamer on exactly the machines
                 // that could otherwise have kept up.
                 _survey.Update(dt);
+                SurveyKey();
                 _gauge.Draw(_needs, suspended);
 
                 // LAST, so a card rides over the gauge rather than under it -- and outside
@@ -411,6 +412,30 @@ namespace BareMinimum
             }
 
             Cleanup();
+        }
+
+        /// <summary>Whether the survey key was down last frame. See SurveyKey.</summary>
+        private bool _surveyWas;
+
+        /// <summary>
+        /// The survey's own key, on an EDGE.
+        ///
+        /// Game.IsKeyPressed is a level and not an edge -- held for a fifth of a second it is
+        /// true across a dozen frames, which for a toggle means starting and stopping the
+        /// survey six times before you let go. The same trap SettingsPanel.Toggled is written
+        /// around, and the same fix.
+        /// </summary>
+        private void SurveyKey()
+        {
+            bool down;
+
+            try { down = Game.IsKeyPressed(_cfg.SurveyKey); }
+            catch { down = false; }
+
+            var edge = down && !_surveyWas;
+            _surveyWas = down;
+
+            if (edge) _survey.Toggle();
         }
 
         private void OnAborted(object sender, EventArgs e)

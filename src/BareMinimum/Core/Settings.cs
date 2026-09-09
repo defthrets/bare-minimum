@@ -1530,23 +1530,30 @@ namespace BareMinimum.Core
         public float FoodSpinZ = 90f;
 
         /// <summary>
-        /// Opens the settings menu. F7, which is this mod's slot on this install's function row.
+        /// Opens the settings menu. F11 and F12 are where these two live on this install.
         ///
-        /// IT WAS F11, WHICH IS RAMPAGE'S, under an ini comment explaining at length why F7 was
-        /// free. The comment described one key and the value was another -- the two had come
-        /// apart at some point and nothing noticed, because a menu that opens SOMETHING when
-        /// you press the key looks like it works. Pressing F7 opened the trainer instead.
+        /// THEY WERE MOVED TO F7 AND B ONCE AND MOVED STRAIGHT BACK. F7 is Rampage's on this
+        /// machine, so a hotkey note claiming this mod owned it was wrong -- but the answer to
+        /// that was to check before touching anything, not to rearrange a working keyboard
+        /// around a note. The player's own layout is the authority on the player's own layout.
         /// </summary>
-        public Keys MenuKey = Keys.F7;
+        public Keys MenuKey = Keys.F11;
+
+        /// <summary>Opens the pocket: what you have bought and not eaten yet.</summary>
+        public Keys BagKey = Keys.F12;
 
         /// <summary>
-        /// Opens the pocket: what you have bought and not eaten yet.
+        /// Runs the map survey. See Venues.Survey.
         ///
-        /// OFF THE FUNCTION ROW, because all twelve are spoken for on this install and F12 --
-        /// where this was -- is Menyoo. A plain letter is the only thing left and B is the one
-        /// this mod has always meant to use; it is a pocket, and it is not near anything else.
+        /// SCROLL LOCK, WHICH IS THE POINT. This is a tool you use once -- fly the map, collect
+        /// every vending machine, never touch it again -- so it wants a key nothing sane has
+        /// bound rather than a place on a function row where all twelve are already spoken for.
+        /// Scroll Lock does nothing in GTA, does nothing in Windows, and is far enough from
+        /// anything to be safe to lean on by accident.
+        ///
+        /// The F11 menu still has the row, with the progress on it. This is the shortcut.
         /// </summary>
-        public Keys BagKey = Keys.B;
+        public Keys SurveyKey = Keys.Scroll;
 
         /// <summary>
         /// Whether the settings menu and the pocket open on a CONTROLLER as well.
@@ -1877,6 +1884,7 @@ namespace BareMinimum.Core
                 cfg.InteractKey = ini.GetKey("Keys", "Interact", cfg.InteractKey);
                 cfg.MenuKey = ini.GetKey("Keys", "Menu", cfg.MenuKey);
                 cfg.BagKey = ini.GetKey("Keys", "Bag", cfg.BagKey);
+                cfg.SurveyKey = ini.GetKey("Keys", "Survey", cfg.SurveyKey);
                 cfg.MenuPad = ini.GetBool("Keys", "MenuPad", cfg.MenuPad);
                 cfg.BagPad = ini.GetBool("Keys", "BagPad", cfg.BagPad);
 
