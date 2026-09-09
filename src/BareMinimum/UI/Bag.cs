@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using GTA;
@@ -84,6 +84,15 @@ namespace BareMinimum.UI
 
         private readonly Core.Settings _cfg;
         private readonly Catalogue _menu;
+
+        /// <summary>
+        /// The thing under the cursor, held up while the pocket is open. See UI.Peek.
+        ///
+        /// The icons on the tiles are good and they are all the same size and weight -- a hot
+        /// dog, a sandwich and a burrito are three warm rectangles until you read the words.
+        /// The actual object in his hand settles it before you have read anything.
+        /// </summary>
+        private readonly Peek _peek = new Peek();
         private readonly Pantry _pantry;
         private readonly Eating _eating;
 
@@ -110,6 +119,34 @@ namespace BareMinimum.UI
 
         /// <summary>Whether that tile is a bag rather than a sandwich.</summary>
         private bool IsDope(int at) { return at >= _ids.Count && at < Places; }
+
+        /// <summary>
+        /// Puts whatever the cursor is on into his hand.
+        ///
+        /// EVERY FRAME, not only when the selection moves. A model that was not in memory when
+        /// it was asked for arrives some frames later, and Peek is built to be asked again --
+        /// so this is the thing doing the asking.
+        ///
+        /// NOTHING IN HAND FOR THE PRODUCT. Dope has no prop of its own here and a bag of it
+        /// is the other mod's object; showing a sandwich for it would be worse than showing
+        /// nothing.
+        /// </summary>
+        private void Holding()
+        {
+            try
+            {
+                var id = IdAt(_index);
+
+                var item = string.IsNullOrEmpty(id) || IsDope(_index) ? null : _menu.Find(id);
+
+                _peek.Show(item == null ? "" : item.Prop);
+                _peek.Tick();
+            }
+            catch (Exception ex)
+            {
+                Log.Once("bag-hold", "Could not hold that up: " + ex.Message);
+            }
+        }
 
         /// <summary>The id under that tile, from whichever list it falls in.</summary>
         private string IdAt(int at)
@@ -152,6 +189,12 @@ namespace BareMinimum.UI
             _pantry = pantry;
             _eating = eating;
             _needs = needs;
+
+            // The same turn it takes when it is eaten, so a thing looks the same in the pocket
+            // as it does going in. See Eating.SpinFor and [Eating] FoodSpinX.
+            _peek.Spin = () => _cfg == null
+                ? GTA.Math.Vector3.Zero
+                : new GTA.Math.Vector3(_cfg.FoodSpinX, _cfg.FoodSpinY, _cfg.FoodSpinZ);
         }
 
         // ======================================================================
@@ -179,7 +222,11 @@ namespace BareMinimum.UI
                 Suppress();
                 Navigate();
 
-                if (IsOpen) Paint();
+                if (IsOpen)
+                {
+                    Holding();
+                    Paint();
+                }
             }
             catch (Exception ex)
             {
@@ -215,6 +262,10 @@ namespace BareMinimum.UI
         public void Close()
         {
             IsOpen = false;
+
+            // OUT OF HIS HAND WITH THE PANEL. It is attached, not given -- a burger left on
+            // somebody after they shut their pocket is a burger they carry for the session.
+            _peek.Clear();
 
             // The same 300ms hush the other menus use. A key held through a closing menu is a
             // human holding a key, and humans hold them for about that long.
