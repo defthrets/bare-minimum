@@ -360,8 +360,8 @@
     },
     "servo": {
       "name": "Convenience Store",
-      "sprite": 739,
-      "colour": 3
+      "sprite": 52,
+      "colour": 62
     },
     "pharmacy": {
       "name": "Pharmacy",
