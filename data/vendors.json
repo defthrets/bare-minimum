@@ -1,4 +1,4 @@
-{
+﻿{
   "_comment": [
     "Places to buy one specific thing. No menu: walk up, the game's own prompt appears",
     "top left, press the key, eat it.",
@@ -406,7 +406,7 @@
     },
     "cafe": {
       "name": "Cafes",
-      "sprite": 111,
+      "sprite": 521,
       "colour": 0
     },
     "store": {
