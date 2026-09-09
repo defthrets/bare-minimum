@@ -24,8 +24,26 @@ namespace BareMinimum.Vitals
             return Ink.Alpha(c, (int)(235f * opacity * strength + 0.5f));
         }
 
-        private static readonly Color Amber = Color.FromArgb(255, 236, 176, 52);
-        private static readonly Color Red = Color.FromArgb(255, 214, 69, 58);
+        // THE TWO STOPS BETWEEN THE CONFIGURED GREEN AND NOTHING.
+        //
+        // BOTH ENDS WERE PULLED WELL OUT TOWARDS THE EDGE OF THE GAMUT. The green was a muted
+        // sage and the red a dull brick, which is a health bar drawn in watercolour: the two
+        // states that matter most -- fine, and about to die -- were the two least emphatic
+        // colours on the screen, sitting under a minimap that is all saturated blips.
+        //
+        // The amber between them moved with them, because a midpoint that stayed where it was
+        // would have become the dullest stop on a ramp whose ends are now both vivid, and the
+        // eye reads the dullest thing in a gradient as the middle of it whatever the level
+        // actually says. It runs hotter and more orange now -- further from the green above it
+        // and closer to the red below, so the second half of the ramp is where the urgency
+        // starts building rather than where it suddenly arrives.
+        //
+        // The red is NOT the same red as the low-health pulse below. That one goes further
+        // still, toward a hot 255,72,60, so the beat can be seen against a bar that is already
+        // red -- if the two matched, the warning would be invisible in exactly the state it
+        // exists for.
+        private static readonly Color Amber = Color.FromArgb(255, 246, 168, 34);
+        private static readonly Color Red = Color.FromArgb(255, 240, 38, 42);
 
         /// <summary>
         /// Green at full, amber at half, red at empty -- and a beat toward red once there is

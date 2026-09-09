@@ -961,8 +961,9 @@ namespace BareMinimum.Core
         public SpecialMode VitalsSpecial = SpecialMode.Auto;
 
         /// <summary>
-        /// The stock bars' own colours. Health runs to red with the level; armour is the game's
-        /// blue; the third is energy's FLUORESCENT GREEN-YELLOW or the special's gold.
+        /// The stock bars' own colours. Health is a vivid green and runs through amber to a
+        /// vivid red with the level; armour is the game's blue; the third is energy's
+        /// FLUORESCENT GREEN-YELLOW or the special's gold.
         ///
         /// THIS HAS MOVED TWICE AND BOTH TIMES FOR THE SAME REASON. It was plain yellow, which
         /// is what the fuel gauge beside it shows at a full tank; it went teal, which was the
@@ -976,7 +977,16 @@ namespace BareMinimum.Core
         /// under a lightning bolt. It is also the only genuinely FLUORESCENT colour in the row,
         /// which does the separating on its own before hue is even considered.
         /// </summary>
-        public System.Drawing.Color VitalsHealth = System.Drawing.Color.FromArgb(255, 114, 204, 114);
+        /// <summary>
+        /// The top of the health ramp, and a VIVID green rather than the game's own.
+        ///
+        /// 114,204,114 is the shade the vanilla bar uses and it was kept out of deference to
+        /// it, which was the wrong instinct: that bar is a thin strip in the corner of a busy
+        /// HUD and it can afford to be quiet, where this is a full column standing in a row of
+        /// five saturated ones. Beside them the sage read as a bar that had been left greyed
+        /// out. This is the same hue with the life put back into it.
+        /// </summary>
+        public System.Drawing.Color VitalsHealth = System.Drawing.Color.FromArgb(255, 48, 222, 82);
         public System.Drawing.Color VitalsArmour = System.Drawing.Color.FromArgb(255, 93, 182, 229);
         public System.Drawing.Color VitalsEnergyColour = System.Drawing.Color.FromArgb(255, 196, 246, 40);
         public System.Drawing.Color VitalsSpecialColour = System.Drawing.Color.FromArgb(255, 240, 200, 80);
