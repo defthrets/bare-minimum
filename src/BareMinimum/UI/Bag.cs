@@ -475,7 +475,9 @@ namespace BareMinimum.UI
 
             if (!_eating.Begin(item))
             {
-                _pantry.Add(id);
+                // BACK, not added -- see Store.Return: the cap can refuse an ordinary Add
+                // and the item would be gone.
+                _pantry.Return(id);
                 Sound("ERROR");
                 return;
             }

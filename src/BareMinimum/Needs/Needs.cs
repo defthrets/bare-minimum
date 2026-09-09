@@ -788,9 +788,9 @@ namespace BareMinimum.Needs
         {
             try
             {
-                var doc = JsonFile.Read(Paths.StateFile, out var how);
+                var doc = _guard.Read(Paths.StateFile);
 
-                if (how != ReadResult.Ok || doc == null || doc.IsNull)
+                if (doc == null)
                 {
                     Log.Info("No saved needs yet - starting fed and rested.");
                     return;
@@ -858,9 +858,16 @@ namespace BareMinimum.Needs
             SaveNow();
         }
 
+        /// <summary>Whether the save on disk is safe to write over. See Core.SaveGuard.</summary>
+        private readonly SaveGuard _guard = new SaveGuard("Needs");
+
         public void SaveNow()
         {
             _sinceSave = 0f;
+
+            // A SAVE THAT COULD NOT BE READ IS NOT WRITTEN OVER. The file on disk is somebody's
+            // playthrough; a blank one in its place is not an improvement.
+            if (!_guard.MayWrite) return;
 
             if (!_dirty) return;
             _dirty = false;

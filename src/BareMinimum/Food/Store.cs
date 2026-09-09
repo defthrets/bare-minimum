@@ -111,6 +111,28 @@ namespace BareMinimum.Food
 
         // ---- changing -------------------------------------------------------
 
+        /// <summary>
+        /// Puts something BACK that this bag just handed out, past the cap if it has to.
+        ///
+        /// THE CAP IS READ LIVE AND CAN BE LOWERED UNDER WHAT YOU ARE ALREADY CARRYING, which
+        /// makes the take-then-put-back pattern the shops and the pocket use unsafe: the take
+        /// works, the meal is refused, and the put-back is turned away by a cap that was not in
+        /// the way a moment ago. The item is then simply gone. Returning something to where it
+        /// came from is not the same act as acquiring it, and it is never refused.
+        /// </summary>
+        public void Return(string id, int howMany = 1)
+        {
+            if (string.IsNullOrEmpty(id) || howMany < 1) return;
+
+            var bag = Bag();
+
+            int have;
+            bag.TryGetValue(id, out have);
+            bag[id] = have + howMany;
+
+            _dirty = true;
+        }
+
         public bool Add(string id, int howMany = 1)
         {
             if (string.IsNullOrEmpty(id) || howMany < 1) return false;
@@ -216,7 +238,7 @@ namespace BareMinimum.Food
         {
             try
             {
-                var doc = JsonFile.Read(File);
+                var doc = _guard.Read(File);
                 if (doc == null || doc.IsNull) return;
 
                 var version = doc["version"].AsInt(1);
@@ -285,9 +307,16 @@ namespace BareMinimum.Food
             }
         }
 
+        /// <summary>Whether the save on disk is safe to write over. See Core.SaveGuard.</summary>
+        private readonly SaveGuard _guard = new SaveGuard("Pocket");
+
         public void SaveNow()
         {
             _sinceSave = 0f;
+
+            // As the needs: everything you were carrying is in this file, and losing all three
+            // characters' pockets to a locked file is worse than not saving for one session.
+            if (!_guard.MayWrite) return;
 
             if (!_dirty) return;
             _dirty = false;

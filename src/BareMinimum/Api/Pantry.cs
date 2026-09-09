@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace BareMinimum.Api
@@ -278,7 +278,9 @@ namespace BareMinimum.Api
 
                 if (_eating.Begin(item)) return true;
 
-                _bag.Add(id);
+                // BACK, not added: the cap can have been lowered under what he is carrying
+                // since the take, and a refused put-back destroys the item. See Store.Return.
+                _bag.Return(id);
                 return false;
             }
             catch { return false; }
