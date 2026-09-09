@@ -969,6 +969,13 @@ namespace BareMinimum.UI
                 "the frame's -- which is why somebody else's panel comes up with no background. " +
                 "Past this number our specks and sheen stop and the bars carry on.");
 
+            Float("Lift notifications", "HUD", "NotifyLift",
+                  () => _cfg.HudNotifyLift, v => _cfg.HudNotifyLift = v,
+                  0.005f, -0.5f, 0.5f, "0.000",
+                  "The game's own notifications sit just above the radar and land across the top " +
+                  "of the frame. This moves them clear. If they go the wrong way, negate it; 0 " +
+                  "hands them back to the game.");
+
             Float("Bar width", "HUD", "BarWidth",
                   () => _cfg.HudBarWidth, v => _cfg.HudBarWidth = v,
                   0.0004f, 0.0010f, 0.0400f, "0.0000",

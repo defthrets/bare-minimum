@@ -683,6 +683,24 @@ namespace BareMinimum.Core
         /// </summary>
         public int HudDrawBudget = 200;
 
+        /// <summary>
+        /// How far the game's own notifications are lifted, in fractions of the screen.
+        ///
+        /// THEY SIT JUST ABOVE THE RADAR AND STACK UPWARD, which was clear of everything until
+        /// this mod put a band above the map with the street name in it -- and now "Can's away."
+        /// lands across the top of the frame. The map cannot move and the band is where the
+        /// writing lives, so the notifications are the thing that gives way.
+        ///
+        /// THEFEED_SET_SCRIPTED_MENU_HEIGHT is the game's own way of doing it: the height a
+        /// script says it is occupying, which the feed then keeps clear of. Rockstar's menus
+        /// pass their own height and 0 to put it back, and this passes the frame's band.
+        ///
+        /// IF IT GOES THE WRONG WAY, NEGATE IT. The native takes a height and the direction it
+        /// moves the feed is the game's business, not something a script can read back. 0 turns
+        /// it off and hands the notifications back to the game exactly as they were.
+        /// </summary>
+        public float HudNotifyLift = 0.045f;
+
         /// <summary>How WIDE a bar is, as a fraction of screen width. Fumes' figure.</summary>
         public float HudBarWidth = 0.0048f;
 
@@ -1470,6 +1488,7 @@ namespace BareMinimum.Core
                 cfg.Style = ParseStyle(ini.GetString("HUD", "Style", ""), cfg.Style);
                 cfg.HudBarLength = ini.GetFloat("HUD", "BarLength", cfg.HudBarLength, 0.004f, 0.6f);
                 cfg.HudDrawBudget = ini.GetInt("HUD", "DrawBudget", cfg.HudDrawBudget, 40, 350);
+                cfg.HudNotifyLift = ini.GetFloat("HUD", "NotifyLift", cfg.HudNotifyLift, -0.5f, 0.5f);
                 UI.Draw.Budget = cfg.HudDrawBudget;
                 cfg.HudBarWidth = ini.GetFloat("HUD", "BarWidth", cfg.HudBarWidth, 0.001f, 0.2f);
                 cfg.HudBarIconScale = ini.GetFloat("HUD", "BarIconScale",

@@ -71,6 +71,8 @@ namespace BareMinimum.Vitals
                 Restore();
             }
 
+            Notifications(cfg);
+
             if (!cfg.MoveCash)
             {
                 _since = -1f;
@@ -159,6 +161,50 @@ namespace BareMinimum.Vitals
             Draw(cfg, gauge, (long)Math.Round(_shown), _delta, k);
         }
 
+        /// <summary>
+        /// The game's notifications, lifted clear of the frame.
+        ///
+        /// THEY SIT JUST ABOVE THE RADAR and stack upward, which was clear of everything until
+        /// the frame put a band above the map with the street name in it. The map cannot be
+        /// moved and the band is where the writing lives, so the notifications give way.
+        ///
+        /// EVERY FRAME, because it is a per-frame value the game and every other script are
+        /// free to set as well -- a menu that opens and reserves its own height would otherwise
+        /// leave the feed wherever it put it. Nought puts it back, which is what Rockstar's own
+        /// menus call on the way out and what Restore does here.
+        /// </summary>
+        private void Notifications(Settings cfg)
+        {
+            var lift = cfg.HudNotifyLift;
+
+            if (Math.Abs(lift) < 0.0005f)
+            {
+                if (!_lifted) return;
+                lift = 0f;
+            }
+
+            try
+            {
+                Function.Call(Hash.THEFEED_SET_SCRIPTED_MENU_HEIGHT, lift);
+                _lifted = Math.Abs(lift) > 0.0005f;
+
+                if (_lifted && !_saidLift)
+                {
+                    _saidLift = true;
+                    Log.Info("Notifications lifted by " + lift.ToString("0.000") +
+                             " of the screen. [HUD] NotifyLift, and 0 hands them back to the game.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Once("notify-lift", "Could not move the notifications: " + ex.Message);
+            }
+        }
+
+        /// <summary>Whether the feed is currently being held clear, so it is only put back once.</summary>
+        private bool _lifted;
+        private bool _saidLift;
+
         /// <summary>The readout itself: off the end of the row, level with the tops of the bars, the change under the total.</summary>
         private static void Draw(Settings cfg, UI.Gauge gauge, long total, long delta, float k)
         {
@@ -207,6 +253,11 @@ namespace BareMinimum.Vitals
             {
                 Function.Call(Hash.RESET_HUD_COMPONENT_VALUES, Cash);
                 Function.Call(Hash.RESET_HUD_COMPONENT_VALUES, CashChange);
+
+                // And the notifications back where the game had them, which is what nought
+                // means to this native.
+                Function.Call(Hash.THEFEED_SET_SCRIPTED_MENU_HEIGHT, 0f);
+                _lifted = false;
             }
             catch
             {
