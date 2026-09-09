@@ -165,13 +165,26 @@ namespace BareMinimum.UI
         ///
         /// Asked BEFORE the work, not before each rectangle: a speck that draws three of them
         /// should not get one and stop.
+        ///
+        /// ONE ANSWER FOR THE WHOLE FRAME, WHICH IT DID NOT USED TO BE. This was
+        /// `RectsThisFrame &lt; Budget` -- a live comparison against a number that grows as the
+        /// frame is drawn -- so on a frame that ended over the allowance the decorations asked
+        /// EARLY got their rectangles and the ones asked LATE did not, and which is which
+        /// shifts with whatever else happens to be on screen that frame. That is not trimming,
+        /// it is a different subset of the sparkle appearing every frame at sixty a second,
+        /// which is exactly what it looks like: the charge streaks and the bars' relief
+        /// flickering while everything solid stays put.
+        ///
+        /// So the decision is made once, when the frame rolls over, from the frame BEFORE it --
+        /// see Latch. Trimming is now all of it or none of it, and a frame's worth of sparkle
+        /// vanishing when the screen genuinely gets busy is a thing you can see and understand.
         /// </summary>
         public static bool Room
         {
             get
             {
                 Sync();
-                return RectsThisFrame < Budget;
+                return !_trim;
             }
         }
 
@@ -219,8 +232,48 @@ namespace BareMinimum.UI
                 }
             }
 
+            Latch();
+
             RectsThisFrame = 0;
         }
+
+        /// <summary>
+        /// Decides whether the frame about to start draws its decoration, from the one that
+        /// just finished.
+        ///
+        /// HYSTERESIS, OR IT WOULD OSCILLATE INSTEAD OF FLICKERING. Trimming makes the count
+        /// drop -- that is its whole job -- so a plain "over the line, trim; under it, do not"
+        /// turns on and off on alternate frames the moment the untrimmed load sits above the
+        /// allowance. It goes off above the allowance and does not come back until well under
+        /// it, and the band is wide enough to hold the cost of the decoration itself.
+        ///
+        /// AND IT STAYS OFF FOR A WHILE ONCE IT GOES. A busy screen is busy for longer than one
+        /// frame -- a menu opening, a phone coming up, a cutscene bar -- and something that
+        /// came back the instant it was allowed to would still blink on the way in and out of
+        /// every one of them. Half a second is long enough that the eye reads it as the sparkle
+        /// having stopped rather than as the sparkle faulting.
+        /// </summary>
+        private static void Latch()
+        {
+            if (_hold > 0) { _hold--; return; }
+
+            if (RectsThisFrame > Budget)
+            {
+                _trim = true;
+                _hold = HoldFrames;
+                return;
+            }
+
+            if (RectsThisFrame < Budget * 4 / 5) _trim = false;
+        }
+
+        /// <summary>Whether decoration is off this frame. One answer for the whole frame. See Room.</summary>
+        private static bool _trim;
+
+        /// <summary>Frames left before the latch will look again.</summary>
+        private static int _hold;
+
+        private const int HoldFrames = 30;
 
         private static int _frame;
 

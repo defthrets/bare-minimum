@@ -521,7 +521,7 @@ namespace BareMinimum.UI
             float outerL, outerR;
             Sides(out outerL, out outerR);
 
-            var clear = wide * 0.45f;
+            var clear = Clearance();
 
             if (_cfg.Style != HudStyle.Bars)
             {
@@ -540,6 +540,40 @@ namespace BareMinimum.UI
             var slots = Math.Max(1, Standing().Count);
 
             return outerL - clear - barW - (slots - 1) * pitch;
+        }
+
+        /// <summary>
+        /// How far the row stands off the minimap frame: EXACTLY THE GAP BETWEEN TWO BARS.
+        ///
+        /// FROM THE SAME EXPRESSION THE ROW IS SPACED BY, not a number that matches. Two bars'
+        /// black outlines are (pitch - barW - two edges) apart, and the outside of the frame is
+        /// a border like any other, so the row should stand off it by the same. Asked for that
+        /// way, the row reads as evenly spaced along its whole length including the end that
+        /// meets the map, and it goes on doing so if Gap or BarWidth is ever touched.
+        ///
+        /// IT USED TO BE HudSize * 0.45, which is a share of the ICON height -- a setting that
+        /// means nothing whatever on the bar style, that this install has wound down to 0.004
+        /// for reasons of its own, and that nobody adjusting the row's spacing would ever think
+        /// to look at. It came out visibly wider than the spacing inside the row, which is what
+        /// was reported.
+        ///
+        /// RETURNED AS A DISTANCE TO THE BAR'S CHANNEL, not to its outline -- the edge is added
+        /// back on here -- because that is the number every caller wants: x is a channel.
+        ///
+        /// AND THE FUEL GAUGE TAKES THIS TOO, through SpareX. One clearance, four sides of the
+        /// map between the two mods, one expression.
+        /// </summary>
+        private float Clearance()
+        {
+            var barW = Math.Max(0.001f, _cfg.HudBarWidth);
+            var edge = Math.Max(0.0005f, barW * 0.22f);
+
+            var pitch = barW * (1f + Math.Max(0.56f, _cfg.HudGap * 2.4f));
+
+            var between = pitch - barW - edge * 2f;
+            if (between < 0f) between = 0f;
+
+            return between + edge;
         }
 
         /// <summary>
@@ -591,7 +625,7 @@ namespace BareMinimum.UI
             float outerL, outerR;
             Sides(out outerL, out outerR);
 
-            var clear = _cfg.HudSize / Aspect() * 0.45f;
+            var clear = Clearance();
 
             return _cfg.HudSide == HudSide.Left
                        ? outerR + clear
@@ -857,7 +891,8 @@ namespace BareMinimum.UI
                 catch { _screenH = 1080; }
             }
 
-            // ONE EVERY FOURTEEN PIXELS, WHICH USED TO BE ONE EVERY FOUR.
+            // ONE EVERY THIRTY PIXELS, WHICH USED TO BE ONE EVERY FOURTEEN AND, BEFORE THAT,
+            // ONE EVERY FOUR.
             //
             // The gradient this draws is two humps on a fourteen- and a twenty-two-second lap,
             // wide enough that neighbouring bands differ by a hair -- which is the whole
@@ -869,10 +904,15 @@ namespace BareMinimum.UI
             // so a bar spending twenty-four on a gradient nobody can count is twenty-four
             // another script does not get. Six bars of them took the phone's background off
             // the screen in a car.
-            var n = (int)(h * _screenH / 14f);
+            //
+            // HALVED AGAIN WHEN THE ROW GREW A SIXTH BAR. Eighteen apiece across six bars is a
+            // hundred and eight rectangles on gradients, which is most of this mod's whole
+            // allowance spent on the one part of it nobody can count. Eight is still four more
+            // than the argument above says are distinguishable.
+            var n = (int)(h * _screenH / 30f);
 
-            if (n < 5) n = 5;
-            if (n > 18) n = 18;
+            if (n < 4) n = 4;
+            if (n > 8) n = 8;
 
             return n;
         }

@@ -529,14 +529,20 @@ namespace BareMinimum.Vitals
         /// <summary>How many bands the body is drawn in: one per five pixels of height, 1 to 48.</summary>
         private static int Bands(float h)
         {
-            // ONE EVERY FOURTEEN PIXELS, WHICH USED TO BE ONE EVERY FIVE. Rectangles come
-            // out of one list the whole machine shares, and three columns of them beside
-            // the minimap were part of what took the background off Hoodrich's phone in a
-            // car. The gradient is broad and slow enough that the count does not show.
-            var n = (int)(h * Ink.ScreenHeight / 14f);
+            // ONE EVERY THIRTY PIXELS, WHICH USED TO BE ONE EVERY FOURTEEN AND, BEFORE THAT,
+            // ONE EVERY FIVE. Rectangles come out of one list the whole machine shares, and
+            // three columns of them beside the minimap were part of what took the background
+            // off Hoodrich's phone in a car. The gradient is broad and slow enough that the
+            // count does not show -- and the row is six bars wide now, where eighteen bands
+            // apiece is a hundred and eight rectangles on a gradient nobody can count.
+            //
+            // The same figures as Gauge.Bands, deliberately: these bars and those are one row
+            // and a gradient banded differently on two of them would be visible where the
+            // banding itself is not.
+            var n = (int)(h * Ink.ScreenHeight / 30f);
 
             if (n < 1) n = 1;
-            if (n > 18) n = 18;
+            if (n > 8) n = 8;
 
             return n;
         }
