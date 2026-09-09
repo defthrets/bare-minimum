@@ -24,6 +24,23 @@ namespace BareMinimum.Core
         Bars
     }
 
+    /// <summary>
+    /// Which side of the minimap the row of bars stands on.
+    ///
+    /// AND THEREFORE WHICH SIDE THE FUEL GAUGE STANDS ON, because those two are the same
+    /// decision made once. The gauge is drawn by Fumes and the row by this mod, and the only
+    /// thing keeping them off each other is that this mod publishes where the far side of the
+    /// map is and Fumes goes there. See Api.Rack.SpareX.
+    /// </summary>
+    internal enum HudSide
+    {
+        Left,
+        Right,
+
+        /// <summary>Neither -- HudX is the answer, wherever that puts it.</summary>
+        Manual
+    }
+
     /// <summary>Which shape the vitals -- health, armour, energy -- take.</summary>
     internal enum VitalsStyle
     {
@@ -595,6 +612,33 @@ namespace BareMinimum.Core
         ///
         /// Turn this back on for the old behaviour; it is the first row of the F7 placement
         /// page and takes effect the moment it is pressed.
+        /// </summary>
+        /// <summary>
+        /// WHICH SIDE OF THE MINIMAP THE ROW STANDS ON, or Manual to use HudX instead.
+        ///
+        /// LEFT BY DEFAULT, WHICH IS A SWAP. The row was on the right and Fumes' fuel gauge on
+        /// the left, because that is the order the two were built in and not because anybody
+        /// chose it. Left puts every meter this mod owns on one side and leaves the whole of
+        /// the other side for the one it does not.
+        ///
+        /// IT DECIDES WHERE THE FUEL GAUGE GOES TOO, which is the part worth stating. The far
+        /// side of the map is published as Api.Rack.SpareX and Fumes stands there, so the two
+        /// can never pick the same side and there is no second setting to keep in step.
+        /// Flipping this moves both.
+        ///
+        /// HORIZONTAL ONLY. This and HudAutoPosition used to be one switch, which is why the
+        /// switch was off here: turning it on to move the row sideways would also have thrown
+        /// away a hand-tuned foot. They are separate now -- Side is where along the bottom
+        /// edge, AutoPosition is how far down -- which is the rule the rest of this file
+        /// states everywhere and did not follow in this one place.
+        /// </summary>
+        public HudSide HudSide = HudSide.Left;
+
+        /// <summary>
+        /// Whether the row's FOOT is worked out from the minimap rather than taken from HudY.
+        ///
+        /// VERTICAL ONLY, SINCE HudSide. It used to place the row in both directions, and the
+        /// horizontal half of that job now belongs to Side.
         /// </summary>
         public bool HudAutoPosition = false;
 
@@ -1588,6 +1632,7 @@ namespace BareMinimum.Core
                 cfg.HudGap = ini.GetFloat("HUD", "Gap", cfg.HudGap, 0f, 3f);
                 cfg.HudOpacity = ini.GetFloat("HUD", "Opacity", cfg.HudOpacity, 0.05f, 1f);
                 cfg.Style = ParseStyle(ini.GetString("HUD", "Style", ""), cfg.Style);
+                cfg.HudSide = ParseSide(ini.GetString("HUD", "Side", ""), cfg.HudSide);
                 cfg.HudBarLength = ini.GetFloat("HUD", "BarLength", cfg.HudBarLength, 0.004f, 0.6f);
                 cfg.HudDrawBudget = ini.GetInt("HUD", "DrawBudget", cfg.HudDrawBudget, 40, 350);
                 cfg.HudNotifyLift = ini.GetFloat("HUD", "NotifyLift", cfg.HudNotifyLift, -0.5f, 0.5f);
@@ -1787,6 +1832,19 @@ namespace BareMinimum.Core
         }
 
         /// <summary>Reads the HUD style, forgivingly. Anything unrecognised keeps the default.</summary>
+        private static HudSide ParseSide(string text, HudSide fallback)
+        {
+            if (string.IsNullOrEmpty(text)) return fallback;
+
+            var s = text.Trim();
+
+            if (s.StartsWith("l", StringComparison.OrdinalIgnoreCase)) return HudSide.Left;
+            if (s.StartsWith("r", StringComparison.OrdinalIgnoreCase)) return HudSide.Right;
+            if (s.StartsWith("m", StringComparison.OrdinalIgnoreCase)) return HudSide.Manual;
+
+            return fallback;
+        }
+
         private static HudStyle ParseStyle(string text, HudStyle fallback)
         {
             if (string.IsNullOrEmpty(text)) return fallback;

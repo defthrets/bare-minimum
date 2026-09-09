@@ -250,7 +250,7 @@ namespace BareMinimum.Vitals
                     else Heartbeat(cfg, x, w, floor, surface, body, spring, m.Wall, r.Health, strength);
                     break;
                 case Kind.Armour: Plating(cfg, x, w, floor, surface, body, t, m.Wall, r, strength); break;
-                default: Streaks(cfg, x, w, floor, surface, body, m.Wall, r, strength); break;
+                default: Streaks(cfg, x, w, floor, surface, body, m.Charge, r, strength); break;
             }
         }
 
@@ -449,10 +449,17 @@ namespace BareMinimum.Vitals
         /// being spent, so a glance says which way the bar is going before the level has moved
         /// far enough to show it; at rest they drift up slowly. Winded, they crawl and dim.
         /// While the special ability runs they race, which is the "doubling" showing inside the
-        /// bar as well as in its colour. On the wall clock, so the speed is a speed.
+        /// bar as well as in its colour.
+        ///
+        /// ON THE CHARGE PHASE, NOT THE WALL CLOCK. Everything about how fast and which way
+        /// lives in Momentum.Charge now, which is a signed accumulation rather than a clock
+        /// multiplied by a rate -- the rate used to be worked out here and applied to a growing
+        /// number, which teleported every streak on the screen each time it changed. Momentum's
+        /// comment has the whole of it. What is left in here is where a streak IS, which is all
+        /// this method was ever meant to decide.
         /// </summary>
         private static void Streaks(Settings cfg, float x, float w, float floor, float surface,
-                                    Color body, float wall, Readings r, float strength)
+                                    Color body, float charge, Readings r, float strength)
         {
             var count = (int)Math.Round(3f * cfg.VitalsParticles);
             if (count < 1) return;
@@ -469,27 +476,21 @@ namespace BareMinimum.Vitals
 
             if (span <= len * 1.5f) return;
 
-            var draining = r.ThirdIsEnergy && r.ThirdDelta < -0.00001f;
-            var filling = r.ThirdIsEnergy && r.ThirdDelta > 0.00001f;
-
-            // Bars per second, near enough: quick spending, steady rebuilding, a drift at rest;
-            // a crawl when winded; a race while the ability runs.
-            var rate = draining ? 1.6f : filling ? 1.0f : 0.5f;
-            if (r.Tired) rate = 0.3f;
-            if (r.SpecialActive) rate *= 2.2f;
-            if (r.Wired) rate = 2.8f;
-
             var tint = Ink.Mix(body, Color.FromArgb(body.A, 255, 255, 255), 0.75f);
             var bright = r.Tired ? 70f : r.Wired ? 215f : 150f;
 
             for (var i = 0; i < count; i++)
             {
-                // Staggered speeds, so the lanes never fall into step.
-                var raw = wall * rate * (0.85f + 0.15f * i) + i * 0.37f;
+                // Staggered speeds, so the lanes never fall into step. A constant per lane, so
+                // scaling the shared phase by it cannot introduce a jump of its own.
+                var raw = charge * (0.85f + 0.15f * i) + i * 0.37f;
                 var cycle = (float)Math.Floor(raw);
+
+                // Math.Floor rounds toward negative infinity, which is what makes this wrap
+                // correctly on the way back: at -0.3 the trip is -1 and the position 0.7.
                 var at = raw - cycle;
 
-                var prog = draining ? 1f - at : at;
+                var prog = at;
 
                 // A new lane every trip, from the trip's own number.
                 var lane = 0.12f + 0.76f * Paint.Scatter(i * 3.1f + cycle * 17.3f);

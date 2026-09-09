@@ -217,6 +217,37 @@ namespace BareMinimum.Vitals
             return true;
         }
 
+        /// <summary>
+        /// THE OUTSIDE OF THE MINIMAP FRAME, which is what anything standing beside it has to
+        /// clear -- not the map, which is a good deal narrower.
+        ///
+        /// FRAME.DRAW OWNS THESE TWO EXPRESSIONS AND THIS IS THEM, moved here so the row that
+        /// stands next to the frame and the frame itself cannot disagree about where it ends.
+        /// They are not obvious: the line is drawn OUTSIDE a gap that is itself outside the
+        /// map, so the frame reaches a gap plus a line-width past the map on each side -- and
+        /// on the left the gap gives way first, because with the safe zone at its widest the
+        /// map sits four pixels from the edge of the screen and a frame drawn outside that
+        /// falls off it.
+        ///
+        /// False when the map cannot be found, and then the caller has nothing to stand beside.
+        /// </summary>
+        public static bool Outer(float edge, float frameGap, out float left, out float right)
+        {
+            left = right = 0f;
+
+            float l, top, r, bottom, safeLine;
+            if (!Map(out l, out top, out r, out bottom, out safeLine)) return false;
+
+            var gapW = Math.Max(0f, frameGap) / Ink.Aspect;
+
+            var leftGapW = Math.Min(gapW, Math.Max(0f, l - edge));
+
+            left = Math.Max(0f, l - leftGapW - edge);
+            right = r + gapW + edge;
+
+            return true;
+        }
+
         /// <summary>Last frame's answer, and when it is worth asking again. See Map.</summary>
         private static bool _cached;
         private static bool _cachedOk;

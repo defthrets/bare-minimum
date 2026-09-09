@@ -69,8 +69,34 @@ namespace BareMinimum.Vitals
         /// <summary>Real seconds, unpaced, for the things that are warnings rather than decoration.</summary>
         public float Wall => _wall;
 
+        /// <summary>
+        /// THE CHARGE PHASE for the third bar's streaks, in bars travelled. SIGNED: it counts
+        /// backwards while the energy is being spent.
+        ///
+        /// AN ACCUMULATED PHASE, NOT A CLOCK TIMES A RATE, and the difference is the whole
+        /// reason it exists. The streaks used to be positioned from wall * rate, and their rate
+        /// changes constantly -- 1.6 while spending, 1.0 while rebuilding, 0.5 at rest, doubled
+        /// for the ability, a crawl when winded. Multiplying a growing clock by a rate that
+        /// changes rescales everything already accumulated, so the instant the rate moved the
+        /// streaks did not speed up, they TELEPORTED to wherever the new rate said they ought
+        /// to have got to by now. At the end of a sprint the delta crosses zero several times a
+        /// second and every crossing was a jump, each one also handing every lane a fresh
+        /// random position. Gauge.Clock has the same comment about the same mistake.
+        ///
+        /// Integrating instead makes a change of rate continuous by construction: the phase
+        /// never jumps, only the speed at which it is growing.
+        ///
+        /// AND THE SIGN CARRIES THE DIRECTION, which used to be a bool that mirrored the
+        /// streaks' progress along the bar -- a second, larger jump on the same frame as the
+        /// first. Running the phase backwards means a reversal is a reversal: they slow, stop
+        /// and go the other way, which is what a flow doing that actually looks like.
+        /// </summary>
+        public float Charge => _charge;
+
         private float _phase;
         private float _wall;
+        private float _charge;
+        private float _chargeRate;
 
         /// <summary>How hard the player is being pushed along their own length, m/s², eased.</summary>
         public float Accel;
@@ -111,9 +137,48 @@ namespace BareMinimum.Vitals
                 Kicks(cfg, r, energy);
             }
 
+            Charged(cfg, dt, r);
+
             Health.Step(dt, force);
             Armour.Step(dt, force);
             Third.Step(dt, force);
+        }
+
+        /// <summary>
+        /// Moves the charge phase on. See Charge for why this is an integration and not a
+        /// multiplication.
+        ///
+        /// THE RATE IS CHASED RATHER THAN SET, which is the second half of the same fix. Even
+        /// integrated, a rate that snaps from 1 to -1.6 the frame a sprint starts reads as a
+        /// switch being thrown -- and ThirdDelta is a raw per-frame difference, so at the edges
+        /// it flickers between "draining" and "at rest" on alternate frames as the meter's
+        /// movement falls under what a float can hold. Chased, both of those come out as the
+        /// streaks winding up and winding down, and a frame of noise cannot be seen at all.
+        /// </summary>
+        private void Charged(Settings cfg, float dt, Readings r)
+        {
+            // Bars per second, near enough: quick spending, steady rebuilding, a drift at rest;
+            // a crawl when winded; a race while the ability runs or a stimulant is riding.
+            var want = 0.5f;
+
+            if (r != null)
+            {
+                if (r.ThirdIsEnergy && r.ThirdDelta < -0.00001f) want = -1.6f;
+                else if (r.ThirdIsEnergy && r.ThirdDelta > 0.00001f) want = 1.0f;
+
+                // KEEPING THE SIGN. Winded and the ability are about how FAST, not which way,
+                // and a crawl that also reversed would say the bar was filling while it drained.
+                if (r.Tired) want = want < 0f ? -0.3f : 0.3f;
+                if (r.SpecialActive) want *= 2.2f;
+                if (r.Wired) want = 2.8f;
+            }
+
+            _chargeRate += (want - _chargeRate) * (1f - (float)Math.Pow(0.02, dt));
+            _charge += _chargeRate * dt;
+
+            // Kept bounded at both ends, because this one runs backwards.
+            if (_charge > 1000000f) _charge -= 1000000f;
+            if (_charge < -1000000f) _charge += 1000000f;
         }
 
         /// <summary>Everything stops moving. For a frame the HUD was not drawn on, so nothing rings on unseen.</summary>

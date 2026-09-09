@@ -447,7 +447,10 @@ namespace BareMinimum.UI
             var wide = side / Aspect();
             var gap = side * _cfg.HudGap;
 
-            x = _cfg.HudAutoPosition ? MinimapLeft() + MinimapWidth() + wide * 0.45f : _cfg.HudX;
+            // SIDE PLACES IT, NOT AutoPosition. Those were one switch and this install had it
+            // off, because turning it on to move the row sideways would have thrown away a
+            // hand-tuned foot as well. See Settings.HudSide.
+            x = _cfg.HudSide == HudSide.Manual ? _cfg.HudX : Beside(wide);
 
             // THE LINE THE FRAME ENDS ON, asked for rather than guessed. It used to be a flat
             // 0.955, which was a number that looked right on one screen and had nothing to do
@@ -491,6 +494,108 @@ namespace BareMinimum.UI
             var floor = 1f - 1f / Math.Max(720f, Hud.ScreenHeight);
             if (bottom > floor) bottom = floor;
             if (bottom < 0.05f) bottom = 0.05f;
+        }
+
+        /// <summary>
+        /// Where the row starts, placed against whichever side of the minimap it was asked for.
+        ///
+        /// ONE CLEARANCE, MIRRORED, so both sides sit the same distance off the map and nobody
+        /// has to eyeball the second one. Standing on the right, x is the far edge of the map
+        /// plus that clearance -- what this did for its whole life, unchanged. Standing on the
+        /// left the row has to be laid out BACKWARDS from the near edge, because x is the FIRST
+        /// bar's channel and the bars grow rightwards from it: the whole span has to be worked
+        /// out and taken off, or the row starts at the map and runs straight across it.
+        ///
+        /// THE SPAN NEEDS THE COUNT, so this asks Standing() -- the same list RowFor builds a
+        /// moment later. A duplicated call, and worth it: the alternative is laying the row out
+        /// at one x and shifting it afterwards, which is the kind of two-pass arrangement that
+        /// works until something reads Rack.Left between the two passes.
+        ///
+        /// Both expressions collapse to "the near outline sits one clearance off the map" --
+        /// the edge the outline adds cancels against the edge the clearance is measured from,
+        /// which is why no edge appears in either line. SpareX below is the same sentence for a
+        /// row of one on the other side, and comes out the same length.
+        /// </summary>
+        private float Beside(float wide)
+        {
+            float outerL, outerR;
+            Sides(out outerL, out outerR);
+
+            var clear = wide * 0.45f;
+
+            if (_cfg.Style != HudStyle.Bars)
+            {
+                // The icon HUD's x is a CENTRE and not an edge -- see Mark -- so its own half
+                // width is the whole of the difference between the two cases.
+                return _cfg.HudSide == HudSide.Left
+                           ? outerL - clear - wide * 0.5f
+                           : outerR + clear + wide * 0.5f;
+            }
+
+            if (_cfg.HudSide != HudSide.Left) return outerR + clear;
+
+            var barW = Math.Max(0.001f, _cfg.HudBarWidth);
+            var pitch = barW * (1f + Math.Max(0.56f, _cfg.HudGap * 2.4f));
+
+            var slots = Math.Max(1, Standing().Count);
+
+            return outerL - clear - barW - (slots - 1) * pitch;
+        }
+
+        /// <summary>
+        /// The two edges the row has to stand outside of: the minimap FRAME's, when there is
+        /// one, and the map's own when there is not.
+        ///
+        /// FROM Layout.Map RATHER THAN MinimapLeft, which is the difference between this
+        /// landing beside the map and landing on it. MinimapLeft asks the game for HUD
+        /// component 13 and Frame's own comment records what that is worth: it put the map at
+        /// four pixels on a screen where the map stands at five hundred, and the frame that
+        /// believed it sat in the corner with nothing in it. Layout.Map does the game's
+        /// alignment arithmetic instead, is what the frame is built from, and is cached.
+        ///
+        /// MinimapLeft is still the fallback, because a wrong position is better than no HUD --
+        /// and it is the fallback the frame uses too, so on a screen where the answer is bad
+        /// the two are at least wrong in the same direction.
+        /// </summary>
+        private void Sides(out float left, out float right)
+        {
+            var edge = Math.Max(0.0005f, Math.Max(0.001f, _cfg.HudBarWidth) * 0.22f);
+
+            // Nothing is drawn outside the map when the frame is off, so there is nothing to
+            // stand clear of.
+            var gap = _cfg.MinimapFrame ? _cfg.MinimapFrameGap : 0f;
+            var line = _cfg.MinimapFrame ? edge : 0f;
+
+            if (BareMinimum.Vitals.Layout.Outer(line, gap, out left, out right)) return;
+
+            left = MinimapLeft();
+            right = left + MinimapWidth();
+        }
+
+        /// <summary>
+        /// Where a bar belonging to somebody ELSE should stand: the side of the minimap this
+        /// row is not on. Published as Api.Rack.SpareX and read by the fuel gauge in Fumes.
+        ///
+        /// ANSWERED HERE BECAUSE ONLY THIS MOD CAN ANSWER IT. Where the minimap sits depends on
+        /// the player's own safe-zone slider, and GET_HUD_COMPONENT_POSITION is the only way to
+        /// find out -- which a script that has never needed the minimap has no reason to be
+        /// calling. Fumes guessing at the far edge is how the two spent a day overlapping every
+        /// time this mod's frame changed. One mod owns the answer; the other asks.
+        ///
+        /// A ROW OF ONE at this mod's own bar width, so the gauge lands exactly as far off the
+        /// map on its side as the row does on this one. Meaningful whatever Side says, Manual
+        /// included: it is a fact about the map, not about the row.
+        /// </summary>
+        internal float SpareX()
+        {
+            float outerL, outerR;
+            Sides(out outerL, out outerR);
+
+            var clear = _cfg.HudSize / Aspect() * 0.45f;
+
+            return _cfg.HudSide == HudSide.Left
+                       ? outerR + clear
+                       : outerL - clear - Math.Max(0.001f, _cfg.HudBarWidth);
         }
 
         /// <summary>The row as it stands right now, for anything that has to line up with it without drawing it.</summary>
@@ -591,7 +696,8 @@ namespace BareMinimum.UI
             // minimap frame moved the row and left it behind. See Api.Rack.
             Api.Rack.Publish(_cfg.ShowHud && _cfg.Style == HudStyle.Bars,
                              x, bottom, barW, Math.Max(0.004f, _cfg.HudBarLength),
-                             pitch, row.Names.Count, _cfg.HudOpacity, plateH);
+                             pitch, row.Names.Count, _cfg.HudOpacity, plateH,
+                             SpareX(), _cfg.HudSide == HudSide.Left);
 
             return row;
         }

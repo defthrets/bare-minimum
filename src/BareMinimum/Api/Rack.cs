@@ -29,7 +29,7 @@ namespace BareMinimum.Api
         /// The contract version, read by the caller BEFORE anything else. An old reader against
         /// a new host sees a number it does not know and leaves its own settings alone.
         /// </summary>
-        public static int ApiVersion => 1;
+        public static int ApiVersion => 2;
 
         /// <summary>The mod's version string, for the other side's log.</summary>
         public static string Version
@@ -75,13 +75,39 @@ namespace BareMinimum.Api
         /// </summary>
         public static float PlateHeight { get; private set; }
 
+        /// <summary>
+        /// Where a bar belonging to SOMEBODY ELSE should stand: the far side of the minimap
+        /// from this row. A fraction of screen width, and the left edge of its channel.
+        ///
+        /// v2, AND THE ONE NUMBER THE OTHER SIDE COULD NOT WORK OUT FOR ITSELF. Everything else
+        /// here is a matter of the two matching, and matching is copying; this is a fact about
+        /// the screen that only this mod is placed to know, because where the minimap sits
+        /// depends on the player's safe-zone slider and the only way to find out is to ask the
+        /// game for HUD component 13.
+        ///
+        /// It moves when the row changes sides, so the two can never end up on the same one.
+        /// See Settings.HudSide.
+        /// </summary>
+        public static float SpareX { get; private set; }
+
+        /// <summary>
+        /// Whether this row stands to the LEFT of the minimap. v2.
+        ///
+        /// SpareX is already the whole answer to "where do I go", so nothing needs this to
+        /// place itself. It is here so a neighbour can name the side in its own log, and so one
+        /// that wants to face differently depending on the side has something to ask.
+        /// </summary>
+        public static bool RowOnLeft { get; private set; }
+
         /// <summary>Published by the gauge every time it lays the row out. Nothing else calls this.</summary>
         internal static void Publish(bool ready, float left, float bottom, float barWidth,
                                      float barLength, float pitch, int slots, float opacity,
-                                     float plateHeight)
+                                     float plateHeight, float spareX, bool rowOnLeft)
         {
             try
             {
+                SpareX = spareX;
+                RowOnLeft = rowOnLeft;
                 PlateHeight = plateHeight;
                 Ready = ready;
                 Left = left;
