@@ -1529,10 +1529,24 @@ namespace BareMinimum.Core
         public float FoodSpinY = 0f;
         public float FoodSpinZ = 90f;
 
-        public Keys MenuKey = Keys.F11;
+        /// <summary>
+        /// Opens the settings menu. F7, which is this mod's slot on this install's function row.
+        ///
+        /// IT WAS F11, WHICH IS RAMPAGE'S, under an ini comment explaining at length why F7 was
+        /// free. The comment described one key and the value was another -- the two had come
+        /// apart at some point and nothing noticed, because a menu that opens SOMETHING when
+        /// you press the key looks like it works. Pressing F7 opened the trainer instead.
+        /// </summary>
+        public Keys MenuKey = Keys.F7;
 
-        /// <summary>Opens the pocket: what you have bought and not eaten yet.</summary>
-        public Keys BagKey = Keys.F12;
+        /// <summary>
+        /// Opens the pocket: what you have bought and not eaten yet.
+        ///
+        /// OFF THE FUNCTION ROW, because all twelve are spoken for on this install and F12 --
+        /// where this was -- is Menyoo. A plain letter is the only thing left and B is the one
+        /// this mod has always meant to use; it is a pocket, and it is not near anything else.
+        /// </summary>
+        public Keys BagKey = Keys.B;
 
         /// <summary>
         /// Whether the settings menu and the pocket open on a CONTROLLER as well.
