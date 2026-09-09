@@ -168,7 +168,9 @@ namespace BareMinimum.Core
         public float ThirstSleepMultiplier = 0.6f;
 
         /// <summary>
-        /// Below this, being dry starts to slow him down. Hunger's is 0.34.
+        /// Below this, being dry starts costing him his WIND -- ThirstWindMultiplier ramps from
+        /// here down. IT NO LONGER SLOWS HIM: the name is left over from when it did, kept
+        /// because it is in everybody's ini, and ThirstClipset says why that went.
         ///
         /// LOWER THAN HUNGER'S, because thirst empties in a game day where hunger takes two
         /// and a bit: at the same threshold this would be the meter doing the slowing almost
@@ -177,10 +179,24 @@ namespace BareMinimum.Core
         public float ThirstSlowAt = 0.28f;
 
         /// <summary>
-        /// The slowest being dry ALONE will make him walk. Higher than hunger's 0.55 -- see
-        /// Effects.MoveRate, which multiplies the two, so a man who is both gets both.
+        /// THE MOVEMENT CLIPSET FOR A MAN WHO IS DRY. The game's own tired set.
+        ///
+        /// THIS REPLACED A MOVE-RATE PENALTY AND IS BETTER THAN IT WAS. Being dry used to
+        /// multiply his speed like hunger and sleep do, and with three needs each taking their
+        /// share the result was a man walking at a third speed -- which does not read as
+        /// somebody in a bad way, it reads as the game running in slow motion, with nothing on
+        /// screen explaining why. Reported as exactly that.
+        ///
+        /// A clipset says it where the player can see it. move_m@tired is the set the game
+        /// keeps for somebody who has run himself into the ground: he still moves at his own
+        /// speed and he plainly has nothing left. It is verified present in this build's
+        /// animation list with its own walk clip -- move_f@exhausted is the female equivalent
+        /// and there is no move_m@exhausted, which is worth knowing before anybody goes looking.
+        ///
+        /// The wind is still the real cost -- see ThirstWindMultiplier -- and it is felt rather
+        /// than watched. This is what it looks like.
         /// </summary>
-        public float ThirstMinMoveRate = 0.62f;
+        public string ThirstClipset = "move_m@tired";
 
         /// <summary>
         /// Below this he is audibly struggling: breathing hard, and occasionally saying so.
@@ -1681,8 +1697,7 @@ namespace BareMinimum.Core
                 cfg.ThirstSleepMultiplier = ini.GetFloat("Thirst", "SleepMultiplier",
                                                          cfg.ThirstSleepMultiplier, 0f, 4f);
                 cfg.ThirstSlowAt = ini.GetFloat("Thirst", "SlowAt", cfg.ThirstSlowAt, 0f, 1f);
-                cfg.ThirstMinMoveRate = ini.GetFloat("Thirst", "MinMoveRate",
-                                                     cfg.ThirstMinMoveRate, 0.3f, 1f);
+                cfg.ThirstClipset = ini.GetString("Thirst", "Clipset", cfg.ThirstClipset);
                 cfg.ThirstDryAt = ini.GetFloat("Thirst", "DryAt", cfg.ThirstDryAt, 0f, 1f);
                 cfg.ThirstWindMultiplier = ini.GetFloat("Thirst", "WindMultiplier",
                                                         cfg.ThirstWindMultiplier, 1f, 10f);

@@ -18,12 +18,12 @@ namespace BareMinimum.Needs
     ///    Deliberately mild -- the brief was a slight drunk effect, and the game's own
     ///    verydrunk set is a stagger that makes doorways impossible.
     ///  - DRINK does the same thing harder, and escalates from merry to properly gone.
-    ///  - THIRST slows you as hunger does, and takes your WIND, which is the part you feel.
-    ///    It does not take the clipset: three things already queue for the one slot on a ped
-    ///    and a fourth limp would only ever be the one nobody sees. What being dry does
-    ///    instead is empty the sprint meter far faster -- see Settings.ThirstWindMultiplier
-    ///    and Vitals.Energy -- so it shows up on a bar already in the row rather than as a
-    ///    walk you cannot tell from the hungry one.
+    ///  - THIRST takes your WIND, which is the part you feel, and moves you like a man who has
+    ///    run himself into the ground, which is the part you see. It does NOT slow you down: it
+    ///    did, and three needs each multiplying the same number gave a man walking at a third
+    ///    speed with nothing on screen saying why -- slow motion rather than exhaustion. The
+    ///    sprint meter emptying far faster is the cost (Settings.ThirstWindMultiplier) and
+    ///    move_m@tired is the look.
     ///
     /// ONE CLIPSET AT A TIME. All three can apply at once and there is only one movement
     /// clipset slot on a ped, so they are a PRIORITY LIST: drink, then hunger, then sleep.
@@ -75,7 +75,7 @@ namespace BareMinimum.Needs
                 var drunk = _cfg.BoozeEnabled ? needs.Drunk : 0f;
 
                 MoveRate(me, hunger, sleep, thirst);
-                Clipset(me, hunger, sleep, drunk);
+                Clipset(me, hunger, sleep, thirst, drunk);
                 Unsteady(me, sleep, drunk);
                 Wobble(sleep);
             }
@@ -113,13 +113,17 @@ namespace BareMinimum.Needs
                 rate *= Ramp(sleep, _cfg.SleepTiredAt, _cfg.SleepMinMoveRate);
             }
 
-            // THE THIRD ONE MULTIPLIES LIKE THE OTHER TWO, which is the whole reason the floor
-            // below had to move. Three ramps at their minimums is a smaller number than two.
-            if (_cfg.ThirstEnabled && thirst < _cfg.ThirstSlowAt)
-            {
-                rate *= Ramp(thirst, _cfg.ThirstSlowAt, _cfg.ThirstMinMoveRate);
-            }
-
+            // THIRST IS NOT HERE, AND THAT IS THE POINT.
+            //
+            // It was, and it multiplied like the other two -- so a man who was hungry, tired and
+            // dry walked at a third speed. That does not read as somebody in a bad way; it reads
+            // as the game running in slow motion, with nothing on screen saying why, and it was
+            // reported as exactly that. Three penalties of the same KIND stack into one that
+            // does not mean anything.
+            //
+            // Being dry costs him his WIND instead -- see Vitals.Energy.Dry -- and shows in the
+            // walk through the game's own tired clipset. Neither of those is a share of the same
+            // number, so both can be true at once without the sum turning into a crawl.
             rate *= WellFed(hunger, sleep, thirst);
 
             // Only when there is actually something to say. A fed and rested player with the
@@ -134,17 +138,14 @@ namespace BareMinimum.Needs
             // about it anywhere. A setting that is accepted and then overruled is worse than
             // one that is refused.
             //
-            // 0.027 is not a taste decision, it is the three ranges multiplied: 0.3 for
-            // hunger times 0.3 for sleep times 0.3 for thirst, which is the slowest the ramps
-            // above can legitimately produce. It was 0.09 for two of them, and a third need
-            // arriving without moving it would have reintroduced the exact bug the 0.09 was
-            // written to fix -- a floor sitting on top of settings the ini accepts, quietly
-            // overruling anybody who set all three low on purpose. Reaching it takes an ini
-            // deliberately set to every minimum AND being starving, exhausted and parched at
-            // the same moment, which MoveRate is explicit about wanting to be worse than any
-            // one alone. The floor only catches a rate that got past the ranges some other way,
-            // which is all it was ever for.
-            if (rate < 0.027f) rate = 0.027f;
+            // 0.09 is not a taste decision, it is the two ranges multiplied: 0.3 for hunger
+            // times 0.3 for sleep, which is the slowest the ramps above can legitimately
+            // produce. It went to 0.027 for a while when thirst was a third ramp and came back
+            // with it. A floor has to sit UNDER the settings the ini accepts and never on top
+            // of them -- it was a flat 0.4 once, which silently overruled everybody who set
+            // MinMoveRate anywhere from 0.30 to 0.39 on purpose, and that is the mistake this
+            // number exists in order not to make again.
+            if (rate < 0.09f) rate = 0.09f;
 
             Function.Call(Hash.SET_PED_MOVE_RATE_OVERRIDE, me.Handle, rate);
         }
@@ -241,7 +242,7 @@ namespace BareMinimum.Needs
         /// takes a few frames, so this returns and tries again next tick rather than applying
         /// something that will be ignored.
         /// </summary>
-        private void Clipset(Ped me, float hunger, float sleep, float drunk)
+        private void Clipset(Ped me, float hunger, float sleep, float thirst, float drunk)
         {
             string want = null;
 
@@ -267,6 +268,15 @@ namespace BareMinimum.Needs
             else if (_cfg.HungerEnabled && hunger < _cfg.HungerHurtAt)
             {
                 want = _cfg.HungerClipset;
+            }
+            else if (_cfg.ThirstEnabled && thirst < _cfg.ThirstDryAt)
+            {
+                // ABOVE SLEEP AND BELOW HUNGER. A stomach injury is a worse thing to be doing
+                // than being parched, and being parched is more immediate than being short of a
+                // night's sleep. It matters where this sits: thirst empties in a game day
+                // against sleep's three and a half, so it is usually the one that is true, and
+                // a state that never wins the one clipset slot is a state nobody ever sees.
+                want = _cfg.ThirstClipset;
             }
             else if (_cfg.SleepEnabled && sleep < _cfg.SleepDrunkAt)
             {
