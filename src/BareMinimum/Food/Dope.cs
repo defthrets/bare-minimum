@@ -672,27 +672,17 @@ namespace BareMinimum.Food
                 Tint = Color.FromArgb(255, 168, 130, 96),
                 Desc = "A nod, and nothing else matters." } },
 
-            // OXYCODONE, AND IT IS FILED UNDER "ecstasy" IN THE OTHER MOD.
+            // NOT IN POSTED UP'S drugs.json TODAY. Here so it behaves the day it is -- and it
+            // has been here through one whole round trip already, which is why it stays.
             //
-            // Posted Up's drugs.json has id "ecstasy" carrying the name Oxycodone, the tag OXY,
-            // the code word "blues", counted in PILLS, pressed and repressed, tier 1 at $25.
-            // Every field a player can see says opioid; only the key says otherwise, and the key
-            // is plainly a leftover from whatever the entry used to be.
-            //
-            // This mod was keying off the key, so an oxy woke him up, pinned the energy bar for
-            // ten minutes and crashed him afterwards -- the exact opposite of what he took.
-            // BEHAVIOUR FOLLOWS THE LABEL, NOT THE ID: the label is the only one of the two the
-            // player will ever read, and a mod arguing with the packet is a mod that is wrong.
-            //
-            // BOTH KEYS POINT HERE. "ecstasy" is what the file says today and "oxycodone" is
-            // what it should say, so correcting it over there changes nothing over here -- and
-            // if a real ecstasy is ever added under its own id it gets the uppers' entry as it
-            // should, rather than inheriting this by accident.
-            { "ecstasy", new Dose {
-                Hunger = -0.12f, Wake = -0.30f,
-                Tint = Color.FromArgb(255, 228, 212, 158),
-                Desc = "A warm nod. Everything slows down." } },
-
+            // THAT ENTRY WAS BRIEFLY WEARING THE ID "ecstasy". Posted Up carried the key
+            // "ecstasy" with the name Oxycodone, the tag OXY and the code word "blues", counted
+            // in pills; every field a player could read said opioid and only the key said
+            // otherwise, so this mod followed the label and filed it here. The name has since
+            // been corrected to Ecstasy, so the key and the label agree again and the uppers
+            // have it back. This one is dormant and correct rather than deleted, because the
+            // cost of keeping it is four lines and the cost of not having it was a drug that
+            // did the opposite of what it said.
             { "oxycodone", new Dose {
                 Hunger = -0.12f, Wake = -0.30f,
                 Tint = Color.FromArgb(255, 228, 212, 158),
@@ -723,16 +713,25 @@ namespace BareMinimum.Food
                 Tint = Color.FromArgb(255, 238, 238, 244),
                 Desc = "Wide awake, and suddenly fine." } },
 
-            // CRACK WAS NOT NAMED and is here anyway, because it is the same camp and half a
-            // rule is worse than either whole one -- a man who has just learnt that uppers stand
-            // him up should not find that one of them does not.
-            //
-            // ECSTASY USED TO BE ON THIS LIST AND IS NOT ANY MORE. The id belongs to the pills
-            // the other mod calls Oxycodone; see the downers above for the whole of it.
+            // CRACK AND ECSTASY WERE NOT NAMED and are here anyway, because they are the same
+            // camp and half a rule is worse than either whole one -- a man who has just learnt
+            // that uppers stand him up should not find that two of them do not.
             { "crack", new Dose {
                 Hunger = 0.10f, Wake = 1f, Wired = 4f, Crash = 1.5f,
                 Tint = Color.FromArgb(255, 226, 206, 168),
                 Desc = "Sharp and short, and you are up." } },
+
+            // BACK IN THE UPPERS, WHERE IT STARTED. It spent a build filed as an opioid because
+            // Posted Up's entry carried the name Oxycodone over the id "ecstasy" -- the label
+            // being the only one of the two a player ever reads, this mod followed the label.
+            // The name is Ecstasy again, so the two agree and so does this.
+            //
+            // The longest ride of the four and, in proportion, the gentlest landing: it is the
+            // one on the list you are meant to come down off among people rather than alone.
+            { "ecstasy", new Dose {
+                Hunger = 0.10f, Wake = 1f, Wired = 10f, Crash = 3f,
+                Tint = Color.FromArgb(255, 212, 122, 196),
+                Desc = "Up all night, and glad about it." } },
         };
 
         /// <summary>
