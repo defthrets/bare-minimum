@@ -350,6 +350,24 @@ namespace BareMinimum.Venues
         }
 
         /// <summary>
+        /// How far away a find of this kind is still a find.
+        ///
+        /// THE SCAN KNOWS WHICH LIST IT IS WALKING AND THE CACHE DOES NOT -- between scans
+        /// there is only _kind to go on, so the figure has to be looked up from that. Holding
+        /// every find at TillReach instead is how a snack machine, which can only ever be
+        /// picked up at 1.5m, went on being offered out to 1.9m.
+        /// </summary>
+        private float ReachFor(Counter kind)
+        {
+            switch (kind)
+            {
+                case Counter.Machine: return MachineReach;
+                case Counter.Stall: return StallReach;
+                default: return TillReach;
+            }
+        }
+
+        /// <summary>
         /// What is within reach, if anything. Re-scanned a few times a second.
         ///
         /// TILLS WIN OVER MACHINES when both are in range, which happens constantly -- petrol
@@ -361,9 +379,27 @@ namespace BareMinimum.Venues
         {
             var now = Game.GameTime;
 
-            if (now < _nextScan && _found != null && _found.Exists())
+            // THE WINDOW HOLDS ON TO "NOTHING HERE" AS WELL AS TO A FIND, and it has to. The
+            // clock used to be honoured only when there was a counter to hand back, and there
+            // is no counter to hand back nearly all the time, because the player is not stood
+            // at one nearly all the time. So the throttle threw itself away in exactly the
+            // case that mattered and the whole sweep -- fifteen-odd GET_CLOSEST_OBJECT_OF_TYPE
+            // calls across four model lists -- ran on every single tick, all session. An empty
+            // window is now answered from the cache just as a full one is.
+            //
+            // A FIND IS STILL RANGE-CHECKED, so stepping away from a counter stops offering it
+            // at once rather than up to a fifth of a second later, and walking off one counter
+            // towards another re-scans on the spot instead of waiting the window out.
+            //
+            // AGAINST THE REACH THAT MATCHES WHAT WAS FOUND, which it was not before: every
+            // kind was re-validated at TillReach, so a snack machine found at 1.5m was still
+            // being reported in reach at 1.9m and then vanished the moment the next scan went
+            // looking for it from there and could not reach it either.
+            if (now < _nextScan)
             {
-                if (_found.Position.DistanceTo(from) <= TillReach) return _kind;
+                if (_found == null) return Counter.None;
+
+                if (_found.Exists() && _found.Position.DistanceTo(from) <= ReachFor(_kind)) return _kind;
             }
 
             _nextScan = now + 200;

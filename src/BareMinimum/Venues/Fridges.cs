@@ -154,10 +154,18 @@ namespace BareMinimum.Venues
             // One already held on to stays valid between scans, so the prompt does not
             // flicker while you shuffle about at the edge of the radius -- but it is STILL
             // range-checked, or the cache hands back a fridge already walked away from.
-            if (now < _nextScan && _found != null && _found.Exists() &&
-                _found.Position.DistanceTo(from) <= radius)
+            //
+            // AND AN EMPTY WINDOW IS CACHED AS WELL. The clock used to be honoured only when
+            // there was a fridge to hand back, and there is no fridge to hand back nearly all
+            // the time -- the player is in a kitchen for a few seconds of a session. So the
+            // throttle threw itself away in exactly the case that mattered and the whole model
+            // sweep ran on every single tick, all session, only ever to say no again. "Nothing
+            // here" is an answer worth holding for the rest of the window too.
+            if (now < _nextScan)
             {
-                return _found;
+                if (_found == null) return null;
+
+                if (_found.Exists() && _found.Position.DistanceTo(from) <= radius) return _found;
             }
 
             _nextScan = now + 200;

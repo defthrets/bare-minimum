@@ -122,10 +122,18 @@ namespace BareMinimum.Venues
             //
             // BUT IT IS STILL RANGE-CHECKED, or the cache hands back a bed the player has
             // already walked away from for up to a fifth of a second.
-            if (now < _nextScan && _found != null && _found.Exists() &&
-                _found.Position.DistanceTo(from) <= radius)
+            //
+            // AND AN EMPTY WINDOW COUNTS AS AN ANSWER TOO. The clock used to be honoured only
+            // when there was a bed to hand back, and there is no bed to hand back nearly all
+            // the time -- a player is next to one for a few seconds of a session. So the
+            // throttle threw itself away in exactly the case that mattered and the full model
+            // sweep ran on every single tick, all session, to keep saying no. "Nothing here"
+            // is worth keeping for the rest of the window every bit as much as a bed is.
+            if (now < _nextScan)
             {
-                return _found;
+                if (_found == null) return null;
+
+                if (_found.Exists() && _found.Position.DistanceTo(from) <= radius) return _found;
             }
 
             _nextScan = now + 200;
