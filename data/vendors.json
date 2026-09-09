@@ -188,55 +188,6 @@
   ],
   "rooms": [
     {
-      "key": "tequilala",
-      "name": "Tequi-la-la",
-      "ipl": "",
-      "online": false,
-      "x": -556.509,
-      "y": 286.318,
-      "z": 81.176,
-      "heading": 84.0,
-      "also": [
-        [
-          -555.593,
-          285.774,
-          81.176
-        ],
-        [
-          -558.005,
-          285.664,
-          81.176
-        ],
-        [
-          -560.24,
-          293.01,
-          82.33
-        ]
-      ]
-    },
-    {
-      "key": "bahama",
-      "name": "Bahama Mamas West",
-      "ipl": "",
-      "online": false,
-      "x": -1387.08,
-      "y": -588.4,
-      "z": 30.32,
-      "heading": 90.0,
-      "also": [
-        [
-          -1388.001,
-          -618.42,
-          30.82
-        ],
-        [
-          -1387.5,
-          -603.4,
-          30.5
-        ]
-      ]
-    },
-    {
       "_note": "the walk-in 24/7 at Vinewood Plaza, at its counter; the other four walked 24/7s as fallbacks",
       "key": "store247",
       "name": "24/7",
@@ -1976,7 +1927,6 @@
       "_note2": "above the sign. A bar: what is on tap, what is behind it, and the short list",
       "_note3": "of things a bar kitchen will do for you.",
       "id": "mirror_park_tavern",
-      "inside": "tequilala",
       "name": "Mirror Park Tavern",
       "item": [
         "beer",
@@ -2001,7 +1951,6 @@
     {
       "_note": "The door under the Logger neon, round the side of the tavern.",
       "id": "mirror_park_tavern_side",
-      "inside": "tequilala",
       "name": "Mirror Park Tavern",
       "item": [
         "beer",
@@ -2322,7 +2271,6 @@
       "_note2": "in a frame by the door: appetizers, entrees, salads and soups, desserts. So:",
       "_note3": "one entree, one dessert, a soup, and what you drink with them.",
       "id": "jazz_desserts",
-      "inside": "bahama",
       "name": "Jazz",
       "item": [
         "jazz_entree",
@@ -2623,7 +2571,6 @@
       "_note2": "the brick. The single door between the two sets of french doors is the one",
       "_note3": "you go in by. A lounge: drinks, and small plates to go with them.",
       "id": "eclipse_lounge",
-      "inside": "bahama",
       "name": "Eclipse Lounge",
       "item": [
         "eclipse_small",
@@ -3954,7 +3901,6 @@
     {
       "_note": "liquor store. Surveyed in game; inherits Liquor Store's menu -- one chain, one menu.",
       "id": "steamboat_beers_vespuccibeach",
-      "inside": "bahama",
       "name": "Steamboat Beers",
       "x": -1209.236,
       "y": -1384.583,
@@ -4022,7 +3968,6 @@
     {
       "_note": "juice and smoothies. Surveyed in game; inherits Limey's's menu -- one chain, one menu.",
       "id": "limey_s_juice_bar_vespucci",
-      "inside": "bahama",
       "name": "Limey's Juice Bar",
       "x": -1183.175,
       "y": -1248.321,
@@ -5185,7 +5130,6 @@
     {
       "_note": "restaurant & bar, Pacific Bluffs. Surveyed in game.",
       "id": "pipeline_inn",
-      "inside": "bahama",
       "name": "Pipeline Inn",
       "x": -2193.772,
       "y": -388.596,
@@ -5245,7 +5189,6 @@
     {
       "_note": "seafood diner, Paleto coast. Surveyed in game.",
       "id": "hookies_paleto",
-      "inside": "tequilala",
       "name": "Hookies",
       "x": -2193.262,
       "y": 4286.801,
@@ -5308,7 +5251,6 @@
     {
       "_note": "Paleto Bay. Surveyed in game.",
       "id": "mojito_inn_paleto",
-      "inside": "tequilala",
       "name": "Mojito Inn",
       "x": -123.485,
       "y": 6389.982,
@@ -5329,7 +5271,6 @@
     {
       "_note": "Paleto Bay. Surveyed in game.",
       "id": "bay_bar_paleto",
-      "inside": "tequilala",
       "name": "The Bay Bar",
       "x": -261.335,
       "y": 6291.114,

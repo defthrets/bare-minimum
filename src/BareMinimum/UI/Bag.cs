@@ -50,8 +50,23 @@ namespace BareMinimum.UI
         private const float Pad = 0.012f;
         private const float GridPad = 0.006f;
 
-        /// <summary>The card under the grid: the chosen thing, said properly.</summary>
-        private const float CardH = 0.052f;
+        /// <summary>
+        /// The card under the grid: the chosen thing, said properly.
+        ///
+        /// MEASURED, NOT EYEBALLED. It was a flat 0.052, which is a number somebody looked at
+        /// once and thought was about right -- and the line of flavour under the name hung out
+        /// of the bottom of the plate it is drawn on, because a line of body text at this scale
+        /// is taller than the room that was left for it. Asked of the game instead: the name's
+        /// line, the description's own height, and a breath under it.
+        /// </summary>
+        private static float CardH
+        {
+            get { return DescTop + Hud.Height(DescScale, Hud.FontBody) + 0.008f; }
+        }
+
+        /// <summary>Where the line of flavour starts, from the top of the card, and how big it is.</summary>
+        private const float DescTop = 0.031f;
+        private const float DescScale = 0.25f;
 
         /// <summary>The gap between tiles, as an x fraction. Turned into y through the aspect.</summary>
         private const float Gap = 0.0018f;
@@ -188,6 +203,11 @@ namespace BareMinimum.UI
             _refused = null;
             _frame.Reset();
 
+            // Opened on RB + A, the A is still down and Navigate runs later in this same tick.
+            // Dead until it comes back up. Opened from the key, it is already up and this is
+            // true immediately, so the keyboard path is unchanged.
+            _acceptArmed = !Core.Pad.Down(GTA.Control.FrontendAccept);
+
             IsOpen = true;
             Sound("SELECT");
         }
@@ -236,17 +256,44 @@ namespace BareMinimum.UI
         private bool _byChord;
 
         /// <summary>
-        /// The frames on which both halves of the chord are down: cover and jump are switched
-        /// off for that frame.
+        /// Whether Accept is allowed to eat yet. False from the moment the pocket opens with
+        /// that button already held, true again once it has come back up.
         /// </summary>
         ///
         /// <remarks>
-        /// RB IS THE COVER BUTTON ON FOOT AND X IS JUMP, and the game acts on each on the frame
-        /// it is pressed. A control disabled during a script's tick is disabled for the rest
-        /// of that frame, which is how every menu in this mod keeps a gun from firing -- so
-        /// when the two are pressed together, the frame they land on has cover and jump off
-        /// and he does neither. It cannot help when RB lands a frame or two before X: by the
-        /// time both are down he is already dropping. That case is OutOfCover's.
+        /// BECAUSE THE CHORD'S SECOND HALF IS THE CONFIRM BUTTON. Tick() opens the pocket and
+        /// then runs Navigate() in the SAME frame, and Navigate reads Accept with
+        /// IS_DISABLED_CONTROL_JUST_PRESSED -- which is still true on that frame, because the
+        /// press that opened the pocket is the press it is asking about. RB + A would have
+        /// opened the pocket and eaten whatever was under the cursor in one motion.
+        ///
+        /// The 300ms hush on _quietUntil does not cover this: it gates TOGGLING, so it stops
+        /// a held button re-opening a pocket that just closed, and Navigate never consults it.
+        ///
+        /// A RELEASE RATHER THAN A TIMER. A hush long enough to outlast the chord is a hush
+        /// the player can feel when they meant to eat immediately, and one short enough not to
+        /// be felt is one a slow release beats. The button coming up is the actual event being
+        /// waited for, so that is what gets waited for.
+        /// </remarks>
+        private bool _acceptArmed = true;
+
+        /// <summary>
+        /// The frames on which both halves of the chord are down: cover and sprint are
+        /// switched off for that frame.
+        /// </summary>
+        ///
+        /// <remarks>
+        /// RB IS THE COVER BUTTON ON FOOT AND A IS SPRINT, and the game acts on each on the
+        /// frame it is pressed. A control disabled during a script's tick is disabled for the
+        /// rest of that frame, which is how every menu in this mod keeps a gun from firing --
+        /// so when the two are pressed together, the frame they land on has cover and sprint
+        /// off and he does neither. It cannot help when RB lands a frame or two before A: by
+        /// the time both are down he is already dropping. That case is OutOfCover's.
+        ///
+        /// SPRINT RATHER THAN JUMP BECAUSE THE SECOND HALF MOVED. This chord was RB + X, and X
+        /// is the jump button -- so jump is what had to be held off. A is the sprint button,
+        /// and a chord that suppressed jump would now be suppressing a button nobody in it is
+        /// pressing while the one they ARE pressing ran.
         ///
         /// Only the frames with BOTH down. Disabling cover whenever RB is held would take the
         /// cover button away from a man who is only holding it to take cover.
@@ -257,10 +304,10 @@ namespace BareMinimum.UI
 
             try
             {
-                if (!Core.Pad.Down(GTA.Control.FrontendRb) || !Core.Pad.Down(GTA.Control.FrontendX)) return;
+                if (!Core.Pad.Down(GTA.Control.FrontendRb) || !Core.Pad.Down(GTA.Control.FrontendAccept)) return;
 
                 Game.DisableControlThisFrame(GTA.Control.Cover);
-                Game.DisableControlThisFrame(GTA.Control.Jump);
+                Game.DisableControlThisFrame(GTA.Control.Sprint);
             }
             catch { /* then the frame plays as the game would have it */ }
         }
@@ -299,16 +346,19 @@ namespace BareMinimum.UI
             var edge = down && !_down;
             _down = down;
 
-            // RB + X. Checked even when the key already fired, so the chord's own memory
+            // RB + A. Checked even when the key already fired, so the chord's own memory
             // stays in step and releasing it cannot fire a second time.
             //
-            // BOTH HALVES ARE BUSY ON FOOT -- RB takes cover and X sprints -- which is true
+            // BOTH HALVES ARE BUSY ON FOOT -- RB takes cover and A sprints -- which is true
             // of every pair on a pad and is why this is a chord at all. Holding RB and
-            // tapping X is not a thing the game does together, which is the test that
+            // tapping A is not a thing the game does together, which is the test that
             // matters. What it used to cost was the cover press registering underneath --
             // see Chording and OutOfCover for the two halves of not paying that.
+            //
+            // A IS ALSO THE BUTTON THAT EATS, which X was not, and that is the one new cost
+            // of moving the chord. See _acceptArmed.
             if (_cfg.BagPad &&
-                Core.Pad.Chord(GTA.Control.FrontendRb, GTA.Control.FrontendX, ref _padWas))
+                Core.Pad.Chord(GTA.Control.FrontendRb, GTA.Control.FrontendAccept, ref _padWas))
             {
                 edge = true;
                 _byChord = true;
@@ -334,6 +384,14 @@ namespace BareMinimum.UI
                 if (Pressed(GTA.Control.FrontendLeft)) Move(-1);
                 if (Pressed(GTA.Control.FrontendDown)) Move(Columns);
                 if (Pressed(GTA.Control.FrontendUp)) Move(-Columns);
+            }
+
+            // Placed AFTER the d-pad so the cursor still moves while the chord's A is held --
+            // it is only eating that waits.
+            if (!_acceptArmed)
+            {
+                if (!Core.Pad.Down(GTA.Control.FrontendAccept)) _acceptArmed = true;
+                return;
             }
 
             if (!Pressed(GTA.Control.FrontendAccept)) return;
@@ -797,7 +855,7 @@ namespace BareMinimum.UI
 
             if (!string.IsNullOrEmpty(desc) && room > 0.02f)
             {
-                Hud.Text(Kit.Fit(desc, room, 0.25f, Hud.FontBody), tx, y + 0.031f, 0.25f,
+                Hud.Text(Kit.Fit(desc, room, DescScale, Hud.FontBody), tx, y + DescTop, DescScale,
                          Palette.Alpha(Palette.TextDim, (int)((110f + 90f * grown) * arrive)),
                          Hud.FontBody);
             }
