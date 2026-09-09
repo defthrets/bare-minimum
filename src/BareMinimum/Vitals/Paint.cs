@@ -9,12 +9,15 @@ namespace BareMinimum.Vitals
     /// arithmetic. Here rather than in either of them, because a bar lying down and a bar
     /// standing up are the same bar and must agree about what red means.
     ///
-    /// THE STOCK BARS KEEP THEIR OWN COLOURS. Health is the game's green, and it runs down
-    /// through amber to red with the level, the way the eye expects a health bar to; armour
-    /// is the game's blue; the third bar is energy's fluorescent green-yellow, or the special
-    /// ability's gold. See Settings.VitalsEnergyColour for why that colour and not another.
-    /// The hunger and sleep bars beside these went orange and purple so that no two of the
-    /// five share a family.
+    /// EVERY BAR IS ONE FAMILY, DEEP AT EMPTY AND VIVID AT FULL. Health is red, armour is the
+    /// game's blue, the third bar is energy's fluorescent green-yellow or the special ability's
+    /// gold, and hunger and sleep are orange and purple beside them -- no two sharing a family,
+    /// so hue says WHICH meter and brightness says how it is doing.
+    ///
+    /// HEALTH USED TO BREAK THAT RULE and it was the only one that did: green through amber to
+    /// red, hue moving with the level, so at half full it was a colour belonging to no meter at
+    /// all. It is red the whole way now, and the low-health beat is what carries the urgency
+    /// the colour change used to.
     /// </summary>
     internal static class Paint
     {
@@ -24,30 +27,35 @@ namespace BareMinimum.Vitals
             return Ink.Alpha(c, (int)(235f * opacity * strength + 0.5f));
         }
 
-        // THE TWO STOPS BETWEEN THE CONFIGURED GREEN AND NOTHING.
+        // RED THE WHOLE WAY NOW, AND THE HUE STOPS CARRYING ANYTHING.
         //
-        // BOTH ENDS WERE PULLED WELL OUT TOWARDS THE EDGE OF THE GAMUT. The green was a muted
-        // sage and the red a dull brick, which is a health bar drawn in watercolour: the two
-        // states that matter most -- fine, and about to die -- were the two least emphatic
-        // colours on the screen, sitting under a minimap that is all saturated blips.
+        // It ran green through amber to red, which is what a health bar has done since health
+        // bars existed and is also the one thing in this row that worked differently from
+        // everything beside it. Every other bar here is ONE family, deep at empty and vivid at
+        // full, on the stated rule that darker is worse and hue says WHICH meter. Health was
+        // the exception: its hue moved with its level, so at half full it was a colour that
+        // belonged to no meter at all, and the two habits the eye had learned did not both
+        // hold across the row.
         //
-        // The amber between them moved with them, because a midpoint that stayed where it was
-        // would have become the dullest stop on a ramp whose ends are now both vivid, and the
-        // eye reads the dullest thing in a gradient as the middle of it whatever the level
-        // actually says. It runs hotter and more orange now -- further from the green above it
-        // and closer to the red below, so the second half of the ramp is where the urgency
-        // starts building rather than where it suddenly arrives.
+        // Now it does. Vivid red at full, dark red at nothing, and the whole journey is
+        // brightness -- which is the same reading the other five give, and a red bar is not
+        // ambiguous about which meter it is whatever shade it happens to be.
         //
-        // The red is NOT the same red as the low-health pulse below. That one goes further
-        // still, toward a hot 255,72,60, so the beat can be seen against a bar that is already
-        // red -- if the two matched, the warning would be invisible in exactly the state it
-        // exists for.
-        private static readonly Color Amber = Color.FromArgb(255, 246, 168, 34);
-        private static readonly Color Red = Color.FromArgb(255, 240, 38, 42);
+        // THE MIDDLE STOP IS NOT HALFWAY BETWEEN THE OTHER TWO. A linear ramp between a vivid
+        // red and a very dark one spends its whole upper half looking full, because brightness
+        // is not perceived linearly; pulling the midpoint down below the arithmetic middle puts
+        // the visible change where the meter is actually worth watching.
+        //
+        // AND THE BOTTOM STOP IS NOT THE PULSE'S RED. The beat below goes to a hot 255,110,95,
+        // far brighter than any stop here -- if they were close the warning would be invisible
+        // in exactly the state it exists for, which is the whole reason a dark bottom end is
+        // safe to have at all.
+        private static readonly Color Amber = Color.FromArgb(255, 158, 24, 28);
+        private static readonly Color Red = Color.FromArgb(255, 74, 10, 14);
 
         /// <summary>
-        /// Green at full, amber at half, red at empty -- and a beat toward red once there is
-        /// not much of it left.
+        /// Red the whole way -- vivid at full, dark at empty -- and a beat once there is not
+        /// much of it left.
         /// </summary>
         public static Color Health(Settings cfg, float opacity, Readings r, Momentum m, float strength)
         {
@@ -63,14 +71,26 @@ namespace BareMinimum.Vitals
                 // Sine rather than a square wave: a hard blink is a fault light, and this is
                 // meant to be urgent without being an alarm. On the wall clock, because it is
                 // a warning and Pace is for decoration.
+                //
+                // IT GOES FURTHER AND BRIGHTER THAN IT USED TO, because what it is beating
+                // against changed underneath it. The bar was a mid red at this level and is a
+                // dark one now, so a mix toward 255,72,60 at 30-70% -- which read clearly on
+                // the old bar -- would be a dark bar getting slightly less dark. The target is
+                // brighter and the swing is wider, so the flash is a flash.
                 var pulse = (float)Math.Abs(Math.Sin(m.Wall * 3.4));
-                c = Ink.Mix(c, Color.FromArgb(c.A, 255, 72, 60), 0.30f + 0.40f * pulse);
+                //
+                // AND IT COMES ALL THE WAY BACK DOWN. The floor was 0.30, which meant the bar
+                // never once showed its own colour while the beat was running -- it sat a third
+                // of the way lit at the bottom of every cycle, so what you saw was a permanently
+                // paler bar breathing rather than a dark one flashing. At 0.05 the trough is the
+                // bar and the peak is the warning, which is what makes it read as a flash.
+                c = Ink.Mix(c, Color.FromArgb(c.A, 255, 110, 95), 0.05f + 0.75f * pulse);
             }
 
             return c;
         }
 
-        /// <summary>The health ramp: the configured green at the top, amber half way, red at the bottom.</summary>
+        /// <summary>The health ramp: the configured red at the top, and two darker ones under it.</summary>
         private static Color Ramp(Color full, float level)
         {
             level = Ink.Clamp01(level);

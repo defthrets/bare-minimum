@@ -1076,9 +1076,9 @@ namespace BareMinimum.Core
         public SpecialMode VitalsSpecial = SpecialMode.Auto;
 
         /// <summary>
-        /// The stock bars' own colours. Health is a vivid green and runs through amber to a
-        /// vivid red with the level; armour is the game's blue; the third is energy's
-        /// FLUORESCENT GREEN-YELLOW or the special's gold.
+        /// The stock bars' own colours. Health is a vivid red that darkens as it empties;
+        /// armour is the game's blue; the third is energy's FLUORESCENT GREEN-YELLOW or the
+        /// special's gold.
         ///
         /// THIS HAS MOVED TWICE AND BOTH TIMES FOR THE SAME REASON. It was plain yellow, which
         /// is what the fuel gauge beside it shows at a full tank; it went teal, which was the
@@ -1093,15 +1093,20 @@ namespace BareMinimum.Core
         /// which does the separating on its own before hue is even considered.
         /// </summary>
         /// <summary>
-        /// The top of the health ramp, and a VIVID green rather than the game's own.
+        /// The top of the health ramp: a VIVID RED, and red is now the whole ramp.
         ///
-        /// 114,204,114 is the shade the vanilla bar uses and it was kept out of deference to
-        /// it, which was the wrong instinct: that bar is a thin strip in the corner of a busy
-        /// HUD and it can afford to be quiet, where this is a full column standing in a row of
-        /// five saturated ones. Beside them the sage read as a bar that had been left greyed
-        /// out. This is the same hue with the life put back into it.
+        /// IT WAS GREEN AND THAT MADE IT THE ODD ONE OUT. Every other bar in the row is one
+        /// colour family that darkens as it empties -- the rule being that brightness says how
+        /// bad and hue says which meter -- and health alone changed hue with its level, so
+        /// halfway down it was an amber belonging to no meter at all.
+        ///
+        /// Red at full is unusual for a health bar and it is the right call here: it makes the
+        /// row read by one rule instead of five plus an exception, and a red column is never
+        /// ambiguous about what it is measuring. What the old green-to-red carried -- "you are
+        /// in trouble" -- is carried better by the beat, which is a far louder signal than any
+        /// hue and only appears when it is true. See Vitals.Paint.
         /// </summary>
-        public System.Drawing.Color VitalsHealth = System.Drawing.Color.FromArgb(255, 48, 222, 82);
+        public System.Drawing.Color VitalsHealth = System.Drawing.Color.FromArgb(255, 236, 40, 44);
         public System.Drawing.Color VitalsArmour = System.Drawing.Color.FromArgb(255, 93, 182, 229);
         public System.Drawing.Color VitalsEnergyColour = System.Drawing.Color.FromArgb(255, 196, 246, 40);
         public System.Drawing.Color VitalsSpecialColour = System.Drawing.Color.FromArgb(255, 240, 200, 80);
