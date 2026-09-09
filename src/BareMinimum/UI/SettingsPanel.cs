@@ -95,6 +95,12 @@ namespace BareMinimum.UI
         public Func<int> MachineCount;
         public Action ForgetMachines;
 
+        /// <summary>The map survey, by the same arrangement. See Venues.Survey.</summary>
+        public Func<bool> SurveyRunning;
+        public Func<float> SurveyProgress;
+        public Func<float> SurveyLeft;
+        public Action ToggleSurvey;
+
         public SettingsPanel(Core.Settings cfg, Needs.Needs needs)
         {
             _cfg = cfg;
@@ -921,6 +927,30 @@ namespace BareMinimum.UI
                     _needs.Thirst.Value = 0f;
                     _needs.SaveNow();
                     Notify("~r~Starving and exhausted.");
+                }
+            });
+
+            Add(new Option
+            {
+                Name = "Survey the map for machines",
+                Note = "Flies you over the whole map on a grid, slowly enough for the props " +
+                       "to load, and every machine and stall it passes goes on the map for " +
+                       "good. Takes a while. Press again to stop; you land back where you " +
+                       "started either way.",
+                Show = () =>
+                {
+                    if (SurveyRunning == null || !SurveyRunning()) return "start";
+
+                    var pct = SurveyProgress == null ? 0f : SurveyProgress() * 100f;
+                    var left = SurveyLeft == null ? 0f : SurveyLeft() / 60f;
+
+                    return pct.ToString("0", CultureInfo.InvariantCulture) + "%, " +
+                           left.ToString("0", CultureInfo.InvariantCulture) + "m left";
+                },
+                Activate = () =>
+                {
+                    if (ToggleSurvey == null) return;
+                    ToggleSurvey();
                 }
             });
 

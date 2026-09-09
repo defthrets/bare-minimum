@@ -1399,6 +1399,39 @@ namespace BareMinimum.Core
         /// </summary>
         public int RememberMachinesMax = 900;
 
+        /// <summary>
+        /// HOW FAST THE MAP SURVEY FLIES, in metres per second. See Venues.Survey.
+        ///
+        /// THE ONE NUMBER THAT DECIDES WHETHER IT WORKS. Map props do not exist until the game
+        /// has streamed them, so a survey that outruns the streamer completes, reports success,
+        /// and has found a third of what is out there -- which is the worst possible failure
+        /// because it looks exactly like the good one. 45 m/s is about 160 km/h, which is a fast
+        /// car and well inside what the engine keeps up with at rooftop height.
+        ///
+        /// Raising it is the obvious economy and the obvious mistake. If a survey has to be
+        /// rushed, the honest lever is the map bounds, not this.
+        /// </summary>
+        public float SurveySpeed = 45f;
+
+        /// <summary>
+        /// The rectangle the survey flies, in world coordinates.
+        ///
+        /// THE WHOLE MAP BY DEFAULT AND THAT IS NOT FREE. At the default speed and scan radius
+        /// it is 26 lanes, 300 km and just under two hours -- which is the honest figure and
+        /// the reason these are settings rather than constants. Nearly every machine in the
+        /// game is in Los Santos proper, and that rectangle is 11 lanes, 51 km and about twenty
+        /// minutes; it is written out in the ini so narrowing to it is one paste rather than an
+        /// afternoon working out where the city ends.
+        ///
+        /// THE OCEAN IS STILL FLOWN with the full bounds, on purpose. Carving it out would mean
+        /// this code knowing the coastline, and a wrong guess at that is a stretch of Chumash
+        /// nobody ever surveys and no way to tell. Time is the cheap thing.
+        /// </summary>
+        public float SurveyWest = -3900f;
+        public float SurveyEast = 4400f;
+        public float SurveySouth = -3800f;
+        public float SurveyNorth = 7800f;
+
         /// <summary>Whether the roadside produce stalls sell to you. Same argument.</summary>
         public bool FruitStalls = true;
 
@@ -1860,6 +1893,11 @@ namespace BareMinimum.Core
                 cfg.RememberMachines = ini.GetBool("Map", "RememberMachines", cfg.RememberMachines);
                 cfg.RememberMachinesMax = ini.GetInt("Map", "RememberMachinesMax",
                                                      cfg.RememberMachinesMax, 10, 5000);
+                cfg.SurveySpeed = ini.GetFloat("Map", "SurveySpeed", cfg.SurveySpeed, 5f, 200f);
+                cfg.SurveyWest = ini.GetFloat("Map", "SurveyWest", cfg.SurveyWest, -5000f, 5000f);
+                cfg.SurveyEast = ini.GetFloat("Map", "SurveyEast", cfg.SurveyEast, -5000f, 5000f);
+                cfg.SurveySouth = ini.GetFloat("Map", "SurveySouth", cfg.SurveySouth, -5000f, 9000f);
+                cfg.SurveyNorth = ini.GetFloat("Map", "SurveyNorth", cfg.SurveyNorth, -5000f, 9000f);
                 cfg.MachineBlips = ini.GetBool("Counters", "MachineBlips", cfg.MachineBlips);
                 cfg.DiscoverCarts = ini.GetBool("Counters", "DiscoverCarts", cfg.DiscoverCarts);
                 cfg.WalkIns = ini.GetBool("Counters", "WalkIns", cfg.WalkIns);
