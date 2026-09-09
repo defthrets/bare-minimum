@@ -148,6 +148,27 @@ namespace BareMinimum
             // meter, and neither has to know the other is there.
             Food.Dope.Rush = minutes => _vitals.HoldEnergy(minutes, true);
 
+            // AND WHAT HE SOUNDS LIKE WHEN HIS LEGS GO. A grunt out of the game's own
+            // non-verbal set the moment the energy runs out, with an out-of-breath line
+            // behind it, and the sound of finishing a workout when he has his wind back.
+            _vitals.Winded = out_ =>
+            {
+                if (out_)
+                {
+                    _speech.Noise(Food.Speech.Pain.Exhaustion);
+                    _speech.Say("winded");
+                }
+                else
+                {
+                    _speech.Say("caught");
+                }
+            };
+
+            // WHAT A DRUG DOES TO HIM OUT LOUD. Dope knows which camp it was; the lines are in
+            // foods.json with the rest. Not gated on having been served by anybody -- a man
+            // reacting to what he has just taken is not thanking a cashier.
+            Food.Dope.Reacted = set => _speech.Say(set);
+
             Interval = 0;
             Tick += OnTick;
             Aborted += OnAborted;

@@ -174,7 +174,17 @@ namespace BareMinimum.Food
 
             // BEFORE THE PROP AND THE ANIMATION, so the line lands while his hands are
             // still empty. Said after, he is thanking the cashier around a mouthful.
-            if (aloud) _speech.Say(item.Smoke ? "smoke" : item.Booze > 0f ? "booze" : "buy");
+            // WHAT HE IS HAVING, not only that he paid for it. The game's bank has GENERIC_EAT
+            // and GENERIC_DRINK in all three voices, which is a better line over a burger than
+            // a thank-you, so the set is picked by what is in his hand. Still only when
+            // somebody served him -- see the note on this method.
+            if (aloud)
+            {
+                _speech.Say(item.Smoke ? "smoke"
+                          : item.Booze > 0f ? "booze"
+                          : item.Drink ? "drink"
+                          : "eat");
+            }
 
             _item = item;
             _animStarted = false;
@@ -286,6 +296,10 @@ namespace BareMinimum.Food
             else
             {
                 _needs.Eat(item.Hunger);
+
+                // A COUGH AFTER A CIGARETTE. Not a line -- a noise, in his own voice, out of
+                // the set the game keeps for coughing. See Speech.Noise.
+                if (item.Smoke) _speech.Noise(Speech.Pain.Cough);
                 if (item.Wake > 0f) _needs.Wake(item.Wake);
             }
 

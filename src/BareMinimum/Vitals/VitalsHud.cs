@@ -76,6 +76,13 @@ namespace BareMinimum.Vitals
         /// <summary>Whether he has run himself out of breath. For anything else that cares.</summary>
         public bool Tired => _cfg.VitalsEnabled && _energy.Tired;
 
+        /// <summary>
+        /// Called when he runs out of breath and when he gets it back. Wired by Main, because
+        /// the speech bank belongs to Food and the meter belongs here, and neither needs to
+        /// know the other exists -- the same arrangement the drinks and the drugs already use.
+        /// </summary>
+        public Action<bool> Winded;
+
         /// <summary>The gauge, for the row's geometry: the minimap's frame lines up with it. Set by Main.</summary>
         public Gauge Gauge { get; set; }
 
@@ -116,6 +123,13 @@ namespace BareMinimum.Vitals
             }
 
             _energy.Update(_cfg, dt);
+
+            // HIS LEGS GOING, AND COMING BACK. A grunt of exhaustion the moment the bar runs
+            // out -- a noise, in his own voice, not a line -- and one of the game's own
+            // out-of-breath lines with it; then the sound of finishing a workout when he has
+            // his wind again. See Food.Speech.
+            if (_energy.JustEmptied && Winded != null) Winded(true);
+            if (_energy.JustRecovered && Winded != null) Winded(false);
             _readings.Update(_cfg, dt, _energy);
             _motion.Update(_cfg, dt, _readings, _energy);
 

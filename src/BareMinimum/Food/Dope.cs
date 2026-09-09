@@ -343,6 +343,22 @@ namespace BareMinimum.Food
                 catch (Exception ex) { Log.Debug("The rush did not reach the bar: " + ex.Message); }
             }
 
+            if (Reacted != null)
+            {
+                // Weed is its own thing: it is the one on the list that is neither an upper
+                // nor a night's sleep, and the one line in the bank that fits it is Kifflom.
+                var mood = string.Equals(id, "weed", StringComparison.OrdinalIgnoreCase) ? "weed"
+                         : effect.Wired > 0f ? "upper"
+                         : effect.Wake < 0f ? "downer"
+                         : null;
+
+                if (mood != null)
+                {
+                    try { Reacted(mood); }
+                    catch (Exception ex) { Log.Debug("The reaction did not land: " + ex.Message); }
+                }
+            }
+
             Report(id, effect, fedBefore, restedBefore, needs);
 
             return null;
@@ -428,6 +444,16 @@ namespace BareMinimum.Food
         /// below are this mod's own reckoning of how long each one rides.
         /// </summary>
         public static Action<float> Rush;
+
+        /// <summary>
+        /// What he says about what he has just taken. Wired by Main, for the reason above.
+        ///
+        /// BY CAMP RATHER THAN BY DRUG. The uppers get an excited line, the downers a flat
+        /// one, weed the Epsilon greeting -- three sets in foods.json rather than a line per
+        /// entry in the table below, because the table is about a body and this is about a
+        /// mood, and a dozen sets of two lines each would come out as the same two lines.
+        /// </summary>
+        public static Action<string> Reacted;
 
         /// <summary>
         /// What each one does, and it is not a table of medicine.

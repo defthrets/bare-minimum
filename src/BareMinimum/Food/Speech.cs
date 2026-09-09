@@ -32,6 +32,7 @@ namespace BareMinimum.Food
             new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
 
         private int _nextAllowed;
+        private int _nextNoise;
 
         public Speech(Core.Settings cfg)
         {
@@ -95,6 +96,65 @@ namespace BareMinimum.Food
             {
                 Log.Once("speech", "Could not say anything: " + ex.Message);
             }
+        }
+
+        /// <summary>
+        /// A NOISE RATHER THAN A LINE: a cough, a wheeze, a grunt of exhaustion.
+        ///
+        /// PLAY_PAIN is misnamed. It is the ped's whole non-verbal vocal set and most of the
+        /// list has nothing to do with being hurt -- inhale, exhale, wheeze, cough, exhaustion,
+        /// sneeze -- recorded in the same voice as everything else, so it comes out as Franklin
+        /// or Michael or Trevor without a wav being shipped. It is the closest thing the game
+        /// has to the stomach rumble and the yawn that are simply not in it.
+        ///
+        /// NOT GATED ON THE DICE, and only lightly on the clock. A line is garnish and should
+        /// mostly not happen; a cough after a cigarette and a grunt when your legs go are the
+        /// mod telling you something, and one that fires half the time is a bug you cannot see.
+        /// They are still rate-limited, because two of them on top of each other is a man
+        /// choking.
+        /// </summary>
+        public void Noise(Pain what)
+        {
+            if (!_cfg.SpeechEnabled) return;
+
+            try
+            {
+                var now = Game.GameTime;
+                if (now < _nextNoise) return;
+
+                var me = Game.Player.Character;
+                if (me == null || !me.Exists() || me.IsDead) return;
+
+                if (Function.Call<bool>(Hash.IS_ANY_SPEECH_PLAYING, me.Handle)) return;
+
+                // The third argument is how hard it hurt, which for a cough is nothing.
+                Function.Call(Hash.PLAY_PAIN, me.Handle, (int)what, 0f);
+
+                _nextNoise = now + 2500;
+
+                Log.Debug("Made a " + what + " noise.");
+            }
+            catch (Exception ex)
+            {
+                Log.Once("speech-noise", "Could not make a noise: " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// The ones out of eAudDamageReason worth having here, by their own names.
+        ///
+        /// The full list runs to thirty-four and most of it is screaming, drowning and being
+        /// set on fire. These six are the ones a mod about a stomach and a pair of lungs has
+        /// any use for.
+        /// </summary>
+        public enum Pain
+        {
+            Inhale = 11,
+            Exhale = 12,
+            Wheeze = 18,
+            Cough = 19,
+            Exhaustion = 21,
+            Sneeze = 30
         }
     }
 }

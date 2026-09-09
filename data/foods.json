@@ -4079,19 +4079,74 @@
       "nothing, the name is wrong.",
       "",
       "GENERIC_THANKS is the safe one and is listed twice on purpose, so it comes up",
-      "more often than the others."
+      "more often than the others.",
+      "",
+      "EVERY NAME BELOW WAS READ OUT OF THE GAME'S OWN SPEECH LIST ON THIS MACHINE",
+      "(menyooStuff/PedSpeechList.txt) and checked to exist in ALL THREE of",
+      "MICHAEL_NORMAL, FRANKLIN_NORMAL and TREVOR_NORMAL -- so none of them is the",
+      "silent miss the note above warns about, whoever you are playing."
     ],
     "buy": [
       "GENERIC_THANKS",
       "GENERIC_THANKS",
       "GENERIC_HOWS_IT_GOING"
     ],
+    "eat": [
+      "GENERIC_EAT",
+      "GENERIC_EAT",
+      "GENERIC_THANKS"
+    ],
+    "drink": [
+      "GENERIC_DRINK",
+      "DRINK_GOOD",
+      "GENERIC_THANKS"
+    ],
     "booze": [
-      "GENERIC_THANKS",
+      "GENERIC_DRINK",
+      "DRINK_GOOD",
       "GENERIC_YES"
     ],
     "smoke": [
-      "GENERIC_THANKS"
+      "GENERIC_THANKS",
+      "GENERIC_YES"
+    ],
+    "broke": [
+      "NO_CHANGE",
+      "GENERIC_NO"
+    ],
+    "empty": [
+      "VEND_NO_ITEM",
+      "GENERIC_WHATEVER"
+    ],
+    "winded": [
+      "RACE_FINISHED_OUT_OF_BREATH",
+      "RACE_COLLIDE_OUT_OF_BREATH",
+      "RACE_STAY_POSITION_OUT_OF_BREATH"
+    ],
+    "caught": [
+      "WORKOUT_FINISHED",
+      "GENERIC_YES"
+    ],
+    "upper": [
+      "ROLLERCOASTER_CHAT_EXCITED",
+      "GAME_GOOD_SELF",
+      "GENERIC_YES",
+      "DARTS_HAPPY"
+    ],
+    "downer": [
+      "GENERIC_WHATEVER",
+      "TV_BORED",
+      "GENERIC_YES"
+    ],
+    "weed": [
+      "KIFFLOM_GREET",
+      "TV_BORED",
+      "GENERIC_WHATEVER"
+    ],
+    "badtrip": [
+      "GENERIC_SHOCKED_MED",
+      "GENERIC_FRIGHTENED_MED",
+      "GENERIC_CURSE_MED"
     ]
   }
 }
