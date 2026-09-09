@@ -1289,10 +1289,10 @@ namespace BareMinimum.Core
         public float FoodSpinY = 0f;
         public float FoodSpinZ = 90f;
 
-        public Keys MenuKey = Keys.F7;
+        public Keys MenuKey = Keys.F11;
 
         /// <summary>Opens the pocket: what you have bought and not eaten yet.</summary>
-        public Keys BagKey = Keys.B;
+        public Keys BagKey = Keys.F12;
 
         /// <summary>
         /// Whether the settings menu and the pocket open on a CONTROLLER as well.
@@ -1301,7 +1301,7 @@ namespace BareMinimum.Core
         /// spare button on a pad -- every one of them is spoken for on foot -- so a single
         /// press is always one press away from something the game already does.
         ///
-        /// LB + D-pad UP for the menu and RB + X for the pocket. Fumes already owns LB +
+        /// LB + D-pad UP for the menu and RB + A for the pocket. Fumes already owns LB +
         /// D-pad DOWN for its menu, and somebody running both mods should not have one chord
         /// open two panels.
         ///
@@ -1473,16 +1473,28 @@ namespace BareMinimum.Core
                 cfg.BlockVanillaCounter = ini.GetBool("Counters", "BlockVanillaMenu",
                                                       cfg.BlockVanillaCounter);
 
+                // THE FOUR BELOW HAD NO RANGE AT ALL, which is how LocationChance came to be
+                // the only guarded number in either section. A percent is 0..100 wherever it
+                // appears, and the two gaps are worse than untidy: both are multiplied by a
+                // thousand where they are used, so a gap of anything past about 2,147,483
+                // seconds overflows int and comes out NEGATIVE -- a gap so long the player
+                // asked for silence turns into no gap whatsoever, which is the exact opposite
+                // of the setting. An hour is the longest gap that is a gap rather than an off
+                // switch, and Enabled is already the off switch.
                 cfg.SpeechEnabled = ini.GetBool("Speech", "Enabled", cfg.SpeechEnabled);
-                cfg.SpeechChance = ini.GetInt("Speech", "ChancePercent", cfg.SpeechChance);
-                cfg.SpeechGapSeconds = ini.GetInt("Speech", "GapSeconds", cfg.SpeechGapSeconds);
+                cfg.SpeechChance = ini.GetInt("Speech", "ChancePercent",
+                                              cfg.SpeechChance, 0, 100);
+                cfg.SpeechGapSeconds = ini.GetInt("Speech", "GapSeconds",
+                                                  cfg.SpeechGapSeconds, 0, 3600);
                 cfg.SpeechLocations = ini.GetBool("Speech", "Locations", cfg.SpeechLocations);
                 cfg.SpeechLocationChance = ini.GetInt("Speech", "LocationChance",
                                                       cfg.SpeechLocationChance, 0, 100);
 
                 cfg.SocialEnabled = ini.GetBool("Social", "Enabled", cfg.SocialEnabled);
-                cfg.SocialChance = ini.GetInt("Social", "ChancePercent", cfg.SocialChance);
-                cfg.SocialGapSeconds = ini.GetInt("Social", "GapSeconds", cfg.SocialGapSeconds);
+                cfg.SocialChance = ini.GetInt("Social", "ChancePercent",
+                                              cfg.SocialChance, 0, 100);
+                cfg.SocialGapSeconds = ini.GetInt("Social", "GapSeconds",
+                                                  cfg.SocialGapSeconds, 0, 3600);
 
                 cfg.ShowShopBlips = ini.GetBool("Map", "ShowShopBlips", cfg.ShowShopBlips);
                 cfg.ShopBlipRange = ini.GetFloat("Map", "ShopBlipRange",

@@ -113,7 +113,20 @@ namespace BareMinimum.Needs
             // to set their move rate has to fight us for it every frame.
             if (Math.Abs(rate - 1f) < 0.001f) return;
 
-            if (rate < 0.4f) rate = 0.4f;
+            // THE BACKSTOP HAS TO SIT UNDER THE INI, NOT ON TOP OF IT. This was 0.4, and the
+            // ini accepts either MinMoveRate down to 0.3 -- so every value from 0.30 to 0.39
+            // was quietly identical to 0.40, and somebody who set 0.30 because the setting
+            // says it is "the slowest hunger alone will make you walk" got 0.40 and no word
+            // about it anywhere. A setting that is accepted and then overruled is worse than
+            // one that is refused.
+            //
+            // 0.09 is not a taste decision, it is the two ranges multiplied: 0.3 for hunger
+            // times 0.3 for sleep, which is the slowest the ramps above can legitimately
+            // produce. Reaching it takes an ini deliberately set to both minimums AND being
+            // starving and exhausted at the same moment, which MoveRate is explicit about
+            // wanting to be worse than either alone. So the floor now only catches a rate
+            // that got past the ranges some other way -- which is all it was ever for.
+            if (rate < 0.09f) rate = 0.09f;
 
             Function.Call(Hash.SET_PED_MOVE_RATE_OVERRIDE, me.Handle, rate);
         }
@@ -142,8 +155,16 @@ namespace BareMinimum.Needs
             if (_cfg.SleepEnabled) worst = Math.Min(worst, sleep);
 
             var from = _cfg.WellFedAbove;
+
+            // A THRESHOLD OF ONE IS ANSWERED BEFORE THE RAMP, and the order is the whole bug.
+            // The ini accepts WellFedAbove up to 1.0, which reads as "only at a completely
+            // full meter" -- but a meter never goes ABOVE one, so the "not there yet" test
+            // below was true even at full and returned before the line that grants it. The
+            // one setting that asks for the strictest bonus was the one setting that switched
+            // it off. Tested first, 1.0 now means exactly what it says.
+            if (from >= 0.9999f) return worst >= 0.9999f ? _cfg.WellFedBonus : 1f;
+
             if (worst <= from) return 1f;
-            if (from >= 0.9999f) return _cfg.WellFedBonus;
 
             // Ramps from nothing at the threshold to the full bonus at completely full.
             var t = (worst - from) / (1f - from);
@@ -212,7 +233,15 @@ namespace BareMinimum.Needs
             // hungry limp instead reads as the beer having done nothing.
             //
             // It also escalates: merry, then properly gone.
-            if (drunk >= _cfg.BoozeDrunkAt)
+            //
+            // STONE SOBER IS TESTED FIRST, AND SEPARATELY. The ini accepts DrunkAt down to 0,
+            // and at 0 the comparison below is 0 >= 0 -- true for a player who has not had a
+            // drink in his life, so the drunk walk was pinned on permanently. Worse, drunk is
+            // FORCED to 0 up in Update when the drink system is switched off, so turning
+            // [Drink] off was the one thing that could not stop it. Nothing above zero is
+            // affected: DrunkAt = 0 still means "the very first sip shows", because any drink
+            // at all puts drunk above zero and past this guard.
+            if (drunk > 0.0001f && drunk >= _cfg.BoozeDrunkAt)
             {
                 want = drunk >= _cfg.BoozeHeavyAt ? _cfg.BoozeClipsetHeavy : _cfg.BoozeClipset;
             }
