@@ -61,7 +61,7 @@ namespace BareMinimum.Vitals
         private float _since = -1f;
 
         /// <summary>Once a frame. <paramref name="visible"/> is whether the HUD is being drawn at all -- dead, arrested, hidden.</summary>
-        public void Update(Settings cfg, UI.Gauge gauge, bool visible, float dt)
+        public void Update(Settings cfg, UI.Gauge gauge, bool visible, bool on, float dt)
         {
             // A BUILD BEFORE THIS ONE MOVED THE GAME'S READOUT ACROSS THE SCREEN, and a moved
             // component stays moved until it is reset -- across a reload, not across a restart.
@@ -71,7 +71,10 @@ namespace BareMinimum.Vitals
                 Restore();
             }
 
-            Notifications(cfg);
+            // NOT WHILE THE MOD IS OFF. This holds the game's own notification feed out of
+            // the way of our frame, and a frame we are not drawing needs nothing held out of
+            // its way. Passing 0 is what puts the feed back, and it is what Restore calls.
+            Notifications(on ? cfg.HudNotifyLift : 0f);
 
             if (!cfg.MoveCash)
             {
@@ -173,10 +176,8 @@ namespace BareMinimum.Vitals
         /// leave the feed wherever it put it. Nought puts it back, which is what Rockstar's own
         /// menus call on the way out and what Restore does here.
         /// </summary>
-        private void Notifications(Settings cfg)
+        private void Notifications(float lift)
         {
-            var lift = cfg.HudNotifyLift;
-
             if (Math.Abs(lift) < 0.0005f)
             {
                 if (!_lifted) return;

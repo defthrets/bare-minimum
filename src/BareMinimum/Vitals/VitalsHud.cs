@@ -102,8 +102,10 @@ namespace BareMinimum.Vitals
             var compare = _cfg.VitalsCompare;
 
             // The cash readout is part of the HUD's layout, not of the vitals, and is drawn
-            // whether the vitals are on or off.
-            _placement.Update(_cfg, Gauge, Visible(), dt);
+            // whether the vitals are on or off -- but not when the MOD is off, which is what
+            // `on` carries. It moves the game's notification feed, and a mod that is switched
+            // off has no business still holding somebody else's HUD out of the way.
+            _placement.Update(_cfg, Gauge, on && Visible(), on, dt);
 
             // THE GAME'S BARS ARE MANAGED WHETHER OR NOT OURS ARE DRAWN. During a fade or a
             // switch nothing of ours is on screen, and that is exactly when the minimap is
@@ -113,6 +115,13 @@ namespace BareMinimum.Vitals
             if (!on)
             {
                 _motion.Rest();
+
+                // EVERYTHING THE METER DID TO HIM, UNDONE. The movement cap and the switched-off
+                // special ability are the game's state, not ours, and this return is the path a
+                // player takes when they turn the mod off in the menu -- which until now left a
+                // man who happened to be winded jogging, with no ability, for the rest of the
+                // session with the mod off. Release is cheap and does nothing when nothing is held.
+                _energy.Release();
                 return;
             }
 

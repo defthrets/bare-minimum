@@ -98,10 +98,21 @@ namespace BareMinimum.Vitals
 
             if (wantHidden != _hidden)
             {
-                _hidden = wantHidden;
-
-                if (!wantHidden) Show(cfg);
-                else _needRefresh = true;
+                // PUTTING IT BACK IS ALLOWED TO FAIL, AND USED TO BE FORGOTTEN WHEN IT DID.
+                // Setup does nothing and says so when the minimap's scaleform is not to hand,
+                // and it backs off for two seconds after a miss -- but the flag had already
+                // been flipped, so the branch never came round again and the game's own health
+                // strip stayed missing for the session with the mod switched off. The flag now
+                // moves only when the work actually happened, so the next tick tries again.
+                if (!wantHidden)
+                {
+                    if (Show(cfg)) _hidden = false;
+                }
+                else
+                {
+                    _hidden = true;
+                    _needRefresh = true;
+                }
             }
 
             if (_hidden)
@@ -149,10 +160,14 @@ namespace BareMinimum.Vitals
         }
 
         /// <summary>Puts the game's bars back, once. Used on the way out as well as for the compare view.</summary>
-        public void Show(Settings cfg)
+        /// <summary>
+        /// The game's own strip back. FALSE when the scaleform was not to hand and nothing was
+        /// done, so the caller knows to come round again rather than assuming it worked.
+        /// </summary>
+        public bool Show(Settings cfg)
         {
             AbilityBar(true);
-            Setup(cfg.VitalsShowType);
+            return Setup(cfg.VitalsShowType);
         }
 
         /// <summary>Everything back the way it was found, and the big map shut in case a flick left it open.</summary>

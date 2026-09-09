@@ -161,6 +161,19 @@ namespace BareMinimum.Venues
         private readonly Bolt _bolt = new Bolt();
         private readonly Crowd _crowd = new Crowd();
 
+        /// <summary>
+        /// WHAT WAS TURNED ON TO GET HIM IN, so that it can be turned off again.
+        ///
+        /// An interior pinned into memory is refcounted and stays pinned until it is unpinned;
+        /// an IPL requested is loaded until it is removed; and both outlive a script reload.
+        /// Neither was ever undone, so a session of shopping raised the floor on memory a shop
+        /// at a time with nothing able to lower it. Held here rather than on the Room, because
+        /// the interior is whatever the game answered with at the time and not a property of
+        /// the room in the file.
+        /// </summary>
+        private int _pinned;
+        private readonly List<string> _asked = new List<string>();
+
         private Vendor _in;
         private Room _room;
 
@@ -346,6 +359,7 @@ namespace BareMinimum.Venues
                     if (one.Length == 0) continue;
 
                     Function.Call(Hash.REQUEST_IPL, one);
+                    if (!_asked.Contains(one)) _asked.Add(one);
                     Log.Info("Asked for ipl '" + one + "' for " + room.Name + ".");
                 }
 
@@ -370,6 +384,7 @@ namespace BareMinimum.Venues
                 {
                     Function.Call(Hash.PIN_INTERIOR_IN_MEMORY, interior);
                     Function.Call(Hash.SET_INTERIOR_ACTIVE, interior, true);
+                    _pinned = interior;
                 }
 
                 // WAITED ON, NOT WAITED OUT. Is there collision round him, is the interior
@@ -390,6 +405,7 @@ namespace BareMinimum.Venues
                         {
                             Function.Call(Hash.PIN_INTERIOR_IN_MEMORY, interior);
                             Function.Call(Hash.SET_INTERIOR_ACTIVE, interior, true);
+                            _pinned = interior;
                         }
                     }
 
@@ -397,7 +413,9 @@ namespace BareMinimum.Venues
                         !Function.Call<bool>(Hash.IS_IPL_ACTIVE, room.Ipl.Split(';')[0].Trim()))
                     {
                         // A request is not a load; a dropped one looks like a slow one.
-                        Function.Call(Hash.REQUEST_IPL, room.Ipl.Split(';')[0].Trim());
+                        var again = room.Ipl.Split(';')[0].Trim();
+                        Function.Call(Hash.REQUEST_IPL, again);
+                        if (!_asked.Contains(again)) _asked.Add(again);
                     }
 
                     var solid = Function.Call<bool>(Hash.HAS_COLLISION_LOADED_AROUND_ENTITY, me.Handle);
@@ -507,6 +525,14 @@ namespace BareMinimum.Venues
                 catch { /* nothing else to try */ }
 
                 try { me.Position = _cameFrom; } catch { /* nothing else to try */ }
+
+                // AND THE LOAD SCENE, which is started forty lines above the stop and was only
+                // ever stopped on the way through. Anything thrown between the two -- and there
+                // is an eight second wait in there -- left the streamer anchored to a sphere at
+                // the shop, so the world stopped loading around him wherever he went afterwards.
+                try { Function.Call(Hash.NEW_LOAD_SCENE_STOP); } catch { /* nothing else to try */ }
+
+                Undo();
                 if (room.Online) Mp(false);
                 Fade(true);
             }
@@ -742,10 +768,43 @@ namespace BareMinimum.Venues
             catch { /* a reload will fall back to the first bar with that room */ }
         }
 
+        /// <summary>
+        /// Everything Enter turned on, turned off: the pinned interior and any map chunk it
+        /// asked for. Safe to call with nothing held, and called from every way out.
+        /// </summary>
+        private void Undo()
+        {
+            if (_pinned != 0)
+            {
+                try
+                {
+                    Function.Call(Hash.SET_INTERIOR_ACTIVE, _pinned, false);
+                    Function.Call(Hash.UNPIN_INTERIOR, _pinned);
+                }
+                catch { /* an interior the game has already dropped needs nothing */ }
+
+                _pinned = 0;
+            }
+
+            foreach (var one in _asked)
+            {
+                try { Function.Call(Hash.REMOVE_IPL, one); }
+                catch { /* likewise */ }
+            }
+
+            _asked.Clear();
+        }
+
         private void Forget(string why)
         {
             _bolt.Release();
             _crowd.Clear();
+            Undo();
+
+            // AND THE MAP BACK. Leave switches it; this did not, and this is the path a death
+            // inside a room takes -- which left the whole city on the online map, with the
+            // story blips gone, for the rest of the session and nothing left that knew why.
+            if (_room != null && _room.Online) Mp(false);
             _outSince = 0;
 
             if (why != null && _in != null)
@@ -781,6 +840,10 @@ namespace BareMinimum.Venues
             // AND THE CROWD, which is this mod's peds and nobody else's. Left behind they are a
             // room full of people standing in a place the player cannot get back to.
             try { _crowd.Clear(); } catch { /* teardown */ }
+
+            // The pin and the map chunks outlive a reload, so they are the one thing here that
+            // MUST come off on the way out rather than being left for the next Enter.
+            try { Undo(); } catch { /* teardown */ }
 
             if (_room != null && _room.Online) Mp(false);
         }

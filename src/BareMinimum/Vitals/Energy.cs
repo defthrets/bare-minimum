@@ -184,6 +184,12 @@ namespace BareMinimum.Vitals
                 // with the game's own cap on it; once, and on the right ped, when it lifts.
                 if (Tired)
                 {
+                    // THE OLD BODY FIRST. This used to overwrite the handle, so going winded as
+                    // one character and switching to another left the first one capped with
+                    // nothing that knew about him -- he could not sprint again until he happened
+                    // to go winded and recover on that body a second time.
+                    if (_cappedPed != 0 && _cappedPed != me.Handle) ReleaseCap();
+
                     Function.Call(Hash.SET_PED_MAX_MOVE_BLEND_RATIO, me.Handle, RunCap);
                     _cappedPed = me.Handle;
                 }
