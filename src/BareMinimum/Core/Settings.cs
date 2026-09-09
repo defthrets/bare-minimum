@@ -93,9 +93,11 @@ namespace BareMinimum.Core
         /// <summary>
         /// GAME hours awake before the meter is empty.
         ///
-        /// Forty-four is deliberately just under two game days, so "a day or two without
-        /// sleep" lands where the effects do: the first slowdown arrives around twenty-eight
-        /// hours awake, which is a bit over one day.
+        /// Eighty-two is a bit over three game days, which is where this settled after several
+        /// rounds of it emptying too fast to live with. With TiredAt at 0.35 the first slowdown
+        /// arrives somewhere past two game days awake, so a night missed is felt and a long day
+        /// is not. The number and this sentence drifted apart once; they are checked together
+        /// now, because a comment that describes an older value is worse than no comment.
         /// </summary>
         public float SleepHoursToEmpty = 82f;
 
@@ -108,8 +110,8 @@ namespace BareMinimum.Core
         /// forty-fourths -- about a seventh -- and a full night barely moved the meter, which
         /// read as sleeping being broken rather than as sleeping being slow.
         ///
-        /// Twelve, so two normal nights take somebody from nothing to full and one six-hour
-        /// night is worth half a meter.
+        /// Eight, so one proper night takes somebody from nothing to full and a four-hour
+        /// night is worth half a meter. It was twelve, and the sentence outlived the number.
         /// </summary>
         public float SleepHoursToFull = 8f;
 
