@@ -2267,10 +2267,21 @@ namespace BareMinimum.Venues
                     return;
                 }
 
+                // FULL POCKETS ARE NOT A REFUSAL, THEY ARE A MEAL. Being told at the shelf
+                // that you cannot buy a burrito because you are already carrying five is the
+                // shop answering a question nobody asked: the pocket is for taking food away,
+                // and a man with nowhere to put it eats it standing there. Same rule as the
+                // window and the cart above, which never used the pocket in the first place.
+                if (_eating.Begin(item, true))
+                {
+                    Notify("~g~" + item.Name + "~s~ - no room in your pockets, so you ate it.");
+                    return;
+                }
+
                 try { Game.Player.Money += price; }
                 catch (Exception ex) { Log.Error("Could not refund " + price, ex); }
 
-                Notify("~y~Your pockets are full - refunded.");
+                Notify("~y~Your pockets are full, and so are your hands - refunded.");
                 return;
             }
 

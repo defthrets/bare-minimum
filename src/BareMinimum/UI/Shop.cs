@@ -506,16 +506,27 @@ namespace BareMinimum.UI
             // you do once, for several items.
             if (_cfg.BuyToPantry)
             {
-                if (_pantry.Full)
-                {
-                    Notify("~y~Your pockets are full.");
-                    return;
-                }
+                // FULL POCKETS ARE NOT A REFUSAL, THEY ARE A MEAL. Being told at the counter
+                // that you cannot buy a burger because you are already carrying five is the
+                // shop answering a question nobody asked: the pocket is for taking food away,
+                // and a man with nowhere to put it is a man who eats it standing there. So the
+                // last one goes in his hand instead of being turned down.
+                if (_pantry.Full) { Spot(item); return; }
 
                 if (!Charge(item.Price)) return;
 
                 if (!_pantry.Add(item.Id))
                 {
+                    // Paid for, and the pocket took it as far as the shelf and no further.
+                    // Eaten rather than refunded, for the reason above.
+                    if (!_eating.Busy && _eating.Begin(item, true))
+                    {
+                        _ui.Close();
+                        if (_at == Counter.Machine) Vend();
+                        Notify("~g~" + item.Name + "~s~ - no room in your pockets, so you ate it.");
+                        return;
+                    }
+
                     Refund(item.Price);
                     Notify("~r~No room for that - refunded.");
                     return;
@@ -552,6 +563,37 @@ namespace BareMinimum.UI
                 Refund(item.Price);
                 Notify("~r~Could not eat that - refunded.");
             }
+        }
+
+        /// <summary>
+        /// Bought with nowhere to put it: he eats it where he is standing.
+        ///
+        /// The whole path a normal purchase takes -- the money, the machine's animation, the
+        /// menu closing because you cannot shop with your mouth full -- and the same refund if
+        /// the animation will not start. The one thing it does not do is put anything anywhere.
+        /// </summary>
+        private void Spot(Item item)
+        {
+            if (_eating.Busy)
+            {
+                Notify("~y~Your pockets are full, and so are your hands.");
+                return;
+            }
+
+            if (!Charge(item.Price)) return;
+
+            _ui.Close();
+
+            if (_at == Counter.Machine) Vend();
+
+            if (_eating.Begin(item, true))
+            {
+                Notify("~g~" + item.Name + "~s~ - no room in your pockets, so you ate it.");
+                return;
+            }
+
+            Refund(item.Price);
+            Notify("~r~Could not eat that - refunded.");
         }
 
         private static int Money()
