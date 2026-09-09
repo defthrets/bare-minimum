@@ -456,9 +456,11 @@
       "_note4": "this group has had -- 52, then 475 radar_office, whose cabinet of little",
       "_note5": "windows was close but reads as a tower block once you know. Every one of",
       "_note6": "them was picked by looking at the art; not one of the names describes it.",
+      "_note7": "White, like the cafes and the shops. 53 was a pale blue that read as a",
+      "_note8": "cold thing on a map already carrying a blue armour bar beside it.",
       "name": "Vending Machines",
       "sprite": 945,
-      "colour": 53
+      "colour": 0
     }
   },
   "vendors": [
