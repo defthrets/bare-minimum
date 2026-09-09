@@ -1,4 +1,4 @@
-﻿{
+{
   "_comment": [
     "Places to buy one specific thing. No menu: walk up, the game's own prompt appears",
     "top left, press the key, eat it.",
@@ -391,23 +391,23 @@
   "groups": {
     "stand": {
       "name": "Street Food",
-      "sprite": 52,
-      "colour": 2
+      "sprite": 87,
+      "colour": 0
     },
     "fastfood": {
       "name": "Fast Food",
       "sprite": 889,
-      "colour": 41
+      "colour": 0
     },
     "restaurant": {
       "name": "Restaurants",
-      "sprite": 52,
-      "colour": 66
+      "sprite": 117,
+      "colour": 0
     },
     "cafe": {
       "name": "Cafes",
-      "sprite": 52,
-      "colour": 4
+      "sprite": 111,
+      "colour": 0
     },
     "store": {
       "name": "Shops",
@@ -417,17 +417,17 @@
     "liquor": {
       "name": "Liquor",
       "sprite": 827,
-      "colour": 3
+      "colour": 0
     },
     "bar": {
       "name": "Bars",
-      "sprite": 52,
-      "colour": 53
+      "sprite": 93,
+      "colour": 0
     },
     "smoke": {
       "name": "Smoke Shops",
-      "sprite": 52,
-      "colour": 72
+      "sprite": 925,
+      "colour": 0
     },
     "servo": {
       "name": "Convenience Store",
@@ -436,18 +436,18 @@
     },
     "pharmacy": {
       "name": "Pharmacy",
-      "sprite": 52,
-      "colour": 5
+      "sprite": 61,
+      "colour": 0
     },
     "produce": {
       "name": "Fruit Stalls",
       "sprite": 52,
-      "colour": 69
+      "colour": 2
     },
     "machine": {
       "name": "Vending Machines",
       "sprite": 52,
-      "colour": 74
+      "colour": 53
     }
   },
   "vendors": [
@@ -521,7 +521,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 87
     },
     {
       "_note": "THE TACO FARMER DRIVE-THROUGH, the hatch under the painted menu board on the",
@@ -546,7 +547,8 @@
       "reach": 5.5,
       "blip": false,
       "ui": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 87
     },
     {
       "_note": "La Vaca Loca Burger Shack DRIVE-THROUGH. Order without getting out.",
@@ -1129,7 +1131,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 87
     },
     {
       "_note": "Attack-A-Taco, Kill That Hunger. Coordinate is the DOOR from the first",
@@ -1150,7 +1153,8 @@
       "reach": 2.4,
       "blip": true,
       "ui": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 87
     },
     {
       "_note": "Xero 24, the garage shop. Open all hours, and the widest shelf on the map:",
@@ -1902,7 +1906,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 87
     },
     {
       "_note": "A second BITE!, out east. The windows sell it for us: SALADS Fresh,",
@@ -2520,7 +2525,8 @@
         "open": 10,
         "close": 2
       },
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 98
     },
     {
       "_note": "The other set of Up-n-Atom doors, at the far end of the same frontage.",
@@ -2548,7 +2554,8 @@
         "open": 10,
         "close": 2
       },
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 98
     },
     {
       "_note": "And the drive-through window round the back, with the board beside it.",
@@ -2578,7 +2585,8 @@
         "open": 10,
         "close": 2
       },
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 98
     },
     {
       "_note": "The cart on Vinewood Boulevard, on the stars outside the theatre -- the busiest",
@@ -3093,7 +3101,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 87
     },
     {
       "_note": "Taco Bomb, Vespucci -- the second one, and a proper branch rather than a",
@@ -3116,7 +3125,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 87
     },
     {
       "_note": "Up-n-Atom Burger, Del Perro. The second location. Same stock as the",
@@ -3141,7 +3151,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 98
     },
     {
       "_note": "Up-n-Atom Del Perro, THE LOWER DOOR. The same shop: it sits four metres",
@@ -3168,7 +3179,8 @@
       "reach": 2.2,
       "blip": false,
       "ui": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 98
     },
     {
       "_note": "LETTUCE BE, Vespucci. VEGETARIAN CUISINE on the sign, under a peace",
@@ -3215,7 +3227,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 98
     },
     {
       "_note": "Burger Shot Vespucci, THE SECOND DOOR. Fifteen metres along the same",
@@ -3239,7 +3252,8 @@
       "reach": 2.2,
       "blip": false,
       "ui": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 98
     },
     {
       "_note": "Rob's Liquor, Vespucci. ANOTHER WALK-IN, so the coordinate is the counter",
@@ -4155,7 +4169,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 98
     },
     {
       "_note": "Del Perro Pier. Surveyed in game; inherits Bean Machine's menu -- one chain, one menu.",
@@ -4490,7 +4505,8 @@
         "close": 2
       },
       "blip": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 98
     },
     {
       "_note": "Alamo Sea, self-service produce market. Surveyed in game; inherits Bean's Market's menu -- one chain, one menu.",
@@ -4839,7 +4855,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 87
     },
     {
       "_note": "Harmony -- DRIVE-THROUGH side of the same building. Surveyed in game; inherits The Taco Farmer's menu -- one chain, one menu. The drive-through side, so it serves you in the car.",
@@ -4860,7 +4877,8 @@
       "spawnRange": 90.0,
       "blip": true,
       "fromVehicle": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 87
     },
     {
       "_note": "Harmony, WALK-IN. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
@@ -4980,7 +4998,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 101
     },
     {
       "_note": "Vespucci Beach. Surveyed in game.",
@@ -5081,7 +5100,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 87
     },
     {
       "_note": "Del Perro Pier. Surveyed in game.",
@@ -5206,7 +5226,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 101
     },
     {
       "_note": "Del Perro Pier, ice cream company. Surveyed in game.",
@@ -5650,7 +5671,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "fastfood"
+      "group": "fastfood",
+      "blipSprite": 87
     },
     {
       "_note": "Korean Plaza, Little Seoul. Two doors on one corner; this is the north one.",
