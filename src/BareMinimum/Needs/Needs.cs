@@ -41,6 +41,17 @@ namespace BareMinimum.Needs
         public readonly Need Hunger = new Need(Kind.Hunger);
         public readonly Need Sleep = new Need(Kind.Sleep);
 
+        /// <summary>
+        /// THIRST, which runs faster than hunger and is cheaper to fix.
+        ///
+        /// The same Need as the other two, deliberately -- same clamp, same five stages, same
+        /// "1 is fine and 0 is trouble" -- because a bar standing beside them has to behave
+        /// identically or the row stops reading as one instrument. What makes it its own thing
+        /// is the rates: you go thirsty in well under a day and one can fixes it, where a day's
+        /// food is several meals. See Settings.ThirstHoursToEmpty.
+        /// </summary>
+        public readonly Need Thirst = new Need(Kind.Thirst);
+
         /// <summary>Every character's saved state, keyed by the model name below.</summary>
         private readonly Dictionary<string, float[]> _saved =
             new Dictionary<string, float[]>(StringComparer.OrdinalIgnoreCase);
@@ -296,6 +307,14 @@ namespace BareMinimum.Needs
                 Hunger.Drain(hours, _cfg.HungerHoursToEmpty, Exertion());
             }
 
+            if (_cfg.ThirstEnabled)
+            {
+                // WORK MAKES YOU THIRSTY, and harder than it makes you hungry -- the same
+                // exertion the stomach reads, on a meter that empties three times faster, so a
+                // sprint across the city is felt here first and by a long way.
+                Thirst.Drain(hours, _cfg.ThirstHoursToEmpty, Exertion());
+            }
+
             if (_cfg.SleepEnabled)
             {
                 // DRINK MAKES YOU TIRED FASTER. Not a separate timer -- it scales the sleep
@@ -545,6 +564,14 @@ namespace BareMinimum.Needs
                 Hunger.Drain(gameHours, _cfg.HungerHoursToEmpty, _cfg.HungerSleepMultiplier);
             }
 
+            if (_cfg.ThirstEnabled)
+            {
+                // A NIGHT COSTS MORE WATER THAN IT COSTS FOOD, which is why this has its own
+                // multiplier rather than sharing the stomach's: waking up parched is the
+                // ordinary experience and waking up starving is not.
+                Thirst.Drain(gameHours, _cfg.ThirstHoursToEmpty, _cfg.ThirstSleepMultiplier);
+            }
+
             if (_cfg.SleepEnabled)
             {
                 // AGAINST HoursToFull, NOT HoursToEmpty. Recovery is not the reverse of
@@ -569,7 +596,8 @@ namespace BareMinimum.Needs
             SaveNow();
 
             Log.Info("Slept " + gameHours.ToString("0.#") + "h (quality " +
-                     restoreFraction.ToString("0.00") + "). " + Hunger + ", " + Sleep + ".");
+                     restoreFraction.ToString("0.00") + "). " + Hunger + ", " + Sleep +
+                     ", " + Thirst + ".");
         }
 
         // ======================================================================
@@ -582,6 +610,29 @@ namespace BareMinimum.Needs
             var got = Hunger.Restore(amount);
             if (got > 0f) { _dirty = true; SaveNow(); }
             return got;
+        }
+
+        /// <summary>
+        /// Puts drink in. Returns what actually landed, as Eat does.
+        ///
+        /// SEPARATE FROM Eat BECAUSE A MEAL IS NOT A DRINK. Anything wet fills this, most food
+        /// fills a little of it, and neither is the other -- a man who has eaten four burgers is
+        /// not less thirsty for it, which is the whole reason the bar is worth having.
+        /// </summary>
+        public float Quench(float amount)
+        {
+            if (!_cfg.ThirstEnabled || Math.Abs(amount) < 0.0001f) return 0f;
+
+            // NOT Need.Restore, WHICH REFUSES NEGATIVES. Spirits are worth less than nothing
+            // here -- see Catalogue.Wetness -- and a whisky has to be able to move this the
+            // wrong way. Need.Value clamps at both ends, so the sum is the only arithmetic.
+            var before = Thirst.Value;
+            Thirst.Value = before + amount;
+
+            var moved = Thirst.Value - before;
+            if (Math.Abs(moved) > 0f) { _dirty = true; SaveNow(); }
+
+            return moved;
         }
 
         /// <summary>
@@ -752,7 +803,7 @@ namespace BareMinimum.Needs
 
             if (_who != null)
             {
-                _saved[_who] = new[] { Hunger.Value, Sleep.Value, Drunk };
+                _saved[_who] = new[] { Hunger.Value, Sleep.Value, Drunk, Thirst.Value };
                 SaveNow();
             }
 
@@ -764,20 +815,23 @@ namespace BareMinimum.Needs
                 Sleep.Value = v[1];
 
                 // Length-checked separately: a needs.json written before drink existed has
-                // two entries, and reading a third would throw on every old save.
+                // two entries, and reading a third would throw on every old save. Thirst is the
+                // fourth and reads the same way, defaulting to full rather than empty.
                 Drunk = v.Length >= 3 ? v[2] : 0f;
+                Thirst.Value = v.Length >= 4 ? v[3] : 1f;
             }
             else
             {
                 Hunger.Value = 1f;
                 Sleep.Value = 1f;
                 Drunk = 0f;
+                Thirst.Value = 1f;
             }
 
             // A switch is also a teleport in time as far as the clock is concerned.
             _clockPrimed = false;
 
-            Log.Info("Now playing as " + now + ": " + Hunger + ", " + Sleep + ".");
+            Log.Info("Now playing as " + now + ": " + Hunger + ", " + Sleep + ", " + Thirst + ".");
         }
 
         // ======================================================================
@@ -808,7 +862,8 @@ namespace BareMinimum.Needs
                     {
                         Clamp01(node["hunger"].AsFloat(1f)),
                         Clamp01(node["sleep"].AsFloat(1f)),
-                        Clamp01(node["drunk"].AsFloat(0f))
+                        Clamp01(node["drunk"].AsFloat(0f)),
+                        Clamp01(node["thirst"].AsFloat(1f))
                     };
                 }
 
@@ -874,7 +929,7 @@ namespace BareMinimum.Needs
 
             try
             {
-                if (_who != null) _saved[_who] = new[] { Hunger.Value, Sleep.Value, Drunk };
+                if (_who != null) _saved[_who] = new[] { Hunger.Value, Sleep.Value, Drunk, Thirst.Value };
 
                 var people = Json.Object();
                 foreach (var pair in _saved)
@@ -882,7 +937,12 @@ namespace BareMinimum.Needs
                     people.Set(pair.Key, Json.Object()
                         .Set("hunger", Math.Round(pair.Value[0], 4))
                         .Set("sleep", Math.Round(pair.Value[1], 4))
-                        .Set("drunk", Math.Round(pair.Value.Length >= 3 ? pair.Value[2] : 0f, 4)));
+                        .Set("drunk", Math.Round(pair.Value.Length >= 3 ? pair.Value[2] : 0f, 4))
+
+                        // A SAVE FROM BEFORE THIS BAR EXISTED CARRIES NO THIRST, and the read
+                        // below starts those at full rather than parched -- arriving back in a
+                        // playthrough gasping because the mod grew a meter is not a mechanic.
+                        .Set("thirst", Math.Round(pair.Value.Length >= 4 ? pair.Value[3] : 1f, 4)));
                 }
 
                 var doc = Json.Object()

@@ -438,7 +438,8 @@ namespace BareMinimum.UI
         private void Subtitle()
         {
             _ui.Subtitle = Stock.Header(Money(), _needs.Hunger.Value,
-                                        _needs.Sleep.Value, _needs.Drunk);
+                                        _needs.Sleep.Value, _needs.Drunk,
+                                        _needs.Thirst.Value);
         }
 
         /// <summary>Rebuilds the row list for the current tab.</summary>

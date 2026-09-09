@@ -3,13 +3,14 @@ using System;
 namespace BareMinimum.Needs
 {
     /// <summary>
-    /// Which of the two this is. Kept as an enum rather than a bool so the log, the save file
+    /// Which of the three this is. Kept as an enum rather than a bool so the log, the save file
     /// and the HUD all name the same thing the same way.
     /// </summary>
     internal enum Kind
     {
         Hunger,
-        Sleep
+        Sleep,
+        Thirst
     }
 
     /// <summary>

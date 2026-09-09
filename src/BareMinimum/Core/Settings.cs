@@ -115,6 +115,35 @@ namespace BareMinimum.Core
         /// </summary>
         public float SleepHoursToFull = 8f;
 
+        // ---- Thirst ----------------------------------------------------------
+
+        public bool ThirstEnabled = true;
+
+        /// <summary>
+        /// GAME hours from a full glass to a dry mouth.
+        ///
+        /// A THIRD OF HUNGER'S, DELIBERATELY. The whole point of a third bar is that it does not
+        /// move at the same speed as the two beside it -- if it emptied on hunger's clock it
+        /// would just be a second hunger bar and you would fix both at the same counter, which
+        /// is a bar that tells you nothing. Eighteen game hours is under a game day, so a drink
+        /// is a thing you go and get on its own rather than something that happens to come with
+        /// lunch, and the corner shop fridge and every vending machine on the map earn their
+        /// place.
+        ///
+        /// It is also the cheapest need to fix, which is what stops that being a chore: a can is
+        /// a couple of dollars and fills most of the meter, where a day's food is several meals.
+        /// </summary>
+        public float ThirstHoursToEmpty = 18f;
+
+        /// <summary>
+        /// Multiplier on the drain while asleep. Higher than hunger's.
+        ///
+        /// You wake up thirsty rather than hungry -- eight hours of breathing costs you water
+        /// and very little food -- so a night in bed should take a real bite out of this and
+        /// barely touch the stomach.
+        /// </summary>
+        public float ThirstSleepMultiplier = 0.6f;
+
         // ---- Effects ---------------------------------------------------------
 
         /// <summary>Below this, hunger starts to slow the player down.</summary>
@@ -1227,6 +1256,17 @@ namespace BareMinimum.Core
         public float VendingSipHunger = 0.05f;
 
         /// <summary>
+        /// How much THIRST the same drink gives back. 0 turns it off.
+        ///
+        /// TEN TIMES THE HUNGER FIGURE, because that is what a can of soft drink actually is.
+        /// The hunger number is small because a drink is not a meal; the whole reason thirst
+        /// exists as its own meter is that the same object is very much a drink, and a vending
+        /// machine that moved the stomach a twentieth and the thirst bar not at all would be
+        /// the mod noticing the least interesting half of what just happened.
+        /// </summary>
+        public float VendingSipThirst = 0.5f;
+
+        /// <summary>
         /// Whether the machines and the stalls get map markers of their own.
         ///
         /// SEPARATE FROM ShowShopBlips, which they also obey. A shop is a destination and a
@@ -1387,6 +1427,12 @@ namespace BareMinimum.Core
                                                      cfg.SleepHoursToEmpty, 0.5f, 500f);
                 cfg.SleepHoursToFull = ini.GetFloat("Sleep", "HoursToFull",
                                                     cfg.SleepHoursToFull, 0.5f, 200f);
+
+                cfg.ThirstEnabled = ini.GetBool("Thirst", "Enabled", cfg.ThirstEnabled);
+                cfg.ThirstHoursToEmpty = ini.GetFloat("Thirst", "HoursToEmpty",
+                                                      cfg.ThirstHoursToEmpty, 0.5f, 500f);
+                cfg.ThirstSleepMultiplier = ini.GetFloat("Thirst", "SleepMultiplier",
+                                                         cfg.ThirstSleepMultiplier, 0f, 4f);
 
                 cfg.HungerSlowAt = ini.GetFloat("Effects", "HungerSlowAt", cfg.HungerSlowAt, 0f, 1f);
                 cfg.HungerHurtAt = ini.GetFloat("Effects", "HungerHurtAt", cfg.HungerHurtAt, 0f, 1f);
@@ -1633,6 +1679,8 @@ namespace BareMinimum.Core
                 cfg.StallItems = ini.GetString("Counters", "StallItems", cfg.StallItems);
                 cfg.VendingSipHunger = ini.GetFloat("Counters", "VendingSipHunger",
                                                     cfg.VendingSipHunger, 0f, 0.5f);
+                cfg.VendingSipThirst = ini.GetFloat("Counters", "VendingSipThirst",
+                                                    cfg.VendingSipThirst, 0f, 1f);
                 cfg.MachineBlips = ini.GetBool("Counters", "MachineBlips", cfg.MachineBlips);
                 cfg.DiscoverCarts = ini.GetBool("Counters", "DiscoverCarts", cfg.DiscoverCarts);
                 cfg.WalkIns = ini.GetBool("Counters", "WalkIns", cfg.WalkIns);

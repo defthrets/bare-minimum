@@ -369,13 +369,16 @@ namespace BareMinimum.UI
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             { "Mod enabled",              "s_power.png"  },
-            { "Empty both needs",         "s_power.png"  },
+            { "Empty every need",         "s_power.png"  },
 
             { "Hunger",                   "food0.png"    },
             { "Hunger: hours to empty",   "s_clock.png"  },
             { "Sleep",                    "moon0.png"    },
             { "Sleep: hours to empty",    "s_clock.png"  },
             { "Sleep: hours to full",     "s_clock.png"  },
+            { "Thirst",                   "drop0.png"    },
+            { "Thirst: hours to empty",   "s_clock.png"  },
+            { "Thirst: sip from machines", "drop0.png"   },
 
             { "Slow down below",          "s_run.png"    },
             { "Stomach walk below",       "food0.png"    },
@@ -492,6 +495,23 @@ namespace BareMinimum.UI
                   1f, 1f, 200f, "0",
                   "Hours of sleep that take you from empty to fully rested. 12 makes a " +
                   "six-hour night worth half a meter.");
+
+            Bool("Thirst", "Thirst", "Enabled",
+                 () => _cfg.ThirstEnabled, v => _cfg.ThirstEnabled = v,
+                 "Whether you get thirsty at all. Off takes the bar out of the row and " +
+                 "the rest close up.");
+
+            Float("Thirst: hours to empty", "Thirst", "HoursToEmpty",
+                  () => _cfg.ThirstHoursToEmpty, v => _cfg.ThirstHoursToEmpty = v,
+                  1f, 2f, 200f, "0",
+                  "18 is under a game day -- a third of hunger's, so a drink is its own " +
+                  "errand rather than something that comes with lunch.");
+
+            Float("Thirst: sip from machines", "Counters", "VendingSipThirst",
+                  () => _cfg.VendingSipThirst, v => _cfg.VendingSipThirst = v,
+                  0.05f, 0f, 1f, "P0",
+                  "What a drink from a VANILLA soda machine gives back. This does not sell " +
+                  "you anything -- it notices the game did.");
 
             Group("FEEL");
 
@@ -865,27 +885,29 @@ namespace BareMinimum.UI
 
             Add(new Option
             {
-                Name = "Fill both needs",
-                Note = "Fed and rested, right now. For testing, or for mercy.",
+                Name = "Fill every need",
+                Note = "Fed, rested and watered, right now. For testing, or for mercy.",
                 Show = () => "",
                 Activate = () =>
                 {
                     _needs.Hunger.Value = 1f;
                     _needs.Sleep.Value = 1f;
+                    _needs.Thirst.Value = 1f;
                     _needs.SaveNow();
-                    Notify("~g~Fed and rested.");
+                    Notify("~g~Fed, rested and watered.");
                 }
             });
 
             Add(new Option
             {
-                Name = "Empty both needs",
-                Note = "Starving and exhausted, right now. For seeing what the effects look like.",
+                Name = "Empty every need",
+                Note = "Starving, exhausted and parched. For seeing what the effects look like.",
                 Show = () => "",
                 Activate = () =>
                 {
                     _needs.Hunger.Value = 0f;
                     _needs.Sleep.Value = 0f;
+                    _needs.Thirst.Value = 0f;
                     _needs.SaveNow();
                     Notify("~r~Starving and exhausted.");
                 }

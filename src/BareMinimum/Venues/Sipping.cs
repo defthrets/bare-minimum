@@ -54,7 +54,10 @@ namespace BareMinimum.Venues
 
         public void Update()
         {
-            if (_cfg.VendingSipHunger <= 0f) return;
+            // EITHER OF THE TWO IS REASON ENOUGH TO WATCH. This used to bail on the hunger
+            // figure alone, so setting that to 0 -- which is what somebody who does not want a
+            // soda counted as food would do -- switched off the thirst it now gives as well.
+            if (_cfg.VendingSipHunger <= 0f && _cfg.VendingSipThirst <= 0f) return;
 
             try
             {
@@ -77,8 +80,14 @@ namespace BareMinimum.Venues
 
                 _needs.Hunger.Restore(_cfg.VendingSipHunger);
 
+                // THROUGH Quench RATHER THAN Thirst.Restore, so the setting being off and the
+                // whole meter being off are one answer and not two, and so the save is marked
+                // dirty by the same route every other top-up uses.
+                _needs.Quench(_cfg.VendingSipThirst);
+
                 Log.Info("Drank from a vending machine: hunger +" +
-                         (_cfg.VendingSipHunger * 100f).ToString("0") + "%.");
+                         (_cfg.VendingSipHunger * 100f).ToString("0") + "%, thirst +" +
+                         (_cfg.VendingSipThirst * 100f).ToString("0") + "%.");
             }
             catch (Exception ex)
             {

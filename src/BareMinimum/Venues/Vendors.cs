@@ -2112,7 +2112,8 @@ namespace BareMinimum.Venues
             if (_shopping == null || !InReach(me, _shopping)) { Close(); return; }
 
             _ui.Subtitle = UI.Stock.Header(Money(), _needs.Hunger.Value,
-                                           _needs.Sleep.Value, _needs.Drunk);
+                                           _needs.Sleep.Value, _needs.Drunk,
+                                           _needs.Thirst.Value);
 
             if (_ui.Rows.Count > 0)
             {

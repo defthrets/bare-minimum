@@ -1,4 +1,4 @@
-﻿{
+{
   "_comment": [
     "Places to buy one specific thing. No menu: walk up, the game's own prompt appears",
     "top left, press the key, eat it.",
@@ -405,8 +405,11 @@
       "colour": 0
     },
     "cafe": {
+      "_note": "629 is named radar_cctv in the reference and draws a TAKEAWAY CUP -- the",
+      "_note2": "blip names describe nothing, which is how this group spent a build as a",
+      "_note3": "red square on 111. White because a cup reads as a cup unpainted.",
       "name": "Cafes",
-      "sprite": 521,
+      "sprite": 629,
       "colour": 0
     },
     "store": {

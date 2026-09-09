@@ -82,10 +82,18 @@ namespace BareMinimum.UI
 
             if (item.Smoke) return "One will not hurt. That is what everybody says.";
 
-            if (item.Booze >= 0.40f) return Join(size, "This will do it.");
+            // BOOZE FIRST, AND IT SAYS THE DRY PART OUT LOUD. A spirit takes water out of you
+            // -- Catalogue.Wetness -- and a player watching a bar go the wrong way after a
+            // drink deserves to have been told, in the one line the row gets, rather than left
+            // to work out that the mod is not broken.
+            if (item.Booze >= 0.40f) return Join(size, "This will do it. And dry you right out.");
             if (item.Booze > 0f) return Join(size, "One of these will not hurt.");
+
             if (item.Wake >= 0.10f) return Join(size, "Will wake you up a bit.");
             if (item.Wake > 0f) return Join(size, "A slight lift.");
+
+            if (item.Thirst >= 0.50f) return Join(size, "That will sort your throat out.");
+            if (item.Thirst >= 0.20f) return Join(size, "Wets the whistle.");
 
             return size;
         }
@@ -104,10 +112,13 @@ namespace BareMinimum.UI
         /// pause menu; the needs are there because "how hungry am I actually" is the question
         /// the whole shop exists to answer, and the HUD icon gives a band, not a number.
         /// </summary>
-        public static string Header(int money, float fed, float rested, float drunk)
+        public static string Header(int money, float fed, float rested, float drunk,
+                                   float watered)
         {
             var line = "$" + money.ToString("N0", CultureInfo.InvariantCulture) +
-                       "     Fed " + Pct(fed) + "     Rested " + Pct(rested);
+                       "     Fed " + Pct(fed) +
+                       "     Watered " + Pct(watered) +
+                       "     Rested " + Pct(rested);
 
             // Only once it is showing. A sober reading of 0% is a stat nobody asked for.
             if (drunk >= 0.22f) line += "     ~y~Drunk " + Pct(drunk);

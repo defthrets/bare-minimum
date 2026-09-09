@@ -22,6 +22,18 @@ namespace BareMinimum.Food
         public bool Drink;
 
         /// <summary>
+        /// How much of the THIRST meter one of these puts back, 0 to 1. May be NEGATIVE.
+        ///
+        /// DERIVED RATHER THAN TYPED, for every one of the hundred-odd items in foods.json that
+        /// does not name a figure: anything wet fills most of the bar, anything else fills a
+        /// little of it in proportion to how much of a meal it is, and spirits take water OUT.
+        /// Writing a thirst number on a hundred items by hand would have been a hundred chances
+        /// to get one wrong and no chance of noticing; the rule is in one place and any item
+        /// that wants to argue with it can say so in the file. See Catalogue.Wetness.
+        /// </summary>
+        public float Thirst;
+
+        /// <summary>
         /// How drunk one of these makes you, 0 to 1.
         ///
         /// Cumulative: the meter it feeds is capped at 1, so a fourth beer does less than the
@@ -368,6 +380,11 @@ namespace BareMinimum.Food
 
                     if (string.IsNullOrEmpty(item.Name)) continue;
 
+                    // AFTER THE INITIALISER, because the default is worked out FROM the item --
+                    // whether it is a drink, how much of a meal it is, and how much alcohol is
+                    // in it. A "thirst" key in the file wins over the rule.
+                    item.Thirst = node["thirst"].AsFloat(Wetness(item));
+
                     // A price of zero is legal (somebody may want a free-food game); a negative
                     // one is not, and would pay the player to eat.
                     if (item.Price < 0) item.Price = 0;
@@ -472,6 +489,29 @@ namespace BareMinimum.Food
             }
         }
 
+        /// <summary>
+        /// How much water something is worth, when the file has not said.
+        ///
+        /// THREE RULES AND NOTHING ELSE. A drink is mostly water and fills better than half the
+        /// meter, so one can is a fix rather than a sip. Food carries a fraction of its own
+        /// hunger value across, because a burger IS a bit of a drink and a bag of crisps is
+        /// nearly none -- that fraction, rather than a flat number, is what keeps a full meal
+        /// worth more than a snack without anybody typing either figure.
+        ///
+        /// AND BOOZE IS A NET LOSS, which is the only one of the three that is a design choice
+        /// rather than an observation. A shelf of beer would otherwise be the cheapest way to
+        /// keep this bar full for the rest of the game, and the bar would mean nothing. Strong
+        /// drink lands below zero and costs you water; a lager still gives a little back.
+        /// </summary>
+        private static float Wetness(Item item)
+        {
+            var wet = item.Drink ? 0.62f : item.Hunger * 0.18f;
+
+            if (item.Booze > 0f) wet -= item.Booze * 0.9f;
+
+            return wet;
+        }
+
         private static string[] PropNames(Json node)
         {
             if (node == null || node.IsNull) return new string[0];
@@ -574,6 +614,11 @@ namespace BareMinimum.Food
             _items.Add(new Item { Id = "coffee", Name = "Coffee", Category = "Drinks",
                                   Price = 4, Hunger = 0.05f, Wake = 0.10f, Drink = true,
                                   Props = new[] { "p_amb_coffeecup_01" } });
+
+            // THROUGH THE SAME RULE THE FILE GOES THROUGH, rather than four typed numbers.
+            // These four exist only when foods.json did not arrive, and a hand-written thirst
+            // figure here is a fifth place for the rule to drift out of step with itself.
+            foreach (var item in _items) item.Thirst = Wetness(item);
 
             _categories.Add("Food");
             _categories.Add("Snacks");

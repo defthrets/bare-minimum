@@ -901,10 +901,21 @@ namespace BareMinimum.UI
 
                 if (item.Booze > 0f && item.Hunger <= 0.02f) return "A DRINK";
 
-                if (item.Hunger >= Math.Abs(item.Wake) && item.Hunger > 0.001f)
-                    return "+" + Pct(item.Hunger) + "% FED";
+                // WHICHEVER OF THE THREE IT MOVES MOST. This ranked hunger against wake, and
+                // once thirst existed a can of eCola -- six per cent of a meal and most of a
+                // drink -- carried the badge "+6% FED", which is true, useless, and the least
+                // interesting thing about it. The badge is one line and it should spend it on
+                // the meter the player would actually buy the thing for.
+                var fed = item.Hunger;
+                var wet = item.Thirst;
+                var up = item.Wake;
 
-                if (item.Wake > 0.001f) return "+" + Pct(item.Wake) + "% RESTED";
+                if (fed >= Math.Abs(up) && fed >= wet && fed > 0.001f)
+                    return "+" + Pct(fed) + "% FED";
+
+                if (wet >= Math.Abs(up) && wet > 0.001f) return "+" + Pct(wet) + "% WATERED";
+
+                if (up > 0.001f) return "+" + Pct(up) + "% RESTED";
 
                 return "";
             }

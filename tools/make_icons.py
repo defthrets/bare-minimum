@@ -837,6 +837,67 @@ def dash_brake():
     return img
 
 
+# ===========================================================================
+# THIRST -- a drop of water
+# ===========================================================================
+#
+# THE SAME DRAWING AT EVERY STAGE, like the drumstick and for the same reason: the reading
+# is the bar's, and an icon that only gets emptier is a second bar wearing a costume. What
+# the mark is for is saying WHICH meter, at a glance, from the plate under the column --
+# and a drop says water to everybody in every language there is.
+#
+# A TEARDROP, NOT A CIRCLE WITH A HAT ON. The shape is a circle at the bottom and the two
+# TANGENT lines from the apex down to it, which is what makes the sides meet the bulge
+# without a corner -- the join is where the tangent touches, so the curvature is continuous
+# and there is nothing for the rim routine to catch on. Drawing it as a triangle stacked on
+# a circle leaves two nicks at the shoulders that are perfectly visible at 46 pixels.
+
+DROP_APEX = 42.0                        # the point, in design units from the top
+DROP_BULGE = (128.0, 158.0, 58.0)       # centre x, y and radius of the round end
+
+
+def droplet(stage=0):
+    """A falling drop. See the note above for why the stage is ignored."""
+    img, d = canvas()
+
+    layer = Image.new("RGBA", img.size, CLEAR)
+    ld = ImageDraw.Draw(layer)
+
+    cx, cy, r = DROP_BULGE
+    ax, ay = cx, DROP_APEX
+
+    span = cy - ay
+
+    # Where the sides touch the bulge. cos(phi) = r / span is the angle between the line to
+    # the apex and the radius that meets the tangent -- the one bit of trigonometry in the
+    # shape, and the reason it has no shoulders.
+    phi = math.acos(max(-1.0, min(1.0, r / span)))
+
+    right = -math.pi / 2.0 + phi
+    left = -math.pi / 2.0 - phi
+
+    points = [(s(ax), s(ay))]
+
+    # Round the bulge the long way -- from the right-hand tangent point, down under the
+    # bottom, and back up to the left one.
+    steps = 96
+    for i in range(steps + 1):
+        a = right + (left + 2.0 * math.pi - right) * i / steps
+        points.append((s(cx + math.cos(a) * r), s(cy + math.sin(a) * r)))
+
+    ld.polygon(points, fill=WHITE)
+
+    # NO HIGHLIGHT. One was drawn and taken out again: CustomSprite MULTIPLIES the tint
+    # through the sprite, so a lighter fill is impossible and the only way to mark the inside
+    # of a shape is to punch a hole in it -- which on a drop is a pupil, and the mark under
+    # the bar came out looking like an eye. The drumstick can afford its two nicks because
+    # they sit off-centre in a much wider shape. This cannot, and does not need to: a
+    # teardrop is already unmistakable in silhouette alone at forty-six pixels.
+
+    img.alpha_composite(layer)
+    return img
+
+
 def main():
     print("Writing icons to " + OUT)
 
@@ -867,6 +928,14 @@ def main():
 
     for stage in range(5):
         save(moon(stage), "moon%d_flat.png" % stage, outline=False)
+
+    # THIRST. Five copies of one drawing, as the drumstick is, so Gauge can index the set by
+    # stage without knowing or caring that the stages look alike.
+    for stage in range(5):
+        save(droplet(stage), "drop%d.png" % stage)
+
+    for stage in range(5):
+        save(droplet(stage), "drop%d_flat.png" % stage, outline=False)
 
     # THE VITALS' MARKS, rim-free like the other plate marks.
     save(heart(), "heart.png", outline=False)

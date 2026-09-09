@@ -287,6 +287,7 @@ namespace BareMinimum.Food
             // is gone -- so both are taken now, on the line before they change.
             _fedBefore = _needs.Hunger.Value;
             _restedBefore = _needs.Sleep.Value;
+            _wateredBefore = _needs.Thirst.Value;
 
             if (item.Drink)
             {
@@ -305,6 +306,13 @@ namespace BareMinimum.Food
 
             if (item.Booze > 0f) _needs.Booze(item.Booze);
 
+            // OUTSIDE THE DRINK BRANCH, ON PURPOSE. Food is a bit of a drink and drink is a bit
+            // of a meal, and the two branches above already model that in one direction; a
+            // thirst that only moved for things flagged Drink would have a bowl of soup doing
+            // nothing for it. The figure itself is the item's, and Catalogue.Wetness says where
+            // it comes from when the file has not named one.
+            _needs.Quench(item.Thirst);
+
             Cleanup();
             Report(item);
         }
@@ -321,6 +329,7 @@ namespace BareMinimum.Food
         /// <summary>Where the two meters stood before the mouthful. The card sweeps from here.</summary>
         private float _fedBefore;
         private float _restedBefore;
+        private float _wateredBefore;
 
         /// <summary>
         /// What he just had, as the same card the wake-up uses.
@@ -343,8 +352,16 @@ namespace BareMinimum.Food
             {
                 var sleepy = item.Smoke || (item.Wake > 0f && item.Hunger <= 0.001f);
 
+                // WHICHEVER METER THIS ACTUALLY MOVED. The card sweeps one bar and it has to be
+                // the one that changed, or the mod is reporting nothing happened when something
+                // did -- the same reason a cigarette sweeps sleep rather than the stomach. A can
+                // of eCola is 0.06 of a meal and most of a drink, so a stomach bar barely
+                // twitching is the wrong thing to be looking at while swallowing it.
+                var wet = !sleepy && item.Thirst > item.Hunger;
+
                 var line = item.Smoke ? "That is better."
                          : item.Booze > 0f ? Tipsy()
+                         : wet ? Watered()
                          : "Fed " + (int)Math.Round(_needs.Hunger.Value * 100f) + "%.";
 
                 if (!item.Smoke && item.Wake > 0f)
@@ -353,13 +370,16 @@ namespace BareMinimum.Food
                            (int)Math.Round(_needs.Sleep.Value * 100f) + "%.";
                 }
 
+                var was = sleepy ? _restedBefore : wet ? _wateredBefore : _fedBefore;
+                var now = sleepy ? _needs.Sleep.Value
+                        : wet ? _needs.Thirst.Value
+                        : _needs.Hunger.Value;
+
                 // TWO AND A HALF, NOT FOUR. The wake-up card can hold four seconds because
                 // it happens once a night; eating happens all day, and the same four seconds
                 // on every bag of crisps is the mod talking over the game.
                 UI.Toast.Show(Mark(item), item.Name.ToUpperInvariant(), line, item.Tint,
-                              sleepy ? _restedBefore : _fedBefore,
-                              sleepy ? _needs.Sleep.Value : _needs.Hunger.Value,
-                              2500);
+                              was, now, 2500);
             }
             catch
             {
@@ -374,6 +394,18 @@ namespace BareMinimum.Food
         private static string Mark(Item item)
         {
             return string.IsNullOrEmpty(item.Icon) ? null : "p_" + item.Icon + ".png";
+        }
+
+        /// <summary>
+        /// What a drink says, which is a percentage like the stomach's rather than words.
+        ///
+        /// "Quenched" and not "thirst", because this bar reads the same way the other two do:
+        /// the number is what you HAVE, not what you need. A drink reporting "thirst 90%" after
+        /// a bottle of water would be exactly backwards.
+        /// </summary>
+        private string Watered()
+        {
+            return "Quenched " + (int)Math.Round(_needs.Thirst.Value * 100f) + "%.";
         }
 
         /// <summary>How drunk, in words rather than a number.</summary>

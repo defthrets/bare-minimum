@@ -55,6 +55,16 @@ namespace BareMinimum.UI
         private readonly Icon[] _foodFlat = new Icon[5];
         private readonly Icon[] _moonFlat = new Icon[5];
 
+        /// <summary>
+        /// THIRST's mark: a drop of water, the same drawing at all five stages.
+        ///
+        /// Five copies of one picture rather than one Icon, so this set is indexed by stage
+        /// exactly as the other two are and Column never has to know which of the three it is
+        /// drawing. The drumstick does the same. See tools/make_icons.py droplet().
+        /// </summary>
+        private readonly Icon[] _drop = new Icon[5];
+        private readonly Icon[] _dropFlat = new Icon[5];
+
 
         private bool _measured;
 
@@ -89,7 +99,8 @@ namespace BareMinimum.UI
         }
 
         /// <summary>The five, in the order they take when the ini says nothing else.</summary>
-        private static readonly string[] Defaults = { "health", "sleep", "food", "energy" };
+        private static readonly string[] Defaults =
+            { "health", "sleep", "food", "thirst", "energy" };
 
         /// <summary>
         /// The bars standing this frame, in the ini's order.
@@ -114,6 +125,7 @@ namespace BareMinimum.UI
                 var name = raw.Trim().ToLowerInvariant();
                 if (name == "armor") name = "armour";
                 if (name == "hunger") name = "food";
+                if (name == "water" || name == "drink") name = "thirst";
 
                 Stand(names, name, upright, third);
             }
@@ -127,7 +139,7 @@ namespace BareMinimum.UI
         {
             if (name.Length == 0 || names.Contains(name)) return;
 
-            if (name == "sleep" || name == "food") names.Add(name);
+            if (name == "sleep" || name == "food" || name == "thirst") names.Add(name);
             // NO ARMOUR COLUMN. Armour is a state of the health bar now -- blue and full while
             // the plate holds -- so an "armour" in RowOrder is read and ignored rather than
             // stood, and an old ini that names it changes nothing.
@@ -169,8 +181,11 @@ namespace BareMinimum.UI
                 _food[i] = new Icon("food" + i + ".png");
                 _moon[i] = new Icon("moon" + i + ".png");
 
+                _drop[i] = new Icon("drop" + i + ".png");
+
                 _foodFlat[i] = new Icon("food" + i + "_flat.png");
                 _moonFlat[i] = new Icon("moon" + i + "_flat.png");
+                _dropFlat[i] = new Icon("drop" + i + "_flat.png");
 
             }
         }
@@ -327,6 +342,17 @@ namespace BareMinimum.UI
         // Drawing
         // ======================================================================
 
+        /// <summary>
+        /// How many marks the icon HUD stacks. Two, or three once thirst is switched on.
+        ///
+        /// ASKED RATHER THAN ASSUMED, because the top of the stack is worked back from it and
+        /// the whole stack hangs off the same foot the bar row stands on.
+        /// </summary>
+        private float Marks()
+        {
+            return _cfg.ThirstEnabled ? 3f : 2f;
+        }
+
         public void Draw(Needs.Needs needs, bool suspended)
         {
             if (!_cfg.ShowHud || needs == null) return;
@@ -358,7 +384,10 @@ namespace BareMinimum.UI
                 // one they were meant to be on.
                 float x, bottom;
                 Anchor(out x, out bottom);
-                var top = bottom - (side * 2f + gap);
+                // THREE TALL SINCE THIRST, not two. How many there are is asked rather
+                // than written down, so a hardcoded 2 with a third mark drawn under it
+                // cannot hang the bottom one off the bottom of the screen. See Marks.
+                var top = bottom - (side * Marks() + gap * (Marks() - 1f));
 
                 Measure(x, top, side);
 
@@ -370,8 +399,15 @@ namespace BareMinimum.UI
                     return;
                 }
 
-                Mark(_food, needs.Hunger, x, top + side / 2f, wide, side, 0f, false);
-                Mark(_moon, needs.Sleep, x, top + side + gap + side / 2f, wide, side, 0.37f, true);
+                var pitch = side + gap;
+
+                Mark(_food, needs.Hunger, x, top + side / 2f, wide, side, 0f);
+                Mark(_moon, needs.Sleep, x, top + pitch + side / 2f, wide, side, 0.37f);
+
+                if (_cfg.ThirstEnabled)
+                {
+                    Mark(_drop, needs.Thirst, x, top + pitch * 2f + side / 2f, wide, side, 0.71f);
+                }
             }
             catch (Exception ex)
             {
@@ -566,14 +602,26 @@ namespace BareMinimum.UI
 
             // THE ORDER OF THE ROW IS THE INI'S. See Standing: each column takes its slot by
             // name, and the vitals' three do the same in Columns.
-            Column(needs.Sleep, _moon, row, row.SlotOf("sleep"), true);
-            Column(needs.Hunger, _food, row, row.SlotOf("food"), false);
+            Column(needs.Sleep, _moon, _moonFlat, row, row.SlotOf("sleep"));
+            Column(needs.Hunger, _food, _foodFlat, row, row.SlotOf("food"));
+
+            if (_cfg.ThirstEnabled)
+            {
+                Column(needs.Thirst, _drop, _dropFlat, row, row.SlotOf("thirst"));
+            }
 
             if (Vitals != null) Vitals.DrawColumns(this, row);
         }
 
         /// <summary>One upright bar: the mark above it, the channel, and the level inside.</summary>
-        private void Column(Need need, Icon[] set, Row row, int slot, bool sleep)
+        /// <summary>
+        /// WHICH BAR THIS IS COMES OFF need.Kind, NOT A FLAG. It used to take a "sleep" bool
+        /// that chose the ramp, the icon set and the animation all at once, and a third meter
+        /// would have meant a second bool -- four states for three bars, one of them nonsense.
+        /// The Need already knows what it is, and asking it cannot disagree with the number
+        /// being drawn, which a caller-supplied flag can and eventually would.
+        /// </summary>
+        private void Column(Need need, Icon[] set, Icon[] flatSet, Row row, int slot)
         {
             if (slot < 0) return;
             if (_cfg.HudHideWhenFine && need.Value > _cfg.HudFineAbove) return;
@@ -583,9 +631,9 @@ namespace BareMinimum.UI
             var h = row.BarH;
             var w = row.BarW;
 
-            var body = Colour(need, sleep);
+            var body = Colour(need);
 
-            var flat = (sleep ? _moonFlat : _foodFlat)[Stage(need)];
+            var flat = flatSet[Stage(need)];
 
             // Falls back to the outlined art if the rim-free copy did not deploy. A logo with
             // a rim on it is a great deal better than no logo at all.
@@ -619,8 +667,18 @@ namespace BareMinimum.UI
                 return;
             }
 
-            if (sleep) Night(x, top, w, h, fraction, body);
-            else Churn(x, top, w, h, fraction, body);
+            if (need.Kind == global::BareMinimum.Needs.Kind.Sleep)
+            {
+                Night(x, top, w, h, fraction, body);
+            }
+            else if (need.Kind == global::BareMinimum.Needs.Kind.Thirst)
+            {
+                Slake(x, top, w, h, fraction, body);
+            }
+            else
+            {
+                Churn(x, top, w, h, fraction, body);
+            }
         }
 
         /// <summary>
@@ -815,6 +873,169 @@ namespace BareMinimum.UI
 
             // The crumbs are decoration and yield when the frame's share has gone. See Draw.Room.
             if (Hud.Room) Sediment(x, y, w, h, surfaceY, inside, empty);
+        }
+
+        /// <summary>
+        /// THIRST: water, and bubbles going up through it.
+        ///
+        /// THE SAME LIQUID AS THE OTHER FOUR AND A DIFFERENT SUBSTANCE. Surface, banded body
+        /// and relief are the row's, to the number -- that was the whole point of "same flow
+        /// and movements", and a sixth bar arriving with a motion of its own would undo it. So
+        /// this is Churn's skeleton with two things changed, and both of them are about what is
+        /// in the glass rather than how it moves.
+        ///
+        /// IT IS CLEAN, so there is no warm tint in the body. Hunger mixes its bands toward a
+        /// creamy white and gets more of it the emptier it is, which is contents; water has no
+        /// contents, and the banding here is a highlight -- a cool, bright cyan -- so the column
+        /// reads as something transparent with light going through it rather than something
+        /// thick with stuff in it.
+        ///
+        /// AND IT CALMS AS IT EMPTIES, which is the opposite of hunger and the same as the fuel
+        /// gauge. An empty stomach rumbles; a glass with an inch in it barely moves, and half a
+        /// glass is what slops about. So the highlight peaks in the middle of the range instead
+        /// of at the bottom of it, and the bubbles thin out with the level.
+        ///
+        /// BUBBLES GO UP. Sediment falls through the stomach and that direction is the whole
+        /// reason it is a stomach; gas rising through liquid is a drink, and it is the oldest
+        /// signal in this HUD -- Fumes has sent bubbles up a fuel gauge since the first build.
+        /// Three of them, deterministic off the clock, as everything else here is.
+        /// </summary>
+        private void Slake(float x, float y, float w, float h, float fraction, Color body)
+        {
+            var t = Clock();
+            var inside = t / InsideSlow;
+
+            var level = h * fraction;
+
+            // HOW LIVELY IT IS: nothing at empty, nothing at full, most in the middle. See the
+            // note above -- a full glass and an almost-empty one are both steady, and the one
+            // that slops is the one with room to slop in.
+            var lively = 4f * fraction * (1f - fraction);
+
+            var thrown = _thirstSpring.S * h;
+            var speed = Clamp(_thirstSpring.V * 1.8f, -1f, 1f);
+
+            var surfaceY = Clamp(y + h - level - thrown, y, y + h);
+            var floor = y + h;
+
+            // THE ROW'S SURFACE, on this bar's own tempo so no two of the six breathe in step.
+            // 1.21 and 2.03 are the two numbers not already spoken for -- health 0.87, energy
+            // 1.13, sleep 0.94, food 1.06 -- and neither divides into any of them.
+            var tops = Surface(x, y, w, h, surfaceY, 1.21f, 2.03f, speed, h * 0.007f);
+
+            var bodyTop = Lowest(tops, floor);
+
+            // ---- the body ----
+            var bands = Bands(h);
+
+            for (var i = 0; i < bands; i++)
+            {
+                var bTop = bodyTop + (floor - bodyTop) * i / bands;
+                var bBot = bodyTop + (floor - bodyTop) * (i + 1) / bands;
+
+                if (bBot - bTop <= 0f) continue;
+
+                var u = (i + 0.5f) / bands;
+
+                // Two humps on laps that do not divide into each other, as hunger's are, but
+                // travelling DOWN rather than up: light falling through water rather than
+                // contents turning over. Slower than hunger's as well -- this is meant to be
+                // barely moving, and a still drink is a believable drink.
+                var a = Pulse(u + inside * 0.00104f, 0.52f);
+                var b = Pulse(u + inside * 0.00061f + 0.5f, 0.70f);
+
+                var lit = (a * 0.62f + b * 0.38f) * (0.07f + 0.11f * lively);
+
+                Hud.Bar(x, bTop, w, bBot - bTop,
+                        Mix(body, Color.FromArgb(body.A, 215, 250, 255), lit));
+            }
+
+            if (level <= 0.002f) return;
+
+            // ---- the surface ----
+            var crestH = h * 0.007f;
+            var crest = Mix(body, Color.FromArgb(body.A, 225, 252, 255), 0.60f);
+
+            for (var i = 0; i < tops.Length; i++)
+            {
+                var left = x + w * i / tops.Length;
+                var right = x + w * (i + 1) / tops.Length;
+                var topY = tops[i];
+
+                if (topY < bodyTop) Hud.Bar(left, topY, right - left, bodyTop - topY, body);
+
+                Hud.Bar(left, topY, right - left, crestH, crest);
+            }
+
+            Relief(x, w, floor, surfaceY, body, t / PaceOf());
+
+            // Decoration, and it yields when the frame's share of rectangles has gone. Same
+            // rule as the crumbs. See Draw.Room.
+            if (Hud.Room) Bubbles(x, y, w, h, surfaceY, inside, lively);
+        }
+
+        /// <summary>
+        /// THIRST: gas going up through it.
+        ///
+        /// SEDIMENT'S TWIN, RUN BACKWARDS. The stomach sends crumbs down because something
+        /// heavier than what it is in, sinking, is contents; something lighter, rising, is a
+        /// drink. Everything else here is Sediment's -- three of them, deterministic off the
+        /// clock and the bubble's own index, no state between frames and no Random being pumped
+        /// sixty times a second for three specks.
+        ///
+        /// THEY GROW ON THE WAY UP, which is the one thing a crumb does not do. A bubble
+        /// expands as the pressure above it drops, and at three pixels that is the difference
+        /// between gas rising and a dot being winched.
+        /// </summary>
+        private void Bubbles(float x, float y, float w, float h, float surfaceY,
+                             float t, float lively)
+        {
+            const int count = 3;
+
+            var level = y + h - surfaceY;
+            if (level < h * 0.10f) return;
+
+            // Square ON SCREEN, as the crumbs are: equal width and height fractions give a
+            // rectangle as much wider than it is tall as the screen is.
+            var size = w * 0.20f;
+
+            var drift = Clamp01(_cfg.HudBarDrift);
+            if (drift <= 0.001f) return;
+
+            for (var i = 0; i < count; i++)
+            {
+                // A little quicker when there is more of it to rise through, and speeds that
+                // do not divide into each other so the three never travel in formation.
+                var speed = (0.007f + i * 0.0017f + lively * 0.0030f) * drift;
+
+                // 1 - phase, which is what turns a fall into a climb: the same wrapped ramp
+                // read from the other end.
+                var phase = 1f - ((t * speed + i * 0.41f) % 1f);
+
+                var py = surfaceY + level * phase;
+
+                // A wander across as it climbs, a different lane and rate each.
+                var lane = 0.28f + i * 0.22f;
+                var sway = (float)Math.Sin(t * (0.6f + i * 0.11f) * drift + i * 1.7f) * 0.14f;
+
+                var px = x + w * (lane + sway) - size / 2f;
+
+                // Bigger the higher it gets. Half size at the floor, full at the surface.
+                var grow = 0.55f + 0.45f * (1f - phase);
+
+                var wide = size * grow;
+                var tall = wide * Aspect();
+
+                // In quickly off the floor and out as it reaches the surface, rather than
+                // appearing and vanishing. The out is the slower of the two: a bubble arrives
+                // at the top and joins it.
+                var edge = Math.Min((1f - phase) * 5f, Math.Min(phase * 3f, 1f));
+
+                var alpha = (int)(135 * Math.Max(edge, 0f));
+                if (alpha <= 4) continue;
+
+                Hud.Bar(px, py, wide, tall, Fade(Color.FromArgb(alpha, 225, 252, 255)));
+            }
         }
 
         /// <summary>
@@ -1349,10 +1570,12 @@ namespace BareMinimum.UI
 
         private readonly Slosh _foodSpring = new Slosh();
         private readonly Slosh _sleepSpring = new Slosh();
+        private readonly Slosh _thirstSpring = new Slosh();
 
         /// <summary>Last frame's readings, for the kicks. Below zero until there has been a frame.</summary>
         private float _lastFood = -1f;
         private float _lastSleep = -1f;
+        private float _lastThirst = -1f;
 
         /// <summary>How hard he is being pushed along his own length, and upward, m/s², eased.</summary>
         private float _accel;
@@ -1394,6 +1617,7 @@ namespace BareMinimum.UI
 
             _foodSpring.Step(dt, force);
             _sleepSpring.Step(dt, force);
+            _thirstSpring.Step(dt, force);
         }
 
         /// <summary>
@@ -1414,11 +1638,15 @@ namespace BareMinimum.UI
             var food = Clamp01(needs.Hunger.Value);
             var sleep = Clamp01(needs.Sleep.Value);
 
+            var thirst = Clamp01(needs.Thirst.Value);
+
             if (_lastFood >= 0f) Jolt(_foodSpring, food - _lastFood, k);
             if (_lastSleep >= 0f) Jolt(_sleepSpring, sleep - _lastSleep, k);
+            if (_lastThirst >= 0f) Jolt(_thirstSpring, thirst - _lastThirst, k);
 
             _lastFood = food;
             _lastSleep = sleep;
+            _lastThirst = thirst;
         }
 
         private static void Jolt(Slosh spring, float delta, float k)
@@ -1635,7 +1863,7 @@ namespace BareMinimum.UI
         /// step they read as one object with two halves rather than two separate things.
         /// </summary>
         private void Mark(Icon[] set, Need need, float centreX, float centreY,
-                          float wide, float tall, float offset, bool sleep)
+                          float wide, float tall, float offset)
         {
             if (_cfg.HudHideWhenFine && need.Value > _cfg.HudFineAbove) return;
 
@@ -1644,7 +1872,7 @@ namespace BareMinimum.UI
             var icon = set[stage];
             if (icon == null || icon.Missing) return;
 
-            var colour = Colour(need, sleep);
+            var colour = Colour(need);
 
             var y = centreY;
             var turn = 0f;
@@ -1743,9 +1971,9 @@ namespace BareMinimum.UI
         /// rate whatever the framerate is doing -- a counter makes it race on a fast machine
         /// and crawl on a slow one.
         /// </summary>
-        private Color Colour(Need need, bool sleep = false)
+        private Color Colour(Need need)
         {
-            var c = OnRamp(need.Value, sleep ? SleepRamp : Ramp);
+            var c = OnRamp(need.Value, RampFor(need.Kind));
 
             if (_cfg.HudFlashWhenCritical && need.Stage == 0)
             {
@@ -1862,6 +2090,40 @@ namespace BareMinimum.UI
             Color.FromArgb(235, 134,  96, 222),   // fine      light violet
             Color.FromArgb(235, 156, 120, 240)    // full      lavender
         };
+
+        // THIRST IS CYAN, WHICH IS THE LAST FAMILY LEFT AND ALSO THE RIGHT ONE.
+        //
+        // The row runs health green-to-red, armour blue, energy yellow, sleep purple and food
+        // orange, and the argument that moved food into the oranges applies again: a sixth bar
+        // has to be unmistakably none of the other five from colour alone, because the order is
+        // configurable and the mark under it is four millimetres of white.
+        //
+        // Cyan is what is left, and it is also what water looks like -- the first time in this
+        // HUD that the free slot and the meaningful colour have been the same thing. Its
+        // nearest neighbour is the ARMOURED state of the health bar, which is a deep blue at
+        // about 0.58 of the way round the wheel where this sits at 0.51 and carries far more
+        // green; the closest any two levels of the two come measures dE 34, where 30 is already
+        // unmistakable, and that bar is only blue at all while a plate is holding.
+        //
+        // DEEP AT EMPTY like every other ramp here, so the two habits the eye has learned --
+        // darker is worse, hue says which -- hold across the whole row.
+        private static readonly Color[] ThirstRamp =
+        {
+            Color.FromArgb(235,  20,  74,  88),   // empty     deep slate teal
+            Color.FromArgb(235,  26, 108, 126),   // bad       teal
+            Color.FromArgb(235,  32, 148, 172),   // middling  sea
+            Color.FromArgb(235,  42, 184, 210),   // fine      bright cyan
+            Color.FromArgb(235,  74, 208, 228)    // full      pale cyan
+        };
+
+        /// <summary>Which family a meter is drawn in. The ramps say why each is what it is.</summary>
+        private static Color[] RampFor(global::BareMinimum.Needs.Kind kind)
+        {
+            if (kind == global::BareMinimum.Needs.Kind.Sleep) return SleepRamp;
+            if (kind == global::BareMinimum.Needs.Kind.Thirst) return ThirstRamp;
+
+            return Ramp;
+        }
 
         private static Color OnRamp(float t)
         {
