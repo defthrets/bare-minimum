@@ -58,6 +58,9 @@ namespace BareMinimum.Venues
 
         /// <summary>Other places the room might be, tried in order when the anchor has nothing.</summary>
         public readonly List<Vector3> Also = new List<Vector3>();
+
+        /// <summary>Who is in it, if anybody. Null for a room the game already populates or a shop. See Crowd.</summary>
+        public Crowd.Plan Crowd;
     }
 
     /// <summary>
@@ -156,6 +159,7 @@ namespace BareMinimum.Venues
         private readonly Settings _cfg;
         private readonly Vendors _vendors;
         private readonly Bolt _bolt = new Bolt();
+        private readonly Crowd _crowd = new Crowd();
 
         private Vendor _in;
         private Room _room;
@@ -482,8 +486,10 @@ namespace BareMinimum.Venues
 
                 Remember(v.Id);
 
-                // With the screen still black, so the doors are shut before he can see them.
+                // With the screen still black, so the doors are shut -- and the room is filled --
+                // before he can see either happen.
                 _bolt.Lock(me.Position);
+                _crowd.Fill(room.Crowd, me.Position);
 
                 Function.Call(Hash.FREEZE_ENTITY_POSITION, me.Handle, false);
                 frozen = false;
@@ -739,6 +745,7 @@ namespace BareMinimum.Venues
         private void Forget(string why)
         {
             _bolt.Release();
+            _crowd.Clear();
             _outSince = 0;
 
             if (why != null && _in != null)
@@ -770,6 +777,10 @@ namespace BareMinimum.Venues
             // shut for the rest of the session. Put back now; Recover locks them again if he is
             // still standing in the room when the script comes back.
             try { _bolt.Release(); } catch { /* teardown */ }
+
+            // AND THE CROWD, which is this mod's peds and nobody else's. Left behind they are a
+            // room full of people standing in a place the player cannot get back to.
+            try { _crowd.Clear(); } catch { /* teardown */ }
 
             if (_room != null && _room.Online) Mp(false);
         }

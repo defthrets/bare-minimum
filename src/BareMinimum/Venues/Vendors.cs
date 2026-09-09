@@ -516,6 +516,23 @@ namespace BareMinimum.Venues
                         Heading = node["heading"].AsFloat(0f)
                     };
 
+                    // WHO IS IN IT. Absent for every shop, which is the common case and not a
+                    // failure -- an empty block means an empty room.
+                    var crowd = node["crowd"];
+
+                    if (!crowd.IsNull && crowd["count"].AsInt(0) > 0)
+                    {
+                        room.Crowd = new Crowd.Plan
+                        {
+                            Count = crowd["count"].AsInt(0),
+                            Radius = crowd["radius"].AsFloat(5f),
+                            Peds = Strings(crowd["ped"]),
+                            Dict = crowd["dance"]["dict"].AsString(""),
+                            Clips = Strings(crowd["dance"]["clip"]),
+                            Scenario = crowd["scenario"].AsString("")
+                        };
+                    }
+
                     foreach (var alt in node["also"].Items)
                     {
                         var xyz = new List<float>();

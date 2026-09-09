@@ -218,7 +218,19 @@
           2675.336,
           41.605
         ]
-      ]
+      ],
+      "crowd": {
+        "count": 3,
+        "radius": 3.2,
+        "ped": [
+          "a_m_y_downtown_01",
+          "a_f_y_hipster_01",
+          "a_m_y_hipster_01",
+          "a_f_y_vinewood_01",
+          "a_m_y_vinewood_01"
+        ],
+        "scenario": "WORLD_HUMAN_STAND_MOBILE"
+      }
     },
     {
       "_note": "Rob's Liquor, Del Perro, at its counter; Vespucci, Ace and Harmony as fallbacks",
@@ -246,7 +258,19 @@
           2703.357,
           38.179
         ]
-      ]
+      ],
+      "crowd": {
+        "count": 3,
+        "radius": 3.2,
+        "ped": [
+          "a_m_y_downtown_01",
+          "a_f_y_hipster_01",
+          "a_m_y_hipster_01",
+          "a_f_y_vinewood_01",
+          "a_m_y_vinewood_01"
+        ],
+        "scenario": "WORLD_HUMAN_STAND_MOBILE"
+      }
     },
     {
       "_note": "the LTD on Ginger Street, Little Seoul, at its counter; the Route 68 fuel shop as fallback",
@@ -264,7 +288,103 @@
           2316.191,
           32.686
         ]
-      ]
+      ],
+      "crowd": {
+        "count": 3,
+        "radius": 3.2,
+        "ped": [
+          "a_m_y_downtown_01",
+          "a_f_y_hipster_01",
+          "a_m_y_hipster_01",
+          "a_f_y_vinewood_01",
+          "a_m_y_vinewood_01"
+        ],
+        "scenario": "WORLD_HUMAN_STAND_MOBILE"
+      }
+    },
+    {
+      "key": "tequilala",
+      "name": "Tequi-la-la",
+      "ipl": "",
+      "online": false,
+      "origin": false,
+      "x": -557.0,
+      "y": 286.0,
+      "z": 81.0,
+      "heading": 0.0,
+      "crowd": {
+        "count": 14,
+        "radius": 6.0,
+        "ped": [
+          "a_f_y_clubcust_01",
+          "a_f_y_clubcust_02",
+          "a_f_y_clubcust_03",
+          "a_f_y_clubcust_04",
+          "a_m_y_clubcust_01",
+          "a_m_y_clubcust_02",
+          "a_m_y_clubcust_03",
+          "a_f_y_vinewood_01",
+          "a_m_y_vinewood_01",
+          "a_m_y_vinewood_02"
+        ],
+        "dance": {
+          "dict": "anim@amb@nightclub@dancers@crowddance_facedj@med_intensity",
+          "clip": [
+            "mi_dance_facedj_09_v1_female^1",
+            "mi_dance_facedj_09_v1_male^1",
+            "mi_dance_facedj_11_v1_female^1",
+            "mi_dance_facedj_11_v1_male^1",
+            "mi_dance_facedj_13_v1_female^1",
+            "mi_dance_facedj_13_v1_male^1",
+            "mi_dance_facedj_15_v1_female^1",
+            "mi_dance_facedj_15_v1_male^1",
+            "mi_dance_facedj_17_v1_female^1",
+            "mi_dance_facedj_17_v1_male^1"
+          ]
+        }
+      }
+    },
+    {
+      "key": "bahama",
+      "name": "Bahama Mamas West",
+      "ipl": "",
+      "online": false,
+      "origin": false,
+      "x": -1387.0,
+      "y": -588.0,
+      "z": 30.0,
+      "heading": 0.0,
+      "crowd": {
+        "count": 14,
+        "radius": 6.0,
+        "ped": [
+          "a_f_y_clubcust_01",
+          "a_f_y_clubcust_02",
+          "a_f_y_clubcust_03",
+          "a_f_y_clubcust_04",
+          "a_m_y_clubcust_01",
+          "a_m_y_clubcust_02",
+          "a_m_y_clubcust_03",
+          "a_f_y_vinewood_01",
+          "a_m_y_vinewood_01",
+          "a_m_y_vinewood_02"
+        ],
+        "dance": {
+          "dict": "anim@amb@nightclub@dancers@crowddance_facedj@med_intensity",
+          "clip": [
+            "mi_dance_facedj_09_v1_female^1",
+            "mi_dance_facedj_09_v1_male^1",
+            "mi_dance_facedj_11_v1_female^1",
+            "mi_dance_facedj_11_v1_male^1",
+            "mi_dance_facedj_13_v1_female^1",
+            "mi_dance_facedj_13_v1_male^1",
+            "mi_dance_facedj_15_v1_female^1",
+            "mi_dance_facedj_15_v1_male^1",
+            "mi_dance_facedj_17_v1_female^1",
+            "mi_dance_facedj_17_v1_male^1"
+          ]
+        }
+      }
     }
   ],
   "_groups": "The map groups. The pause map's legend collects blips by their distinct name and pages through each name's blips with left and right, so a group IS a shared name -- see [Map] GroupShopBlips, which turns the whole thing off and gives every shop its own name back. A vendor with no group, or one naming a group that is not here, falls back to [Map] ShopBlipGroupName.",
