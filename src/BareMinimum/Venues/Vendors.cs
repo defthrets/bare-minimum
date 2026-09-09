@@ -217,7 +217,10 @@ namespace BareMinimum.Venues
 
         /// <summary>Whether to put a marker on the map. Sprite and colour are the game's own ids.</summary>
         public bool Blip = true;
-        public int BlipSprite = 267;        // the food/burger marker
+        // 52 is the shopping basket. It was 267 with a comment calling it "the food/burger
+        // marker", and 267 draws a letter P -- a default nobody had looked at, waiting for
+        // the first vendor that did not name its own. NO HOUSE AND NO LETTER, anywhere.
+        public int BlipSprite = 52;
         public int BlipColour = 47;         // orange-yellow
 
         // ---- live state ----
