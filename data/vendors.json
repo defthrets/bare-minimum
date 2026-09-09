@@ -1,4 +1,4 @@
-{
+﻿{
   "_comment": [
     "Places to buy one specific thing. No menu: walk up, the game's own prompt appears",
     "top left, press the key, eat it.",
@@ -396,7 +396,7 @@
     },
     "fastfood": {
       "name": "Fast Food",
-      "sprite": 52,
+      "sprite": 889,
       "colour": 41
     },
     "restaurant": {
@@ -416,7 +416,7 @@
     },
     "liquor": {
       "name": "Liquor",
-      "sprite": 52,
+      "sprite": 827,
       "colour": 3
     },
     "bar": {

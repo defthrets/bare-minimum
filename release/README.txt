@@ -71,7 +71,7 @@
   button spare:
 
     LB + D-pad UP      settings
-    RB + X             your pocket
+    RB + A             your pocket
 
   Inside a panel the d-pad moves, A chooses and B closes, and the key hints
   change to those glyphs the moment you pick a pad up. Fumes uses LB + D-pad

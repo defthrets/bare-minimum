@@ -131,7 +131,7 @@ Drag into your GTA V folder, say yes to merging, load a save. Needs ScriptHookV 
 
 All three can be changed in the ini.
 
-🎮 <b>On a controller:</b> the context button does everything E does. The panels open on a chord, because a pad has no button spare — <b>LB + D-pad Up</b> for settings, <b>RB + X</b> for your pocket. Inside a panel the d-pad moves, A chooses and B closes, and the on-screen hints switch to those glyphs the moment you pick a pad up.
+🎮 <b>On a controller:</b> the context button does everything E does. The panels open on a chord, because a pad has no button spare — <b>LB + D-pad Up</b> for settings, <b>RB + A</b> for your pocket. Inside a panel the d-pad moves, A chooses and B closes, and the on-screen hints switch to those glyphs the moment you pick a pad up.
 
 
 --------------------------------------------------------------------------------
