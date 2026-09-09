@@ -4118,7 +4118,31 @@
       "VEND_NO_ITEM",
       "GENERIC_WHATEVER"
     ],
-    "winded": [
+    "_parched": [
+    "WHAT HE SAYS WHEN HE IS DRY, and there is no line in the game for it.",
+    "",
+    "Every voice in menyooStuff/PedSpeechList.txt was searched for THIRST, PARCH, DEHYD,",
+    "WATER and SWEAT. The only hit anywhere is DEATH_UNDERWATER, which is the opposite",
+    "problem. Rockstar recorded a man saying he is hungry and never recorded one saying he",
+    "is thirsty, and that is worth writing down so nobody goes looking a second time.",
+    "",
+    "So this is the closest the game has: the one drinking line, among the out-of-breath",
+    "race lines, which is a man gasping and saying something about a drink. GENERIC_DRINK is",
+    "listed twice so it comes up more often than any single gasp -- it is the one that",
+    "carries the meaning and the others are the texture around it.",
+    "",
+    "It is RARE by design. Parched.cs mostly makes him BREATHE instead, out of the game's",
+    "non-verbal set, which is the real Franklin and never wears out. A stock line repeating",
+    "is the fastest way to make a mod tiresome, and he can be dry for a long stretch."
+  ],
+  "parched": [
+    "GENERIC_DRINK",
+    "GENERIC_DRINK",
+    "RACE_FINISHED_OUT_OF_BREATH",
+    "TRIATHLON_COMMENT",
+    "GENERIC_FRUSTRATED_MED"
+  ],
+  "winded": [
       "RACE_FINISHED_OUT_OF_BREATH",
       "RACE_COLLIDE_OUT_OF_BREATH",
       "RACE_STAY_POSITION_OUT_OF_BREATH"

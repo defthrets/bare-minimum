@@ -45,6 +45,7 @@ namespace BareMinimum
 
         /// <summary>Marks the machines and stalls, which have no coordinate to blip.</summary>
         private readonly MachineBlips _machineBlips;
+        private readonly Needs.Parched _parched;
         private readonly Vendors _vendors;
 
         /// <summary>The way into a bar's room, and back out. Nothing without a room in vendors.json.</summary>
@@ -117,6 +118,7 @@ namespace BareMinimum
             _counters = new Counters(_cfg);
             _sipping = new Sipping(_cfg, _needs);
             _machineBlips = new MachineBlips(_cfg);
+            _parched = new Needs.Parched(_cfg, _speech);
             _socials = new Social.Socials(_cfg);
             _socials.Load();
 
@@ -162,6 +164,12 @@ namespace BareMinimum
             // drink above and for the same reason: Dope knows the drug, the vitals own the
             // meter, and neither has to know the other is there.
             Food.Dope.Rush = minutes => _vitals.HoldEnergy(minutes, true);
+
+            // AND A DRY THROAT COSTS YOU YOUR WIND. The energy bar asks how thirsty he
+            // is rather than being told, so the vitals still know nothing about the
+            // needs and the needs nothing about the vitals -- the same seam as the two
+            // lines above. See Vitals.Energy.Dry.
+            Vitals.Energy.Thirst = () => _needs.Thirst.Value;
 
             // AND WHAT HE SOUNDS LIKE WHEN HIS LEGS GO. A grunt out of the game's own
             // non-verbal set the moment the energy runs out, with an out-of-breath line
@@ -318,6 +326,7 @@ namespace BareMinimum
 
                 _needs.Update(dt, suspended);
                 _effects.Update(_needs, suspended);
+                _parched.Update(_needs, suspended);
                 _gauge.Draw(_needs, suspended);
 
                 // LAST, so a card rides over the gauge rather than under it -- and outside

@@ -148,7 +148,15 @@ namespace BareMinimum.Vitals
                 var drain = 0f;
 
                 if (Spending) drain += dt / Math.Max(1f, cfg.EnergySpecialSeconds);
-                if (sprinting) drain += dt / Math.Max(1f, cfg.EnergySprintSeconds);
+
+                // A DRY MAN RUNS OUT OF WIND FIRST, and this is where being thirsty is actually
+                // felt. The walk slowing is a number; losing your legs halfway across a
+                // forecourt is something that happens to you.
+                //
+                // ON THE SPRINT ONLY, not on the special. The ability is a burst of whatever it
+                // is that makes Franklin Franklin, and rationing it by how recently he had a can
+                // is a joke rather than a mechanic. Sprinting is lungs.
+                if (sprinting) drain += dt / Math.Max(1f, cfg.EnergySprintSeconds) * Dry(cfg);
 
                 if (drain > 0f)
                 {
@@ -266,6 +274,43 @@ namespace BareMinimum.Vitals
             {
                 Log.Once("vitals-special", "The special ability could not be run off the energy bar: " + ex.Message);
             }
+        }
+
+        /// <summary>
+        /// HOW THIRSTY HE IS, ASKED RATHER THAN HELD. Main wires this to the needs; null when
+        /// there are none, and then it is 1 and nothing here changes.
+        ///
+        /// A DELEGATE AND NOT A REFERENCE, the same arrangement as Dope.Rush and VitalsHud's
+        /// Winded. The vitals own a meter and the needs own three, and neither has ever had to
+        /// know the other exists -- which is what kept them separable through a merge and
+        /// several rounds of one of them moving. One float a frame does not buy a dependency.
+        /// </summary>
+        public static Func<float> Thirst;
+
+        /// <summary>
+        /// The multiplier on the sprint drain for how dry he is: 1 when watered, rising to
+        /// ThirstWindMultiplier at nothing left.
+        ///
+        /// FROM THE SLOW THRESHOLD DOWN, so it covers the same stretch of the meter the legs go
+        /// over -- one number in the ini describes both, and the walk and the wind start
+        /// failing together rather than at two figures nobody can hold in their head. Above it,
+        /// exactly 1, for the cost of a comparison.
+        /// </summary>
+        private static float Dry(Settings cfg)
+        {
+            var ask = Thirst;
+            if (ask == null || cfg.ThirstWindMultiplier <= 1.0001f) return 1f;
+
+            float have;
+            try { have = ask(); }
+            catch { return 1f; }
+
+            var from = cfg.ThirstSlowAt;
+            if (from <= 0.0001f || have >= from) return 1f;
+
+            var t = 1f - Ink.Clamp01(have / from);
+
+            return 1f + (cfg.ThirstWindMultiplier - 1f) * t;
         }
 
         /// <summary>Everything this class does to the player, undone. Safe to call with nothing on; called on the way out too.</summary>

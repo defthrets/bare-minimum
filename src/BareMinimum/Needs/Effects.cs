@@ -18,6 +18,12 @@ namespace BareMinimum.Needs
     ///    Deliberately mild -- the brief was a slight drunk effect, and the game's own
     ///    verydrunk set is a stagger that makes doorways impossible.
     ///  - DRINK does the same thing harder, and escalates from merry to properly gone.
+    ///  - THIRST slows you as hunger does, and takes your WIND, which is the part you feel.
+    ///    It does not take the clipset: three things already queue for the one slot on a ped
+    ///    and a fourth limp would only ever be the one nobody sees. What being dry does
+    ///    instead is empty the sprint meter far faster -- see Settings.ThirstWindMultiplier
+    ///    and Vitals.Energy -- so it shows up on a bar already in the row rather than as a
+    ///    walk you cannot tell from the hungry one.
     ///
     /// ONE CLIPSET AT A TIME. All three can apply at once and there is only one movement
     /// clipset slot on a ped, so they are a PRIORITY LIST: drink, then hunger, then sleep.
@@ -65,9 +71,10 @@ namespace BareMinimum.Needs
 
                 var hunger = needs.Hunger.Value;
                 var sleep = needs.Sleep.Value;
+                var thirst = needs.Thirst.Value;
                 var drunk = _cfg.BoozeEnabled ? needs.Drunk : 0f;
 
-                MoveRate(me, hunger, sleep);
+                MoveRate(me, hunger, sleep, thirst);
                 Clipset(me, hunger, sleep, drunk);
                 Unsteady(me, sleep, drunk);
                 Wobble(sleep);
@@ -92,7 +99,7 @@ namespace BareMinimum.Needs
         /// full rate, so a fed and rested player never has this native called at all and
         /// nothing else that wants to set their move rate has to fight us for it.
         /// </summary>
-        private void MoveRate(Ped me, float hunger, float sleep)
+        private void MoveRate(Ped me, float hunger, float sleep, float thirst)
         {
             var rate = 1f;
 
@@ -106,7 +113,14 @@ namespace BareMinimum.Needs
                 rate *= Ramp(sleep, _cfg.SleepTiredAt, _cfg.SleepMinMoveRate);
             }
 
-            rate *= WellFed(hunger, sleep);
+            // THE THIRD ONE MULTIPLIES LIKE THE OTHER TWO, which is the whole reason the floor
+            // below had to move. Three ramps at their minimums is a smaller number than two.
+            if (_cfg.ThirstEnabled && thirst < _cfg.ThirstSlowAt)
+            {
+                rate *= Ramp(thirst, _cfg.ThirstSlowAt, _cfg.ThirstMinMoveRate);
+            }
+
+            rate *= WellFed(hunger, sleep, thirst);
 
             // Only when there is actually something to say. A fed and rested player with the
             // bonus turned off never has this native called at all, so nothing else that wants
@@ -120,13 +134,17 @@ namespace BareMinimum.Needs
             // about it anywhere. A setting that is accepted and then overruled is worse than
             // one that is refused.
             //
-            // 0.09 is not a taste decision, it is the two ranges multiplied: 0.3 for hunger
-            // times 0.3 for sleep, which is the slowest the ramps above can legitimately
-            // produce. Reaching it takes an ini deliberately set to both minimums AND being
-            // starving and exhausted at the same moment, which MoveRate is explicit about
-            // wanting to be worse than either alone. So the floor now only catches a rate
-            // that got past the ranges some other way -- which is all it was ever for.
-            if (rate < 0.09f) rate = 0.09f;
+            // 0.027 is not a taste decision, it is the three ranges multiplied: 0.3 for
+            // hunger times 0.3 for sleep times 0.3 for thirst, which is the slowest the ramps
+            // above can legitimately produce. It was 0.09 for two of them, and a third need
+            // arriving without moving it would have reintroduced the exact bug the 0.09 was
+            // written to fix -- a floor sitting on top of settings the ini accepts, quietly
+            // overruling anybody who set all three low on purpose. Reaching it takes an ini
+            // deliberately set to every minimum AND being starving, exhausted and parched at
+            // the same moment, which MoveRate is explicit about wanting to be worse than any
+            // one alone. The floor only catches a rate that got past the ranges some other way,
+            // which is all it was ever for.
+            if (rate < 0.027f) rate = 0.027f;
 
             Function.Call(Hash.SET_PED_MOVE_RATE_OVERRIDE, me.Handle, rate);
         }
@@ -143,7 +161,7 @@ namespace BareMinimum.Needs
         /// slowdown threshold, so by the time this returns anything above 1 both of those have
         /// already returned nothing.
         /// </summary>
-        private float WellFed(float hunger, float sleep)
+        private float WellFed(float hunger, float sleep, float thirst)
         {
             if (_cfg.WellFedBonus <= 1.0001f) return 1f;
 
@@ -153,6 +171,7 @@ namespace BareMinimum.Needs
 
             if (_cfg.HungerEnabled) worst = Math.Min(worst, hunger);
             if (_cfg.SleepEnabled) worst = Math.Min(worst, sleep);
+            if (_cfg.ThirstEnabled) worst = Math.Min(worst, thirst);
 
             var from = _cfg.WellFedAbove;
 

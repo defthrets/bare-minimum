@@ -167,6 +167,54 @@ namespace BareMinimum.Core
         /// </summary>
         public float ThirstSleepMultiplier = 0.6f;
 
+        /// <summary>
+        /// Below this, being dry starts to slow him down. Hunger's is 0.34.
+        ///
+        /// LOWER THAN HUNGER'S, because thirst empties in a game day where hunger takes two
+        /// and a bit: at the same threshold this would be the meter doing the slowing almost
+        /// all the time and the stomach's own penalty would never be the one you felt.
+        /// </summary>
+        public float ThirstSlowAt = 0.28f;
+
+        /// <summary>
+        /// The slowest being dry ALONE will make him walk. Higher than hunger's 0.55 -- see
+        /// Effects.MoveRate, which multiplies the two, so a man who is both gets both.
+        /// </summary>
+        public float ThirstMinMoveRate = 0.62f;
+
+        /// <summary>
+        /// Below this he is audibly struggling: breathing hard, and occasionally saying so.
+        ///
+        /// SEPARATE FROM SlowAt AND LOWER, so the legs go before the lungs do. A player who
+        /// hears him start panting at the same moment the walk slows has been told one thing
+        /// twice; hearing it a while after gives the meter two stages that mean different
+        /// things without a second bar to read.
+        /// </summary>
+        public float ThirstDryAt = 0.16f;
+
+        /// <summary>
+        /// HOW MUCH FASTER THE SPRINT METER GOES WHEN HE IS DRY, at nothing left. 1 turns it off.
+        ///
+        /// THIS IS THE "MORE TIRED" PART AND IT IS THE ONE THAT MATTERS. Slowing the walk is a
+        /// number; running out of wind in half the distance is something you feel in the middle
+        /// of doing something. It scales with how dry he is rather than switching on at a
+        /// threshold, so the last quarter of the bar is a steady loss of legs rather than a
+        /// cliff -- and it is on the ENERGY meter, which is already on screen, so the cause and
+        /// the effect are two bars in the same row.
+        /// </summary>
+        public float ThirstWindMultiplier = 2.4f;
+
+        /// <summary>
+        /// REAL seconds between one breath and the next at the very bottom of the meter.
+        ///
+        /// It stretches as the meter recovers -- five times this at the dry threshold -- so the
+        /// rate itself says how bad it is without anybody counting. Sprinting halves it.
+        /// </summary>
+        public float ThirstBreathSeconds = 9f;
+
+        /// <summary>Percent chance that a breath is a spoken line instead of a noise. 0 for never.</summary>
+        public int ThirstLineChance = 18;
+
         // ---- Effects ---------------------------------------------------------
 
         /// <summary>Below this, hunger starts to slow the player down.</summary>
@@ -1550,6 +1598,15 @@ namespace BareMinimum.Core
                                                       cfg.ThirstHoursToEmpty, 0.5f, 500f);
                 cfg.ThirstSleepMultiplier = ini.GetFloat("Thirst", "SleepMultiplier",
                                                          cfg.ThirstSleepMultiplier, 0f, 4f);
+                cfg.ThirstSlowAt = ini.GetFloat("Thirst", "SlowAt", cfg.ThirstSlowAt, 0f, 1f);
+                cfg.ThirstMinMoveRate = ini.GetFloat("Thirst", "MinMoveRate",
+                                                     cfg.ThirstMinMoveRate, 0.3f, 1f);
+                cfg.ThirstDryAt = ini.GetFloat("Thirst", "DryAt", cfg.ThirstDryAt, 0f, 1f);
+                cfg.ThirstWindMultiplier = ini.GetFloat("Thirst", "WindMultiplier",
+                                                        cfg.ThirstWindMultiplier, 1f, 10f);
+                cfg.ThirstBreathSeconds = ini.GetFloat("Thirst", "BreathSeconds",
+                                                       cfg.ThirstBreathSeconds, 2f, 120f);
+                cfg.ThirstLineChance = ini.GetInt("Thirst", "LineChance", cfg.ThirstLineChance, 0, 100);
 
                 cfg.HungerSlowAt = ini.GetFloat("Effects", "HungerSlowAt", cfg.HungerSlowAt, 0f, 1f);
                 cfg.HungerHurtAt = ini.GetFloat("Effects", "HungerHurtAt", cfg.HungerHurtAt, 0f, 1f);
