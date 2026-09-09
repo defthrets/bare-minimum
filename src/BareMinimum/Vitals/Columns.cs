@@ -246,8 +246,19 @@ namespace BareMinimum.Vitals
             {
                 case Kind.Health:
                     // Plate while it is armour, a heartbeat once it is blood.
-                    if (r.Armour > 0.002f) Plating(cfg, x, w, floor, surface, body, t, m.Wall, r, strength);
-                    else Heartbeat(cfg, x, w, floor, surface, body, spring, m.Wall, r.Health, strength);
+                    if (r.Armour > 0.002f)
+                    {
+                        Plating(cfg, x, w, floor, surface, body, t, m.Wall, r, strength);
+                    }
+                    else
+                    {
+                        // HEARTBEAT FIRST AND ALWAYS. It is what advances the beat clock every
+                        // frame -- the phase, the period and when the last beat fell -- and it
+                        // returns early once the flash has faded, so the cells cannot be folded
+                        // into it. They read that clock; they must not be the ones running it.
+                        Heartbeat(cfg, x, w, floor, surface, body, spring, m.Wall, r.Health, strength);
+                        Cells(cfg, x, w, floor, surface, body, m.Wall, strength);
+                    }
                     break;
                 case Kind.Armour: Plating(cfg, x, w, floor, surface, body, t, m.Wall, r, strength); break;
                 default: Streaks(cfg, x, w, floor, surface, body, m.Charge, r, strength); break;
@@ -331,6 +342,111 @@ namespace BareMinimum.Vitals
             if (tall <= 0.002f) return;
 
             Ink.Bar(x, surface, w, tall, Ink.Alpha(Ink.Mix(body, Color.FromArgb(body.A, 255, 255, 255), 0.85f), alpha));
+        }
+
+        /// <summary>
+        /// HEALTH: a few cells in the bloodstream, shoved up the column on the beat and drawn
+        /// back down between them.
+        ///
+        /// EVERY OTHER BAR'S SPECKS TRAVEL AND THESE DO NOT. The stomach sinks crumbs, the
+        /// drink sends bubbles up, the energy runs charge along its lanes -- all of them go
+        /// somewhere and wrap. Blood in a vessel does not travel past you; it surges and falls
+        /// back, twice a second, and that difference is the whole reason this is its own method
+        /// rather than Streaks with a different tint. A cell that drifted steadily upward would
+        /// say "flowing", and what this bar has to say is "pumping".
+        ///
+        /// PUSHED, THEN SUCKED BACK PAST WHERE IT STARTED. The wave is a sharp shove on the
+        /// beat and a gentler undershoot behind it, so each cell overshoots up, falls below its
+        /// resting height and settles -- which is what makes it read as pressure rather than as
+        /// a dot being moved. Squeezing it and letting go, not lifting it and putting it down.
+        ///
+        /// AND THE WAVE TRAVELS UP THE COLUMN. A cell higher up feels the beat later, by a
+        /// fifth of a beat over the length of the bar. Without that the three of them jump in
+        /// perfect unison, which reads as the whole bar twitching; with it there is a visible
+        /// front moving through, which is what a pulse is.
+        ///
+        /// THE CLOCK IS THE HEART'S, not a clock of its own. Heartbeat above works out the
+        /// period from health and exertion -- 56 bpm resting and half as fast again at a
+        /// sprint, faster the worse the wound -- and everything here hangs off _beatAt and
+        /// _beatPeriod. So the cells quicken with him without a second dial to keep in step,
+        /// and the bar has a pulse you can take.
+        ///
+        /// THREE OF THEM. This is decoration on a column nine pixels wide, and it yields with
+        /// the rest of the decoration when the frame's share of rectangles has gone.
+        /// </summary>
+        private void Cells(Settings cfg, float x, float w, float floor, float surface,
+                           Color body, float wall, float strength)
+        {
+            var count = (int)Math.Round(3f * cfg.VitalsParticles);
+            if (count < 1) return;
+            if (count > 5) count = 5;
+
+            var span = floor - surface;
+
+            // Square ON SCREEN: equal width and height fractions give a rectangle as much
+            // wider than it is tall as the screen is.
+            var size = w * 0.17f;
+            var tall = size * Ink.Aspect;
+
+            // FEWER OF THEM IN A SHORTER COLUMN, and none at all in a puddle.
+            //
+            // The resting heights spread across whatever room there is rather than across a
+            // fixed distance, so at a quarter full three cells are packed into a quarter of the
+            // bar -- which reads as grit in the bottom of a glass, not as blood in a vessel.
+            // Room for three and a half each is the point where they stop touching under the
+            // wander, and below one there is nothing worth drawing at all.
+            var room = (int)(span / (tall * 3.5f));
+            if (count > room) count = room;
+            if (count < 1) return;
+
+            var since = wall - _beatAt;
+
+            // Bright enough to be seen against a bar that is dark at exactly the moment this
+            // matters most, and warm rather than white -- these are IN the blood, not on it.
+            var tint = Ink.Mix(body, Color.FromArgb(body.A, 255, 214, 206), 0.78f);
+
+            for (var i = 0; i < count; i++)
+            {
+                // Where it sits between beats: spread up the column, with a very slow wander so
+                // three cells are not three marks painted on the glass.
+                var rest = 0.18f + 0.64f * ((i + 0.5f) / count);
+                rest += 0.045f * (float)Math.Sin(wall * (0.21f + i * 0.06f) + i * 2.3f);
+
+                var lane = 0.20f + 0.60f * Paint.Scatter(i * 5.7f + 1.3f);
+
+                // THE FRONT MOVES UP THE COLUMN. See the note above.
+                var t = since - rest * _beatPeriod * 0.20f;
+
+                // THE SHOVE AND THE PULL BACK UNDER IT -- and then the second, smaller one.
+                //
+                // LUB AND DUB, off the same two figures the glow above uses: a beat is two
+                // sounds and two pressures, the second at a fifth of a period behind the first
+                // and about half its size. Without the dub the second half of every beat is
+                // dead air, which at 56 bpm is most of a second of nothing happening; with it
+                // the column is never quite still and the rhythm is a heartbeat's rather than
+                // a metronome's.
+                var lub = Flash(t, 0.18f) - 0.42f * Flash(t - 0.18f, 0.32f);
+
+                var dubAt = t - _beatPeriod * 0.20f;
+                var dub = (Flash(dubAt, 0.13f) - 0.42f * Flash(dubAt - 0.13f, 0.22f)) * 0.45f;
+
+                var push = lub + dub;
+
+                var at = Ink.Clamp01(rest + push * 0.16f);
+
+                var py = floor - tall - (span - tall) * at;
+                var px = Ink.Clamp(x + w * lane - size / 2f, x, x + w - size);
+
+                // Brighter as it is driven, so the surge is in the light as well as the
+                // position -- on a bar this narrow the movement alone is a few pixels.
+                var lit = 0.55f + 0.45f * Ink.Clamp01(push);
+
+                var alpha = (int)(165f * lit * cfg.VitalsParticles * strength);
+                if (alpha <= 4) continue;
+                if (alpha > 255) alpha = 255;
+
+                Ink.Bar(px, py, size, tall, Ink.Alpha(tint, alpha));
+            }
         }
 
         /// <summary>One flash: nought before it, full at once, gone after <paramref name="life"/> seconds, eased out.</summary>
