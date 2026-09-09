@@ -1321,6 +1321,36 @@ namespace BareMinimum.Core
         /// </summary>
         public bool VendingMachines = true;
 
+        /// <summary>
+        /// Whether a machine or a stall you have been near STAYS on the map afterwards.
+        ///
+        /// THE MARKERS USED TO BE KEYED BY PROP HANDLE, which is the handle of a streamed map
+        /// object: drive out of range and the prop unloads, the handle goes, and the marker
+        /// with it; drive back and the same machine returns under a different handle. So the
+        /// map only ever showed what was loaded around you, which is the one place you do not
+        /// need a map to find a drink.
+        ///
+        /// Remembered by POSITION instead, because that is the thing about a vending machine
+        /// that is actually true: it does not move. Written to machines.json, so a map filled
+        /// in over a session is still filled in the next one -- which is the point. It is a
+        /// record of where you have been as much as of where the drinks are.
+        ///
+        /// Off, the markers behave as they did: only what is loaded, only while it is.
+        /// </summary>
+        public bool RememberMachines = true;
+
+        /// <summary>
+        /// The most machines that will ever be remembered.
+        ///
+        /// A CAP THAT SAYS SO. There are several hundred of these in the world and the whole
+        /// map driven end to end will find most of them; a number this high is not a limit
+        /// anybody will meet by playing, but a file that grows without one is a file that
+        /// eventually explains a stutter nobody can account for. It is logged when it is
+        /// reached rather than silently enforced, because a marker quietly not appearing is
+        /// exactly the sort of thing that gets reported as "the blips are broken".
+        /// </summary>
+        public int RememberMachinesMax = 900;
+
         /// <summary>Whether the roadside produce stalls sell to you. Same argument.</summary>
         public bool FruitStalls = true;
 
@@ -1770,6 +1800,9 @@ namespace BareMinimum.Core
                                                     cfg.VendingSipHunger, 0f, 0.5f);
                 cfg.VendingSipThirst = ini.GetFloat("Counters", "VendingSipThirst",
                                                     cfg.VendingSipThirst, 0f, 1f);
+                cfg.RememberMachines = ini.GetBool("Map", "RememberMachines", cfg.RememberMachines);
+                cfg.RememberMachinesMax = ini.GetInt("Map", "RememberMachinesMax",
+                                                     cfg.RememberMachinesMax, 10, 5000);
                 cfg.MachineBlips = ini.GetBool("Counters", "MachineBlips", cfg.MachineBlips);
                 cfg.DiscoverCarts = ini.GetBool("Counters", "DiscoverCarts", cfg.DiscoverCarts);
                 cfg.WalkIns = ini.GetBool("Counters", "WalkIns", cfg.WalkIns);

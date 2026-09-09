@@ -135,6 +135,12 @@ namespace BareMinimum
             Api.Pantry.Wire(_pantry, _catalogue, _eating, _needs);
 
             _settings = new SettingsPanel(_cfg, _needs);
+
+            // THE MENU ASKS RATHER THAN HOLDS. See SettingsPanel.ForgetMachines -- a menu that
+            // took a MachineBlips would be a menu that has to be rebuilt every time that class
+            // changes shape, for a row that wants one number and one button.
+            _settings.MachineCount = () => _machineBlips.Count;
+            _settings.ForgetMachines = () => _machineBlips.Forget();
             _gauge = new Gauge(_cfg);
 
             // The vitals stand in the gauge's row, so the gauge is handed them: it asks how
@@ -404,6 +410,10 @@ namespace BareMinimum
             try { _eating.Shutdown(); } catch (Exception ex) { Log.Error("Eating shutdown", ex); }
             try { UI.Toast.Clear(); } catch { /* a card is not worth a failed shutdown */ }
             try { UI.Hint.Clear(); } catch { /* nor is a hint */ }
+            // WRITTEN BEFORE THE BLIPS GO. Clear only takes the markers off the map; what
+            // was found this session is on the list and owed to disk, and a reload two
+            // seconds after driving past a machine should not lose it.
+            try { _machineBlips.Shutdown(); } catch (Exception ex) { Log.Error("Machine shutdown", ex); }
             try { _machineBlips.Clear(); } catch { /* a stray blip is not worth a failed shutdown */ }
             try { _sleeping.Shutdown(); } catch (Exception ex) { Log.Error("Sleep shutdown", ex); }
             try { _knock.Shutdown(); } catch (Exception ex) { Log.Error("Knock shutdown", ex); }

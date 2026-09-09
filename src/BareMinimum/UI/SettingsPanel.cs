@@ -84,6 +84,17 @@ namespace BareMinimum.UI
         private bool _dirty;
         private bool _keyWasDown;
 
+        /// <summary>
+        /// How many machines are on the map, and how to take them off it. Set by Main.
+        ///
+        /// TWO DELEGATES RATHER THAN THE OBJECT, because this panel has no business knowing
+        /// what a MachineBlips is: it is a menu, and the one thing it wants is a number to show
+        /// and a button to press. Null until Main has wired them, and the row says so rather
+        /// than doing nothing when pressed.
+        /// </summary>
+        public Func<int> MachineCount;
+        public Action ForgetMachines;
+
         public SettingsPanel(Core.Settings cfg, Needs.Needs needs)
         {
             _cfg = cfg;
@@ -910,6 +921,27 @@ namespace BareMinimum.UI
                     _needs.Thirst.Value = 0f;
                     _needs.SaveNow();
                     Notify("~r~Starving and exhausted.");
+                }
+            });
+
+            Add(new Option
+            {
+                Name = "Forget the vending machines",
+                Note = "Takes every machine and fruit stall you have found off the map and " +
+                       "empties machines.json. They go back on as you pass them again.",
+                Show = () =>
+                {
+                    if (MachineCount == null) return "";
+
+                    var n = MachineCount();
+                    return n == 0 ? "none" : n.ToString(CultureInfo.InvariantCulture);
+                },
+                Activate = () =>
+                {
+                    if (ForgetMachines == null) return;
+
+                    ForgetMachines();
+                    Notify("~y~The map has forgotten the vending machines.");
                 }
             });
 

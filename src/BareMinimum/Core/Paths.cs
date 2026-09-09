@@ -255,6 +255,16 @@ namespace BareMinimum.Core
         /// </summary>
         public static string CartsFile => Path.Combine(Writable, "carts-found.json");
 
+        /// <summary>
+        /// Every vending machine and produce stall the player has been near, so the map keeps
+        /// them between sessions. Written by MachineBlips; nothing else reads it.
+        ///
+        /// WRITABLE, NOT Data. carts-found.json next door is a harvest meant to be pasted into
+        /// vendors.json by hand and could have lived either side; this one is the player's own
+        /// progress across their own map and belongs with the needs and the pockets.
+        /// </summary>
+        public static string MachinesFile => Path.Combine(Writable, "machines.json");
+
         private static void EnsureDir(string path)
         {
             try

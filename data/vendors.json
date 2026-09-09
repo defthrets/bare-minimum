@@ -405,11 +405,13 @@
       "colour": 0
     },
     "cafe": {
-      "_note": "629 is named radar_cctv in the reference and draws a TAKEAWAY CUP -- the",
-      "_note2": "blip names describe nothing, which is how this group spent a build as a",
-      "_note3": "red square on 111. White because a cup reads as a cup unpainted.",
+      "_note": "683, named radar_casino_... in the reference and nothing like a casino:",
+      "_note2": "it draws a CUP ON A SAUCER, which is the third sprite this group has worn",
+      "_note3": "and the first anybody picked by looking at the art rather than the name.",
+      "_note4": "111 was a red square in this build and 629 a plain takeaway cup. White,",
+      "_note5": "because a cup reads as a cup unpainted.",
       "name": "Cafes",
-      "sprite": 629,
+      "sprite": 683,
       "colour": 0
     },
     "store": {
@@ -448,8 +450,14 @@
       "colour": 2
     },
     "machine": {
+      "_note": "945, named radar_ls_met_... in the reference and drawing a newspaper box:",
+      "_note2": "a boxy machine on a pavement with a window in the front, which is what a",
+      "_note3": "vending machine looks like from across a street. It is the fourth sprite",
+      "_note4": "this group has had -- 52, then 475 radar_office, whose cabinet of little",
+      "_note5": "windows was close but reads as a tower block once you know. Every one of",
+      "_note6": "them was picked by looking at the art; not one of the names describes it.",
       "name": "Vending Machines",
-      "sprite": 52,
+      "sprite": 945,
       "colour": 53
     }
   },
