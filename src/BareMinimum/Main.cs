@@ -58,6 +58,7 @@ namespace BareMinimum
 
         /// <summary>What the player says over a purchase. Silent when switched off.</summary>
         private readonly Speech _speech;
+        private readonly Venues.Whereabouts _whereabouts;
         private readonly Shop _shop;
         private readonly SettingsPanel _settings;
         private readonly Gauge _gauge;
@@ -93,6 +94,14 @@ namespace BareMinimum
             // are copied while still empty.
             _speech = new Speech(_cfg);
             _speech.Load(_catalogue.Lines);
+
+            // WHERE HE IS, NOW AND THEN. The game has a line for a hundred and one places in
+            // each protagonist's own voice; the list of which ones comes out of foods.json with
+            // the rest of the speech, so a name is checked rather than guessed.
+            _whereabouts = new Venues.Whereabouts(_cfg, _speech);
+
+            string[] places;
+            _whereabouts.Load(_catalogue.Lines.TryGetValue("locations", out places) ? places : null);
 
             _eating = new Eating(_cfg, _catalogue, _needs, _speech);
 
@@ -285,6 +294,7 @@ namespace BareMinimum
                 _shop.Update(_sleeping.Busy || _settings.IsOpen || _bag.IsOpen ||
                              _fridge.IsOpen || _vendors.Offering || _inside.Offering);
                 _eating.Update();
+                _whereabouts.Update();
 
                 // While the sleep sequence owns the screen, the effects and the HUD stand
                 // down -- a limp applied through a fade is still applied when you wake up,

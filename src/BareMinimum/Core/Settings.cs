@@ -414,6 +414,19 @@ namespace BareMinimum.Core
         /// </summary>
         public int SpeechGapSeconds = 45;
 
+        /// <summary>
+        /// Whether he names the suburb when he crosses into a new one.
+        ///
+        /// The game has a line for a hundred and one places in each protagonist's own voice,
+        /// recorded for the friend chatter and otherwise never heard in single player. Said on
+        /// the crossing rather than on a timer, and only sometimes -- a man who announces every
+        /// suburb he drives through is a satnav. See Venues.Whereabouts.
+        /// </summary>
+        public bool SpeechLocations = true;
+
+        /// <summary>Percent chance a new suburb actually gets named. The ordinary speech gap applies on top.</summary>
+        public int SpeechLocationChance = 25;
+
         // ---- Social ----------------------------------------------------------
 
         /// <summary>
@@ -1279,7 +1292,7 @@ namespace BareMinimum.Core
         public Keys MenuKey = Keys.F7;
 
         /// <summary>Opens the pocket: what you have bought and not eaten yet.</summary>
-        public Keys BagKey = Keys.F11;
+        public Keys BagKey = Keys.B;
 
         /// <summary>
         /// Whether the settings menu and the pocket open on a CONTROLLER as well.
@@ -1463,6 +1476,9 @@ namespace BareMinimum.Core
                 cfg.SpeechEnabled = ini.GetBool("Speech", "Enabled", cfg.SpeechEnabled);
                 cfg.SpeechChance = ini.GetInt("Speech", "ChancePercent", cfg.SpeechChance);
                 cfg.SpeechGapSeconds = ini.GetInt("Speech", "GapSeconds", cfg.SpeechGapSeconds);
+                cfg.SpeechLocations = ini.GetBool("Speech", "Locations", cfg.SpeechLocations);
+                cfg.SpeechLocationChance = ini.GetInt("Speech", "LocationChance",
+                                                      cfg.SpeechLocationChance, 0, 100);
 
                 cfg.SocialEnabled = ini.GetBool("Social", "Enabled", cfg.SocialEnabled);
                 cfg.SocialChance = ini.GetInt("Social", "ChancePercent", cfg.SocialChance);

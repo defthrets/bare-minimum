@@ -59,17 +59,31 @@ namespace BareMinimum.Food
         /// </summary>
         public void Say(string set)
         {
-            if (!_cfg.SpeechEnabled || _lines.Count == 0) return;
+            if (_lines.Count == 0) return;
+
+            string[] lines;
+            if (!_lines.TryGetValue(set, out lines) || lines.Length == 0) return;
+
+            if (_rng.Next(100) >= Math.Max(0, _cfg.SpeechChance)) return;
+
+            Line(lines[_rng.Next(lines.Length)]);
+        }
+
+        /// <summary>
+        /// Says ONE named line, if the clock and the situation allow it.
+        ///
+        /// SEPARATE FROM Say BECAUSE THE CALLER SOMETIMES KNOWS WHICH ONE IT WANTS. A line
+        /// about a suburb is not one of a set to pick from -- it is the line for that suburb or
+        /// it is nothing -- and the dice were already rolled by whoever decided to speak.
+        /// </summary>
+        public void Line(string line)
+        {
+            if (!_cfg.SpeechEnabled || string.IsNullOrEmpty(line)) return;
 
             try
             {
                 var now = Game.GameTime;
                 if (now < _nextAllowed) return;
-
-                if (_rng.Next(100) >= Math.Max(0, _cfg.SpeechChance)) return;
-
-                string[] lines;
-                if (!_lines.TryGetValue(set, out lines) || lines.Length == 0) return;
 
                 var me = Game.Player.Character;
                 if (me == null || !me.Exists() || me.IsDead) return;
@@ -78,8 +92,6 @@ namespace BareMinimum.Food
                 // phone calls, mission dialogue, the character muttering at traffic -- and
                 // cutting a line of that off to say "thanks" is worse than staying quiet.
                 if (Function.Call<bool>(Hash.IS_ANY_SPEECH_PLAYING, me.Handle)) return;
-
-                var line = lines[_rng.Next(lines.Length)];
 
                 // SPEECH_PARAMS_FORCE rather than the shouted or standard variants: standard
                 // can be dropped when the audio engine is busy, which for one line every few
@@ -90,7 +102,7 @@ namespace BareMinimum.Food
 
                 _nextAllowed = now + Math.Max(5, _cfg.SpeechGapSeconds) * 1000;
 
-                Log.Debug("Said " + line + " (" + set + ").");
+                Log.Debug("Said " + line + ".");
             }
             catch (Exception ex)
             {
