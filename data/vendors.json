@@ -321,7 +321,7 @@
     "stand": {
       "name": "Street Food",
       "sprite": 52,
-      "colour": 3
+      "colour": 2
     },
     "fastfood": {
       "name": "Fast Food",
@@ -345,18 +345,18 @@
     },
     "liquor": {
       "name": "Liquor",
-      "sprite": 93,
-      "colour": 53
+      "sprite": 52,
+      "colour": 3
     },
     "bar": {
       "name": "Bars",
-      "sprite": 93,
-      "colour": 66
+      "sprite": 52,
+      "colour": 53
     },
     "smoke": {
       "name": "Smoke Shops",
-      "sprite": 51,
-      "colour": 62
+      "sprite": 52,
+      "colour": 72
     },
     "servo": {
       "name": "Convenience Store",
@@ -365,18 +365,18 @@
     },
     "pharmacy": {
       "name": "Pharmacy",
-      "sprite": 153,
-      "colour": 41
+      "sprite": 52,
+      "colour": 5
     },
     "produce": {
       "name": "Fruit Stalls",
       "sprite": 52,
-      "colour": 2
+      "colour": 69
     },
     "machine": {
       "name": "Vending Machines",
       "sprite": 52,
-      "colour": 53
+      "colour": 74
     }
   },
   "vendors": [
