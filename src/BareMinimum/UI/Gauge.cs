@@ -679,9 +679,16 @@ namespace BareMinimum.UI
 
             var clear = Clearance();
 
-            return _cfg.HudSide == HudSide.Left
-                       ? outerR + clear
-                       : outerL - clear - Math.Max(0.001f, _cfg.HudBarWidth);
+            var x = _cfg.HudSide == HudSide.Left
+                        ? outerR + clear
+                        : outerL - clear - Math.Max(0.001f, _cfg.HudBarWidth);
+
+            // THE GROUP OFFSET REACHES THIS TOO, WHICH IT DID NOT. GroupX's own comment says it
+            // moves "the whole lot as one" -- the row and the cash readout together -- and it
+            // was written before the fuel gauge stood in the row. So nudging the group moved
+            // five bars and the money and left the sixth bar on the far side of the map exactly
+            // where it was, which is the one arrangement the number exists to prevent.
+            return x + _cfg.HudGroupX;
         }
 
         /// <summary>The row as it stands right now, for anything that has to line up with it without drawing it.</summary>
