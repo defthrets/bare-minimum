@@ -688,7 +688,9 @@ namespace BareMinimum.Venues
 
             try
             {
-                if (suspended) { _at = null; Close(); return; }
+                // Suspended is another way of not reaching the door block, so the hold goes
+                // with it -- otherwise opening a menu mid-hold and closing it is a release.
+                if (suspended) { _at = null; DropHold(false); Close(); return; }
 
                 var me = Game.Player.Character;
                 if (me == null || !me.Exists() || me.IsDead) { _at = null; Close(); return; }
@@ -1871,23 +1873,41 @@ namespace BareMinimum.Venues
         // ======================================================================
 
         /// <summary>The prompt, and the purchase. No menu, by design.</summary>
+        /// <summary>
+        /// The hold is abandoned: whatever the key is doing right now becomes the truth.
+        ///
+        /// EDGE STATE HAS TO BE TRUE ON EVERY FRAME, not only on the frames that reach the door
+        /// block. It was written only inside that block, under four early returns, so walking
+        /// out of reach part way through a hold froze it -- and the first frame back in reach
+        /// saw a release that never happened. On a door with a menu that opened the shelf by
+        /// itself; on one without, it bought and ate an item with no key pressed.
+        /// </summary>
+        private void DropHold(bool down)
+        {
+            _doorWasDown = down;
+            _keyWasDown = down;
+            _doorHeldSince = 0;
+        }
+
         private void Offer(Ped me)
         {
             _at = null;
 
-            if (_eating.Busy) return;
+            var keyNow = InteractDown();
+
+            if (_eating.Busy) { DropHold(keyNow); return; }
 
             var driving = me.IsInVehicle();
 
             var here = Nearest(me.Position, driving);
-            if (here == null) return;
+            if (here == null) { DropHold(keyNow); return; }
 
             // A drive-through you can use at speed is a drive-BY. The car has to have
             // essentially stopped at the window, which is what the real thing asks of you.
-            if (driving && !Stopped(me)) return;
+            if (driving && !Stopped(me)) { DropHold(keyNow); return; }
 
             var item = Find(here.ItemId);
-            if (item == null) return;
+            if (item == null) { DropHold(keyNow); return; }
 
             _at = here;
 

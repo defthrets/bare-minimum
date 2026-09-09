@@ -122,13 +122,30 @@ namespace BareMinimum.UI
                 if (suspended)
                 {
                     if (_ui.IsOpen) { _ui.Close(); Flush(); }
+
+                    // THE KEY'S EDGE IS KEPT TRUE WHILE SUSPENDED. It was frozen at whatever it
+                    // was when the suspension started, so a press made while the mod was
+                    // deliberately ignoring the key fired the moment the suspension lifted --
+                    // press F7 at a shop counter, close the till, and the settings menu opens.
+                    Toggled();
                     return;
                 }
 
                 if (Toggled())
                 {
                     if (_ui.IsOpen) { _ui.Close(); Flush(); }
-                    else { _ui.Open(); Refill(); }
+                    else
+                    {
+                        _ui.Open();
+                        Refill();
+
+                        // THE CHORD THAT OPENS THIS IS MADE OF THE MENU'S OWN KEYS. Left bumper
+                        // is its tab-back and up is its move-up, and the menu is updated later
+                        // in this same tick -- so opening it moved the cursor off the first row
+                        // on the opening frame. Swallowed for this frame only; the next press
+                        // navigates as normal.
+                        return;
+                    }
                 }
 
                 if (!_ui.IsOpen)

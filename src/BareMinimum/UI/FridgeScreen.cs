@@ -157,18 +157,31 @@ namespace BareMinimum.UI
             }
         }
 
+        /// <summary>
+        /// The interact key's edge, kept true on the frames that do not reach the prompt.
+        ///
+        /// Pressed() is the only thing that writes it and Offer returns above Pressed three
+        /// times, so it went stale the moment you were anywhere but at a fridge. E is also the
+        /// game's own context button, so walking with it held is ordinary -- and walking into a
+        /// fridge's reach with it held opened the fridge off a press made minutes earlier.
+        /// </summary>
+        private void Forget()
+        {
+            _keyWasDown = Game.IsKeyPressed(_cfg.InteractKey);
+        }
+
         /// <summary>The prompt, when you are stood at one on foot with your hands free.</summary>
         private void Offer()
         {
             var me = Game.Player.Character;
-            if (me == null || !me.Exists() || me.IsDead) return;
+            if (me == null || !me.Exists() || me.IsDead) { Forget(); return; }
 
             // Not from a car -- there is no drive-through fridge -- and not mid-meal, for the
             // same reason the counter refuses: a second sandwich while still chewing the first
             // is how a hunger meter gets filled by a queue of overlapping timers.
-            if (me.IsInVehicle() || _eating.Busy) return;
+            if (me.IsInVehicle() || _eating.Busy) { Forget(); return; }
 
-            if (_fridges.Nearest(me.Position, _cfg.FridgeReach) == null) return;
+            if (_fridges.Nearest(me.Position, _cfg.FridgeReach) == null) { Forget(); return; }
 
             Hud.Help("Press ~INPUT_CONTEXT~ to open the fridge.");
 
