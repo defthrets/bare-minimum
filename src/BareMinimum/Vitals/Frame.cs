@@ -105,8 +105,18 @@ namespace BareMinimum.Vitals
             var gap = Math.Max(0f, cfg.MinimapFrameGap);
             var gapW = gap / aspect;
 
-            var ink = Ink.Alpha(Color.FromArgb(228, 0, 0, 0), (int)(228f * cfg.HudOpacity * strength + 0.5f));
-            var mat = Ink.Alpha(Color.FromArgb(120, 0, 0, 0), (int)(120f * cfg.HudOpacity * strength + 0.5f));
+            // ON THE CHROME'S OPACITY, NOT THE LEVELS'. See Settings.HudChromeOpacity: the
+            // bars are meant to be seen through and this is meant to be a hard edge, and they
+            // were sharing one number.
+            //
+            // THE MAT IS RAISED FURTHER THAN THE LINE, proportionally. It fills the gap between
+            // the frame and the map and its job is to bury the radar's own soft faded edge --
+            // at 120 that edge showed through the thing hiding it, which reads as a grubby seam
+            // rather than a deliberate margin.
+            var k = Ink.Clamp01(cfg.HudChromeOpacity) * strength;
+
+            var ink = Ink.Alpha(Color.FromArgb(242, 0, 0, 0), (int)(242f * k + 0.5f));
+            var mat = Ink.Alpha(Color.FromArgb(152, 0, 0, 0), (int)(152f * k + 0.5f));
 
             // ON SCREEN, WHATEVER THE SAFE ZONE. With the safe zone at its widest the map sits
             // four pixels from the left edge, and a frame drawn outside it falls off the

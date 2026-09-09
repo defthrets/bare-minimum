@@ -93,6 +93,23 @@ namespace BareMinimum.Vitals
         /// </summary>
         public float Charge => _charge;
 
+        /// <summary>
+        /// HOW RECENTLY HE WAS HIT, 1 the instant it lands and 0 a third of a second later.
+        ///
+        /// AN EVENT NEEDS A DECAY, NOT A LEVEL. HealthDelta is this frame's change and is
+        /// therefore non-zero for exactly one frame per hit -- at sixty frames a second that is
+        /// sixteen milliseconds of white, which is under what most people reliably see and
+        /// nothing at all on a screen that happens to drop a frame. Held and decayed, one hit
+        /// is one visible flash however the frame times fall.
+        ///
+        /// IT IS NOT A SPRING. The springs beside it ring -- overshoot, come back, overshoot
+        /// less -- which is right for a liquid being knocked about and wrong for an alarm: a
+        /// flash that pulsed twice per hit would say two hits.
+        /// </summary>
+        public float Hurt => _hurt;
+
+        private float _hurt;
+
         private float _phase;
         private float _wall;
         private float _charge;
@@ -138,6 +155,7 @@ namespace BareMinimum.Vitals
             }
 
             Charged(cfg, dt, r);
+            Hit(dt, r);
 
             Health.Step(dt, force);
             Armour.Step(dt, force);
@@ -155,6 +173,42 @@ namespace BareMinimum.Vitals
         /// movement falls under what a float can hold. Chased, both of those come out as the
         /// streaks winding up and winding down, and a frame of noise cannot be seen at all.
         /// </summary>
+        /// <summary>
+        /// Moves the hit-flash on. See Hurt.
+        ///
+        /// ARMOUR COUNTS. A round stopped by a plate is still a round that hit you, and the bar
+        /// is showing armour at the time -- so the flash has to fire off either meter or it
+        /// would be silent for exactly as long as the armour lasts, which is the part of a
+        /// fight where knowing you are being shot at matters most.
+        ///
+        /// THE THRESHOLD IS SMALLER THAN THE SPRINGS'. Those want a real knock before they
+        /// slosh; this wants to catch a graze, because the question it answers is "am I taking
+        /// fire", not "how hard".
+        /// </summary>
+        private void Hit(float dt, Readings r)
+        {
+            if (r != null)
+            {
+                var worst = Math.Min(r.HealthDelta, r.ArmourDelta);
+
+                if (worst < -0.0004f)
+                {
+                    // Bigger hits flash harder, but even the smallest is plainly visible: this
+                    // is a warning and a warning nobody notices is not one.
+                    var hit = 0.55f + 0.45f * Math.Min(1f, -worst * 6f);
+                    if (hit > _hurt) _hurt = hit;
+                }
+            }
+
+            if (_hurt <= 0f) return;
+
+            // A THIRD OF A SECOND, linear. An exponential decay has a long dim tail, and a bar
+            // that stays faintly pale for a second after every graze reads as being permanently
+            // slightly wrong rather than as having just been hit.
+            _hurt -= dt * 3f;
+            if (_hurt < 0f) _hurt = 0f;
+        }
+
         private void Charged(Settings cfg, float dt, Readings r)
         {
             // Bars per second, near enough: quick spending, steady rebuilding, a drift at rest;
@@ -189,6 +243,7 @@ namespace BareMinimum.Vitals
             Third.Rest();
             _haveAlong = false;
             Accel = 0f;
+            _hurt = 0f;
         }
 
         /// <summary>

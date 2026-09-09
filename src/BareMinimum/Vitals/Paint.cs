@@ -62,29 +62,55 @@ namespace BareMinimum.Vitals
             // ARMOUR'S BLUE WHILE THERE IS ARMOUR. The column stands full and blue for as long
             // as the plate holds, and only turns to the ramp -- and to the low-health beat --
             // once it is the man himself taking the damage.
-            if (r.Armour > 0.002f) return Body(opacity, cfg.VitalsArmour, strength);
+            //
+            // THE HIT FLASH STILL FIRES ON IT. Being shot while wearing a plate is still being
+            // shot, and it is drawn below so the blue flashes white the same as the red does.
+            var c = r.Armour > 0.002f
+                        ? Body(opacity, cfg.VitalsArmour, strength)
+                        : Body(opacity, Ramp(cfg.VitalsHealth, r.Health), strength);
 
-            var c = Body(opacity, Ramp(cfg.VitalsHealth, r.Health), strength);
-
-            if (cfg.VitalsLowHealthPulse && r.Health > 0f && r.Health < cfg.VitalsLowHealthAt)
+            if (r.Armour <= 0.002f &&
+                cfg.VitalsLowHealthPulse && r.Health > 0f && r.Health < cfg.VitalsLowHealthAt)
             {
                 // Sine rather than a square wave: a hard blink is a fault light, and this is
                 // meant to be urgent without being an alarm. On the wall clock, because it is
                 // a warning and Pace is for decoration.
                 //
-                // IT GOES FURTHER AND BRIGHTER THAN IT USED TO, because what it is beating
-                // against changed underneath it. The bar was a mid red at this level and is a
-                // dark one now, so a mix toward 255,72,60 at 30-70% -- which read clearly on
-                // the old bar -- would be a dark bar getting slightly less dark. The target is
-                // brighter and the swing is wider, so the flash is a flash.
-                var pulse = (float)Math.Abs(Math.Sin(m.Wall * 3.4));
+                // IT BEATS TOWARD BLACK, NOT TOWARD WHITE.
                 //
-                // AND IT COMES ALL THE WAY BACK DOWN. The floor was 0.30, which meant the bar
-                // never once showed its own colour while the beat was running -- it sat a third
-                // of the way lit at the bottom of every cycle, so what you saw was a permanently
-                // paler bar breathing rather than a dark one flashing. At 0.05 the trough is the
-                // bar and the peak is the warning, which is what makes it read as a flash.
-                c = Ink.Mix(c, Color.FromArgb(c.A, 255, 110, 95), 0.05f + 0.75f * pulse);
+                // Every version of this went brighter, and on a green bar that was right: the
+                // bar was light, so lighter still was a change. On a red one it is wrong twice
+                // over -- a red bar going pale reads as the level RISING, and it is the same
+                // gesture the mod now uses for taking a hit. Darkening is unmistakably not
+                // recovery, it is the only direction a dark red bar has left, and it leaves
+                // the white free to mean one thing.
+                //
+                // AND IT COMES ALL THE WAY BACK UP. The floor was 0.30, so the bar never once
+                // showed its own colour while the beat ran -- it sat a third of the way toward
+                // the target at the bottom of every cycle, which is a permanently altered bar
+                // breathing rather than one flashing. At 0.03 the trough IS the bar.
+                //
+                // NOT QUITE BLACK at the peak: 12,2,4 rather than 0,0,0, so the column is
+                // still faintly there against its own black surround. A bar that vanishes
+                // entirely reads as the HUD glitching, which is not the message.
+                var pulse = (float)Math.Abs(Math.Sin(m.Wall * 3.4));
+
+                c = Ink.Mix(c, Color.FromArgb(c.A, 12, 2, 4), 0.03f + 0.80f * pulse);
+            }
+
+            // ---- and white the moment he is hit ----
+            //
+            // OVER THE TOP OF EVERYTHING ABOVE, on purpose. The beat is a STATE -- you are low,
+            // it has been true for a while and goes on being true -- and this is an EVENT,
+            // which happened just now and is gone in a third of a second. With both running the
+            // event is the one worth seeing, so it is applied last and wins.
+            //
+            // Not pure white: 255,238,238 keeps a breath of the bar's own colour, so a hit on
+            // the red bar and a hit on the blue armour do not both flash to the same flat
+            // nothing. See Momentum.Hurt for why it is held rather than read per frame.
+            if (m != null && m.Hurt > 0f)
+            {
+                c = Ink.Mix(c, Color.FromArgb(c.A, 255, 238, 238), Ink.Clamp01(m.Hurt));
             }
 
             return c;

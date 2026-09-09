@@ -735,6 +735,28 @@ namespace BareMinimum.Core
         public float HudOpacity = 0.72f;
 
         /// <summary>
+        /// How solid the BLACK is, 0 to 1: the minimap frame, the bars' surrounds, the channel
+        /// inside them and the plates their marks sit on. Separate from HudOpacity.
+        ///
+        /// THEY WERE ONE NUMBER AND SHOULD NEVER HAVE BEEN. HudOpacity is there to fade the
+        /// LEVELS -- coloured columns you deliberately want to see the world through -- and
+        /// this install has it at 0.72. The black is not that. It is structure: an edge round
+        /// the map, an outline round a bar, a ground under a mark, and the thing that makes
+        /// white text on it legible. At 0.72 a base of 228 reached the screen at 164 of 255 and
+        /// you could read the pavement through the frame, which is what was reported.
+        ///
+        /// One number for two jobs means every change to either is a compromise. Turning the
+        /// bars down now leaves the chrome alone, and the other way about.
+        ///
+        /// NOT 1. A completely opaque black box round the minimap stops looking like part of
+        /// the game's HUD and starts looking pasted over it -- the vanilla chrome is all
+        /// slightly translucent and this has to sit with it. 0.92 over a base of 242 is 223 of
+        /// 255: solid enough to read white text on at a glance, with just enough of the world
+        /// coming through to belong there.
+        /// </summary>
+        public float HudChromeOpacity = 0.92f;
+
+        /// <summary>
         /// Hide an icon entirely while that need is comfortable.
         ///
         /// Off by default. A gauge that appears only once there is a problem cannot be learnt
@@ -1794,6 +1816,7 @@ namespace BareMinimum.Core
                 cfg.HudSize = ini.GetFloat("HUD", "Size", cfg.HudSize, 0.001f, 0.30f);
                 cfg.HudGap = ini.GetFloat("HUD", "Gap", cfg.HudGap, 0f, 3f);
                 cfg.HudOpacity = ini.GetFloat("HUD", "Opacity", cfg.HudOpacity, 0.05f, 1f);
+                cfg.HudChromeOpacity = ini.GetFloat("HUD", "ChromeOpacity", cfg.HudChromeOpacity, 0.05f, 1f);
                 cfg.Style = ParseStyle(ini.GetString("HUD", "Style", ""), cfg.Style);
                 cfg.HudSide = ParseSide(ini.GetString("HUD", "Side", ""), cfg.HudSide);
                 cfg.HudMatchFrame = ini.GetBool("HUD", "MatchFrame", cfg.HudMatchFrame);
