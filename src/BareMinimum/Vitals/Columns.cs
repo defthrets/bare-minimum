@@ -327,7 +327,7 @@ namespace BareMinimum.Vitals
                 spring.Kick(0.09f * Ink.Clamp01(cfg.HudBarSlosh) * cfg.VitalsParticles);
             }
 
-            // The flash: quick in, quick out, and the dub behind it.
+            // The throb: quick in, quick out, and the dub behind it.
             var since = wall - _beatAt;
             var lub = Flash(since, 0.20f);
             var dub = Flash(since - _beatPeriod * 0.20f, 0.16f) * 0.55f;
@@ -335,13 +335,37 @@ namespace BareMinimum.Vitals
 
             if (glow <= 0.02f) return;
 
-            var alpha = (int)(58f * glow * cfg.VitalsParticles * strength);
+            // IT THROBS DARK, AND ONLY GOES WHITE WHEN HE IS LOW.
+            //
+            // It flashed white on every beat, which was two mistakes at once. On a red bar a
+            // white flash reads as the level RISING -- brighter is more, everywhere else in
+            // this row -- so a resting heart looked like it was healing him sixty times a
+            // minute. And it spent the loudest colour the HUD has on the most ordinary event
+            // there is, leaving nothing louder for the moments that are not ordinary.
+            //
+            // Dark is the honest direction for a beat: a pulse is a squeeze, and the bar
+            // dimming and coming back is what a squeeze looks like. White now means one thing
+            // -- something is wrong -- and it is used twice, here below the threshold and in
+            // Paint the instant he is hit.
+            //
+            // THIS ALSO KILLED A SECOND CLOCK. Paint used to darken the colour on a sine of its
+            // own whenever health was low, so a hurt bar had two pulses at two rates. This one
+            // keeps its clock because it is the real one: the period comes from his health and
+            // how hard he is working, and you can take his pulse off it.
+            var low = cfg.VitalsLowHealthPulse && health > 0f && health < cfg.VitalsLowHealthAt;
+
+            var wash = low
+                           ? Color.FromArgb(body.A, 255, 238, 232)
+                           : Color.FromArgb(body.A, 0, 0, 0);
+
+            // The alarm is worth more of the bar than the resting throb is.
+            var alpha = (int)((low ? 118f : 66f) * glow * cfg.VitalsParticles * strength);
             if (alpha <= 3) return;
 
             var tall = floor - surface;
             if (tall <= 0.002f) return;
 
-            Ink.Bar(x, surface, w, tall, Ink.Alpha(Ink.Mix(body, Color.FromArgb(body.A, 255, 255, 255), 0.85f), alpha));
+            Ink.Bar(x, surface, w, tall, Ink.Alpha(Ink.Mix(body, wash, 0.85f), alpha));
         }
 
         /// <summary>
@@ -355,10 +379,18 @@ namespace BareMinimum.Vitals
         /// rather than Streaks with a different tint. A cell that drifted steadily upward would
         /// say "flowing", and what this bar has to say is "pumping".
         ///
-        /// PUSHED, THEN SUCKED BACK PAST WHERE IT STARTED. The wave is a sharp shove on the
-        /// beat and a gentler undershoot behind it, so each cell overshoots up, falls below its
-        /// resting height and settles -- which is what makes it read as pressure rather than as
-        /// a dot being moved. Squeezing it and letting go, not lifting it and putting it down.
+        /// PUSHED, THEN SUCKED BACK PAST WHERE IT STARTED. The wave is a swell on the beat and
+        /// a gentler undershoot behind it, so each cell rises, falls below its resting height
+        /// and settles -- pressure rather than a dot being moved. Squeezing something and
+        /// letting go, not lifting it and putting it down.
+        ///
+        /// AND IT BARELY MOVES. The travel is a twentieth of the column, down from a sixth: at
+        /// the old figure they crossed a sixth of the screen every beat, which read as three
+        /// dots being thrown about rather than as anything suspended in a liquid. Most of what
+        /// you see now is the slow wander they have between beats, with the beat as a nudge on
+        /// top of it -- which is what blood in a vessel actually does. The beat that got quieter
+        /// in the movement got louder in the BRIGHTNESS to pay for it; two pixels on a
+        /// nine-pixel column is nearly nothing, and a lift in light is not.
         ///
         /// AND THE WAVE TRAVELS UP THE COLUMN. A cell higher up feels the beat later, by a
         /// fifth of a beat over the length of the bar. Without that the three of them jump in
@@ -407,39 +439,55 @@ namespace BareMinimum.Vitals
 
             for (var i = 0; i < count; i++)
             {
-                // Where it sits between beats: spread up the column, with a very slow wander so
+                // Where it sits between beats: spread up the column, with a slow wander so
                 // three cells are not three marks painted on the glass.
-                var rest = 0.18f + 0.64f * ((i + 0.5f) / count);
-                rest += 0.045f * (float)Math.Sin(wall * (0.21f + i * 0.06f) + i * 2.3f);
+                //
+                // THE WANDER CARRIES MORE OF THE MOVEMENT THAN THE BEAT DOES NOW, and that is
+                // the right way round. Blood between beats is not still, it is drifting; the
+                // beat is a nudge on top of a drift. Two periods that do not divide into each
+                // other, so a cell never repeats a path you could learn.
+                var rest = 0.20f + 0.60f * ((i + 0.5f) / count);
+
+                rest += 0.055f * (float)Math.Sin(wall * (0.17f + i * 0.05f) + i * 2.3f);
+                rest += 0.030f * (float)Math.Sin(wall * (0.41f + i * 0.09f) + i * 5.1f);
 
                 var lane = 0.20f + 0.60f * Paint.Scatter(i * 5.7f + 1.3f);
 
                 // THE FRONT MOVES UP THE COLUMN. See the note above.
                 var t = since - rest * _beatPeriod * 0.20f;
 
-                // THE SHOVE AND THE PULL BACK UNDER IT -- and then the second, smaller one.
+                // THE SWELL AND THE PULL BACK UNDER IT -- and then the second, smaller one.
                 //
-                // LUB AND DUB, off the same two figures the glow above uses: a beat is two
-                // sounds and two pressures, the second at a fifth of a period behind the first
-                // and about half its size. Without the dub the second half of every beat is
-                // dead air, which at 56 bpm is most of a second of nothing happening; with it
-                // the column is never quite still and the rhythm is a heartbeat's rather than
-                // a metronome's.
-                var lub = Flash(t, 0.18f) - 0.42f * Flash(t - 0.18f, 0.32f);
+                // ON Swell, NOT Flash. Flash is instant at the front, which is right for a
+                // light coming on and wrong for something being carried: an impulse reads as
+                // the speck being flicked. These ease in and out, and they are slower -- the
+                // lub takes a third of a second where it took a fifth -- so what you see is
+                // something being moved BY a fluid rather than by a finger.
+                //
+                // LUB AND DUB, off the same two figures the throb above uses: a beat is two
+                // sounds and two pressures, the second a fifth of a period behind the first and
+                // about half its size.
+                var lub = Swell(t, 0.34f) - 0.38f * Swell(t - 0.34f, 0.46f);
 
                 var dubAt = t - _beatPeriod * 0.20f;
-                var dub = (Flash(dubAt, 0.13f) - 0.42f * Flash(dubAt - 0.13f, 0.22f)) * 0.45f;
+                var dub = (Swell(dubAt, 0.24f) - 0.38f * Swell(dubAt - 0.24f, 0.34f)) * 0.45f;
 
                 var push = lub + dub;
 
-                var at = Ink.Clamp01(rest + push * 0.16f);
+                // A THIRD OF THE TRAVEL IT HAD. It was 0.16 of the column, which on a bar this
+                // tall is a speck crossing a sixth of the screen height every beat -- read as
+                // three dots being thrown up and down rather than as anything in a liquid. The
+                // beat should be felt in them, not performed by them.
+                var at = Ink.Clamp01(rest + push * 0.055f);
 
                 var py = floor - tall - (span - tall) * at;
                 var px = Ink.Clamp(x + w * lane - size / 2f, x, x + w - size);
 
-                // Brighter as it is driven, so the surge is in the light as well as the
-                // position -- on a bar this narrow the movement alone is a few pixels.
-                var lit = 0.55f + 0.45f * Ink.Clamp01(push);
+                // Brighter as it is driven, so the surge is in the LIGHT as much as in the
+                // position -- which matters much more now the travel is small: a couple of
+                // pixels of movement is nearly invisible on a nine-pixel column, and the same
+                // beat showing as a lift in brightness is not.
+                var lit = 0.52f + 0.48f * Ink.Clamp01(push);
 
                 var alpha = (int)(165f * lit * cfg.VitalsParticles * strength);
                 if (alpha <= 4) continue;
@@ -447,6 +495,22 @@ namespace BareMinimum.Vitals
 
                 Ink.Bar(px, py, size, tall, Ink.Alpha(tint, alpha));
             }
+        }
+
+        /// <summary>
+        /// A SWELL: nought at both ends and full in the middle, easing in and out.
+        ///
+        /// FLASH'S OPPOSITE, AND WHY BOTH EXIST. Flash is instant at the front and decays --
+        /// right for a light coming on, which is what the beat's own throb is. It is wrong for
+        /// something being MOVED: an instant onset is an impulse, and a speck that jumps and
+        /// then drifts back reads as being flicked rather than carried. A liquid has no
+        /// discontinuities in it, so neither does this.
+        /// </summary>
+        private static float Swell(float since, float life)
+        {
+            if (since < 0f || since >= life) return 0f;
+
+            return (float)Math.Sin(Math.PI * since / life);
         }
 
         /// <summary>One flash: nought before it, full at once, gone after <paramref name="life"/> seconds, eased out.</summary>

@@ -735,26 +735,27 @@ namespace BareMinimum.Core
         public float HudOpacity = 0.72f;
 
         /// <summary>
-        /// How solid the BLACK is, 0 to 1: the minimap frame, the bars' surrounds, the channel
-        /// inside them and the plates their marks sit on. Separate from HudOpacity.
+        /// How solid the MINIMAP FRAME's black is, 0 to 1. The frame only; the bars keep
+        /// HudOpacity.
         ///
-        /// THEY WERE ONE NUMBER AND SHOULD NEVER HAVE BEEN. HudOpacity is there to fade the
-        /// LEVELS -- coloured columns you deliberately want to see the world through -- and
-        /// this install has it at 0.72. The black is not that. It is structure: an edge round
-        /// the map, an outline round a bar, a ground under a mark, and the thing that makes
-        /// white text on it legible. At 0.72 a base of 228 reached the screen at 164 of 255 and
-        /// you could read the pavement through the frame, which is what was reported.
+        /// IT READ HudOpacity AND SHOULD NOT HAVE. That number is there to fade the LEVELS --
+        /// coloured columns you deliberately want to see the world through -- and this install
+        /// has it at 0.72, so a frame based on 228 reached the screen at 164 of 255 and you
+        /// could read the pavement through it. The frame is not a level. It is a panel with
+        /// writing on it, and its whole job is to be a hard edge round the map and a ground
+        /// that makes white text legible.
         ///
-        /// One number for two jobs means every change to either is a compromise. Turning the
-        /// bars down now leaves the chrome alone, and the other way about.
+        /// IT COVERED THE BARS' OUTLINES TOO FOR ONE BUILD, and they went back. A bar's outline
+        /// is a few pixels wide with the world moving behind it; solid black there reads as a
+        /// heavy border rather than as an instrument sitting on the scene. A big flat panel and
+        /// a hairline round a nine-pixel column want opposite things, which is the whole reason
+        /// this is a second number rather than a raised first one.
         ///
-        /// NOT 1. A completely opaque black box round the minimap stops looking like part of
-        /// the game's HUD and starts looking pasted over it -- the vanilla chrome is all
-        /// slightly translucent and this has to sit with it. 0.92 over a base of 242 is 223 of
-        /// 255: solid enough to read white text on at a glance, with just enough of the world
-        /// coming through to belong there.
+        /// NOT 1. A completely opaque box round the minimap stops looking like part of the
+        /// game's HUD and starts looking pasted over it -- the vanilla chrome is all slightly
+        /// translucent and this has to sit with it. 0.92 over a base of 242 is 223 of 255.
         /// </summary>
-        public float HudChromeOpacity = 0.92f;
+        public float MinimapOpacity = 0.92f;
 
         /// <summary>
         /// Hide an icon entirely while that need is comfortable.
@@ -1816,7 +1817,6 @@ namespace BareMinimum.Core
                 cfg.HudSize = ini.GetFloat("HUD", "Size", cfg.HudSize, 0.001f, 0.30f);
                 cfg.HudGap = ini.GetFloat("HUD", "Gap", cfg.HudGap, 0f, 3f);
                 cfg.HudOpacity = ini.GetFloat("HUD", "Opacity", cfg.HudOpacity, 0.05f, 1f);
-                cfg.HudChromeOpacity = ini.GetFloat("HUD", "ChromeOpacity", cfg.HudChromeOpacity, 0.05f, 1f);
                 cfg.Style = ParseStyle(ini.GetString("HUD", "Style", ""), cfg.Style);
                 cfg.HudSide = ParseSide(ini.GetString("HUD", "Side", ""), cfg.HudSide);
                 cfg.HudMatchFrame = ini.GetBool("HUD", "MatchFrame", cfg.HudMatchFrame);
@@ -1891,6 +1891,7 @@ namespace BareMinimum.Core
                 cfg.VitalsStripOpacity = ini.GetFloat("VitalsStrip", "Opacity", cfg.VitalsStripOpacity, 0.05f, 1f);
 
                 cfg.MinimapFrame = ini.GetBool("Minimap", "Frame", cfg.MinimapFrame);
+                cfg.MinimapOpacity = ini.GetFloat("Minimap", "Opacity", cfg.MinimapOpacity, 0.05f, 1f);
                 cfg.MinimapLabel = ini.GetBool("Minimap", "Label", cfg.MinimapLabel);
                 cfg.MinimapFrameGap = ini.GetFloat("Minimap", "FrameGap", cfg.MinimapFrameGap, 0f, 0.03f);
                 cfg.MinimapTopCover = ini.GetFloat("Minimap", "TopCover", cfg.MinimapTopCover, 0f, 0.5f);

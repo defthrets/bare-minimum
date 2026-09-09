@@ -159,16 +159,16 @@ namespace BareMinimum.UI
             var x = row.Centre(slot) - row.BarW / 2f;
             var aspect = Aspect();
 
-            // THE SURROUND AND THE CHANNEL ARE CHROME, not level. The outline is what separates
-            // one bar from the next and from the world behind it, and the channel is the empty
-            // part of the instrument -- neither is something you look THROUGH, and both were
-            // being faded by the setting for the part you do. Raised with the frame beside them
-            // so the row and the map read as one piece of furniture.
+            // ON THE ROW'S OWN OPACITY. These were raised with the minimap frame for one build
+            // and put back: a bar's outline is a few pixels wide with the world moving behind
+            // it, and solid black on a narrow column reads as a bar with a heavy border rather
+            // than as an instrument sitting on the scene. The frame is a big flat panel with
+            // writing on it and wants the opposite. See Settings.MinimapOpacity.
             Hud.Bar(x - row.Edge, row.Top - row.Edge * aspect,
                     row.BarW + row.Edge * 2f, row.BarH + row.Edge * 2f * aspect,
-                    Chrome(Color.FromArgb(242, 0, 0, 0), strength));
+                    Fade(Color.FromArgb(228, 0, 0, 0), strength));
 
-            Hud.Bar(x, row.Top, row.BarW, row.BarH, Chrome(Color.FromArgb(180, 28, 28, 32), strength));
+            Hud.Bar(x, row.Top, row.BarW, row.BarH, Fade(Color.FromArgb(165, 28, 28, 32), strength));
         }
 
         /// <summary>The plate under one slot's foot, with a mark on it. See Badge.</summary>
@@ -928,7 +928,7 @@ namespace BareMinimum.UI
             // expression, because two adjacent rectangles at slightly different alphas is a
             // seam -- the lesson this file already records about the breath between them.
             Hud.Bar(plateX, plateY, plateW, plateH,
-                    Chrome(Color.FromArgb(242, 0, 0, 0), strength));
+                    Fade(Color.FromArgb(228, 0, 0, 0), strength));
 
             if (icon == null || icon.Missing) return;
 
@@ -2058,24 +2058,6 @@ namespace BareMinimum.UI
         }
 
         /// <summary>The colour at the HUD's opacity, for parts that do not go through Colour.</summary>
-        /// <summary>
-        /// As Fade, but on the CHROME's opacity: the black outlines, the channel and the plates.
-        ///
-        /// A SECOND METHOD RATHER THAN A PARAMETER, so that every draw in this file declares
-        /// which of the two it is by the name it calls. A bool argument at the call site would
-        /// be one character away from being wrong and would read as noise everywhere it
-        /// appeared. See Settings.HudChromeOpacity.
-        /// </summary>
-        private Color Chrome(Color c, float strength = 1f)
-        {
-            var a = (int)(c.A * _cfg.HudChromeOpacity * strength + 0.5f);
-
-            if (a < 0) a = 0;
-            if (a > 255) a = 255;
-
-            return Color.FromArgb(a, c.R, c.G, c.B);
-        }
-
         private Color Fade(Color c, float strength = 1f)
         {
             var a = (int)(c.A * _cfg.HudOpacity * strength + 0.5f);
