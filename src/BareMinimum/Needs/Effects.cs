@@ -457,8 +457,18 @@ namespace BareMinimum.Needs
         /// on, and its strength breathes on a slow sine -- a constant wobble is a filter, one
         /// that comes and goes is somebody fighting to stay awake.
         /// </summary>
+        /// <summary>Set by Main: a psychedelic already has the timecycle. See Needs.Trip.</summary>
+        public Func<bool> Tripping;
+
         private void Wobble(float sleep)
         {
+            // ONE TIMECYCLE SLOT ON THE GAME, AND THE TRIP WINS IT. A man who has taken acid and
+            // not slept should be shown the acid: it is the thing he DID, it is far the louder
+            // of the two, and a tired shimmer in its place would read as the tab being a dud.
+            // Standing down rather than being overwritten, so neither ends up clearing the
+            // other's modifier out from under it.
+            if (Tripping != null && Tripping()) { ClearWobble(); return; }
+
             var want = _cfg.SleepEnabled && _cfg.SleepWobble && sleep <= 0.0001f;
 
             if (!want)

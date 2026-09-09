@@ -362,6 +362,26 @@ namespace BareMinimum.Food
                 }
             }
 
+            // THE PICTURE, FOR AS LONG AS IT LASTS. A second tab while the first is still
+            // going extends it rather than starting a second one -- there is one screen.
+            if (effect.Trip > 0f)
+            {
+                try
+                {
+                    var now = Game.GameTime;
+                    var have = _tripTo > now ? _tripTo - now : 0;
+
+                    _tripTo = now + have + (int)(effect.Trip * 60000f);
+                    _tripTotal = (_tripTo - now) / 1000f;
+
+                    Log.Info("Trip: " + (_tripTotal / 60f).ToString("0.#") + " minute(s).");
+                }
+                catch
+                {
+                    _tripTo = 0;
+                }
+            }
+
             // AND WHAT IT COSTS ON THE WAY DOWN. The crash is armed the moment the dose lands
             // rather than watched for: the rush's length is known here and nothing else has to
             // notice the bar letting go. See Dose.Crash.
@@ -371,7 +391,12 @@ namespace BareMinimum.Food
                 {
                     var now = Game.GameTime;
 
-                    _crashFrom = now + (int)(effect.Wired * 60000f);
+                    // OFF WHICHEVER LASTS LONGER. A drug with both a rush and a trip comes down
+                    // when the last of them lets go, not when the first does -- crashing a man
+                    // whose screen is still bending is two states arguing about one body.
+                    var rides = Math.Max(effect.Wired, effect.Trip);
+
+                    _crashFrom = now + (int)(rides * 60000f);
                     _crashTo = _crashFrom + (int)(effect.Crash * 60000f);
                     _crashSaid = false;
 
@@ -388,7 +413,14 @@ namespace BareMinimum.Food
             {
                 // Weed is its own thing: it is the one on the list that is neither an upper
                 // nor a night's sleep, and the one line in the bank that fits it is Kifflom.
-                var mood = string.Equals(id, "weed", StringComparison.OrdinalIgnoreCase) ? "weed"
+                // WEED AND ACID SHARE THE EPSILON GREETING, which is the only thing in the
+                // bank that fits either of them: neither is an upper and neither is a night's
+                // sleep, and "Kifflom" out of a man who has just eaten a square of paper is
+                // exactly right. The camps below still answer for everything else.
+                var psychedelic = string.Equals(id, "weed", StringComparison.OrdinalIgnoreCase) ||
+                                  string.Equals(id, "lsd", StringComparison.OrdinalIgnoreCase);
+
+                var mood = psychedelic ? "weed"
                          : effect.Wired > 0f ? "upper"
                          : effect.Wake < 0f ? "downer"
                          : null;
@@ -502,6 +534,16 @@ namespace BareMinimum.Food
             /// </summary>
             public float Sedative;
 
+            /// <summary>
+            /// Real minutes the PICTURE is bent for. Nought for everything that is a number on a
+            /// meter rather than a thing to look at. See Needs.Trip.
+            ///
+            /// SEPARATE FROM Wired, because they are not the same clock and one drug has both
+            /// in principle. Wired is what the energy bar is doing; this is what the screen is
+            /// doing, and the comedown is armed off whichever of the two lasts longer.
+            /// </summary>
+            public float Trip;
+
             public Color Tint;
             public string Desc;
         }
@@ -563,6 +605,33 @@ namespace BareMinimum.Food
             if (_sedative < 0f) _sedative = 0f;
 
             return _sedative;
+        }
+
+        /// <summary>When the trip ends, and how long it was. Wall clock, in game-time ms.</summary>
+        private static int _tripTo;
+        private static float _tripTotal;
+
+        /// <summary>Seconds of trip left, or 0. Read by Needs.Trip; nothing has to be told when it ends.</summary>
+        public static float TripLeft
+        {
+            get
+            {
+                if (_tripTo == 0) return 0f;
+
+                int now;
+                try { now = Game.GameTime; }
+                catch { return 0f; }
+
+                if (now >= _tripTo) { _tripTo = 0; return 0f; }
+
+                return (_tripTo - now) / 1000f;
+            }
+        }
+
+        /// <summary>How long the trip was in total, in seconds, so the curve knows where it is.</summary>
+        public static float TripTotal
+        {
+            get { return _tripTotal; }
         }
 
         /// <summary>When the comedown starts and when it lets go. Wall clock, in game-time ms.</summary>
@@ -694,6 +763,31 @@ namespace BareMinimum.Food
                 Hunger = -0.16f, Wake = -0.25f,
                 Tint = Color.FromArgb(255, 126, 178, 96),
                 Desc = "The munchies, and a heavy head." } },
+
+            // ---- sideways: neither up nor down, and the only one you WATCH ----
+            //
+            // LSD IS THE ONE DRUG HERE THAT IS NOT ARITHMETIC. Every other entry is a number on
+            // a meter -- the stimulants fill the sleep bar and pin the energy, the sedatives
+            // empty it -- and acid does almost nothing to either. You are not rested and you are
+            // not tired; you are somewhere else. Modelled as numbers alone it would have come
+            // out as the one that did nothing at all, which is why it has Trip and why
+            // Needs.Trip exists to spend it.
+            //
+            // It DOES keep you up, and only about half as hard as a stimulant does -- a night on
+            // it is a night you did not sleep, not a night you were awake for. The stomach goes
+            // the other way: nobody eats on acid, and the meter says so.
+            //
+            // TWELVE MINUTES, which is the longest ride on the list by half again and still a
+            // joke against the real thing. The honest length is most of a day, and a mod that
+            // took the player's screen for most of a day would be uninstalled by lunchtime.
+            //
+            // NO CRASH. That is not an oversight: the way off acid is a long flat glide, and the
+            // tired walk the stimulants get would be saying the wrong thing about it. What it
+            // costs is the twelve minutes and a sleep meter you have to pay back later.
+            { "lsd", new Dose {
+                Hunger = -0.14f, Wake = 0.45f, Trip = 12f,
+                Tint = Color.FromArgb(255, 206, 130, 232),
+                Desc = "The road is breathing. Give it a minute." } },
 
             // ---- up: wide awake, a tenth back on the stomach, and the energy bar pinned ----
             //

@@ -1657,6 +1657,16 @@ namespace BareMinimum.Core
         /// want a mod deciding when they stop being able to see should be able to say so
         /// without giving up the rest of it.
         /// </summary>
+        /// <summary>
+        /// How hard a psychedelic bends the picture, 0 to 1. See Needs.Trip.
+        ///
+        /// ITS OWN DIAL BECAUSE IT TAKES THE WHOLE SCREEN. "How much of this do I want" is the
+        /// first thing anybody asks of a full-screen effect, and 0 is a legitimate answer -- the
+        /// drug still runs its twelve minutes and still costs the stomach; it just stops being
+        /// something you have to look at.
+        /// </summary>
+        public float TripStrength = 0.8f;
+
         public bool BlackoutsEnabled = true;
 
         /// <summary>
@@ -1958,6 +1968,7 @@ namespace BareMinimum.Core
                     : padLabel.Trim();
 
                 cfg.DrugsInPocket = ini.GetBool("General", "DrugsInPocket", cfg.DrugsInPocket);
+                cfg.TripStrength = ini.GetFloat("Effects", "TripStrength", cfg.TripStrength, 0f, 1f);
                 cfg.BlackoutsEnabled = ini.GetBool("Effects", "Blackouts", cfg.BlackoutsEnabled);
                 cfg.BlackoutEverySeconds = ini.GetFloat("Effects", "BlackoutEverySeconds",
                                                         cfg.BlackoutEverySeconds, 3f, 600f);

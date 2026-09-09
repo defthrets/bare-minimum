@@ -47,6 +47,7 @@ namespace BareMinimum
         private readonly MachineBlips _machineBlips;
         private readonly Needs.Parched _parched;
         private readonly Needs.Blackout _blackout;
+        private readonly Needs.Trip _trip;
         private readonly Survey _survey;
         private readonly Vendors _vendors;
 
@@ -122,6 +123,11 @@ namespace BareMinimum
             _machineBlips = new MachineBlips(_cfg);
             _parched = new Needs.Parched(_cfg, _speech);
             _blackout = new Needs.Blackout(_cfg);
+            _trip = new Needs.Trip(_cfg, _speech);
+
+            // THE TRIP OWNS THE TIMECYCLE WHILE IT RUNS. Asked rather than told, so the effects
+            // and the trip never both write the same one slot. See Needs.Trip.
+            _effects.Tripping = () => _trip.Running;
             _survey = new Survey(_cfg);
             _socials = new Social.Socials(_cfg);
             _socials.Load();
@@ -352,6 +358,7 @@ namespace BareMinimum
                 // THE FULL LIST, NOT JUST THE SLEEP. This one takes the whole screen, so
                 // anything else that fades or opens has to hold it off -- see Blackout, which
                 // also drops a lapse already in progress the moment one of these becomes true.
+                _trip.Update(suspended);
                 _blackout.Update(suspended || _shop.IsOpen || _settings.IsOpen || _bag.IsOpen ||
                                  _fridge.IsOpen || _vendors.MenuOpen || _inside.IsInside);
 
@@ -486,6 +493,7 @@ namespace BareMinimum
             // THE SCREEN COMES BACK FIRST OF ALL. A reload while a blackout is up would
             // otherwise leave it up with nothing running that knows how to end it.
             try { _blackout.Shutdown(); } catch (Exception ex) { Log.Error("Blackout shutdown", ex); }
+            try { _trip.Clear(); } catch (Exception ex) { Log.Error("Trip shutdown", ex); }
 
             try { _survey.Stop("the script unloaded"); } catch (Exception ex) { Log.Error("Survey shutdown", ex); }
 
