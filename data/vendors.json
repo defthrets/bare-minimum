@@ -316,27 +316,27 @@
       ]
     }
   ],
-  "_groups": "The map groups. The pause map's legend collects blips by their distinct name and pages through each name's blips with left and right, so a group IS a shared name -- see [Map] GroupShopBlips, which turns the whole thing off and gives every shop its own name back. A vendor with no group, or one naming a group that is not here, falls back to [Map] ShopBlipGroupName.",
+  "_groups": "The map groups. The pause map's legend collects blips by their distinct name and pages through each name's blips with left and right, so a group IS a shared name -- see [Map] GroupShopBlips, which turns the whole thing off and gives every shop its own name back. A vendor with no group, or one naming a group that is not here, falls back to [Map] ShopBlipGroupName. A vendor with a room behind it (\"inside\") overrides the group's sprite with 267, the house mark, so the shape says you can walk in and the colour still says what it sells.",
   "groups": {
     "stand": {
       "name": "Street Food",
       "sprite": 52,
-      "colour": 66
+      "colour": 3
     },
     "fastfood": {
       "name": "Fast Food",
       "sprite": 52,
-      "colour": 51
+      "colour": 41
     },
     "restaurant": {
       "name": "Restaurants",
       "sprite": 52,
-      "colour": 41
+      "colour": 66
     },
     "cafe": {
       "name": "Cafes",
       "sprite": 52,
-      "colour": 61
+      "colour": 4
     },
     "store": {
       "name": "Shops",
@@ -351,7 +351,7 @@
     "bar": {
       "name": "Bars",
       "sprite": 93,
-      "colour": 61
+      "colour": 66
     },
     "smoke": {
       "name": "Smoke Shops",
@@ -376,7 +376,7 @@
     "machine": {
       "name": "Vending Machines",
       "sprite": 52,
-      "colour": 3
+      "colour": 53
     }
   },
   "vendors": [
@@ -524,7 +524,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Aguila Burrito. The shopfront is part of the map; nothing is spawned.",
@@ -637,7 +638,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Save-a-Cent. The other dollar store. Same idea as Cosas Baratas, whole shelf",
@@ -666,7 +668,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Del-Hi Liquor. The sign says LIQUOR, DELICATESSEN and SUNDRIES, so the",
@@ -751,7 +754,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Rancho corner store: same idea, different shelf.",
@@ -777,7 +781,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Liquor store 1, now live. Spirits and beer, plus something to eat.",
@@ -801,7 +806,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "Liquor store 2. Mount Whiskey is on its own door, so it always has it.",
@@ -825,7 +831,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "Liquor store 3. Mount Whiskey on the door again.",
@@ -850,7 +857,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "Long Pig Mini Market and Fast Foods. Its own awning lists ATM, TACOS,",
@@ -878,7 +886,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Liquor store 4, Rancho. BEER & WINE over the door, Mount Whiskey on it.",
@@ -903,7 +912,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "Liquor store 5, the Forum Drive corner by the hot dog stand. BEER - WINE over",
@@ -933,7 +943,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "ON THE BONE -- Meat Market, Butchers, Deli. Same block as the Forum Drive Beer",
@@ -1113,7 +1124,8 @@
       "reach": 2.4,
       "blip": true,
       "ui": true,
-      "group": "servo"
+      "group": "servo",
+      "blipSprite": 267
     },
     {
       "_note": "Bishop's Chicken. The doors are part of the map; nothing is spawned.",
@@ -1164,7 +1176,8 @@
       "spawnRange": 90.0,
       "reach": 2.4,
       "blip": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "The Coop -- Cluckin' Bell's walk-up burger and ice cream kiosk. The board",
@@ -1256,7 +1269,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Bean's Market, 10112. The awning says GROCERIES and SUPPLIES and there",
@@ -1282,7 +1296,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Bean Machine on Alta. The coffee shop, and the only place on this list",
@@ -1347,7 +1362,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "Chihuahua Hot Dogs. A shopfront, not a cart, so it gets its own dogs",
@@ -1460,7 +1476,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "Ground & Pound. A sandwich bar with hot drinks and nothing else --",
@@ -1694,7 +1711,8 @@
       "reach": 2.4,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Mama's Grocery. A family grocer with a hot counter, which is what",
@@ -1716,7 +1734,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "The market kiosk on the corner -- juice, sludgies, ice cream and a",
@@ -1749,7 +1768,8 @@
       "spawnRange": 90.0,
       "reach": 2.6,
       "blip": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Bean Machine, fourth branch -- the one twenty metres from the market",
@@ -1937,7 +1957,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "Its other door, four metres round the side. UNSIGNED, so this is a read",
@@ -1969,7 +1990,8 @@
       "reach": 2.2,
       "blip": false,
       "ui": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "MIRROR PARK TAVERN, with a Logger neon by the door and a happy hour banner",
@@ -1996,7 +2018,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "bar"
+      "group": "bar",
+      "blipSprite": 267
     },
     {
       "_note": "The door under the Logger neon, round the side of the tavern.",
@@ -2021,7 +2044,8 @@
       "reach": 2.2,
       "blip": false,
       "ui": true,
-      "group": "bar"
+      "group": "bar",
+      "blipSprite": 267
     },
     {
       "_note": "Green neon round the whole corner: PAINKILLERS -- PILLS -- CIGARETTES. It is",
@@ -2192,7 +2216,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "The other door, eight metres down the same frontage -- the one with Jakey's",
@@ -2226,7 +2251,8 @@
       "reach": 2.2,
       "blip": false,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "LIQUOR MARKET, and the strapline under it does the work: Cold Beer, Soft",
@@ -2259,7 +2285,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "B.J.'s MARKET & CONVENIENCE STORE. The door carries CASH CHECKS HERE",
@@ -2292,7 +2319,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "A second Pizza This..., up on the hill -- Sprunk umbrellas out front and the",
@@ -2340,7 +2368,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "bar"
+      "group": "bar",
+      "blipSprite": 267
     },
     {
       "_note": "Vinewood LIQUOR -- the blue fascia with the script name, folding gates over",
@@ -2372,7 +2401,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "LIBERTY STYLE PIZZA -- Guido's Take Out, OPEN 24 HOURS, FREE DELIVERY, hand",
@@ -2420,7 +2450,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "UP-N-ATOM BURGER, and its menu board is readable from the pavement: triple",
@@ -2641,7 +2672,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "bar"
+      "group": "bar",
+      "blipSprite": 267
     },
     {
       "_note": "SPITROASTERS MEAT HOUSE -- 'the Bigger the Beef the Bigger the Roasting',",
@@ -2698,7 +2730,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "ECLIPSE liqour.deli, named for the boulevard -- NOT the Eclipse Lounge",
@@ -2727,7 +2760,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "Bean Machine on West Vinewood, the fifth branch and the first one",
@@ -3559,7 +3593,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Vinewood. Surveyed in game; inherits BITE!'s menu -- one chain, one menu.",
@@ -3611,7 +3646,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "restaurant. Surveyed in game; inherits Les Bianco's menu -- one chain, one menu.",
@@ -3662,7 +3698,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "Hawick, smokers supplies. Surveyed in game; inherits Pipe Down's menu -- one chain, one menu.",
@@ -3736,7 +3773,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Pillbox. Surveyed in game; inherits BITE!'s menu -- one chain, one menu.",
@@ -3838,7 +3876,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Vespucci Beach, walk-up window. Surveyed in game; inherits Pizza This...'s menu -- one chain, one menu.",
@@ -3879,7 +3918,8 @@
       "reach": 2.4,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "wine, beer, food. Surveyed in game; inherits Bean's Market's menu -- one chain, one menu.",
@@ -3903,7 +3943,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Vespucci, wine. Surveyed in game; inherits Fruit of the Vine's menu -- one chain, one menu.",
@@ -3927,7 +3968,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "health food, 'Hit the Nut!'. Surveyed in game; inherits The Grain of Truth's menu -- one chain, one menu.",
@@ -3973,7 +4015,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "stand: smoothies, juice, coconuts. Surveyed in game; inherits Squeeze One Out's menu -- one chain, one menu.",
@@ -4038,7 +4081,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "cafe"
+      "group": "cafe",
+      "blipSprite": 267
     },
     {
       "_note": "Del Perro Pier. Surveyed in game; inherits Mexican and American Diner's menu -- one chain, one menu.",
@@ -4152,7 +4196,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "Chumash, WALK-IN: counter is inside. Surveyed in game; inherits 24/7's menu -- one chain, one menu.",
@@ -4272,7 +4317,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Paleto Bay. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
@@ -4302,7 +4348,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "Paleto Bay, supermarket AND pharmacy under one sign. Surveyed in game; inherits Chico's Hypermarket's menu -- one chain, one menu.",
@@ -4335,7 +4382,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Paleto Bay, liquor + lotto + hot coffee + check cashing. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
@@ -4365,7 +4413,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "Grapeseed, WALK-IN. Surveyed in game; inherits 24/7's menu -- one chain, one menu.",
@@ -4449,7 +4498,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Grapeseed: carniceria, tortilleria, verduras, panaderia. Surveyed in game; inherits Chico's Hypermarket's menu -- one chain, one menu.",
@@ -4482,7 +4532,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "market and store. Surveyed in game; inherits Bean's Market's menu -- one chain, one menu.",
@@ -4506,7 +4557,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Sandy Shores. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
@@ -4536,7 +4588,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "Sandy Shores, open 24 hours. Surveyed in game; inherits Liquor Market's menu -- one chain, one menu.",
@@ -4568,7 +4621,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "FUEL STATION shop, Sandy Shores. Surveyed in game; inherits 24/7's menu -- one chain, one menu.",
@@ -4601,7 +4655,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "servo"
+      "group": "servo",
+      "blipSprite": 267
     },
     {
       "_note": "Sandy Shores, open 24 hours, full menu inside. Surveyed in game; inherits Wok It Off's menu -- one chain, one menu.",
@@ -4661,7 +4716,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "Sandy Shores WALK-IN, interior counter -- WANTS A CASHIER PED standing behind it. Surveyed in game; inherits Liquor's menu -- one chain, one menu.",
@@ -4722,7 +4778,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "Harmony/Route 68, WALK-IN. Surveyed in game; inherits 24/7's menu -- one chain, one menu.",
@@ -4854,7 +4911,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "liquor"
+      "group": "liquor",
+      "blipSprite": 267
     },
     {
       "_note": "restaurant. Surveyed in game.",
@@ -5201,7 +5259,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "bar"
+      "group": "bar",
+      "blipSprite": 267
     },
     {
       "_note": "Chumash, grill diner + surf goods. Surveyed in game.",
@@ -5261,7 +5320,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "bar"
+      "group": "bar",
+      "blipSprite": 267
     },
     {
       "_note": "bar at the aerial tramway, beer signs. Surveyed in game.",
@@ -5324,7 +5384,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "bar"
+      "group": "bar",
+      "blipSprite": 267
     },
     {
       "_note": "Paleto Bay. Surveyed in game.",
@@ -5345,7 +5406,8 @@
       "reach": 2.2,
       "spawnRange": 90.0,
       "blip": true,
-      "group": "bar"
+      "group": "bar",
+      "blipSprite": 267
     },
     {
       "_note": "Paleto Bay, deli + cafe. Surveyed in game.",
@@ -5547,7 +5609,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Little Seoul. NAENG MYUN, KOOK SOO and JOOK painted over the doors.",
@@ -5622,7 +5685,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "The same shop's other door, four metres round the corner. Both are walked to, and at 2.2 m of reach they cannot both catch you at once.",
@@ -5655,7 +5719,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Little Seoul. Green sign, a leaf mark, ORGANIC FOOD MARKET under the Hangul.",
@@ -5678,7 +5743,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Little Seoul. Brown and gold sign; the Hangul down the left lists tobacco, cigars and news, which is what the shelves behind the glass are.",
@@ -5704,7 +5770,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "Morningwood, on the corner under the VITAMINS sign. Same chain and same shelf as the one already listed.",
@@ -5728,7 +5795,8 @@
       "reach": 2.2,
       "blip": true,
       "ui": true,
-      "group": "store"
+      "group": "store",
+      "blipSprite": 267
     },
     {
       "_note": "The second Al Dente's: green script and a fork of spaghetti, under the columns.",
