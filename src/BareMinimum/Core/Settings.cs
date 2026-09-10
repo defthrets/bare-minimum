@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Windows.Forms;
 
 namespace BareMinimum.Core
@@ -65,7 +65,10 @@ namespace BareMinimum.Core
         // ---- General ---------------------------------------------------------
 
         public bool Enabled = true;
-        public bool AnnounceOnLoad = true;
+        // FALSE, BECAUSE THE SEAL ROW SAYS IT NOW. See UI.Splash. Still a switch rather
+        // than a deletion: somebody who wants the old ticker line back has one word
+        // to change and no rebuild.
+        public bool AnnounceOnLoad = false;
         public LogLevel LogLevel = LogLevel.Info;
 
         // ---- Hunger ----------------------------------------------------------
