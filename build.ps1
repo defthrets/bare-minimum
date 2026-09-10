@@ -1,4 +1,4 @@
-<#
+﻿<#
   Bare Minimum build script.
 
   Drives the self-contained Roslyn compiler in tools\ rather than `dotnet build`, because the
@@ -357,6 +357,10 @@ if ($Package) {
     Copy-Item $outDll (Join-Path $scripts 'BareMinimum.dll')
     Copy-Item (Join-Path $root 'BareMinimum.ini') (Join-Path $scripts 'BareMinimum.ini')
     Copy-Item (Join-Path $root 'data\*.json') $dataOut
+    # doors.txt is data too, and Assert-Staged below requires it -- staging
+    # only the .json meant every -Package run failed on a file that was
+    # sitting in data\ the whole time.
+    Copy-Item (Join-Path $root 'data\*.txt') $dataOut
 
     # The icons.
     #
