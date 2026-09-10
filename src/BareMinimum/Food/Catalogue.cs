@@ -507,7 +507,21 @@ namespace BareMinimum.Food
         {
             var wet = item.Drink ? 0.62f : item.Hunger * 0.18f;
 
-            if (item.Booze > 0f) wet -= item.Booze * 0.9f;
+            // THE ALCOHOL PENALTY IS SQUARED, NOT LINEAR, and that is the difference between a
+            // beer and a shot.
+            //
+            // It was booze * 0.9 -- a straight line -- which treats every drink as the same
+            // stuff in different amounts. It is not. A pint is water with a little alcohol in
+            // it and is net HYDRATING; a neat spirit is the other way round. Squaring the term
+            // is that curve: a light drink loses almost nothing and a strong one loses nearly
+            // everything, from one expression with no list of exceptions in it.
+            //
+            //   beer  0.20 -> 0.50      wine    0.34 -> 0.27
+            //   lager 0.24 -> 0.45      whiskey 0.45 -> 0.02
+            //
+            // Which is about right: a beer is a drink, a whisky is not, and nothing on the
+            // shelf had to be told which it was.
+            if (item.Booze > 0f) wet -= item.Booze * item.Booze * 3.0f;
 
             return wet;
         }

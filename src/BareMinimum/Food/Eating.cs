@@ -313,6 +313,19 @@ namespace BareMinimum.Food
             // it comes from when the file has not named one.
             _needs.Quench(item.Thirst);
 
+            // ONE LINE PER THING SWALLOWED, at a level somebody will see.
+            //
+            // Every one of these meters is a number the player can only read as a bar, and
+            // "that did nothing" is the single most common thing to be wrong about -- a beer
+            // moving the thirst bar half a meter and a beer moving it not at all look identical
+            // in the moment. This is the line that settles it without anybody having to
+            // reproduce anything.
+            Log.Info("Had a " + item.Name + ": fed " + Pct(_needs.Hunger.Value) +
+                     "%, watered " + Pct(_needs.Thirst.Value) +
+                     "%, rested " + Pct(_needs.Sleep.Value) + "%" +
+                     (item.Thirst != 0f ? "  (thirst " + (item.Thirst > 0f ? "+" : "") +
+                                          Pct(item.Thirst) + ")" : "") + ".");
+
             Cleanup();
             Report(item);
         }
@@ -406,6 +419,12 @@ namespace BareMinimum.Food
         private string Watered()
         {
             return "Quenched " + (int)Math.Round(_needs.Thirst.Value * 100f) + "%.";
+        }
+
+        /// <summary>A fraction as whole per cent, for the log line above.</summary>
+        private static int Pct(float v)
+        {
+            return (int)Math.Round(v * 100f);
         }
 
         /// <summary>How drunk, in words rather than a number.</summary>
