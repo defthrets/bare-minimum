@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows.Forms;
 
 namespace BareMinimum.Core
@@ -190,16 +190,27 @@ namespace BareMinimum.Core
         /// somebody in a bad way, it reads as the game running in slow motion, with nothing on
         /// screen explaining why. Reported as exactly that.
         ///
-        /// A clipset says it where the player can see it. move_m@tired is the set the game
-        /// keeps for somebody who has run himself into the ground: he still moves at his own
-        /// speed and he plainly has nothing left. It is verified present in this build's
-        /// animation list with its own walk clip -- move_f@exhausted is the female equivalent
-        /// and there is no move_m@exhausted, which is worth knowing before anybody goes looking.
+        /// A clipset says it where the player can see it: he still moves at his own speed and
+        /// he plainly has nothing left.
+        ///
+        /// IT IS A LIST, AND THAT IS NOT TIDINESS. move_m@tired is in every animation list on
+        /// this machine and is NOT a movement clipset -- it is a DICTIONARY, and the two
+        /// namespaces overlap enough to look identical from outside the game. The mod asked for
+        /// it, the game said no forever, and the walk silently never changed; only a six-second
+        /// timeout warning caught it. There is no way to check a clipset name offline, so the
+        /// setting is several guesses in preference order and the game settles which it has.
+        /// See Effects.Pick.
+        ///
+        /// move_m@tired stays first in case a build somewhere does have it. buzzed and
+        /// slightlydrunk are both an unsteady, heavy walk that is not the staggering the sleep
+        /// meter already uses; move_m@injured is the backstop, because it is one this mod knows
+        /// works -- hunger has been wearing it since the beginning.
         ///
         /// The wind is still the real cost -- see ThirstWindMultiplier -- and it is felt rather
         /// than watched. This is what it looks like.
         /// </summary>
-        public string ThirstClipset = "move_m@tired";
+        public string ThirstClipset =
+            "move_m@tired,move_m@buzzed,move_m@drunk@slightlydrunk,move_m@injured";
 
         /// <summary>
         /// Below this he is audibly struggling: breathing hard, and occasionally saying so.

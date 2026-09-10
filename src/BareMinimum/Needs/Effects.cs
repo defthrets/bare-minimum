@@ -367,9 +367,17 @@ namespace BareMinimum.Needs
                 return;
             }
 
-            if (want == _applied) return;
+            // THE SETTING IS A LIST; this is whichever of them this build turned out to have.
+            want = Pick(want);
 
-            if (!Streamed(want)) return;
+            if (string.IsNullOrEmpty(want))
+            {
+                // Still looking, or nothing in the list exists. Either way the walk it is
+                // wearing now is the right one to leave it in until an answer arrives.
+                return;
+            }
+
+            if (want == _applied) return;
 
             // 0.5 second blend. Instant is a visible pop from one gait to another, and
             // anything longer than about a second reads as the game hitching.
@@ -386,6 +394,60 @@ namespace BareMinimum.Needs
 
         /// <summary>How long a clipset gets to stream before it is called missing. Generous.</summary>
         private const int StreamGiveUpMs = 6000;
+
+        /// <summary>The name that won out of a list, so the choice is made once and not per frame.</summary>
+        private readonly System.Collections.Generic.Dictionary<string, string> _chose =
+            new System.Collections.Generic.Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// The first name in a list that this build actually has, or null while it is still
+        /// looking.
+        ///
+        /// A LIST, BECAUSE A CLIPSET NAME CANNOT BE CHECKED OFF THE GAME. move_m@tired is in
+        /// every animation list on this machine and is NOT a movement clipset -- it is a
+        /// dictionary, and the two namespaces overlap enough to be a trap and not enough to be
+        /// relied on. The mod asked for it, the game said no forever, and the walk quietly never
+        /// changed. That is the whole argument for this method.
+        ///
+        /// So a name is a guess and a list is several guesses, tried in order, and the game
+        /// settles it. Beds.cs does the same with its bed models for the same reason, and its
+        /// comment makes the same point: the cost of listing one too many is a line in the log,
+        /// and the cost of listing one too few is a feature that silently does nothing.
+        ///
+        /// ANSWERED ONCE AND REMEMBERED. Whichever wins is kept against the list it came from,
+        /// so the search does not run again every frame for the rest of the session.
+        /// </summary>
+        private string Pick(string list)
+        {
+            if (string.IsNullOrEmpty(list)) return null;
+
+            string won;
+            if (_chose.TryGetValue(list, out won)) return won;
+
+            var any = false;
+
+            foreach (var raw in list.Split(',', ';'))
+            {
+                var name = raw.Trim();
+                if (name.Length == 0) continue;
+
+                any = true;
+
+                if (!Streamed(name)) continue;
+
+                _chose[list] = name;
+
+                Log.Info("Clipset: using \"" + name + "\" out of \"" + list + "\".");
+
+                return name;
+            }
+
+            // NOT CACHED AS A FAILURE. Every name in the list may simply still be streaming,
+            // and the whole point of a list is that the answer arrives a moment later.
+            if (!any) _chose[list] = null;
+
+            return null;
+        }
 
         private bool Streamed(string set)
         {
