@@ -128,6 +128,10 @@ namespace BareMinimum
             // THE TRIP OWNS THE TIMECYCLE WHILE IT RUNS. Asked rather than told, so the effects
             // and the trip never both write the same one slot. See Needs.Trip.
             _effects.Tripping = () => _trip.Running;
+
+            // AND THE WALK WHEN HIS WIND HAS GONE. Asked rather than pushed, so the vitals go
+            // on knowing nothing about the needs. See Needs.Effects.Winded.
+            _effects.Winded = () => _vitals.Tired;
             _survey = new Survey(_cfg);
             _socials = new Social.Socials(_cfg);
             _socials.Load();
@@ -236,6 +240,10 @@ namespace BareMinimum
 
         private void OnTick(object sender, EventArgs e)
         {
+            // The set's mark, for a few seconds after load. Bows out on its own and
+            // costs a comparison thereafter; see UI.Splash.
+            UI.Splash.Render();
+
             if (_parked) return;
 
             try

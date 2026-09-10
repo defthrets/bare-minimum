@@ -18,6 +18,9 @@ namespace BareMinimum.Needs
     ///    Deliberately mild -- the brief was a slight drunk effect, and the game's own
     ///    verydrunk set is a stagger that makes doorways impossible.
     ///  - DRINK does the same thing harder, and escalates from merry to properly gone.
+    ///  - BEING WINDED does too, for the ten seconds or so the energy bar takes to come back.
+    ///    The game locks the sprint off when its own stamina goes and says nothing about it;
+    ///    this says it. See Vitals.Energy.Tired.
     ///  - A COMEDOWN off a stimulant moves you the same way thirst does, for a few minutes
     ///    after the high lets go. Same set on purpose: he has run himself into the ground
     ///    either way, and asking the eye to tell two exhaustions apart is asking it for
@@ -294,6 +297,24 @@ namespace BareMinimum.Needs
             {
                 want = drunk >= _cfg.BoozeHeavyAt ? _cfg.BoozeClipsetHeavy : _cfg.BoozeClipset;
             }
+            else if (Winded != null && Winded())
+            {
+                // OUT OF BREATH, AND IT SHOWS. The game locks the sprint off when its own
+                // stamina runs out and says nothing about it; the mod locks its own bar off and
+                // said nothing either, so the only sign was a sprint key that had stopped
+                // working. A man who has just run himself out moves like it.
+                //
+                // ABOVE EVERYTHING BUT DRINK, which is unusual for something this brief -- ten
+                // seconds against needs measured in game days -- and it is the right way round
+                // precisely because it is brief. It is the only state on this list caused by
+                // something he did in the last few seconds, so it is the only one he can
+                // connect to what he sees, and a hungry limp while he is doubled over reads as
+                // the mod having missed it.
+                //
+                // The same set the dry and the crashing get. He has run himself into the ground
+                // three different ways and the eye should not be asked to tell them apart.
+                want = _cfg.ThirstClipset;
+            }
             else if (Food.Dope.Crashing)
             {
                 // COMING DOWN OFF A STIMULANT, and above the needs for the same reason drink is
@@ -510,6 +531,15 @@ namespace BareMinimum.Needs
         /// </summary>
         /// <summary>Set by Main: a psychedelic already has the timecycle. See Needs.Trip.</summary>
         public Func<bool> Tripping;
+
+        /// <summary>
+        /// Set by Main: he has run the energy bar out and cannot sprint until it is back.
+        ///
+        /// A DELEGATE, THE SAME AS Tripping AND FOR THE SAME REASON. The vitals own that meter
+        /// and this class owns what a body does; neither has ever had to know the other exists,
+        /// and one bool a frame does not buy a dependency.
+        /// </summary>
+        public Func<bool> Winded;
 
         private void Wobble(float sleep)
         {
