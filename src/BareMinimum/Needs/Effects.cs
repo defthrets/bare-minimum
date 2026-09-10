@@ -262,6 +262,15 @@ namespace BareMinimum.Needs
         /// takes a few frames, so this returns and tries again next tick rather than applying
         /// something that will be ignored.
         /// </summary>
+        /// <summary>
+        /// What counts as a meter being AT NOTHING rather than merely low.
+        ///
+        /// Not zero exactly. These are floats moved by a rate every frame, so one that has
+        /// bottomed out sits a few millionths above it as often as not, and a test against 0
+        /// is a test that fails on the frame it matters.
+        /// </summary>
+        private const float Spent = 0.02f;
+
         private void Clipset(Ped me, float hunger, float sleep, float thirst, float drunk)
         {
             string want = null;
@@ -296,17 +305,31 @@ namespace BareMinimum.Needs
                 // and the ear and the eye should not be asked to tell two exhaustions apart.
                 want = _cfg.ThirstClipset;
             }
+            else if (_cfg.ThirstEnabled && thirst <= Spent && !(_cfg.HungerEnabled && hunger <= Spent))
+            {
+                // BONE DRY OUTRANKS MERELY HUNGRY, AND THAT IS THE WHOLE POINT OF THIS BRANCH.
+                //
+                // The order below is right for two needs that are both simply LOW -- a stomach
+                // injury is a worse thing to be doing than being parched. It is wrong the moment
+                // one of them is at NOTHING and the other is not: a bar at 20% was quietly
+                // beating a bar at zero, so a man with an empty thirst meter walked normally
+                // while the mod showed him a hunger he had more of. Reported as exactly that.
+                //
+                // Empty is the one state the player cannot miss on the row, so it is the one the
+                // walk has to agree with. If BOTH are empty the ordinary order applies again and
+                // hunger keeps it, which is why the second half of this test is here.
+                want = _cfg.ThirstClipset;
+            }
             else if (_cfg.HungerEnabled && hunger < _cfg.HungerHurtAt)
             {
                 want = _cfg.HungerClipset;
             }
             else if (_cfg.ThirstEnabled && thirst < _cfg.ThirstDryAt)
             {
-                // ABOVE SLEEP AND BELOW HUNGER. A stomach injury is a worse thing to be doing
-                // than being parched, and being parched is more immediate than being short of a
-                // night's sleep. It matters where this sits: thirst empties in a game day
-                // against sleep's three and a half, so it is usually the one that is true, and
-                // a state that never wins the one clipset slot is a state nobody ever sees.
+                // ABOVE SLEEP AND BELOW HUNGER while both are merely low. Being parched is more
+                // immediate than being short of a night's sleep, and thirst empties in a game
+                // day against sleep's three and a half -- so it is usually the one that is true,
+                // and a state that never wins the one clipset slot is a state nobody ever sees.
                 want = _cfg.ThirstClipset;
             }
             else if (_cfg.SleepEnabled && sleep < _cfg.SleepDrunkAt)
@@ -336,6 +359,13 @@ namespace BareMinimum.Needs
         }
 
         /// <summary>Asks for a clipset once, and says whether it has arrived yet.</summary>
+        /// <summary>When each clipset was first asked for, so one that never arrives can say so.</summary>
+        private readonly System.Collections.Generic.Dictionary<string, int> _askedAt =
+            new System.Collections.Generic.Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>How long a clipset gets to stream before it is called missing. Generous.</summary>
+        private const int StreamGiveUpMs = 6000;
+
         private bool Streamed(string set)
         {
             try
@@ -346,6 +376,27 @@ namespace BareMinimum.Needs
                 {
                     Function.Call(Hash.REQUEST_CLIP_SET, set);
                     Log.Debug("Requested clipset " + set + ".");
+
+                    try { _askedAt[set] = Game.GameTime; }
+                    catch { /* the timeout below simply will not fire */ }
+                }
+
+                // A NAME THIS BUILD DOES NOT HAVE LOOKS EXACTLY LIKE ONE THAT IS STILL LOADING,
+                // and it looked like it for as long as anybody cared to watch: the request goes
+                // in, HAS_CLIP_SET_LOADED says no forever, and the only line about any of it is
+                // at Debug, which is off. So the walk quietly never changed and the log had
+                // nothing to say about why.
+                //
+                // Six seconds is far longer than a clipset takes and far shorter than a session,
+                // so anything still missing after it is missing. Said once per name, at a level
+                // somebody will actually see.
+                int asked;
+                if (_askedAt.TryGetValue(set, out asked) && Game.GameTime - asked > StreamGiveUpMs)
+                {
+                    Log.Once("clipset-missing-" + set,
+                             "The clipset \"" + set + "\" has not loaded after six seconds, so " +
+                             "this build almost certainly does not have it and the walk will " +
+                             "never change. Check the name against the game's own list.");
                 }
 
                 return false;
