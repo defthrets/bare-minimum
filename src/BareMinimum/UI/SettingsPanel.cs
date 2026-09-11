@@ -480,10 +480,32 @@ namespace BareMinimum.UI
         // The options
         // ======================================================================
 
+        /// <summary>The language codes, in the order the row steps through them. What the ini gets.</summary>
+        private static string[] Codes()
+        {
+            var codes = new string[Core.Lingo.Tongues.Length];
+            for (var i = 0; i < codes.Length; i++) codes[i] = Core.Lingo.Tongues[i].Code;
+
+            return codes;
+        }
+
         private void Build()
         {
             Group("NEEDS");
 
+            // FIRST ROW OF THE FIRST PAGE, on purpose. Somebody who cannot read this menu has
+            // to be able to find the row that fixes that, and the only way to make it findable
+            // without being able to read it is to put it where nobody has to look.
+            Choice("Language", "General", "Language", Core.Lingo.Names,
+                   () => Core.Lingo.Index,
+                   v =>
+                   {
+                       _cfg.Language = Core.Lingo.Tongues[v].Code;
+                       Core.Lingo.Load(_cfg);
+                   },
+                   "The mod's own language. English (UK) is what it is written in; anything a " +
+                   "translation has not covered stays in English rather than going blank.",
+                   Codes());
 
             Bool("Mod enabled", "General", "Enabled",
                  () => _cfg.Enabled, v => _cfg.Enabled = v,
@@ -1163,8 +1185,17 @@ namespace BareMinimum.UI
             return 0;
         }
 
+        /// <summary>
+        /// A row that steps through a list.
+        ///
+        /// <paramref name="values"/> is what gets WRITTEN TO THE INI when it is not the same as
+        /// what gets shown. The language row shows each language in its own name and writes a
+        /// two-letter code: an ini is a text file somebody opens in Notepad, and a line reading
+        /// Language = ru is one anybody can read and type, where the same line written in
+        /// Cyrillic is at the mercy of whatever encoding their editor guesses at.
+        /// </summary>
         private void Choice(string name, string section, string key, string[] names,
-                            Func<int> get, Action<int> set, string note)
+                            Func<int> get, Action<int> set, string note, string[] values = null)
         {
             Add(new Option
             {
@@ -1174,8 +1205,14 @@ namespace BareMinimum.UI
                 Key = key,
                 Show = () =>
                 {
+                    // TRANSLATED BEFORE IT IS SHOUTED. The value is upper-cased for the row,
+                    // and an upper-cased English word is not the phrase in the file -- so
+                    // looking it up afterwards would miss every time and these would be the
+                    // only words on the page that never changed language.
                     var i = get();
-                    return i >= 0 && i < names.Length ? names[i].ToUpperInvariant() : "?";
+                    if (i < 0 || i >= names.Length) return "?";
+
+                    return Core.Lingo.Say(names[i]).ToUpperInvariant();
                 },
                 Nudge = (dir, fine) =>
                 {
@@ -1187,8 +1224,9 @@ namespace BareMinimum.UI
                 },
                 Persist = () =>
                 {
+                    var written = values ?? names;
                     var i = get();
-                    return i >= 0 && i < names.Length ? names[i] : names[0];
+                    return i >= 0 && i < written.Length ? written[i] : written[0];
                 }
             });
         }

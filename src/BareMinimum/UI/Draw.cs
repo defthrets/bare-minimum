@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using GTA;
 using GTA.Native;
@@ -499,7 +499,10 @@ namespace BareMinimum.UI
                                 bool outline = true)
         {
             if (string.IsNullOrEmpty(text)) return;
-            if (text.Length > 99) text = text.Substring(0, 99);
+
+            // THE ONE PLACE EVERYTHING DRAWN GOES THROUGH, so it is the place the language
+            // happens. See Core.Lingo: in English this is a null test and a return.
+            text = Lingo.Say(text);
 
             try
             {
@@ -523,8 +526,18 @@ namespace BareMinimum.UI
                 Function.Call(Hash.SET_TEXT_JUSTIFICATION, rightAlign ? 2 : centre ? 0 : 1);
                 Function.Call(Hash.SET_TEXT_WRAP, 0f, rightAlign ? x : 1f);
 
+                // IN CHUNKS, AND CHUNKS MEASURED IN BYTES. This used to cut at 99 CHARACTERS,
+                // which is the same as 99 bytes only in English: a Russian line is two bytes a
+                // letter and a Chinese one is three, so ninety-nine characters of either is two
+                // or three times over the component's limit and the game gets a mangled
+                // string. See Chunks.
                 Function.Call(Hash.BEGIN_TEXT_COMMAND_DISPLAY_TEXT, "STRING");
-                Function.Call(Hash.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME, text);
+
+                foreach (var chunk in Chunks(text, 96))
+                {
+                    Function.Call(Hash.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME, chunk);
+                }
+
                 Function.Call(Hash.END_TEXT_COMMAND_DISPLAY_TEXT, x, y, 0);
 
                 if (rightAlign)
@@ -565,6 +578,11 @@ namespace BareMinimum.UI
         {
             if (string.IsNullOrEmpty(text)) return 0f;
 
+            // TRANSLATED HERE, NOT PER LETTER. Below, each character is drawn on its own
+            // through Text, and a single letter looked up in the phrase table is a miss -- so
+            // a title set this way would be the only text in the mod that never translated.
+            text = Lingo.Say(text);
+
             var at = x;
             var blank = Height(scale, font) * 0.26f;
 
@@ -587,6 +605,8 @@ namespace BareMinimum.UI
         public static float WidthTracked(string text, float scale, int font, float track)
         {
             if (string.IsNullOrEmpty(text)) return 0f;
+
+            text = Lingo.Say(text);
 
             var total = 0f;
             var blank = Height(scale, font) * 0.26f;
@@ -687,7 +707,11 @@ namespace BareMinimum.UI
         public static float Width(string text, float scale, int font = FontLabel)
         {
             if (string.IsNullOrEmpty(text)) return 0f;
-            if (text.Length > 99) text = text.Substring(0, 99);
+
+            // MEASURED IN THE LANGUAGE IT WILL BE DRAWN IN. A panel laid out around the width
+            // of the English and then filled with the German is a panel with the German
+            // hanging out of it.
+            text = Lingo.Say(text);
 
             try
             {
@@ -695,7 +719,11 @@ namespace BareMinimum.UI
                 Function.Call(Hash.SET_TEXT_SCALE, 0f, scale);
 
                 Function.Call(Hash.BEGIN_TEXT_COMMAND_GET_SCREEN_WIDTH_OF_DISPLAY_TEXT, "STRING");
-                Function.Call(Hash.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME, text);
+
+                foreach (var chunk in Chunks(text, 96))
+                {
+                    Function.Call(Hash.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME, chunk);
+                }
 
                 return Function.Call<float>(Hash.END_TEXT_COMMAND_GET_SCREEN_WIDTH_OF_DISPLAY_TEXT, true);
             }
@@ -720,6 +748,12 @@ namespace BareMinimum.UI
         public static void Help(string text)
         {
             if (string.IsNullOrEmpty(text)) return;
+
+            // AFTER THE TAGS ARE WRITTEN, NOT BEFORE. A prompt is translated whole, tags and
+            // all -- "Press ~INPUT_CONTEXT~ to eat" is one phrase in the file -- so a
+            // translator moves the button glyph to wherever their sentence wants it, which in
+            // German is not where English put it.
+            text = Lingo.Say(text);
 
             try
             {
@@ -750,26 +784,101 @@ namespace BareMinimum.UI
         }
 
         /// <summary>Splits on spaces into pieces no longer than the limit. Never splits a ~tag~.</summary>
+        /// <summary>
+        /// A line cut into pieces the game's text component will take -- BY BYTES.
+        ///
+        /// THE LIMIT IS NINETY-NINE BYTES AND IT WAS BEING COUNTED IN CHARACTERS. In English
+        /// those are the same number, which is why it went unnoticed for the life of the mod.
+        /// They are not the same number anywhere else: Cyrillic is two bytes a letter, Han is
+        /// three, so ninety-nine characters of Russian is a hundred and ninety-eight bytes and
+        /// ninety-nine of Chinese is nearly three hundred. Every one of those would have gone
+        /// into a component built for ninety-nine.
+        ///
+        /// Cuts are made at SPACES first, which is what makes the help box safe: a ~INPUT_~ tag
+        /// never contains one, so no split can land inside a tag and leave half of it on screen
+        /// as literal tildes.
+        ///
+        /// A WORD LONGER THAN THE LIMIT IS CUT AND THE REST IS KEPT. It used to be cut and the
+        /// remainder thrown away, which in English meant losing the tail of one freakishly long
+        /// word and in Chinese would have meant losing every sentence after the first ninety
+        /// bytes -- Han is written without spaces, so a whole paragraph arrives here as one
+        /// word.
+        ///
+        /// And a cut never lands inside a character: neither between the two halves of a
+        /// surrogate pair, nor between the bytes of one letter, because the cut is made by
+        /// characters and only measured in bytes.
+        /// </summary>
         private static System.Collections.Generic.List<string> Chunks(string text, int limit)
         {
             var pieces = new System.Collections.Generic.List<string>();
+
+            // The overwhelmingly common case, and the only one that costs anything to get
+            // wrong: one measure, one piece, no allocation beyond the list.
+            if (Bytes(text) <= limit)
+            {
+                pieces.Add(text);
+                return pieces;
+            }
+
             var current = "";
 
             foreach (var word in text.Split(' '))
             {
                 var candidate = current.Length == 0 ? word : current + " " + word;
 
-                if (candidate.Length <= limit) { current = candidate; continue; }
+                if (Bytes(candidate) <= limit) { current = candidate; continue; }
 
-                if (current.Length > 0) pieces.Add(current);
+                if (current.Length > 0) { pieces.Add(current); current = ""; }
 
-                // A single word longer than the limit can only be cut, but at least it is cut
-                // here and not through the middle of the sentence.
-                current = word.Length <= limit ? word : word.Substring(0, limit);
+                // A word that cannot fit on its own is cut down to size as many times as it
+                // takes, rather than once with the rest dropped.
+                var rest = word;
+
+                while (Bytes(rest) > limit)
+                {
+                    var take = Fits(rest, limit);
+                    if (take <= 0) { rest = ""; break; }
+
+                    pieces.Add(rest.Substring(0, take));
+                    rest = rest.Substring(take);
+                }
+
+                current = rest;
             }
 
             if (current.Length > 0) pieces.Add(current);
+
             return pieces;
+        }
+
+        /// <summary>How many bytes that string is as UTF-8, which is what the game counts.</summary>
+        private static int Bytes(string s)
+        {
+            try { return System.Text.Encoding.UTF8.GetByteCount(s); }
+            catch { return s.Length; }
+        }
+
+        /// <summary>
+        /// How many CHARACTERS of s fit in that many bytes, never stopping half way through a
+        /// character or between the two halves of a surrogate pair.
+        /// </summary>
+        private static int Fits(string s, int limit)
+        {
+            var at = 0;
+            var used = 0;
+
+            while (at < s.Length)
+            {
+                var step = char.IsHighSurrogate(s[at]) && at + 1 < s.Length ? 2 : 1;
+                var cost = Bytes(s.Substring(at, step));
+
+                if (used + cost > limit) break;
+
+                used += cost;
+                at += step;
+            }
+
+            return at;
         }
 
         /// <summary>Clears a help box early, so a prompt does not linger after you walk away.</summary>

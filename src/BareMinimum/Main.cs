@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using GTA;
 using BareMinimum.Core;
 using BareMinimum.Food;
@@ -241,6 +241,10 @@ namespace BareMinimum
         private void OnTick(object sender, EventArgs e)
         {
             Core.Pace.Begin();
+
+            // Only does anything with [General] LanguageDump on, and then only every ten
+            // seconds and only when something new has been drawn. See Core.Lingo.Dump.
+            Core.Lingo.Dump(_cfg);
             // The set's mark, for a few seconds after load. Bows out on its own and
             // costs a comparison thereafter; see UI.Splash.
             UI.Splash.Render();

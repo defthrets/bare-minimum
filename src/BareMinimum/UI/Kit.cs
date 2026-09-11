@@ -398,6 +398,15 @@ namespace BareMinimum.UI
         public static string Fit(string text, float maxWidth, float scale, int font)
         {
             if (string.IsNullOrEmpty(text) || maxWidth <= 0f) return text;
+
+            // TRANSLATED BEFORE IT IS CUT, or the cut is made in the wrong string. This
+            // measures a line, decides where it stops fitting and hands back that many
+            // characters of it -- so if the measuring were done on the French and the cutting
+            // on the English, the two would be counting different letters. Translating here
+            // and again in Draw.Text is harmless: the second lookup misses and hands the
+            // French straight back. See Core.Lingo.Say.
+            text = Core.Lingo.Say(text);
+
             if (Hud.Width(text, scale, font) <= maxWidth) return text;
 
             const string Ellipsis = "...";

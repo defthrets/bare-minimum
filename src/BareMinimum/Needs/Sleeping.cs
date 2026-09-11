@@ -349,9 +349,15 @@ namespace BareMinimum.Needs
             // by nothing else; through DISPLAY_TEXT, which is what our own panels use, the
             // raw token comes out instead -- "t_E" on a keyboard and "b__7" on a pad. So the
             // chip is handed the KEY and draws its own cap for it.
-            UI.Hint.Show((hold ? "Hold " : "Press ") + "to " +
-                         (where == Bunk.Bed ? "sleep" : "sleep in the car"),
-                         Core.Pad.Cap(_cfg.InteractKey));
+            // FOUR WHOLE SENTENCES, NOT THREE FRAGMENTS GLUED. The pieces were "Hold "/"Press ",
+            // then "to ", then the place -- which is English word order written into the code,
+            // and it is not every language's. Four phrases is four things to translate and each
+            // of them is a sentence somebody can actually put into their own.
+            UI.Hint.Show(
+                Core.Lingo.Say(where == Bunk.Bed
+                                   ? (hold ? "Hold to sleep" : "Press to sleep")
+                                   : (hold ? "Hold to sleep in the car" : "Press to sleep in the car")),
+                Core.Pad.Cap(_cfg.InteractKey));
         }
 
         /// <summary>

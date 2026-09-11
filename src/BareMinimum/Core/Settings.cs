@@ -69,6 +69,28 @@ namespace BareMinimum.Core
         // than a deletion: somebody who wants the old ticker line back has one word
         // to change and no rebuild.
         public bool AnnounceOnLoad = false;
+
+        /// <summary>
+        /// WHICH LANGUAGE THE MOD SPEAKS. A code -- en-GB, en-US, pt-BR, es, fr, de, ru, pl,
+        /// zh, hi -- or the language's own name; both are understood, and so is a near miss at
+        /// either, because anybody hand-editing an ini writes what comes to mind.
+        ///
+        /// English (UK) is the mod's own words and reads no file at all. Everything else reads
+        /// lang\&lt;code&gt;.json and shows English for whatever the file does not cover, which
+        /// is not a failure mode but the design: see Core.Lingo.
+        /// </summary>
+        public string Language = "en-GB";
+
+        /// <summary>
+        /// Writes every phrase the mod has actually drawn to lang-seen.json, for whoever is
+        /// translating. Off: it holds every string on screen in a set for the session.
+        ///
+        /// It is the only honest way to get the list. Grepping the source turns up log lines,
+        /// ini keys and native names mixed in with the words and misses every sentence that
+        /// came out of foods.json; this is a list of what was drawn, so it invents nothing and
+        /// omits nothing you have looked at.
+        /// </summary>
+        public bool LanguageDump = false;
         public LogLevel LogLevel = LogLevel.Info;
 
         // ---- Hunger ----------------------------------------------------------
@@ -1752,6 +1774,8 @@ namespace BareMinimum.Core
 
                 cfg.Enabled = ini.GetBool("General", "Enabled", cfg.Enabled);
                 cfg.AnnounceOnLoad = ini.GetBool("General", "AnnounceOnLoad", cfg.AnnounceOnLoad);
+                cfg.Language = ini.GetString("General", "Language", cfg.Language);
+                cfg.LanguageDump = ini.GetBool("General", "LanguageDump", cfg.LanguageDump);
                 cfg.LogLevel = ParseLevel(ini.GetString("General", "LogLevel", "Info"), cfg.LogLevel);
 
                 cfg.HungerEnabled = ini.GetBool("Hunger", "Enabled", cfg.HungerEnabled);
@@ -2068,6 +2092,13 @@ namespace BareMinimum.Core
             }
 
             cfg.Validate();
+
+            // THE LANGUAGE COMES UP WITH THE SETTINGS, whichever path loaded them -- the script
+            // starting, the menu saving, a reload. One call here rather than one at each of
+            // those, because the one that gets forgotten is the one that leaves the menu in the
+            // old language while the ini says otherwise.
+            Lingo.Load(cfg);
+
             return cfg;
         }
 

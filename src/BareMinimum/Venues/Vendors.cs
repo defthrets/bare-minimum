@@ -1978,7 +1978,7 @@ namespace BareMinimum.Venues
                 {
                     var held = now - _doorHeldSince;
 
-                    UI.Hint.Show("Going into " + here.Name, Core.Pad.Cap(_cfg.InteractKey),
+                    UI.Hint.Show(Core.Lingo.Fill("Going into {0}", here.Name), Core.Pad.Cap(_cfg.InteractKey),
                                  Math.Min(1f, held / (float)DoorHoldMs));
 
                     if (held >= DoorHoldMs)
@@ -1994,8 +1994,8 @@ namespace BareMinimum.Venues
                 }
                 else
                 {
-                    Hud.Help("Press ~INPUT_CONTEXT~ to shop at ~b~" + here.Name +
-                             "~s~.  Hold it to go inside.");
+                    Hud.Help(Core.Lingo.Fill(
+                        "Press ~INPUT_CONTEXT~ to shop at ~b~{0}~s~.  Hold it to go inside.", here.Name));
                 }
 
                 // Let go before the hold matured: that is the press, and it is the shelf.
@@ -2022,13 +2022,13 @@ namespace BareMinimum.Venues
             // right glyph on a pad, without this code knowing which they are using.
             if (here.UseMenu)
             {
-                Hud.Help("Press ~INPUT_CONTEXT~ to shop at ~b~" + here.Name + "~s~.");
+                Hud.Help(Core.Lingo.Fill("Press ~INPUT_CONTEXT~ to shop at ~b~{0}~s~.", here.Name));
             }
             else
             {
                 Hud.Help(afford
-                    ? "Press ~INPUT_CONTEXT~ to buy a " + what + ".  ~c~$" + price
-                    : "~r~You cannot afford a " + what + ".~s~  ~c~$" + price);
+                    ? Core.Lingo.Fill("Press ~INPUT_CONTEXT~ to buy a {0}.  ~c~${1}", what, price)
+                    : Core.Lingo.Fill("~r~You cannot afford a {0}.~s~  ~c~${1}", what, price));
             }
 
             // THE HORN. In a vehicle the interact key is also the horn, so ordering at a
