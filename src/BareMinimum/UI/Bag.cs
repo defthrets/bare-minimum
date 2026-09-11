@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using GTA;
@@ -768,7 +768,7 @@ namespace BareMinimum.UI
             // gives a rooted path straight back -- so a bag of crack drawn out of somebody
             // else's folder needs nothing changed in Icon at all.
             var icon = dope ? IconCache.Get(Food.Dope.IconOf(id))
-                            : IconCache.Get("p_" + item.Icon + ".png");
+                            : IconCache.Get(Food.Art.For(item));
 
             var tint = dope ? Food.Dope.Effect(id).Tint : item.Tint;
 

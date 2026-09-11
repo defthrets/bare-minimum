@@ -100,48 +100,96 @@ def sheet(group, sources):
     return path
 
 
-def use(group, n):
-    known = groups()
-    if group not in known:
-        raise SystemExit("'%s' is not an icon group in foods.json. Try: python tools/pixelart.py list" % group)
+def items():
+    d = json.loads(io.open(os.path.join(HERE, "data", "foods.json"), encoding="utf-8-sig").read())
+    return {e["id"]: e for e in d["items"] if isinstance(e, dict) and e.get("id")}
 
-    folder = os.path.join(INBOX, group, str(n))
+
+def candidate(batch, n):
+    folder = os.path.join(INBOX, batch, str(n))
     pngs = []
     for root, _, files in os.walk(folder):
         pngs += [os.path.join(root, f) for f in files if f.lower().endswith(".png")]
     if not pngs:
-        raise SystemExit("no candidate %s for %s -- run sheet first" % (n, group))
+        raise SystemExit("no candidate %s in batch '%s' -- run sheet first" % (n, batch))
+    return pngs[0]
 
-    im = Image.open(pngs[0]).convert("RGBA")
+
+def framed(png):
+    """The sprite on the 256 canvas at the largest whole-number scale, NEAREST, centred."""
+    im = Image.open(png).convert("RGBA")
     scale = max(1, (CANVAS - 2 * MARGIN) // max(im.width, im.height))
     big = im.resize((im.width * scale, im.height * scale), Image.NEAREST)
-
     canvas = Image.new("RGBA", (CANVAS, CANVAS), (0, 0, 0, 0))
     canvas.alpha_composite(big, ((CANVAS - big.width) // 2, (CANVAS - big.height) // 2))
+    return canvas, im, scale
 
-    target = os.path.join(ICONS, "p_%s.png" % group)
-    kept = os.path.join(PREVIOUS, "p_%s.png" % group)
 
-    # THE FIRST TIME ONLY. A second use of the same group would otherwise archive the pixel
-    # art it is replacing, over the white glyph that was the thing worth keeping.
-    if os.path.exists(target) and not os.path.exists(kept):
-        os.makedirs(PREVIOUS, exist_ok=True)
-        shutil.copyfile(target, kept)
-        print("  kept the old one at %s" % os.path.relpath(kept, HERE))
+def use(target, n, batch=None):
+    """TARGET is an icon group (-> p_<group>.png, the group's shared picture) or an item id
+    (-> i_<id>.png, that one item's own picture, which the mod prefers -- see Food/Art.cs).
+    BATCH is the sheet the candidate came from; it defaults to the target, which is right for
+    a group and usually wrong for an item, so: use <id> <N> <batch>."""
+    known = groups()
+    every = items()
 
-    canvas.save(target, optimize=True)
-    print("  %s <- candidate %s, %dx%d at x%d on a %d canvas" % (
-        os.path.relpath(target, HERE), n, im.width, im.height, scale, CANVAS))
-    print("  used by %d item(s): %s" % (len(known[group]), ", ".join(known[group][:5]) +
-                                        (" ..." if len(known[group]) > 5 else "")))
-    print("  deploy with: pwsh -NoProfile -File build.ps1 -Deploy -FreshData")
+    # AN ID CAN BE A GROUP'S NAME AS WELL. Bleeder Burger's id is "burger" and Taco Bomb's is
+    # "taco" -- the first item in a group tends to have been named before the group was --
+    # so a bare "burger" cannot say which is meant, and guessing put a group's shared
+    # picture where one item's own should have gone. "item:burger" or "group:burger" says.
+    want = None
+    if target.startswith("item:"):
+        want, target = "item", target[5:]
+    elif target.startswith("group:"):
+        want, target = "group", target[6:]
+    elif target in known and target in every:
+        raise SystemExit("'%s' is both an icon group and an item id. Say item:%s or group:%s."
+                         % (target, target, target))
+
+    batch = batch or target
+
+    png = candidate(batch, n)
+    canvas, im, scale = framed(png)
+
+    if want == "item" and target not in every:
+        raise SystemExit("no item with id '%s'" % target)
+    if want == "group" and target not in known:
+        raise SystemExit("no icon group '%s'" % target)
+
+    if want != "item" and target in known:
+        out = os.path.join(ICONS, "p_%s.png" % target)
+        kept = os.path.join(PREVIOUS, "p_%s.png" % target)
+
+        # THE FIRST TIME ONLY. A second use of the same group would otherwise archive the
+        # pixel art it is replacing, over the white glyph that was the thing worth keeping.
+        if os.path.exists(out) and not os.path.exists(kept):
+            os.makedirs(PREVIOUS, exist_ok=True)
+            shutil.copyfile(out, kept)
+            print("  kept the old one at %s" % os.path.relpath(kept, HERE))
+
+        who = "group of %d: %s" % (len(known[target]), ", ".join(known[target][:5]) +
+                                    (" ..." if len(known[target]) > 5 else ""))
+    elif target in every:
+        out = os.path.join(ICONS, "i_%s.png" % target)
+        who = "item: %s  (was sharing p_%s.png)" % (every[target]["name"], every[target].get("icon", "?"))
+    else:
+        raise SystemExit("'%s' is neither an icon group nor an item id in foods.json. "
+                         "Try: python tools/pixelart.py list   or   items <group>" % target)
+
+    canvas.save(out, optimize=True)
+    print("  %-28s <- %s #%s  (%dx%d at x%d)  %s" % (
+        os.path.relpath(out, HERE), batch, n, im.width, im.height, scale, who))
 
 
 def main(argv):
     if len(argv) >= 3 and argv[0] == "sheet":
         sheet(argv[1], argv[2:])
-    elif len(argv) == 3 and argv[0] == "use":
-        use(argv[1], argv[2])
+    elif argv[:1] == ["use"] and len(argv) in (3, 4):
+        use(argv[1], argv[2], argv[3] if len(argv) == 4 else None)
+    elif argv[:1] == ["items"] and len(argv) == 2:
+        for i in items().values():
+            if i.get("icon") == argv[1]:
+                print("  %-22s %-26s %s" % (i["id"], i["name"], (i.get("desc") or "")[:70]))
     elif argv[:1] == ["list"]:
         done = set()
         for g, names in sorted(groups().items(), key=lambda kv: -len(kv[1])):

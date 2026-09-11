@@ -55,7 +55,8 @@ namespace BareMinimum.UI
 
         private static string File(Item item)
         {
-            return string.IsNullOrEmpty(item.Icon) ? Unknown : "p_" + item.Icon + ".png";
+            // The item's own picture if it has one, the group's shape if not. See Food.Art.
+            return Art.For(item) ?? Unknown;
         }
 
         /// <summary>

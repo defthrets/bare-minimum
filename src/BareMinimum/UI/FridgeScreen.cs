@@ -713,7 +713,7 @@ namespace BareMinimum.UI
             var item = _menu.Find(id);
             if (item == null) return;
 
-            var icon = IconCache.Get("p_" + item.Icon + ".png");
+            var icon = IconCache.Get(Food.Art.For(item));
 
             if (icon != null && !icon.Missing)
             {

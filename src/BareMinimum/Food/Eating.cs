@@ -406,7 +406,7 @@ namespace BareMinimum.Food
         /// </summary>
         private static string Mark(Item item)
         {
-            return string.IsNullOrEmpty(item.Icon) ? null : "p_" + item.Icon + ".png";
+            return Art.For(item);
         }
 
         /// <summary>

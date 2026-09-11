@@ -153,7 +153,10 @@ namespace BareMinimum.Api
                 var item = _menu == null ? null : _menu.Find(id);
                 if (item == null || string.IsNullOrEmpty(item.Icon)) return "";
 
-                var file = System.IO.Path.Combine(Core.Paths.Icons, "p_" + item.Icon + ".png");
+                var name = Food.Art.For(item);
+                if (string.IsNullOrEmpty(name)) return "";
+
+                var file = System.IO.Path.Combine(Core.Paths.Icons, name);
 
                 return System.IO.File.Exists(file) ? file : "";
             }
