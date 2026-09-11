@@ -185,6 +185,22 @@ BIND = [
     ("food", 12, "Loaf of Bread"),            # sliced loaf
     ("food", 12, "group:loaf"),
     ("food", 13, "Rum Cake"),                 # the dark whole cake
+    # milk_shake -- sixteen, and they cover three groups
+    ("shake", 4,  "Milkshake"),               # vanilla, cherry, striped straw, the glass
+    ("shake", 4,  "group:shake"),
+    ("shake", 0,  "Iced Latte"),              # iced coffee, cream, plastic cup
+    ("shake", 1,  "Frappe"),                  # caramel, whipped cream, in the cup
+    ("shake", 2,  "Thick Shake"),             # the metal machine cup
+    ("shake", 6,  "Jumbo Shake"),             # strawberry swirl, tall -- "strawberry, chocolate or vanilla"
+    ("shake", 9,  "Cold Brew"),               # dark iced coffee in a glass
+    ("shake", 3,  "Sludgie"),                 # the blue slush cup with the straw
+    ("shake", 3,  "group:slush"),
+    ("shake", 10, "Smoothie"),                # banana
+    ("shake", 10, "group:smoothie"),
+    ("shake", 14, "Berry Smoothie"),          # the dark red one
+    ("shake", 15, "Wheatgrass Smoothie"),     # the green one
+    # lsd -- one, four tabs of blotter
+    ("lsd", 0, "drug:lsd"),
 ]
 
 
