@@ -1,5 +1,5 @@
 ================================================================================
-  BARE MINIMUM 0.1.4 -- copy for the mod page
+  BARE MINIMUM 0.2.0 -- copy for the mod page
 ================================================================================
 
 Three lengths and a changelog. Use whichever the site's fields want.
@@ -17,27 +17,29 @@ If Hoodrich has a page of its own, its name in section 3 is the one place an
   1. ONE LINE  (summary field -- plain text)
 --------------------------------------------------------------------------------
 
-Franklin gets hungry and he gets tired. 190 real shops to do something about it.
+Franklin gets hungry, thirsty and tired. 211 real shops to do something about it.
 
 
 --------------------------------------------------------------------------------
   2. ONE PARAGRAPH  (short description -- plain text)
 --------------------------------------------------------------------------------
 
-Hunger and sleep for GTA V, as two thin gauges low on the screen with a chicken
-drumstick and a moon underneath them. They do not just drain -- hunger churns,
-and gets more agitated the emptier it is; sleep breathes, and the breath slows
-as you tire. There are 190 places to eat and they are the real ones: the taco
-windows, the hot dog carts, Burger Shot, Bean Machine, Rob's Liquor, the delis
-and the restaurants nobody ever gets to walk into. 201 things to buy, each with
-its own price, its own effect and its own line about itself. Shops with a full
-menu, stalls that just hand you a hot dog, and drive-throughs you order from
-without leaving the car. What you buy goes in your pocket for later, or into the
-fridge in any safehouse kitchen. Sleep in any bed. Run everywhere and you will
-pay for it in both. 105 settings, all live in an in-game menu, and every shop and
-every item is a plain text file you can edit. Drop-in install, works on Legacy
-and Enhanced, and your save is never touched. A work in progress: the shop list
-is still growing, and adding your own is a text file.
+Hunger, thirst and sleep for GTA V, standing in one row of gauges low on the
+screen with health, armour and your sprint energy. They do not just drain --
+hunger churns and gets more agitated the emptier it is, thirst runs clean with
+bubbles going up through it, sleep breathes, and the health bar has a heartbeat
+you can take, quicker the worse he is hurt. There are 211 places to eat and drink
+and they are the real ones: the taco windows, the hot dog carts, Burger Shot,
+Bean Machine, Rob's Liquor, the delis and the restaurants nobody ever gets to
+walk into. 201 things to buy, each with its own price, its own effect and its own
+line about itself. Every vending machine you walk past is remembered on the map
+for good. Shops with a full menu, stalls that just hand you a hot dog, and
+drive-throughs you order from without leaving the car. What you buy goes in your
+pocket for later, or into the fridge in any safehouse kitchen. Sleep in any bed.
+Run everywhere and you will pay for it in all three -- and being dry costs you
+your wind before it costs you anything else. 206 settings, all live in an in-game
+menu, and every shop and every item is a plain text file you can edit. Drop-in
+install, works on Legacy and Enhanced, and your save is never touched.
 
 
 --------------------------------------------------------------------------------
@@ -49,33 +51,40 @@ is still growing, and adding your own is a text file.
 Franklin gets hungry and he gets tired. Two thin gauges sit low on the screen and quietly empty until you do something about it.
 
 
-<b>📊 TWO GAUGES THAT ACTUALLY MOVE</b>
+<b>📊 ONE ROW OF GAUGES THAT ACTUALLY MOVE</b>
 
-Hunger on the left, sleep on the right, standing on the bottom edge of the screen out past the minimap. A chicken drumstick and a moon underneath say which is which.
+Health, sleep, hunger, thirst and your sprint energy, standing in a row beside the minimap inside a frame that also carries the street you are on and the suburb you are in. A mark under each says which is which.
 
-They are animated, and the two move <i>differently</i> on purpose:
+Every one is a liquid, and they move <i>differently</i> on purpose:
 
 <ul>
+<li>❤️ <b>Health has a heartbeat.</b> Cells drift in it and get shoved up the column on every beat, and the beat quickens when he runs and when he is hurt — you can take his pulse off the bar. It throbs dark as it goes, and flashes white the instant he is hit.</li>
 <li>🍗 <b>Hunger churns.</b> An unsettled surface with the contents turning over underneath, and it gets more agitated the emptier it is — which is the opposite of what a fuel gauge does.</li>
+<li>💧 <b>Thirst runs clean.</b> No sediment, bubbles going <i>up</i> rather than crumbs going down, and it calms as it empties, because a glass with an inch left does not slosh.</li>
 <li>🌙 <b>Sleep breathes.</b> The whole gauge rises and falls as one, and the breath slows and deepens the more tired you are.</li>
+<li>⚡ <b>Energy runs charge along it</b> in lanes, up while it rebuilds and down while you spend it.</li>
 </ul>
 
-The colour carries the state as much as the level does. Hunger runs from a vivid green down through olive to a dead brown; sleep from an awake blue down through violet to a deep, sunk purple. When either is nearly out it sways, and you catch it out of the corner of your eye without looking for it.
+The colour carries the state as much as the level does, and every bar follows one rule: <i>brightness says how bad, hue says which meter</i>. Health is red, hunger orange, thirst cyan, sleep purple, energy a fluorescent green-yellow — no two share a family, and all of them darken as they empty.
+
+<b>Franklin's special ability runs off the energy bar.</b> Use it and you watch it go.
 
 <b>There is a second HUD in the box.</b> Switch HUD style to ICONS and the bars come off entirely, leaving the drumstick and the moon on their own, still carrying the same colour. It tells you less on purpose. One press in the menu, either way.
 
 Both run on the <i>game</i> clock, so a full day of them is about 48 minutes of play, and both pause when the game does.
 
 
-<b>🌮 MORE THAN A HUNDRED PLACES TO EAT</b>
+<b>🌮 TWO HUNDRED PLACES TO EAT AND DRINK</b>
 
-190 of them, and they are the shops that are already there: the taco windows, the hot dog carts, Burger Shot, Up-n-Atom, Taco Bomb, Bean Machine, Cool Beans, Rusty Brown's, Pizza This, Rob's Liquor, thirteen liquor stores, the corner stores, the delis, and a good few restaurants the game never lets you into. Del Perro and Vespucci are covered end to end.
+211 of them, and they are the shops that are already there: the taco windows, the hot dog carts, Burger Shot, Up-n-Atom, Taco Bomb, Bean Machine, Cool Beans, Rusty Brown's, Pizza This, Rob's Liquor, thirteen liquor stores, the corner stores, the delis, and a good few restaurants the game never lets you into. Del Perro and Vespucci are covered end to end.
 
 Each has its own menu, its own prices, its own hours and its own voice. A breakfast menu at midnight is shown greyed with its hours on it rather than quietly missing, so you learn to come back.
 
 201 things to buy — 111 meals, 50 snacks and 40 drinks. Drink enough of the wrong ones and you will feel it, and the walk goes with it.
 
-<b>🚧 Still growing, and the thin part is named so you know what you are getting:</b> the convenience stores and the fuel stations. A handful are in and most are not, and they are the next thing going in. Everything that <i>is</i> in is finished — menu, prices, hours, the lot — and vendors.json is plain text, so a door I have not got to yet is a coordinate and a name away from working.
+<b>🥤 Every vending machine and fruit stall you walk past goes on the map for good.</b> They are found by model rather than from a list, so every one in the world works — and they are remembered by where they stand, so the map fills itself in as you play and stays filled in between sessions. There is a survey on the menu that will fly the map and find the lot for you if you would rather not wait.
+
+<b>🚧 Still growing, and the thin part is named so you know what you are getting:</b> the convenience stores and the fuel stations. Everything that <i>is</i> in is finished — menu, prices, hours, the lot — and vendors.json is plain text, so a door I have not got to yet is a coordinate and a name away from working.
 
 
 <b>🛒 HOW YOU BUY IT</b>
@@ -96,6 +105,7 @@ Sprinting empties both faster than walking, and the gauges visibly speed up whil
 
 <ul>
 <li>🍗 <b>Let hunger reach nothing</b> and it starts costing health, slowly, with a warning first. It stops well above the floor — it will never kill you.</li>
+<li>💧 <b>Let thirst run low</b> and it takes your <i>wind</i> before anything else: the sprint meter empties more than twice as fast, so you lose your legs halfway across a forecourt. Then he starts breathing hard — in his own voice, out of the game's own sounds — and the rate of it tells you how bad it is without looking at the bar.</li>
 <li>🌙 <b>Let sleep reach nothing</b> and the picture starts to swim. Stay up through that and you collapse where you stand and wake up four hours later.</li>
 </ul>
 
@@ -104,7 +114,7 @@ Sleep in any bed, and how well you sleep depends on whose bed it is. A car is wo
 
 <b>🔧 YOURS TO CHANGE</b>
 
-105 settings across six tabs in an in-game menu on <b>F7</b>, each with a line saying what it does, everything live as you turn it, and the changes written back to the ini without disturbing your comments or your ordering.
+206 settings across six tabs in an in-game menu on <b>F11</b>, each with a line saying what it does, everything live as you turn it, and the changes written back to the ini without disturbing your comments or your ordering.
 
 Every shop and every item is a plain text file. Add a shop, change a price, write a menu, move something that is in the wrong place. Anything the game cannot find is skipped with a line in the log rather than breaking the mod.
 
@@ -125,8 +135,8 @@ Drag into your GTA V folder, say yes to merging, load a save. Needs ScriptHookV 
 
 <ul>
 <li><b>E</b> — interact: the counter, the bed and the car alike</li>
-<li><b>F7</b> — settings</li>
-<li><b>F11</b> — your pocket</li>
+<li><b>F11</b> — settings</li>
+<li><b>F12</b> — your pocket</li>
 </ul>
 
 All three can be changed in the ini.
@@ -137,6 +147,20 @@ All three can be changed in the ini.
 --------------------------------------------------------------------------------
   4. CHANGELOG  (changelog field -- paste from here to the next divider)
 --------------------------------------------------------------------------------
+
+<b>0.2.0</b>
+
+<ul>
+<li>💧 <b>A third need: thirst.</b> Twenty-four game hours from full to dry — well under half of hunger's, so it empties about as often as you sleep — and one can fixes it where a day's food is several meals. What fills it is worked out rather than typed: a drink is most of the bar, food carries across a fifth of its own hunger value, and <i>alcohol subtracts on a curve</i>, so a beer is a drink and a whisky is very much not.</li>
+<li>🫁 <b>Being dry takes your wind, not your speed.</b> Three needs each slowing you down is a man walking at a third pace with nothing on screen saying why. The sprint meter empties more than twice as fast instead — on a bar already in the row, so the cause and the effect sit two columns apart — and he moves like somebody who has run himself into the ground.</li>
+<li>❤️ <b>Health, armour and energy moved in.</b> They were a mod of their own; they are part of this row now, drawn through the same code with the same frame, plate and mark. Franklin's special ability runs off the energy bar.</li>
+<li>💓 <b>Health went red the whole way</b> with a heartbeat you can take — cells shoved up the column on every beat, quicker when he runs and when he is hurt. It throbs <i>dark</i> as it empties and flashes white the instant he is hit, armour included.</li>
+<li>🗺️ <b>Every vending machine and stall you pass stays on the map</b>, remembered by position and kept between sessions, with a map survey that will go and find them all.</li>
+<li>💊 <b>The drugs cost something.</b> A stimulant used to pin the energy bar and then simply let go; now there is a comedown. Two bars of a sedative and the screen starts going out for a second at a time — no warning, and your controls stay yours, because where you have got to by the time it comes back is the point.</li>
+<li>🌀 <b>LSD</b>, if you run Hoodrich: twelve minutes of the game's own peyote timecycle, swelling on two periods that do not divide into each other so it never settles into a filter and never falls into a rhythm.</li>
+<li>🖼️ <b>A frame round the minimap</b> in the bars' own black, with the street and the suburb above it and a speedo and dash lights below.</li>
+<li>⚙️ 206 settings, up from 105. Settings is <b>F11</b> now and the pocket is <b>F12</b>.</li>
+</ul>
 
 <b>0.1.4</b>
 
