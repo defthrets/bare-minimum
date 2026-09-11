@@ -100,22 +100,7 @@
       "seconds": 4.0,
       "icon": "hotdog",
       "tint": "#e6b45c",
-      "desc": "Ninety per cent mystery. Ten per cent mustard.",
-      "anim": {
-        "_note": "The other player eat set. Not the burger one, so a dog is not a burger.",
-        "options": [
-          {
-            "dict": "mp_player_inteat@pnq",
-            "clip": "loop"
-          },
-          {
-            "dict": "mp_player_inteat@burger",
-            "clip": "mp_player_int_eat_burger"
-          }
-        ],
-        "hand": "left",
-        "scenario": "WORLD_HUMAN_STAND_IMPATIENT"
-      }
+      "desc": "Ninety per cent mystery. Ten per cent mustard."
     },
     {
       "id": "pie",
@@ -1272,22 +1257,7 @@
         "prop_cs_hotdog_02",
         "prop_cs_burger_01"
       ],
-      "seconds": 5.0,
-      "anim": {
-        "_note": "The other player eat set. Not the burger one, so a dog is not a burger.",
-        "options": [
-          {
-            "dict": "mp_player_inteat@pnq",
-            "clip": "loop"
-          },
-          {
-            "dict": "mp_player_inteat@burger",
-            "clip": "mp_player_int_eat_burger"
-          }
-        ],
-        "hand": "left",
-        "scenario": "WORLD_HUMAN_STAND_IMPATIENT"
-      }
+      "seconds": 5.0
     },
     {
       "id": "chilli_dog",
@@ -1304,22 +1274,7 @@
         "prop_cs_hotdog_02",
         "prop_cs_burger_01"
       ],
-      "seconds": 5.5,
-      "anim": {
-        "_note": "The other player eat set. Not the burger one, so a dog is not a burger.",
-        "options": [
-          {
-            "dict": "mp_player_inteat@pnq",
-            "clip": "loop"
-          },
-          {
-            "dict": "mp_player_inteat@burger",
-            "clip": "mp_player_int_eat_burger"
-          }
-        ],
-        "hand": "left",
-        "scenario": "WORLD_HUMAN_STAND_IMPATIENT"
-      }
+      "seconds": 5.5
     },
     {
       "id": "corn_dog",
@@ -1336,22 +1291,7 @@
         "prop_cs_hotdog_01",
         "prop_cs_burger_01"
       ],
-      "seconds": 4.0,
-      "anim": {
-        "_note": "The other player eat set. Not the burger one, so a dog is not a burger.",
-        "options": [
-          {
-            "dict": "mp_player_inteat@pnq",
-            "clip": "loop"
-          },
-          {
-            "dict": "mp_player_inteat@burger",
-            "clip": "mp_player_int_eat_burger"
-          }
-        ],
-        "hand": "left",
-        "scenario": "WORLD_HUMAN_STAND_IMPATIENT"
-      }
+      "seconds": 4.0
     },
     {
       "_note": "Pipe Down. THE PRICES ARE THE CHARACTER: this is the only shop on the list where one item costs more than a whole meal anywhere else, which is what a tobacconist on a good street is. Smoke items report in words rather than a hunger percentage -- see Eating.Report.",
@@ -4013,7 +3953,24 @@
   ],
   "_animations": [
     "The two interaction animation sets used. Both are checked at load; if one will not",
-    "stream, the item is still eaten and only the animation is skipped."
+    "stream, the item is still eaten and only the animation is skipped.",
+    "",
+    "ONE EATING ANIMATION, AND THERE IS ONLY ONE. mp_player_inteat@burger is the whole of",
+    "what this game has for a man eating something in his hand while standing up.",
+    "",
+    "mp_player_inteat@pnq WAS THE SECOND OPTION HERE AND IS A DRINK. Its name says eat, it",
+    "sits in the mp_player_inteat@ family right beside the burger set, and its clips are the",
+    "innocuous intro/loop/outro -- so it looked like the obvious alternative, and it was also",
+    "given to the four hot dogs so that a dog would not be a burger. It is a bottle going to",
+    "the mouth. Nothing in any of the game's own lists says so; only watching him drink a hot",
+    "dog does.",
+    "",
+    "So the fallback is gone as well as the four overrides. A second option that plays the",
+    "WRONG motion is worse than having none: no option at all falls through to the scenario,",
+    "which is a man standing still, and a man standing still is at least not lying to you.",
+    "",
+    "The scenario stays a neutral idle on purpose. The only two eating scenarios in the game",
+    "-- WORLD_HUMAN_SEAT_LEDGE_EATING and WORLD_HUMAN_SEAT_WALL_EATING -- both sit him down."
   ],
   "animations": {
     "eat": {
@@ -4023,10 +3980,6 @@
         {
           "dict": "mp_player_inteat@burger",
           "clip": "mp_player_int_eat_burger"
-        },
-        {
-          "dict": "mp_player_inteat@pnq",
-          "clip": "loop"
         }
       ]
     },
