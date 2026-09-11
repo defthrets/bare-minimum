@@ -15,8 +15,17 @@ namespace BareMinimum.UI
     /// archives, which turns a mod anybody can drop into scripts\ into an asset mod needing
     /// OpenIV, a limit adjuster and a different install per game edition. For one icon.
     ///
-    /// The PNGs are white silhouettes; the colour comes from Tint at draw time, so one file
-    /// serves the amber on the pump, a red warning and whatever a later screen wants.
+    /// MOST of the PNGs are white silhouettes; the colour comes from Tint at draw time, so
+    /// one file serves the amber on the pump, a red warning and whatever a later screen wants.
+    ///
+    /// AND SOME ARE NOT, AS OF THE PIXEL ART. CustomSprite multiplies the texture by the
+    /// tint, which is exactly right for a white shape and exactly wrong for a brown bun with
+    /// yellow cheese on it: multiplied by the item's orange it is a brown-orange smear. So an
+    /// Icon looks at its own file ONCE, and if there is colour in it, it keeps its colours and
+    /// takes only the alpha from whatever tint it is handed -- the fade in, the shimmer and the
+    /// lift on the plate still happen, in the art's own palette. Decided from the file rather
+    /// than a flag, because a flag has to agree with a folder full of PNGs and one day will
+    /// not. See Coloured.
     /// </summary>
     internal sealed class Icon
     {
@@ -31,6 +40,9 @@ namespace BareMinimum.UI
         private readonly string _path;
         private CustomSprite _sprite;
         private bool _missing;
+
+        /// <summary>Whether the file carries colour of its own. Null until it has been looked at. See Coloured.</summary>
+        private bool? _coloured;
 
         /// <summary>Height as a fraction of the screen. Width follows, since the PNGs are square.</summary>
         public float Scale = 0.055f;
@@ -52,6 +64,74 @@ namespace BareMinimum.UI
 
         /// <summary>True once we know the file is not there, so nothing keeps retrying it.</summary>
         public bool Missing => _missing;
+
+        /// <summary>
+        /// Whether this is coloured art rather than a white shape. Read off the pixels, once.
+        ///
+        /// A pixel counts as coloured when its channels differ by more than a little -- white,
+        /// grey and black do not, and the anti-aliased edge of a white shape does not either.
+        /// One coloured pixel among the opaque ones is enough: nobody draws a white glyph with
+        /// a single red dot in it, and the cost of being wrong in that direction is a picture
+        /// that keeps its own colour, which is not much of a failure.
+        ///
+        /// Every fourth pixel each way. A 256-square file is sixty-five thousand pixels and
+        /// this asks four thousand of them, which is plenty to find a bun in.
+        /// </summary>
+        public bool Coloured
+        {
+            get
+            {
+                if (_coloured.HasValue) return _coloured.Value;
+
+                var found = false;
+
+                try
+                {
+                    if (File.Exists(_path))
+                    {
+                        using (var bmp = new Bitmap(_path))
+                        {
+                            var stepX = Math.Max(1, bmp.Width / 64);
+                            var stepY = Math.Max(1, bmp.Height / 64);
+
+                            for (var y = 0; y < bmp.Height && !found; y += stepY)
+                            {
+                                for (var x = 0; x < bmp.Width; x += stepX)
+                                {
+                                    var c = bmp.GetPixel(x, y);
+                                    if (c.A < 40) continue;
+
+                                    var hi = Math.Max(c.R, Math.Max(c.G, c.B));
+                                    var lo = Math.Min(c.R, Math.Min(c.G, c.B));
+
+                                    if (hi - lo > 24) { found = true; break; }
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Then it is treated as a white shape, which is what every icon was until
+                    // today, and the worst case is a coloured picture drawn tinted.
+                    Log.Once("icon-colour-" + _path, "Could not look at the colours in " + _path +
+                                                    "; drawing it tinted: " + ex.Message);
+                }
+
+                _coloured = found;
+                return found;
+            }
+        }
+
+        /// <summary>
+        /// The colour the sprite is actually given: the tint, or -- for coloured art -- white
+        /// at the tint's alpha, so the file's own colours come through and only the fade is
+        /// borrowed. Every draw below goes through here.
+        /// </summary>
+        private Color Paint(Color tint)
+        {
+            return Coloured ? Color.FromArgb(tint.A, 255, 255, 255) : tint;
+        }
 
         /// <summary>
         /// Draws it centred on a point given as a fraction of the screen.
@@ -79,7 +159,7 @@ namespace BareMinimum.UI
                 _sprite.Size = new SizeF(side, side);
                 _sprite.Position = new PointF(fx * CanvasW, (fy + lift) * CanvasH);
                 _sprite.Rotation = tilt;
-                _sprite.Color = Tint;
+                _sprite.Color = Paint(Tint);
                 _sprite.Draw();
             }
             catch (Exception ex)
@@ -109,7 +189,7 @@ namespace BareMinimum.UI
                 _sprite.Size = new SizeF(side, side);
                 _sprite.Position = new PointF(fx * CanvasW, fy * CanvasH);
                 _sprite.Rotation = rotation;
-                _sprite.Color = tint;
+                _sprite.Color = Paint(tint);
                 _sprite.Draw();
             }
             catch (Exception ex)
@@ -150,7 +230,7 @@ namespace BareMinimum.UI
                 _sprite.Size = new SizeF(width * CanvasW, height * CanvasH);
                 _sprite.Position = new PointF(centreX * CanvasW, centreY * CanvasH);
                 _sprite.Rotation = degrees;
-                _sprite.Color = tint;
+                _sprite.Color = Paint(tint);
                 _sprite.Draw();
             }
             catch (Exception ex)
