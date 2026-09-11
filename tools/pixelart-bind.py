@@ -201,6 +201,15 @@ BIND = [
     ("shake", 15, "Wheatgrass Smoothie"),     # the green one
     # lsd -- one, four tabs of blotter
     ("lsd", 0, "drug:lsd"),
+    # sub_sandwich -- seven, one for every sub and one over for the sandwiches
+    ("sub", 4, "Foot-Long Sub"),              # the loaded veg sub on the long baguette
+    ("sub", 4, "group:sub"),
+    ("sub", 0, "Gut Buster"),                 # meatballs and cheese
+    ("sub", 2, "Torpedo"),                    # the cheesesteak
+    ("sub", 3, "Italian Sub"),                # salami and ham on the baguette
+    ("sub", 1, "Crab Roll"),                  # fried seafood in a roll
+    ("sub", 5, "Torta"),                      # ham and cheese on the pale seeded roll
+    ("sub", 6, "Pastrami Combo"),             # pastrami piled on a round roll -- a sandwich, from the sub batch
 ]
 
 
