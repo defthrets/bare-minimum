@@ -106,11 +106,23 @@ namespace BareMinimum.Core
                          Warning = "the game is not running in Chinese, and the Han glyphs are in " +
                                    "the font the game loads for its OWN language. Expect empty " +
                                    "boxes until GTA itself is set to Chinese." },
-            new Tongue { Code = "hi",    Name = "\u0939\u093f\u0928\u094d\u0926\u0940",
+            // HINDI IN LATIN LETTERS, and it is the one in the menu because it is the one
+            // that draws. GTA V has never shipped a Hindi localisation, so there is no font in
+            // the game with Devanagari in it -- the correct Devanagari came out as empty boxes,
+            // which is the most useless kind of correct. Romanised Hindi is not a compromise
+            // invented here; it is how a great deal of Hindi is actually typed, and it goes
+            // through the same font as English.
+            new Tongue { Code = "hi",    Name = "Hindi" },
+
+            // And the Devanagari, kept whole. Its own name cannot be written in its own
+            // letters here -- that is the entire problem -- so the row says what it is in
+            // letters that draw, and whoever picks it is told why it did not.
+            new Tongue { Code = "hi-Deva", Name = "Hindi (Devanagari)",
                          Needs = Never,
                          Warning = "GTA V has never shipped a Hindi localisation, so no font in " +
-                                   "this game has Devanagari in it. The translation is real; the " +
-                                   "letters will almost certainly draw as boxes." }
+                                   "this game has Devanagari in it. Every word of it is right and " +
+                                   "none of it will draw. Pick Hindi instead -- the same text in " +
+                                   "Latin letters." }
         };
 
         /// <summary>What is loaded. NULL means English, which is the code, and makes Say a single test.</summary>
@@ -324,10 +336,11 @@ namespace BareMinimum.Core
             if (low.StartsWith("ru") || low.Contains("russ")) return "ru";
             if (low.StartsWith("pl") || low.Contains("pol")) return "pl";
             if (low.StartsWith("zh") || low.Contains("chin") || low.Contains("mandarin")) return "zh";
+            if (low.Contains("deva") || low.Contains("devanagari")) return "hi-Deva";
             if (low.StartsWith("hi") || low.Contains("hind")) return "hi";
 
             Log.Warn("Language: \"" + asked + "\" is not one of the ten, so English it is. " +
-                     "The codes are en-GB, en-US, pt-BR, es, fr, de, ru, pl, zh, hi.");
+                     "The codes are en-GB, en-US, pt-BR, es, fr, de, ru, pl, zh, hi, hi-Deva.");
 
             return "en-GB";
         }
