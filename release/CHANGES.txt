@@ -1,10 +1,57 @@
-﻿===============================================================================
+===============================================================================
   BARE MINIMUM  --  changes
 ===============================================================================
 
 
-0.2.0  --  Vitals moves in: health, armour and energy, one row of five
+0.2.0  --  A THIRD NEED, THE VITALS MOVE IN, AND THE DRUGS BITE BACK
 -------------------------------------------------------------------------------
+
+  THIRST. A third meter, standing in the row with the other two and behaving
+  exactly as they do -- 100 is fine, 0 is trouble -- and what makes it its own
+  thing is the speed and the price. Twenty-four game hours from full to dry,
+  which is well under half of hunger's, so it empties about as often as you
+  sleep; and one can fixes it, where a day's food is several meals. That ratio
+  is the whole point: a meter that emptied on hunger's clock would be a second
+  hunger bar you fix at the same counter, and it would tell you nothing.
+
+  WHAT FILLS IT IS WORKED OUT, NOT TYPED. Every item in the shop gets a figure
+  from one rule -- a drink is most of the bar, food carries across a fifth of
+  its own hunger value, and ALCOHOL SUBTRACTS, on a curve, so a beer is a drink
+  and a whisky is very much not. A hundred hand-written numbers would have been
+  a hundred chances to get one wrong and no chance of noticing.
+
+  AND BEING DRY IS FELT BEFORE IT IS SEEN. It does not slow you down -- three
+  needs each multiplying your speed is a man walking at a third of it with
+  nothing on screen saying why. It takes your WIND: the sprint meter empties up
+  to two and a half times faster, on a bar already in the row, so the cause and
+  the effect are two columns apart. Then he starts breathing hard, in his own
+  voice, out of the game's own non-verbal set -- and the rate of it is the
+  reading, faster the worse it gets and faster again while he runs.
+
+  THE DRUGS COST SOMETHING NOW. A stimulant pinned the energy bar at the top for
+  minutes and then simply let go. Now there is a comedown: a few minutes moving
+  like a man who has run himself into the ground, with a grunt on the way in.
+  Two bars of a sedative and the screen starts GOING OUT for a second at a time,
+  with no warning and no loss of control -- where you have got to by the time it
+  comes back is the mechanic. And LSD is the one drug here that is not
+  arithmetic: twelve minutes of the game's own peyote timecycle, swelling on two
+  periods that do not divide into each other so it never settles into a filter
+  and never falls into a rhythm.
+
+  HEALTH IS RED THE WHOLE WAY, vivid at full and dark at nothing, so every bar
+  in the row now reads by one rule: brightness says how bad, hue says which
+  meter. The low-health beat goes BLACK rather than white -- on a red bar going
+  pale reads as the level rising -- which leaves white to mean one thing, and it
+  means it the instant you are hit, armour included.
+
+  EVERY VENDING MACHINE YOU WALK PAST STAYS ON THE MAP. They were keyed on the
+  prop's handle, which is the game's memory of a streamed object and not the
+  machine, so they vanished the moment you drove off and came back as new ones.
+  They are remembered by position now, and kept between sessions. There is a
+  map survey on the F7 page that will fly the whole lot for you.
+
+  ---
+
 
   THE MENU GOES OVER THE BRIDGE. Another mod could be handed food and could take
   it away, but had no way to ask what food EXISTS or what any of it costs -- so
