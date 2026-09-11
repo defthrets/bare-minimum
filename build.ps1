@@ -1,4 +1,4 @@
-﻿<#
+<#
   Bare Minimum build script.
 
   Drives the self-contained Roslyn compiler in tools\ rather than `dotnet build`, because the
@@ -374,6 +374,17 @@ if ($Package) {
 
     Copy-Item $icons $dataOut -Recurse
 
+    # The languages, on the same terms as the icons and for the same reason.
+    #
+    # data\*.json ABOVE IS NOT RECURSIVE, and data\lang is a folder -- so without this the
+    # download would have had no language files in it at all while this machine, which has
+    # them deployed already, showed nothing wrong. That is precisely the failure the comment
+    # above is about. Required, and COUNTED, because a half-copied folder passes a Test-Path.
+    $lang = Join-Path $root 'data\lang'
+    if (-not (Test-Path $lang)) { throw "data\lang is missing -- the mod ships ten languages." }
+
+    Copy-Item $lang $dataOut -Recurse
+
     foreach ($doc in @('README.txt', 'CHANGES.txt')) {
         $d = Join-Path $relDir $doc
         if (-not (Test-Path $d)) { throw "release\$doc is missing, and a release without it is a dll in a zip." }
@@ -391,6 +402,8 @@ if ($Package) {
         'scripts\BareMinimum\doors.txt',
         'scripts\BareMinimum\brands.json',
         'scripts\BareMinimum\socials.json',
+        'scripts\BareMinimum\lang\en-GB.json',
+        'scripts\BareMinimum\lang\ru.json',
         'README.txt',
         'CHANGES.txt'
     )
@@ -409,6 +422,13 @@ if ($Package) {
         throw "Package has $gotIcons icon(s) and the repo has $wantIcons."
     }
 
+    $wantLang = (Get-ChildItem $lang -File).Count
+    $gotLang  = @(Get-ChildItem (Join-Path $dataOut 'lang') -File -ErrorAction SilentlyContinue).Count
+
+    if ($gotLang -ne $wantLang) {
+        throw "Package has $gotLang language file(s) and the repo has $wantLang."
+    }
+
     function Assert-Staged($names) {
         $absent = @()
         foreach ($m in $names) { if (-not (Test-Path (Join-Path $stage $m))) { $absent += $m } }
@@ -424,7 +444,7 @@ if ($Package) {
 
         Write-Host ""
         Write-Host ("Packaged  " + (Split-Path $path -Leaf)) -ForegroundColor Green
-        Write-Host "          $count files, $kb KB, $gotIcons icons, version $version"
+        Write-Host "          $count files, $kb KB, $gotIcons icons, $gotLang languages, version $version"
         foreach ($m in $names) { Write-Host "          + $m" -ForegroundColor DarkGray }
     }
 

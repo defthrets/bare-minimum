@@ -1,6 +1,64 @@
-﻿===============================================================================
+===============================================================================
   BARE MINIMUM  --  changes
 ===============================================================================
+
+
+0.3.0  --  TEN LANGUAGES, AND THE HUD STOPS BLINKING
+-------------------------------------------------------------------------------
+
+  TEN LANGUAGES, off the first row of the settings menu: English in British and
+  American, Portuguese (Brazil), Spanish, French, German, Russian, Polish,
+  Chinese and Hindi. Every prompt, every screen, every tab and every row label.
+
+  ANYTHING A TRANSLATION HAS NOT COVERED SHOWS IN ENGLISH, and that is the
+  design rather than a shortfall. A language file is a plain map from what the
+  mod says to what it should say instead -- there are no identifiers in it --
+  so a miss hands back the English and there is no such thing as a missing
+  string. A half-finished file is a working mod in two languages.
+
+  Which also means the food translates the same way the buttons do. A hot dog's
+  name and the joke under it go through the same four functions as everything
+  else, so filling them in is editing a text file, not building anything.
+
+  lang\en-GB.json is the template. Copy it, fill in the right-hand side, save it
+  under your own code. No rebuild and no tools.
+
+  WHETHER THE LETTERS DRAW IS A SEPARATE QUESTION FROM WHETHER THE WORDS EXIST,
+  and the log says which at load. Latin and Cyrillic are in the game's fonts
+  always, so six of the ten are safe anywhere. Chinese rides in on the font GTA
+  loads for its OWN language, so on an English game expect boxes. Devanagari is
+  not in the game at all -- there has never been a Hindi GTA V -- so Hindi will
+  almost certainly be boxes until a font with it is installed. The text is real
+  either way.
+
+  THE AIR METER IS BACK. The game's own breath bar is drawn in the same part of
+  the minimap as its health and armour strip, so the layout that hides those was
+  hiding it too, and it took going swimming to find out. It cannot be let back on
+  its own -- one layout covers all three -- so it is drawn instead, in exactly
+  the space the original used, and only while you are under the water. The full
+  mark is measured rather than assumed, so a diving ability or a rebreather is
+  accounted for without being told about. It beats when it is nearly out, and
+  faster the less is left.
+
+  THE HUD STOPPED BLINKING. The whole row was going off and on, everywhere, all
+  the time. Four files each asked the game whether its HUD was hidden, each
+  asked fresh every time it drew, and each took everything down the instant the
+  answer came back no -- and that native is a THIS FRAME one, which the game
+  uses for cutscenes and phone calls and which any other script can call too.
+  One script doing it on one frame in ten took the bars down on one frame in
+  ten. There is one answer now, asked once a frame, and the twitchy tests have
+  to hold for six frames before anything goes.
+
+  THE MINIMAP STOPPED FLICKERING THE GPS. The call that hides the game's health
+  strip is not a switch being flipped, it is a re-layout of the minimap, and it
+  was being made sixty times a second. The map's own picture survives that; the
+  GPS route and the turn arrow do not, because they are built by that movie only
+  while a route is set. Asked once now, and again only when something has had a
+  chance to undo it.
+
+  AND THE HOT DOGS WERE BEING DRUNK. Four of them carried an animation whose
+  name says eat, which sits in the eating family, and which is a bottle going to
+  the mouth. Five bar drinks had the opposite problem and were being chewed.
 
 
 Unreleased  --  THE RECTANGLES ARE COUNTED FOR THE WHOLE MACHINE
