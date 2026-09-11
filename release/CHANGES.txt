@@ -3,6 +3,29 @@
 ===============================================================================
 
 
+0.3.1  --  HINDI IN LETTERS THE GAME CAN DRAW
+-------------------------------------------------------------------------------
+
+  HINDI IS ROMANISED NOW, and it is the one on the menu because it is the one
+  that draws. 0.3.0 shipped it in Devanagari, every word of it correct, and it
+  came out as a row of empty boxes -- GTA V has never had a Hindi release, so
+  there is no font in the game with those letters in it. That is the most
+  useless kind of correct.
+
+  Latin goes through the same font as English and works on every install, and
+  romanised Hindi is not a compromise invented here: it is how a great deal of
+  Hindi is actually typed. All 120 phrases, checked to hold nothing the game's
+  font does not have.
+
+  The Devanagari is kept whole as hi-Deva, and works the day somebody puts a
+  font in the game that has it. Its row cannot be written in its own letters --
+  that is the whole problem -- so it is labelled in Latin and says why it did
+  not draw if you pick it.
+
+  Nothing else changed. If 0.3.0 is running and you do not read Hindi, this is
+  not worth the download.
+
+
 0.3.0  --  TEN LANGUAGES, AND THE HUD STOPS BLINKING
 -------------------------------------------------------------------------------
 
