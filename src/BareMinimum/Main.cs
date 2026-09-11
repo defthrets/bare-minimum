@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using GTA;
 using BareMinimum.Core;
 using BareMinimum.Food;
@@ -240,6 +240,7 @@ namespace BareMinimum
 
         private void OnTick(object sender, EventArgs e)
         {
+            Core.Pace.Begin();
             // The set's mark, for a few seconds after load. Bows out on its own and
             // costs a comparison thereafter; see UI.Splash.
             UI.Splash.Render();

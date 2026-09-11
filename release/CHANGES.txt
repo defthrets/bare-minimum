@@ -1,7 +1,21 @@
-===============================================================================
+﻿===============================================================================
   BARE MINIMUM  --  changes
 ===============================================================================
 
+
+Unreleased  --  THE RECTANGLES ARE COUNTED FOR THE WHOLE MACHINE
+-------------------------------------------------------------------------------
+
+  ONE LIST, SHARED. The game keeps one list of rectangles a frame for every
+  script on it and drops the rest past about three hundred and fifty, so the
+  mod that draws last pays for everybody's frame. The set now counts into one
+  shared tally, and this log says what the busiest frame cost and who spent
+  it. The sparkle asks the shared tally as well as this mod's own allowance:
+  past the soft line, whoever is over their share goes without until the room
+  is measured to be there again. The bars never go.
+
+  THE LOG SAYS WHEN THE TICK YIELDED. A frame the script hands back is a frame
+  with no bars on it; that is now a line, with how many frames.
 
 0.2.0  --  A THIRD NEED, THE VITALS MOVE IN, AND THE DRUGS BITE BACK
 -------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using GTA;
 using GTA.Native;
@@ -184,7 +184,10 @@ namespace BareMinimum.UI
             get
             {
                 Sync();
-                return !_trim;
+
+                // AND THE MACHINE'S ANSWER, which knows what everybody else drew. This mod's
+                // own allowance above is one guard; the shared one is the other. See Ledger.
+                return !_trim && Ledger.Room;
             }
         }
 
@@ -195,7 +198,7 @@ namespace BareMinimum.UI
             {
                 Sync();
 
-                var left = Budget - RectsThisFrame;
+                var left = Math.Min(Budget - RectsThisFrame, Ledger.Spare);
                 return left < 0 ? 0 : left;
             }
         }
@@ -281,6 +284,7 @@ namespace BareMinimum.UI
         {
             Sync();
             RectsThisFrame++;
+            Ledger.Count();
         }
 
         /// <summary>
