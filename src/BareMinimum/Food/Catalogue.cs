@@ -380,6 +380,29 @@ namespace BareMinimum.Food
 
                     if (string.IsNullOrEmpty(item.Name)) continue;
 
+                    // A THING IN THE DRINKS AISLE IS A DRINK, WHETHER OR NOT ANYBODY SAID SO.
+                    //
+                    // "drink" is the flag that decides which animation he plays, and it is a
+                    // separate fact from the category that decides which tab it sits under --
+                    // so the two can disagree, and they did: a beer, a pint, a pitcher, a
+                    // mojito and an iced tea were all filed under Drinks with the flag missing,
+                    // and the mod put a BURGER animation on a bottle. All five were bar items
+                    // added in one batch, which is how they came to share one omission.
+                    //
+                    // Fixing the five in the file is half of it. This is the other half: the
+                    // category answers for anything that forgets, so the next drink added in a
+                    // hurry cannot be chewed. It only ever adds the flag -- something outside
+                    // the aisle that says it is a drink is taken at its word, because a soup
+                    // somebody wants sipped is a decision and not an oversight.
+                    if (!item.Drink &&
+                        string.Equals(item.Category, "Drinks", StringComparison.OrdinalIgnoreCase))
+                    {
+                        item.Drink = true;
+
+                        Log.Info("\"" + item.Name + "\" is in Drinks with no drink flag; " +
+                                 "treating it as one so it is not eaten like a burger.");
+                    }
+
                     // AFTER THE INITIALISER, because the default is worked out FROM the item --
                     // whether it is a drink, how much of a meal it is, and how much alcohol is
                     // in it. A "thirst" key in the file wins over the rule.

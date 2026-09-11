@@ -3529,6 +3529,7 @@
     },
     {
       "id": "dn_icedtea",
+      "drink": true,
       "name": "Iced Tea",
       "category": "Drinks",
       "price": 4,
@@ -3892,6 +3893,7 @@
     },
     {
       "id": "mj_mojito",
+      "drink": true,
       "name": "Mojito",
       "category": "Drinks",
       "price": 9,
@@ -3911,6 +3913,7 @@
     },
     {
       "id": "bb_pint",
+      "drink": true,
       "name": "Bay Bar Pint",
       "category": "Drinks",
       "price": 6,
@@ -3930,6 +3933,7 @@
     },
     {
       "id": "oot_pitcher",
+      "drink": true,
       "name": "Out Of Towner",
       "category": "Drinks",
       "price": 12,
@@ -3949,6 +3953,7 @@
     },
     {
       "id": "ps_beer",
+      "drink": true,
       "name": "Tramway Beer",
       "category": "Drinks",
       "price": 6,
