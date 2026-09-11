@@ -150,6 +150,26 @@ BIND = [
     ("alcohol", 5,  "group:bottle"),
     ("alcohol", 3,  "group:wine"),            # the fallbacks follow the rebinds above
     ("alcohol", 9,  "group:flask"),
+    # platter_9_Heavy_Shells_Sp -- sixteen boards and trays
+    ("platter", 0,  "Mezze Plate"),           # the tray of dips, breads and olives
+    ("platter", 1,  "Half Dozen Oysters"),    # oysters on a board -- the plate group's one gap, filled from here
+    ("platter", 2,  "Heavy Shells"),          # tortilla chips, salsa, guac: shells and sides
+    ("platter", 3,  "Fish and Chips"),        # in the paper, tartare on the side
+    ("platter", 5,  "Small Plates"),          # the charcuterie board
+    ("platter", 5,  "group:platter"),
+    ("platter", 7,  "Seafood Platter"),       # crab, shrimp, corn, lemon
+    ("platter", 8,  "Meat Pie"),              # a whole golden pie -- the Food pie, unpictured till now
+    ("platter", 9,  "Spit-Roasted Beef"),     # sliced beef on the board, gravy
+    ("platter", 10, "Pipeline Ribs"),         # the rack with the corn
+    ("platter", 11, "Fisherman's Fry"),       # fried fish and shrimp with the dips
+    ("platter", 15, "The Big Chief Special"), # the big round board with all of it
+    # the drugs -- this mod's own pictures for the pocket; the other mod's files are untouched
+    ("weed",  7, "drug:weed"),                # a clear baggie of bud
+    ("drugs", 0, "drug:heroin"),              # the brown powder bag
+    ("drugs", 1, "drug:meth"),                # the blue crystals bag
+    ("drugs", 2, "drug:xanax"),               # the white bar
+    ("pills", 4, "drug:ecstasy"),             # the pink smiley
+    ("pills", 7, "drug:oxycodone"),           # the red oblong pill -- its first picture ever
 ]
 
 
@@ -162,7 +182,7 @@ def main():
 
     plan = []
     for batch, n, target in BIND:
-        if target.startswith("group:"):
+        if target.startswith("group:") or target.startswith("drug:"):
             plan.append((batch, n, target))
             continue
         ids = by_name.get(target.lower())

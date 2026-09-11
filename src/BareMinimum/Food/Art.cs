@@ -63,6 +63,37 @@ namespace BareMinimum.Food
             return file;
         }
 
+        /// <summary>
+        /// This mod's own i_&lt;id&gt;.png for any id at all -- a drug's, say, which is not an
+        /// Item -- as a FULL PATH, or null when there is none. The full path because a drug's
+        /// picture is otherwise a rooted path into the other mod's folder, and the caller
+        /// hands whichever it gets to UI.Icon, which takes both.
+        /// </summary>
+        public static string Own(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return null;
+
+            var key = "own:" + id;
+
+            string file;
+            if (Chosen.TryGetValue(key, out file)) return file;
+
+            file = null;
+
+            try
+            {
+                var path = Path.Combine(Paths.Icons, "i_" + id + ".png");
+                if (File.Exists(path)) file = path;
+            }
+            catch
+            {
+                // No folder, no picture.
+            }
+
+            Chosen[key] = file;
+            return file;
+        }
+
         /// <summary>After a data reload, so a picture added while the game runs is found.</summary>
         public static void Forget()
         {

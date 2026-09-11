@@ -39,6 +39,9 @@ PREVIOUS = os.path.join(HERE, "tools", "icons-previous")
 CANVAS = 256
 MARGIN = 8
 
+# The bridge's drug ids -- Food/Dope.cs's dose table. Not in foods.json, so listed here.
+DRUGS = {"weed", "meth", "coke", "crack", "ecstasy", "lsd", "xanax", "heroin", "oxycodone"}
+
 
 def groups():
     d = json.loads(io.open(os.path.join(HERE, "data", "foods.json"), encoding="utf-8-sig").read())
@@ -156,6 +159,14 @@ def use(target, n, batch=None):
         want, target = "item", target[5:]
     elif target.startswith("group:"):
         want, target = "group", target[6:]
+    elif target.startswith("drug:"):
+        # A DRUG IS NOT AN ITEM. It is not in foods.json at all -- the drugs are the other
+        # mod's, and this mod's pocket asks over the bridge for their pictures. i_<id>.png here
+        # is the one place a picture of ours takes precedence over one of theirs (see
+        # Food/Dope.IconOf), so the ids are the bridge's own and nothing else is accepted.
+        want, target = "drug", target[5:]
+        if target not in DRUGS:
+            raise SystemExit("'%s' is not a drug the pocket knows. They are: %s" % (target, ", ".join(sorted(DRUGS))))
     elif target in known and target in every:
         raise SystemExit("'%s' is both an icon group and an item id. Say item:%s or group:%s."
                          % (target, target, target))
@@ -170,7 +181,10 @@ def use(target, n, batch=None):
     if want == "group" and target not in known:
         raise SystemExit("no icon group '%s'" % target)
 
-    if want != "item" and target in known:
+    if want == "drug":
+        out = os.path.join(ICONS, "i_%s.png" % target)
+        who = "drug: %s  (the pocket's own; the other mod's file is left alone)" % target
+    elif want != "item" and target in known:
         out = os.path.join(ICONS, "p_%s.png" % target)
         kept = os.path.join(PREVIOUS, "p_%s.png" % target)
 

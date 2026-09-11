@@ -195,6 +195,23 @@ namespace BareMinimum.Food
         /// </summary>
         public static string IconOf(string id)
         {
+            // OUR OWN PICTURE FIRST, IF THERE IS ONE. i_<id>.png in this mod's icon folder --
+            // the same rule the food follows, see Food.Art -- so a drawn bag of weed for the
+            // pocket does not mean writing into the other mod's folder, where its wheel draws
+            // the same file white and tinted and would make a smear of it. Nothing there is
+            // touched; this mod simply stops asking for a picture it already has. It is also
+            // the only way oxycodone gets one at all: it exists on this side of the bridge and
+            // not on that one, so the other mod has never had a file to hand back for it.
+            try
+            {
+                var own = Art.Own(id);
+                if (own != null) return own;
+            }
+            catch
+            {
+                // Then the other mod's, as it always was.
+            }
+
             try
             {
                 if (!Present || _iconOf == null) return "";
