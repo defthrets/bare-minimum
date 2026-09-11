@@ -1065,6 +1065,29 @@ namespace BareMinimum.Core
         public int VitalsShowType = 0;
 
         /// <summary>
+        /// HOW OFTEN THE LAYOUT IS ASKED FOR AGAIN, in milliseconds. 0 -- the default -- is
+        /// "only when something has happened that could have undone it".
+        ///
+        /// IT USED TO BE EVERY FRAME, AND THAT IS WHAT MADE THE GPS FLICKER. SETUP_HEALTH_ARMOUR
+        /// is not a flag being set; it is a RE-LAYOUT of the minimap movie, which is why the map
+        /// comes back blank after the first one and has to be rebuilt -- see VitalsMapFlick. The
+        /// map's own texture survives that. The GPS does not: the route line and the turn arrow
+        /// are built by the movie only while a route exists, so asking sixty times a second tore
+        /// them down and rebuilt them sixty times a second. Nothing else on the map moved, which
+        /// is why it read as the GPS being broken rather than the minimap being rebuilt.
+        ///
+        /// So it is asked once, and again only on the falling edge of a pause menu, a screen
+        /// fade, a character switch or a cutscene -- the moments the game rebuilds its own HUD
+        /// and could have put the strip back -- and whenever the player's body changes.
+        ///
+        /// SET THIS TO 1 FOR THE OLD BEHAVIOUR, every frame, if the game's strip ever comes
+        /// back and stays: it means there is a fifth moment that is not on that list. Anything
+        /// in between is a heartbeat, and a heartbeat flickers the GPS at its own rate rather
+        /// than at sixty a second, so it is a worse answer than either end.
+        /// </summary>
+        public int VitalsHideRepeatMs = 0;
+
+        /// <summary>
         /// Collapse the big map once at start-up. OFF: the call itself was suspected of leaving
         /// the radar blank until the pause menu, and this mod never opens the big map anyway.
         /// </summary>
@@ -1908,6 +1931,7 @@ namespace BareMinimum.Core
                 cfg.VitalsHideSpecial = ini.GetBool("Vitals", "HideSpecial", cfg.VitalsHideSpecial);
                 cfg.VitalsHideType = ini.GetInt("Vitals", "HideType", cfg.VitalsHideType, 0, 10);
                 cfg.VitalsShowType = ini.GetInt("Vitals", "ShowType", cfg.VitalsShowType, 0, 10);
+                cfg.VitalsHideRepeatMs = ini.GetInt("Vitals", "HideRepeatMs", cfg.VitalsHideRepeatMs, 0, 60000);
                 cfg.VitalsShrinkMapOnStart = ini.GetBool("Vitals", "ShrinkMapOnStart", cfg.VitalsShrinkMapOnStart);
                 cfg.VitalsRefreshRadar = ini.GetBool("Vitals", "RefreshRadar", cfg.VitalsRefreshRadar);
                 cfg.VitalsMapFlick = ini.GetBool("Vitals", "MapFlick", cfg.VitalsMapFlick);

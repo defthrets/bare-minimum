@@ -12,10 +12,25 @@ namespace BareMinimum.Vitals
     /// own scaleform movie, and HIDE_HUD_COMPONENT_THIS_FRAME has no number for it. What the
     /// movie does have is a method, SETUP_HEALTH_ARMOUR, that the game calls to pick a layout
     /// -- and layout 3 is the one it uses on the golf course, which has no bars in it at all.
-    /// Ask for that every frame and the strip is gone. The FiveM crowd has run this for years.
+    /// Ask for that and the strip is gone. The FiveM crowd has run this for years.
     ///
-    /// The special ability bar has a native of its own, SET_ABILITY_BAR_VISIBILITY, and it
-    /// is asked as well, every frame, because a mission script can set it back.
+    /// ONCE. NOT EVERY FRAME -- AND EVERY FRAME IS WHAT MADE THE GPS FLICKER.
+    ///
+    /// The method is not a flag being set. It is a RE-LAYOUT of the movie, which the rest of
+    /// this comment is the proof of: the first one leaves the map BLANK until the game rebuilds
+    /// it. The map's own texture survives a relayout, so nothing looked wrong. The GPS does not
+    /// survive one: the route line and the turn arrow are built by this movie, and only while a
+    /// route exists, so sixty relayouts a second tore them down and rebuilt them sixty times a
+    /// second and they strobed. Only ever with a route set, which is why it looked like a fault
+    /// in the GPS rather than in the thing rebuilding the map underneath it.
+    ///
+    /// So it is asked once, and asked again only when the game has had a chance to undo it --
+    /// see Upheaval for which moments those are, and VitalsHideRepeatMs for the way back to the
+    /// old behaviour if the strip ever returns and stays.
+    ///
+    /// The special ability bar is different and is still asked every frame:
+    /// SET_ABILITY_BAR_VISIBILITY is a plain native setting a flag, it lays nothing out, and a
+    /// mission script can set it back.
     ///
     /// THE MINIMAP GOES BLANK UNTIL IT IS RE-INITIALISED. Told to use the golf layout, the
     /// map did not draw at all until the player opened the pause menu once -- which is what
@@ -65,6 +80,22 @@ namespace BareMinimum.Vitals
         /// <summary>When the flick's next shut is due. See Flick.</summary>
         private int _flickAt;
 
+        /// <summary>Whether the layout call has ever actually gone into the movie.</summary>
+        private bool _asked;
+
+        /// <summary>Set when something has happened that could have put the game's own strip back.</summary>
+        private bool _askAgain;
+
+        /// <summary>When the optional heartbeat is next due. Only read when HideRepeatMs is not 0.</summary>
+        private int _repeatAt;
+
+        /// <summary>Last frame's answers to the questions in Upheaval. The ped starts at -1 so the first frame is not a change.</summary>
+        private bool _wasPaused, _wasFaded, _wasSwitching, _wasCutscene;
+        private int _wasPed = -1;
+
+        /// <summary>How many times the layout has had to be asked for again. The number that says whether the list in Upheaval is long enough.</summary>
+        private int _reasks;
+
         /// <summary>How long the big map is held open before the first shut, and the two insurance shuts after it.</summary>
         private const int FlickHoldMs = 150;
         private static readonly int[] FlickAgainMs = { 500, 1200 };
@@ -75,6 +106,10 @@ namespace BareMinimum.Vitals
         /// </summary>
         public void Update(Settings cfg, bool show)
         {
+            // Every frame, whatever else happens: it is watching for EDGES, and an edge missed
+            // is an edge gone.
+            var upheaval = Upheaval();
+
             var wantHidden = !show && (cfg.VitalsHideHealthArmour || cfg.VitalsHideSpecial);
 
             if (!_ever)
@@ -112,6 +147,7 @@ namespace BareMinimum.Vitals
                 {
                     _hidden = true;
                     _needRefresh = true;
+                    _askAgain = true;
                 }
             }
 
@@ -119,19 +155,127 @@ namespace BareMinimum.Vitals
             {
                 if (cfg.VitalsHideSpecial) AbilityBar(false);
 
-                if (cfg.VitalsHideHealthArmour && Setup(cfg.VitalsHideType) && _needRefresh)
+                if (cfg.VitalsHideHealthArmour && Due(cfg, upheaval) && Setup(cfg.VitalsHideType))
                 {
-                    // REBUILT ONCE THE LAYOUT CALL IS IN. The flick by default -- see the class
-                    // comment -- or the radar blink for an ini that asks for it instead.
-                    _needRefresh = false;
+                    Landed(cfg);
 
-                    if (cfg.VitalsMapFlick) _flickStep = 0;
-                    else if (cfg.VitalsRefreshRadar) _refreshStep = 0;
+                    if (_needRefresh)
+                    {
+                        // REBUILT ONCE THE LAYOUT CALL IS IN. The flick by default -- see the
+                        // class comment -- or the radar blink for an ini that asks for it.
+                        _needRefresh = false;
+
+                        if (cfg.VitalsMapFlick) _flickStep = 0;
+                        else if (cfg.VitalsRefreshRadar) _refreshStep = 0;
+                    }
                 }
             }
 
             Flick();
             Refresh();
+        }
+
+        /// <summary>
+        /// WHETHER TO PUSH THE LAYOUT INTO THE MOVIE THIS FRAME.
+        ///
+        /// Not while the game is rebuilding its own HUD -- behind a fade or a pause menu there
+        /// is no strip for anyone to see, and a relayout pushed into a movie that is already
+        /// being rebuilt is the whole of what went wrong here.
+        ///
+        /// Every frame until it has landed once, because the movie is not always to hand at a
+        /// load and Setup says so by coming back false. After that, only when something has
+        /// undone it -- or on the heartbeat, for an ini that has asked for one.
+        /// </summary>
+        private bool Due(Settings cfg, bool upheaval)
+        {
+            if (upheaval) return false;
+            if (!_asked || _askAgain) return true;
+
+            return cfg.VitalsHideRepeatMs > 0 && Game.GameTime >= _repeatAt;
+        }
+
+        /// <summary>The layout call went in. Counted, because the count is the evidence.</summary>
+        private void Landed(Settings cfg)
+        {
+            if (_asked && _askAgain)
+            {
+                _reasks++;
+
+                // Loud for the first few and then thinned: if this climbs steadily with nobody
+                // touching anything, the list in Upheaval is catching something that is not an
+                // edge, and the fix is there rather than in a heartbeat.
+                if (_reasks <= 5 || _reasks % 50 == 0)
+                {
+                    Log.Debug("Asked the minimap for layout " + cfg.VitalsHideType + " again (" +
+                              _reasks + " since the load). The game had a chance to put its own " +
+                              "strip back.");
+                }
+            }
+
+            _asked = true;
+            _askAgain = false;
+            _repeatAt = Game.GameTime + Math.Max(1, cfg.VitalsHideRepeatMs);
+        }
+
+        /// <summary>
+        /// WHEN THE GAME HAS HAD A CHANCE TO PUT THE STRIP BACK -- the only time the layout is
+        /// worth asking for twice.
+        ///
+        /// Four states and a body, and each of them is the game rebuilding its HUD. The pause
+        /// menu, which is the very thing that used to be needed to get the minimap back at all.
+        /// A screen fade, which missions, cutscenes, respawns, interiors and fast travel all go
+        /// through. A character switch. A cutscene. And the player's ped handle, for a respawn
+        /// that hands back a different body.
+        ///
+        /// They are read as EDGES: the rebuild happens as each one ENDS, so the ask is queued
+        /// for when it has finished rather than spent while it is going on.
+        ///
+        /// Returns true while any of them is running, and the caller stands down for as long as
+        /// it is: there is nothing to hide behind a fade, and nothing to gain from pushing a
+        /// relayout at a movie the game is already rebuilding.
+        /// </summary>
+        private bool Upheaval()
+        {
+            bool paused = false, faded = false, switching = false, cutscene = false;
+            var ped = _wasPed;
+
+            try
+            {
+                paused = Function.Call<bool>(Hash.IS_PAUSE_MENU_ACTIVE);
+
+                faded = Function.Call<bool>(Hash.IS_SCREEN_FADED_OUT) ||
+                        Function.Call<bool>(Hash.IS_SCREEN_FADING_OUT) ||
+                        Function.Call<bool>(Hash.IS_SCREEN_FADING_IN);
+
+                switching = Function.Call<bool>(Hash.IS_PLAYER_SWITCH_IN_PROGRESS);
+                cutscene = Function.Call<bool>(Hash.IS_CUTSCENE_ACTIVE);
+
+                var me = Game.Player == null ? null : Game.Player.Character;
+                ped = me == null ? 0 : me.Handle;
+            }
+            catch (Exception ex)
+            {
+                // Every one of these is in the vendored 3.6.0 enum, so this is not expected --
+                // but a state we cannot read must not be read as an edge, so nothing moves.
+                Log.Once("vitals-upheaval", "Could not read the game's HUD state; the minimap layout " +
+                                            "will be asked for on HideRepeatMs alone: " + ex.Message);
+                return false;
+            }
+
+            if ((_wasPaused && !paused) || (_wasFaded && !faded) ||
+                (_wasSwitching && !switching) || (_wasCutscene && !cutscene) ||
+                (_wasPed != -1 && ped != _wasPed))
+            {
+                _askAgain = true;
+            }
+
+            _wasPaused = paused;
+            _wasFaded = faded;
+            _wasSwitching = switching;
+            _wasCutscene = cutscene;
+            _wasPed = ped;
+
+            return paused || faded || switching || cutscene;
         }
 
         /// <summary>The radar off for a frame and on again, so the minimap redraws in its new layout.</summary>
@@ -191,6 +335,11 @@ namespace BareMinimum.Vitals
 
             _hidden = false;
             _flickStep = -1;
+
+            // A reload starts over: the movie handle goes with the script and the next run has
+            // to get its layout in before it can stop asking for it.
+            _asked = false;
+            _askAgain = false;
         }
 
         /// <summary>
