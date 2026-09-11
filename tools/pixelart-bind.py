@@ -210,6 +210,38 @@ BIND = [
     ("sub", 1, "Crab Roll"),                  # fried seafood in a roll
     ("sub", 5, "Torta"),                      # ham and cheese on the pale seeded roll
     ("sub", 6, "Pastrami Combo"),             # pastrami piled on a round roll -- a sandwich, from the sub batch
+    # grocery_bag -- four bags
+    ("grocery", 0, "Bag of Groceries"),       # the plastic carrier, full
+    ("grocery", 2, "Bag of Produce"),         # paper bag with handles
+    ("grocery", 1, "group:bag"),              # plain paper bag; the Organic Veg Box stays white -- it is a box
+    # bakery_produce -- eight
+    ("bakery", 0, "item:pt_garlic_bread"),    # the baguette -- two items are called Garlic Bread, so by id
+    ("bakery", 0, "group:baguette"),
+    ("bakery", 1, "Morning Pastry"),          # a croissant, plain
+    ("bakery", 3, "Sourdough Loaf"),          # sliced loaf
+    ("bakery", 4, "Sprinkle Ring"),           # glazed, sprinkles
+    ("bakery", 5, "Golden Bun"),              # the cinnamon roll
+    ("bakery", 6, "Bagel"),                   # poppy seed
+    ("bakery", 6, "group:bagel"),
+    # fast_food_meal -- twenty trays; only where the meal IS the item
+    ("fastfood", 0,  "Chow Mein Box"),        # the takeaway carton, with the drink and the roll
+    ("fastfood", 2,  "Fresh Wrap"),           # wrap, water, salad
+    ("fastfood", 6,  "Aguila Burrito"),       # burrito, guac, cola
+    ("fastfood", 11, "Lucky Plucker Box"),    # red basket of nuggets on the check paper
+    ("fastfood", 14, "Wing Box"),             # fried chicken pieces, slaw, drink
+    # junk_food, the second half (16-32)
+    ("junk", 16, "Geronimo Wings"),           # a fried drumstick -- the wing item's nearest thing
+    ("junk", 17, "Meteorite Bar"),            # red wrapper
+    ("junk", 11, "Ego Chaser Bar"),           # the blue wrapper, which had been the group's fallback
+    ("junk", 18, "Liberty Style Slice"),      # a slice
+    ("junk", 19, "Donut"),                    # pink glazed
+    ("junk", 19, "group:donut"),
+    ("junk", 25, "Ice Cream"),                # soft serve cone
+    ("junk", 25, "group:cone"),
+    ("junk", 28, "Big Cookie"),               # three cookies
+    # street_drugs -- ten; the two the pocket still borrowed from the other mod
+    ("street", 4, "drug:coke"),               # the pale powder bag
+    ("street", 8, "drug:crack"),              # the bag of white rocks
 ]
 
 
