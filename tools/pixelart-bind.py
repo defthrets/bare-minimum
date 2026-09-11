@@ -170,6 +170,21 @@ BIND = [
     ("drugs", 2, "drug:xanax"),               # the white bar
     ("pills", 4, "drug:ecstasy"),             # the pink smiley
     ("pills", 7, "drug:oxycodone"),           # the red oblong pill -- its first picture ever
+    # hotdog -- sixteen dogs, no corn dog among them
+    ("hotdog", 8, "Hot Dog"),                 # mustard zigzag, the plain one
+    ("hotdog", 3, "Chilli Cheese Dog"),       # chilli and cheese
+    ("hotdog", 1, "Chihuahua Dog"),           # loaded: peppers, onions, everything
+    ("hotdog", 7, "Surf Dog"),                # relish and pickles
+    ("hotdog", 4, "group:hotdog"),
+    # food -- a mixed batch; what fits a gap is taken, the rest is spare
+    ("food", 1,  "Club Sandwich"),            # triangles and toothpicks
+    ("food", 3,  "New York Slice"),           # a slice on a plate
+    ("food", 5,  "Fresh Fruit"),              # the fruit bowl
+    ("food", 6,  "Slice of Apple Pie"),       # lattice slice
+    ("food", 7,  "Slice of Pie"),             # the other slice
+    ("food", 12, "Loaf of Bread"),            # sliced loaf
+    ("food", 12, "group:loaf"),
+    ("food", 13, "Rum Cake"),                 # the dark whole cake
 ]
 
 
