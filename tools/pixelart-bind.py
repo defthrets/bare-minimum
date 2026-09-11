@@ -71,6 +71,11 @@ BIND = [
     ("junk", 13, "Bag of Crisps"),            # BBQ crisps, the red bag
     ("junk", 14, "Bag of Toffees"),           # bag of gummy sweets
     ("junk", 15, "Boiled Sweets"),            # lollipops: boiled sugar on a stick
+    # pack_of_smokes -- sixteen packs, no cigar and no pipe among them
+    ("smokes", 8,  "Redwood"),                # red chevron pack: Redwood's own livery
+    ("smokes", 9,  "group:pack"),             # an open pack, cigarettes showing
+    ("smokes", 0,  "Debonaire"),              # gold pack with the crest
+    ("smokes", 0,  "group:cigbox"),
 ]
 
 
