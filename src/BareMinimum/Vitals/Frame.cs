@@ -199,8 +199,16 @@ namespace BareMinimum.Vitals
 
             // THE PLATE: the dash lights at the left and the speed at the right, in a car -- or,
             // with no band to hold them, the words, where they used to be.
-            if (cfg.MinimapFrame) Plate(cfg, outerL, outerR, plateTop, foot, edge + leftGapW, strength);
-            else if (cfg.MinimapLabel) Words(cfg, outerL, outerR, plateTop, foot - plateTop, edge + gapW, strength);
+            //
+            // UNLESS HE IS UNDER THE WATER, in which case the plate is the air meter and
+            // nothing else. Both the things the plate carries want a vehicle, so on a swim
+            // there is nothing there to displace; what it would displace on a dive in a
+            // submarine it displaces on purpose. See Breath.
+            if (!_breath.Draw(cfg, outerL, outerR, plateTop, foot, edge + leftGapW, strength))
+            {
+                if (cfg.MinimapFrame) Plate(cfg, outerL, outerR, plateTop, foot, edge + leftGapW, strength);
+                else if (cfg.MinimapLabel) Words(cfg, outerL, outerR, plateTop, foot - plateTop, edge + gapW, strength);
+            }
 
             if (!cfg.MinimapLabel) return;
 
@@ -234,6 +242,9 @@ namespace BareMinimum.Vitals
         private const float RevGap = 0.0012f;
 
         private static readonly string[] Cardinals = { "N", "E", "S", "W" };
+
+        /// <summary>The air meter. It takes the plate while he is under the water. See Breath.</summary>
+        private readonly Breath _breath = new Breath();
 
         /// <summary>The dashboard lights, held open; a CustomSprite keeps a texture handle.</summary>
         private readonly Icon _lamp = new Icon("dash_lamp.png");

@@ -1303,6 +1303,27 @@ namespace BareMinimum.Core
         /// <summary>The dashboard lights at the left of the plate under the map, in a vehicle: oil (for the engine), headlamp, handbrake.</summary>
         public bool MinimapDash = true;
 
+        /// <summary>
+        /// THE AIR METER, across the plate, only while he is under the water.
+        ///
+        /// The game's own breath bar is drawn in the same clip of the minimap as its health and
+        /// armour bars, so the layout that takes those takes it too -- see Vitals.Stock. It
+        /// cannot be let back on its own, and the space it used has the plate in it now. So it
+        /// is drawn rather than restored, in the place the original had. See Vitals.Breath.
+        /// </summary>
+        public bool MinimapBreath = true;
+
+        /// <summary>
+        /// The air meter at a full chest. It runs down through a blue to a deep navy as the air
+        /// goes, on this row's one rule -- hue says which meter, brightness says how bad.
+        ///
+        /// PALE, NOT THIRST'S CYAN. They are two different things about water and they are not
+        /// in the same place, but a bar that is the colour of the thirst bar is a bar somebody
+        /// will read as the thirst bar for one second, and one second is the whole of what this
+        /// meter is measuring in.
+        /// </summary>
+        public System.Drawing.Color MinimapBreathColour = System.Drawing.Color.FromArgb(255, 168, 226, 255);
+
         /// <summary>KPH or MPH.</summary>
         public string MinimapSpeedUnits = "KPH";
 
@@ -1974,6 +1995,10 @@ namespace BareMinimum.Core
                 cfg.MinimapCompass = ini.GetBool("Minimap", "Compass", cfg.MinimapCompass);
                 cfg.MinimapSpeedo = ini.GetBool("Minimap", "Speedo", cfg.MinimapSpeedo);
                 cfg.MinimapDash = ini.GetBool("Minimap", "Dash", cfg.MinimapDash);
+                cfg.MinimapBreath = ini.GetBool("Minimap", "Breath", cfg.MinimapBreath);
+                cfg.MinimapBreathColour = ParseColour("Minimap", "BreathColour",
+                                                      ini.GetString("Minimap", "BreathColour", null),
+                                                      cfg.MinimapBreathColour);
                 cfg.MinimapSpeedUnits = ini.GetString("Minimap", "SpeedUnits", cfg.MinimapSpeedUnits);
 
                 cfg.HudAnimate = ini.GetBool("HUD", "Animate", cfg.HudAnimate);
