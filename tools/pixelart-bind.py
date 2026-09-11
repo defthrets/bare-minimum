@@ -254,7 +254,9 @@ def main():
 
     plan = []
     for batch, n, target in BIND:
-        if target.startswith("group:") or target.startswith("drug:"):
+        # Already addressed -- a group's fallback, a drug, or an item BY ID for the cases a
+        # name cannot settle (two items are called Garlic Bread). Passed through untouched.
+        if target.startswith(("group:", "drug:", "item:")):
             plan.append((batch, n, target))
             continue
         ids = by_name.get(target.lower())
