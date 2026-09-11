@@ -96,6 +96,29 @@ namespace BareMinimum.Vitals
         /// <summary>How many times the layout has had to be asked for again. The number that says whether the list in Upheaval is long enough.</summary>
         private int _reasks;
 
+        /// <summary>
+        /// WHILE THE MINIMAP IS BEING REBUILT, ASK EVERY FRAME. Until this time, Due says yes
+        /// whatever else is true.
+        ///
+        /// A REBUILD WIPES THE LAYOUT -- which is the whole reason this exists, and it is not a
+        /// guess: the log has the first ask at 16:34:00.347 and the flick that undid it at
+        /// 16:34:02.224, with the game's own strip back on screen afterwards. The every-frame
+        /// call used to re-apply the layout the frame after the rebuild finished, so the gap was
+        /// never visible; asking once leaves it wide open.
+        ///
+        /// Every step of the flick pushes this out again, so the window covers the flick itself
+        /// and SettleMs past its last shut -- the rebuild is asynchronous and a single ask can
+        /// land before it has finished and be wiped by it.
+        ///
+        /// Re-applying the layout AFTER a rebuild does not blank the map again: the old build
+        /// asked sixty times a second through and past the flick and the map came back and
+        /// stayed. It is the first call on a fresh movie that blanks it, not every call.
+        /// </summary>
+        private int _settleUntil;
+
+        /// <summary>How long the layout keeps being asked for after something rebuilt the minimap.</summary>
+        private const int SettleMs = 2000;
+
         /// <summary>How long the big map is held open before the first shut, and the two insurance shuts after it.</summary>
         private const int FlickHoldMs = 150;
         private static readonly int[] FlickAgainMs = { 500, 1200 };
@@ -191,6 +214,9 @@ namespace BareMinimum.Vitals
             if (upheaval) return false;
             if (!_asked || _askAgain) return true;
 
+            // The minimap is being rebuilt, and a rebuild wipes the layout. See _settleUntil.
+            if (Game.GameTime < _settleUntil) return true;
+
             return cfg.VitalsHideRepeatMs > 0 && Game.GameTime >= _repeatAt;
         }
 
@@ -204,11 +230,20 @@ namespace BareMinimum.Vitals
                 // Loud for the first few and then thinned: if this climbs steadily with nobody
                 // touching anything, the list in Upheaval is catching something that is not an
                 // edge, and the fix is there rather than in a heartbeat.
-                if (_reasks <= 5 || _reasks % 50 == 0)
+                // AT INFO, WHICH IS WHERE THE INI RUNS. This went out at Debug first, so the
+                // one line that would have said whether the event list was working was never
+                // written and its silence read as nothing happening. Loud for the first three
+                // and thinned after: if it climbs steadily with nobody touching anything, the
+                // list in Upheaval is firing on something that is not an edge.
+                if (_reasks <= 3)
                 {
-                    Log.Debug("Asked the minimap for layout " + cfg.VitalsHideType + " again (" +
-                              _reasks + " since the load). The game had a chance to put its own " +
-                              "strip back.");
+                    Log.Info("Asked the minimap for layout " + cfg.VitalsHideType + " again (" +
+                             _reasks + " since the load). Something had a chance to put the " +
+                             "game's own strip back.");
+                }
+                else if (_reasks % 50 == 0)
+                {
+                    Log.Info("The minimap layout has now been re-asked " + _reasks + " times.");
                 }
             }
 
@@ -294,6 +329,7 @@ namespace BareMinimum.Vitals
 
                 Function.Call(Hash.DISPLAY_RADAR, true);
                 _refreshStep = -1;
+                _settleUntil = Game.GameTime + SettleMs;
                 Log.Info("Radar blinked off and on so the minimap redraws in its new layout.");
             }
             catch (Exception ex)
@@ -361,6 +397,7 @@ namespace BareMinimum.Vitals
             if (_flickStep == 0)
             {
                 BigMap(true);
+                _settleUntil = now + SettleMs;
                 _flickAt = now + FlickHoldMs;
                 _flickStep = 1;
                 return;
@@ -369,6 +406,11 @@ namespace BareMinimum.Vitals
             if (now < _flickAt) return;
 
             BigMap(false);
+
+            // EACH SHUT PUSHES THE WINDOW OUT. The flick runs the better part of two seconds
+            // and every step of it rebuilds the map, so the layout has to keep being asked for
+            // until the last of them has settled -- not from the first.
+            _settleUntil = now + SettleMs;
 
             // Steps 1 and 2 are followed by another shut; step 3 is the last.
             if (_flickStep <= FlickAgainMs.Length)
