@@ -2394,38 +2394,17 @@ namespace BareMinimum.UI
         }
 
         /// <summary>
-        /// Whether there is anything on screen worth drawing over.
+        /// ONE QUESTION, ONE ANSWER, ONCE A FRAME.
         ///
-        /// The radar being hidden is the useful test: the game turns it off for cutscenes, for
-        /// the pause menu and during a fade, which is exactly the set of moments a HUD icon
-        /// should not be floating in.
+        /// This used to ask the game itself, and so did three other files, each with a slightly
+        /// different list -- so on a frame where the lists disagreed, part of the row drew and
+        /// part did not. And none of them was latched, so a single frame of
+        /// HIDE_HUD_AND_RADAR_THIS_FRAME from anything on this machine took the whole row off
+        /// the screen for that frame. See UI.Sight.
         /// </summary>
         private static bool Visible()
         {
-            try
-            {
-                if (Game.IsPaused) return false;
-                if (!Function.Call<bool>(Hash.IS_SCREEN_FADED_IN)) return false;
-                if (Function.Call<bool>(Hash.IS_PLAYER_SWITCH_IN_PROGRESS)) return false;
-
-                // THE WASTED AND BUSTED SCREENS. The bars stayed up over "WASTED" because the
-                // radar is still shown through the first moments of it; the dead and the
-                // arrested have no needs on screen. IS_HUD_HIDDEN catches the rest of the game's
-                // own reasons to take its HUD away.
-                if (Function.Call<bool>(Hash.IS_PLAYER_DEAD, Game.Player.Handle)) return false;
-                if (Function.Call<bool>(Hash.IS_PLAYER_BEING_ARRESTED, Game.Player.Handle, true)) return false;
-                if (Function.Call<bool>(Hash.IS_HUD_HIDDEN)) return false;
-
-                // IS_RADAR_HIDDEN only. There is no IS_RADAR_ENABLED in SHVDN 3.9's Hash
-                // enum despite the native existing in some lists -- checked by reflecting
-                // the dll rather than assumed, which is the only way to find that out
-                // before the compiler does.
-                return !Function.Call<bool>(Hash.IS_RADAR_HIDDEN);
-            }
-            catch
-            {
-                return true;
-            }
+            return Sight.Clear;
         }
     }
 }

@@ -328,24 +328,17 @@ namespace BareMinimum.UI
         }
 
         /// <summary>
-        /// Whether this is a frame anything of ours belongs on. The same rule the gauge uses:
-        /// not over a pause menu, a fade or a character switch, and not while the player has
-        /// asked for the radar to be gone.
+        /// ONE QUESTION, ONE ANSWER, ONCE A FRAME.
+        ///
+        /// This used to ask the game itself, and so did three other files, each with a slightly
+        /// different list -- so on a frame where the lists disagreed, part of the row drew and
+        /// part did not. And none of them was latched, so a single frame of
+        /// HIDE_HUD_AND_RADAR_THIS_FRAME from anything on this machine took the whole row off
+        /// the screen for that frame. See UI.Sight.
         /// </summary>
         private static bool Visible()
         {
-            try
-            {
-                if (Game.IsPaused) return false;
-                if (!Function.Call<bool>(Hash.IS_SCREEN_FADED_IN)) return false;
-                if (Function.Call<bool>(Hash.IS_PLAYER_SWITCH_IN_PROGRESS)) return false;
-
-                return !Function.Call<bool>(Hash.IS_RADAR_HIDDEN);
-            }
-            catch
-            {
-                return true;
-            }
+            return Sight.Clear;
         }
 
         private static float Clamp01(float v)

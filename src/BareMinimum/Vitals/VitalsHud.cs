@@ -237,35 +237,17 @@ namespace BareMinimum.Vitals
         }
 
         /// <summary>
-        /// Whether there is a HUD on screen worth drawing over.
+        /// ONE QUESTION, ONE ANSWER, ONCE A FRAME.
         ///
-        /// The radar being hidden is the useful test: the game turns it off for cutscenes, for
-        /// the pause menu, on the wasted screen and during a fade, which is exactly the set of
-        /// moments a HUD bar should not be floating in.
+        /// This used to ask the game itself, and so did three other files, each with a slightly
+        /// different list -- so on a frame where the lists disagreed, part of the row drew and
+        /// part did not. And none of them was latched, so a single frame of
+        /// HIDE_HUD_AND_RADAR_THIS_FRAME from anything on this machine took the whole row off
+        /// the screen for that frame. See UI.Sight.
         /// </summary>
         private static bool Visible()
         {
-            try
-            {
-                if (Game.IsPaused) return false;
-                if (Function.Call<bool>(Hash.IS_PAUSE_MENU_ACTIVE)) return false;
-                if (!Function.Call<bool>(Hash.IS_SCREEN_FADED_IN)) return false;
-
-                // THE WASTED AND BUSTED SCREENS. The radar stays up through the first moments of
-                // both, so the radar alone does not say; a dead man has no vitals to show.
-                if (Function.Call<bool>(Hash.IS_PLAYER_DEAD, Game.Player.Handle)) return false;
-                if (Function.Call<bool>(Hash.IS_PLAYER_BEING_ARRESTED, Game.Player.Handle, true)) return false;
-                if (Function.Call<bool>(Hash.IS_PLAYER_SWITCH_IN_PROGRESS)) return false;
-                if (Function.Call<bool>(Hash.IS_HUD_HIDDEN)) return false;
-                if (Function.Call<bool>(Hash.IS_RADAR_HIDDEN)) return false;
-                if (!Function.Call<bool>(Hash.IS_RADAR_PREFERENCE_SWITCHED_ON)) return false;
-
-                return true;
-            }
-            catch
-            {
-                return true;
-            }
+            return UI.Sight.Clear;
         }
     }
 }
