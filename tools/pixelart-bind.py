@@ -242,6 +242,24 @@ BIND = [
     # street_drugs -- ten; the two the pocket still borrowed from the other mod
     ("street", 4, "drug:coke"),               # the pale powder bag
     ("street", 8, "drug:crack"),              # the bag of white rocks
+    # FILL-INS FROM THE SPARES -- an audit of every unused candidate against what was still
+    # white. Only where the picture honestly reads as the item; a Pringles tube is not a
+    # Dented Can and a chocolate slice is not a Cheesecake, so those stay white.
+    ("shake", 8,       "Latte"),              # tall glass, cream, caramel: a cafe latte
+    ("shake", 11,      "Horchata"),           # the creamy beige drink in the jar
+    ("beverages", 16,  "Iced Tea"),           # tea with lemon; the cup is hot but the tea is right
+    ("shake", 12,      "Cold-Pressed Juice"), # the orange juice in a glass
+    ("shake", 13,      "Ice Cream Sundae"),   # the chocolate overload with the scoop on top
+    ("fastfood", 12,   "Whole Pizza"),        # slices laid out whole on the board
+    ("fastfood", 17,   "Whole Liberty Pie"),  # the same, the other board
+    ("fastfood", 18,   "Giovanni's Pizza"),   # and the third
+    ("food", 8,        "Huevos Rancheros"),   # eggs on a plate with the trimmings
+    ("bakery", 2,      "Beef Patty"),         # a folded, crimped pastry -- which is what a patty is
+    ("plate2", 2,      "Seafood Linguine"),   # pasta on the decorative plate
+    ("bakery", 7,      "item:ad_bread"),      # the herbed focaccia, for the deli's Garlic Bread
+    ("beverages", 7,   "Bubble Tea"),         # its own picture is the group's; now it has it by name too
+    ("food", 14,       "Ready Meal"),         # the compartment tray
+    ("bakery", 6,      "Bagel and Schmear"),  # the same bagel as the plain one; better than a white shape
 ]
 
 
