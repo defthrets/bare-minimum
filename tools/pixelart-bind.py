@@ -59,6 +59,18 @@ BIND = [
     ("bucket", 0,  "group:bucket"),
     ("bucket", 7,  "French Fries"),           # paper cup of fries
     ("bucket", 9,  "Rings of Fire"),          # tin of onion rings with dip
+    # junk_food
+    ("junk", 0,  "Sharkies Burger"),          # burger in a paper wrap -- REBOUND, it is the item's own line
+    ("junk", 3,  "Pizza Slice"),              # a slice on a paper plate
+    ("junk", 4,  "Instant Noodles"),          # spicy noodle cup
+    ("junk", 6,  "eCola"),                    # red can -- REBOUND off a bottle; it is a can in the game
+    ("junk", 9,  "group:chips"),              # bag of tortilla chips, the fallback for the crisps aisle
+    ("junk", 10, "Sprunk"),                   # the green bottle with the Z -- REBOUND, brand colour over vessel
+    ("junk", 11, "group:bar"),                # a chocolate bar in its wrapper, for all four candy bars
+    ("junk", 12, "Box of a Dozen"),           # open box of donuts
+    ("junk", 13, "Bag of Crisps"),            # BBQ crisps, the red bag
+    ("junk", 14, "Bag of Toffees"),           # bag of gummy sweets
+    ("junk", 15, "Boiled Sweets"),            # lollipops: boiled sugar on a stick
 ]
 
 
