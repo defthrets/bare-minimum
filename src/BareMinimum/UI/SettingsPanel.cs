@@ -7,7 +7,7 @@ using BareMinimum.Core;
 namespace BareMinimum.UI
 {
     /// <summary>
-    /// The settings menu, on F7.
+    /// The settings menu, on F11.
     ///
     /// CHANGES APPLY LIVE AND SAVE THEMSELVES. You nudge the HUD size, watch it change, and
     /// it stays that way -- no alt-tabbing to an ini, and nothing to remember to press.
@@ -143,7 +143,7 @@ namespace BareMinimum.UI
                     // THE KEY'S EDGE IS KEPT TRUE WHILE SUSPENDED. It was frozen at whatever it
                     // was when the suspension started, so a press made while the mod was
                     // deliberately ignoring the key fired the moment the suspension lifted --
-                    // press F7 at a shop counter, close the till, and the settings menu opens.
+                    // press F11 at a shop counter, close the till, and the settings menu opens.
                     Toggled();
                     return;
                 }

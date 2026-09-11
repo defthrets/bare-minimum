@@ -376,7 +376,7 @@ namespace BareMinimum.Venues
         /// FOR THE PLAYER WHO WANTS THE MAP BACK. Several hundred markers accumulated over a
         /// playthrough is the intended end state and it is also a lot of map, and somebody who
         /// decides they have had enough of it should not have to find and delete a file. It is
-        /// the "Forget the vending machines" row on the F7 page, which shows the count beside
+        /// the "Forget the vending machines" row on the F11 page, which shows the count beside
         /// it so the number is visible before anybody throws it away.
         /// </summary>
         public void Forget()

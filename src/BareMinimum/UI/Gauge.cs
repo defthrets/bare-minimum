@@ -230,7 +230,7 @@ namespace BareMinimum.UI
         /// whatever the screen and whatever that slider says.
         ///
         /// Falls back to the safe-zone size if the native gives something implausible, and the
-        /// whole thing is overridable from the ini and the F7 menu.
+        /// whole thing is overridable from the ini and the F11 menu.
         /// </summary>
         internal static float MinimapLeft()
         {

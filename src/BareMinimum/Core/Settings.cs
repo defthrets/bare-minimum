@@ -688,7 +688,7 @@ namespace BareMinimum.Core
         /// cannot hug the map on both. This one is clear of the map on either, which costs the
         /// tucked-in look on 16:9 and buys a HUD that is never underneath anything.
         ///
-        /// Turn this back on for the old behaviour; it is the first row of the F7 placement
+        /// Turn this back on for the old behaviour; it is the first row of the F11 placement
         /// page and takes effect the moment it is pressed.
         /// </summary>
         /// <summary>
@@ -843,7 +843,7 @@ namespace BareMinimum.Core
         /// that turns out to be what people expect when they install a hunger mod. The first
         /// report on the first release was somebody who thought the icons WERE the bug.
         ///
-        /// The icons are one press away on the F7 placement page and nothing about them has
+        /// The icons are one press away on the F11 placement page and nothing about them has
         /// been taken out.
         /// </summary>
         public HudStyle Style = HudStyle.Bars;
@@ -1391,15 +1391,6 @@ namespace BareMinimum.Core
         /// </summary>
         public Keys InteractKey = Keys.E;
 
-        /// <summary>
-        /// Opens the settings menu. F7.
-        ///
-        /// Verified free on this machine's Enhanced install before it was chosen: the only hit
-        /// for "F7" anywhere under scripts\ was a KEY-CODE REFERENCE TABLE inside
-        /// SafeCracker.ini (its actual binding is StartKey=85, U), and no dll carries "F7" as
-        /// a string in either ASCII or UTF-16. In use nearby: F2 Hoodrich, F3 Overspray,
-        /// F8 Dealien Roleplay Menu, F10 and F11 PullMeOverRemade.
-        /// </summary>
         /// <summary>
         /// Buying puts it in your pocket instead of eating it on the spot.
         ///

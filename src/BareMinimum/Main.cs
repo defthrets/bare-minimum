@@ -267,9 +267,9 @@ namespace BareMinimum
                 // turning the mod off a one-way trip that could only be undone by editing the
                 // ini and reloading scripts.
                 //
-                // It stands down while the shop is up. F7 is a RAW KEY, so the menu's
+                // It stands down while the shop is up. F11 is a RAW KEY, so the menu's
                 // control-suppression cannot block it the way it blocks the game's own inputs
-                // -- without this, pressing F7 at a till draws both menus on top of each other
+                // -- without this, pressing F11 at a till draws both menus on top of each other
                 // and every arrow press drives both of them at once.
                 _settings.Update(_sleeping.Busy || _shop.IsOpen || _vendors.MenuOpen ||
                                  _bag.IsOpen || _fridge.IsOpen);

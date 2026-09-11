@@ -307,7 +307,7 @@ namespace BareMinimum.Needs
         /// It used to append the hours and a line about a car being a poor night. That is
         /// true, and it is also a paragraph pinned to the corner of the screen for as long as
         /// you stand near a bed -- read once on the first night and in the way every night
-        /// after. The hours are in the ini and the F7 menu for anybody who wants the number.
+        /// after. The hours are in the ini and the F11 menu for anybody who wants the number.
         ///
         /// AND IT LEAVES AFTER TWO SECONDS. The key keeps working the whole time you are in
         /// range; only the words go. A prompt that never leaves stops being a prompt and
