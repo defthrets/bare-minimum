@@ -23,7 +23,71 @@ sys.path.insert(0, os.path.join(HERE, "tools"))
 import pixelart  # noqa: E402
 
 # (batch, N, target) -- target is an item's menu name, or "group:<icon>" for a fallback.
+# Later lines win over earlier ones for the same target, so a rebind is a new line at the
+# bottom with the reason beside it, not an edit of the old one; the history stays readable.
 BIND = [
+    # a_greasy_burger -- the first batch; these four were bound from the shell before this
+    # file existed, and are written down here so the record is whole.
+    ("burger", 7,  "Bleeder Burger"),         # the one dripping
+    ("burger", 12, "Cart Burger"),            # plain single cheese, griddle food
+    ("burger", 5,  "Old Yeller"),             # double cheese, yellow through and through
+    ("burger", 11, "Cluckin' Burger"),        # tall bun, grilled patty, lettuce
+    ("burger", 10, "Triple Burger"),          # the tallest
+    ("burger", 2,  "Bacon Triple Cheese Melt"),  # the bacon
+    ("burger", 1,  "Bone-In Burger"),         # sesame bun, dark bits nobody should think about
+    ("burger", 3,  "Bison Burger"),           # dark bun, lean
+    ("burger", 8,  "Money Shot"),             # double, fried egg, dripping: everything
+    ("burger", 13, "Hang Ten Burger"),        # the charred-looking bun
+    ("burger", 9,  "Sharkies Burger"),        # plain double (rebound below, to junk 0)
+    ("burger", 6,  "group:burger"),           # the classic
+    # taco
+    ("taco", 2,  "Taco Farmer Taco"),         # lettuce and tomato -- grown
+    ("taco", 5,  "Taco Bomb Taco"),           # red salsa, the chain's
+    ("taco", 14, "Two Chicken Tacos"),        # chicken, lettuce
+    ("taco", 8,  "Heavenly Taco"),            # the guacamole
+    ("taco", 13, "Tacos al Pastor"),          # the pineapple
+    ("taco", 3,  "Tacos Libres"),             # onion and coriander
+    ("taco", 0,  "group:taco"),               # the plain one
+    # plate_16_carne_asada_meat
+    ("plate", 0,  "Beach Breakfast"),         # smiley pancake (rebound below, to plate2 4)
+    ("plate", 1,  "Carne Asada Plate"),       # on the wooden board
+    ("plate", 2,  "Mixed Grill"),             # the biggest cut
+    ("plate", 3,  "All You Can Eat"),
+    ("plate", 4,  "Mama's Meatloaf"),         # the gravy
+    ("plate", 5,  "Mexican-American Combo"),
+    ("plate", 7,  "Rack of Ribs"),            # orange rim
+    ("plate", 8,  "Tasting Plate"),           # yellow rim, arranged
+    ("plate", 9,  "Secondo"),                 # green rim
+    ("plate", 10, "Plato Chido"),             # the patterned plate
+    ("plate", 11, "Diner Plate"),             # mac and cheese on the side
+    ("plate", 12, "Blue Plate"),              # blue rim, gravy over everything
+    ("plate", 13, "Chef's Garden Plate"),
+    ("plate", 14, "Grilled Fish Plate"),      # a steak (rebound below, to plate2 11)
+    ("plate", 15, "Catch of the Day"),        # wooden board, seaside
+    # beverages
+    ("beverages", 0,  "Mint Tea"),            # teacup with lemon
+    ("beverages", 1,  "Cup of Coffee"),       # black coffee
+    ("beverages", 1,  "group:cup"),
+    ("beverages", 3,  "Mount Whiskey"),       # decanter (rebound below, to alcohol 9)
+    ("beverages", 3,  "group:flask"),
+    ("beverages", 4,  "group:can"),           # the lemon can, no brand of ours
+    ("beverages", 6,  "eCola"),               # cola bottle (rebound below, to junk 6, a can)
+    ("beverages", 7,  "group:bubbletea"),     # the pearls
+    ("beverages", 8,  "Bay Bar Pint"),        # the pint
+    ("beverages", 8,  "group:beer"),
+    ("beverages", 9,  "Pot of Tea"),          # the teapot
+    ("beverages", 9,  "group:teapot"),
+    ("beverages", 10, "Raine Water"),         # the water bottle
+    ("beverages", 10, "group:water"),
+    ("beverages", 11, "Hot Chocolate"),       # cream on top
+    ("beverages", 11, "group:mug"),
+    ("beverages", 12, "Carton of Milk"),
+    ("beverages", 12, "group:carton"),
+    ("beverages", 13, "Fresh Orange Juice"),
+    ("beverages", 13, "group:juice"),
+    ("beverages", 14, "Bottle of Wine"),      # a glass (rebound below, to alcohol 3)
+    ("beverages", 14, "group:wine"),
+    ("beverages", 17, "Bean Machine Coffee"), # the other black coffee
     # bowl_of_food
     ("bowl", 12, "Ring of Fire Chilli"),      # red chilli, sour cream on top -- the cooling for the fire
     ("bowl", 8,  "Homemade Soup"),            # tomato soup, cream swirl, crouton
@@ -76,6 +140,16 @@ BIND = [
     ("smokes", 9,  "group:pack"),             # an open pack, cigarettes showing
     ("smokes", 0,  "Debonaire"),              # gold pack with the crest
     ("smokes", 0,  "group:cigbox"),
+    # alcohol -- seventeen bottles
+    ("alcohol", 0,  "Pisswasser"),            # brown bottle, yellow label
+    ("alcohol", 1,  "Logger Lager"),          # brown bottle, the other label
+    ("alcohol", 16, "Tramway Beer"),          # the dark one
+    ("alcohol", 3,  "Bottle of Wine"),        # a BOTTLE -- REBOUND off a glass; it is the item's name
+    ("alcohol", 9,  "Mount Whiskey"),         # a labelled bottle -- REBOUND off a decanter; it is $15.99
+    ("alcohol", 5,  "Ginger Beer"),           # the cloudy white bottle: "the proper cloudy kind"
+    ("alcohol", 5,  "group:bottle"),
+    ("alcohol", 3,  "group:wine"),            # the fallbacks follow the rebinds above
+    ("alcohol", 9,  "group:flask"),
 ]
 
 
