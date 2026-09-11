@@ -71,10 +71,24 @@ def unpack(src, into):
         return os.path.join(into, pngs[0])
 
 
+def natural(path):
+    """PixelLab numbers a batch beverages.zip, beverages(1).zip, beverages(2).zip ... and the
+    shell hands them over as (1), (10), (11), (2) -- so every number on a sheet moved when a
+    later download joined the batch. Bare file first, then by the number in the brackets:
+    the order they were made in, the order Downloads shows, and one that only ever appends."""
+    import re
+    base = os.path.basename(path)
+    m = re.search(r"\((\d+)\)\.[^.]+$", base)
+    # The extension comes off in BOTH cases, or "beverages.zip" sorts after "beverages" and
+    # the bare file -- the first one made -- ends up last.
+    return (re.sub(r"(\(\d+\))?\.[^.]+$", "", base), int(m.group(1)) if m else 0)
+
+
 def sheet(group, sources):
     inbox = os.path.join(INBOX, group)
     if os.path.isdir(inbox):
         shutil.rmtree(inbox)
+    sources = sorted(sources, key=natural)
     picks = []
     for i, src in enumerate(sources):
         png = unpack(src, os.path.join(inbox, str(i)))
