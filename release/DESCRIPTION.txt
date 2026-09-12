@@ -170,39 +170,40 @@ The full changelog lives in <b>CHANGES.txt</b> inside every zip and on the GitHu
 
 
 --------------------------------------------------------------------------------
-  4. CHANGELOG  (changelog field -- the recent releases only; CHANGES.txt has all)
+  4. CHANGELOG  (changelog field -- short, no emoji; CHANGES.txt and README.md
+                 carry the detail)
 --------------------------------------------------------------------------------
 
 <b>0.4.1</b>
 
 <ul>
-<li>🩹 <b>The game's own health and armour strip could creep back under the map and stay.</b> The layout that hides it was re-asked only on a handful of moments, and the game undid it on one that was none of them. Six more moments are watched now — in and out of a car, the HUD hidden and given back, the wanted level, an interior, a phone call ending — and every re-ask is logged with its cause, so a repeat names the trigger.</li>
-<li>💓 <b>A quiet heartbeat</b> re-asks every five seconds while no waypoint is set. Free, because with no route on the map there is nothing for a relayout to disturb, and it stands down the moment one goes up.</li>
+<li>The game's own health and armour strip could creep back under the map. Six more moments are watched and every re-ask is logged with its cause.</li>
+<li>Re-asks every five seconds while no waypoint is set, so it cannot stay back for long and cannot flicker the GPS.</li>
 </ul>
 
 <b>0.4.0</b>
 
 <ul>
-<li>🎨 <b>Most of the menu has a picture of its own</b> — 157 of the 201 things you can buy, and all nine drugs. Pixel art, in colour, drawn per item: the Bleeder Burger drips, the Bacon Triple Cheese Melt has the bacon, the Money Shot has the egg, the Tacos al Pastor have the pineapple, the Blue Plate has the blue rim. In the shop, the pocket, the fridge and the toast when you eat.</li>
-<li>⬜ <b>The white shapes are still underneath.</b> Anything not drawn yet shows its group's shape, tinted as before. Drop an i_&lt;id&gt;.png in the icons folder and that item has a picture — no rebuild, no field to edit.</li>
-<li>🖥️ <b>Map left/right and Map up/down</b> under Vitals, for HUD mods that move the radar on ultrawide screens: they drag the frame, the bars and the fuel gauge to wherever your map actually is. <i>Asked for by Blackheart117.</i></li>
-<li>🎬 <b>Cutscenes hide the HUD by name</b>, the instant one starts, rather than as a side effect of the game hiding its own. <i>Also asked for.</i></li>
+<li>157 of the 201 items and all nine drugs have their own pixel-art picture, in the shop, the pocket, the fridge and the toast.</li>
+<li>Anything not drawn yet keeps the white shape. Drop an i_&lt;id&gt;.png in the icons folder and that item has a picture.</li>
+<li>Map left/right and Map up/down under Vitals, for HUD mods that move the radar on ultrawide screens.</li>
+<li>Cutscenes hide the HUD the instant they start.</li>
 </ul>
 
 <b>0.3.1</b>
 
 <ul>
-<li>🇮🇳 <b>Hindi in Latin letters.</b> 0.3.0 shipped it in Devanagari, every word correct, and the game has no font with those letters in it, so it drew as boxes. Romanised Hindi draws everywhere; the Devanagari is kept as hi-Deva for the day a font has it.</li>
+<li>Hindi in Latin letters. The game has no Devanagari font, so 0.3.0's drew as boxes.</li>
 </ul>
 
 <b>0.3.0</b>
 
 <ul>
-<li>🌍 <b>Ten languages</b>, first row of the settings menu: English UK and US, Português (BR), Español, Français, Deutsch, Русский, Polski, 中文, Hindi. Every prompt, screen, tab and row label. <b>Anything a translation has not covered shows in English</b> — a language file is a plain map from what the mod says to what it should say instead, so a half-finished one is a working mod in two languages. Copy lang/en-GB.json, fill in the right-hand side, save it under your own code.</li>
-<li>🫧 <b>The air meter is back.</b> The game's breath bar is drawn in the same part of the minimap as its health strip, so hiding one hid the other. It is drawn on the plate under the map now, only while you are under, and it beats faster the less you have. <i>Reported by jerome74.</i></li>
-<li>🖼️ <b>The HUD stopped blinking.</b> Four screens each asked the game whether its HUD was hidden and each hid the instant it said yes — a this-frame native that any other script can flick. One answer now, asked once a frame, held for six frames before anything goes.</li>
-<li>🗺️ <b>The minimap stopped flickering the GPS.</b> The call that hides the game's health strip is a re-layout of the minimap and was being made sixty times a second; the GPS route is rebuilt by that movie and strobed with it. Asked once now, and again only when something could have undone it.</li>
-<li>🌭 <b>The hot dogs were being drunk.</b> Four carried an animation whose name says eat and which is a bottle going to the mouth. Five bar drinks had the opposite problem.</li>
+<li>Ten languages, first row of the settings menu. Anything a translation does not cover shows in English. Copy lang/en-GB.json to make your own.</li>
+<li>The underwater air meter is back, on the plate under the map.</li>
+<li>The HUD no longer blinks when another script hides the game's HUD for a frame.</li>
+<li>The minimap no longer flickers the GPS route.</li>
+<li>Hot dogs use the eating animation, not the drinking one.</li>
 </ul>
 
 

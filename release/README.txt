@@ -53,12 +53,21 @@
 
 
 -------------------------------------------------------------------------------
+  WHAT CHANGED
+-------------------------------------------------------------------------------
+
+  CHANGES.txt, beside this file, has every version in full -- what changed, and
+  why. It is written the moment the zip is, so it is never behind the download.
+
+
+-------------------------------------------------------------------------------
   CONTROLS
 -------------------------------------------------------------------------------
 
-    E          buy, order, open a fridge, get into a bed
-    F11        your pocket -- what you have bought and not eaten yet
-    F7         settings, in game, with everything live as you change it
+    E          buy, order, open a fridge, get into a bed; hold it at a door to go in
+    F11        settings, in game, with everything live as you change it
+    F12        your pocket -- what you have bought and not eaten yet
+    SCROLL LOCK  fly the map and find every vending machine. Once is enough.
 
   In any panel:
 
@@ -95,7 +104,7 @@
   off, leaving the apple and the moon on their own -- each going through five
   drawings as it empties, the apple eaten down to a core, the eye closing -- so
   you read the state from the shape rather than the length. It tells you less
-  on purpose. F7 -> HUD -> HUD style switches between them as you press.
+  on purpose. F11 -> HUD -> HUD style switches between them as you press.
 
   The needs run on the GAME clock, not the real one. A game hour is about two
   real minutes, so a full day is roughly 48 minutes of play.
@@ -137,7 +146,7 @@
 
   THE MINIMAP HAS A FRAME in the same black as the bars, and the plate under it,
   where the game's strip was, always says the street and the suburb you are in.
-  Both are in [Minimap] and the F7 menu.
+  Both are in [Minimap] and the F11 menu.
 
   If you had Vitals installed as its own mod, remove Vitals.dll and Vitals.ini
   from scripts\. This is that mod; the two would fight over the same bars.
@@ -197,7 +206,7 @@
   SETTINGS
 -------------------------------------------------------------------------------
 
-  F7 opens the menu. A hundred and one settings across six tabs, every one with a
+  F11 opens the menu. Two hundred and thirteen settings across seven tabs, every one with a
   line saying what it does, and everything takes effect as you turn it.
 
   Everything is also in scripts\BareMinimum.ini, which is commented at length
@@ -205,7 +214,7 @@
   you hand-edit. When a new version adds a setting, the console prints which
   ones are missing and the defaults apply until you add them.
 
-  The F7 menu writes back to that file, but only the single lines whose values
+  The F11 menu writes back to that file, but only the single lines whose values
   you changed. Your comments and your ordering are left exactly as they are.
 
   Worth knowing about:
@@ -294,10 +303,9 @@
   4. I WANT THE OTHER HUD.
 
      There are two and neither is a fault. BARS is what ships; ICONS replaces
-     them with the apple and the moon on their own, changing shape as they
-     empty.
+     them with the marks on their own, changing shape as they empty.
 
-     F7 -> HUD -> HUD style -> press right. It changes as you press and it is
+     F11 -> HUD -> HUD style -> press right. It changes as you press and it is
      written to the ini for you, so there is nothing to restart. In the file it
      is Style = Bars or Style = Icons under [HUD] in scripts\BareMinimum.ini.
 
@@ -307,7 +315,7 @@
   5. I WANT IT QUIETER.
 
      HUD -> Animate turns off every moving thing on screen, including the
-     panels. General -> Enabled turns the whole mod off and leaves the F7 menu
+     panels. General -> Enabled turns the whole mod off and leaves the F11 menu
      working so you can turn it back on.
 
 
