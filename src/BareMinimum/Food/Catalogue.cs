@@ -154,7 +154,22 @@ namespace BareMinimum.Food
         /// A clip inside a real dict still cannot be checked. But a wrong dict is most of the
         /// risk, and naming several means one wrong guess costs nothing.
         /// </summary>
+        /// <summary>
+        /// Each entry is the dictionary, then the clip, then ANY CLIPS TO CYCLE THROUGH.
+        ///
+        /// The cycle rides on the option rather than on the animation because clip names
+        /// belong to a dictionary: the smoking cycle is three clips in the idle_a dictionary
+        /// and none of them is in the base one behind it, so an option that wins must not
+        /// inherit a list that is not in it.
+        /// </summary>
         public string[][] Options = new string[0][];
+
+        /// <summary>
+        /// The clips to play one after another, from the option that won. One entry -- the
+        /// clip itself -- when the option named no cycle, so everything downstream has a
+        /// single path and never asks whether there is a cycle.
+        /// </summary>
+        public string[] Cycle = new string[0];
 
         /// <summary>
         /// A scenario to run instead when no dictionary works at all.
@@ -210,13 +225,19 @@ namespace BareMinimum.Food
                         Dict = pair[0];
                         Clip = pair[1];
 
+                        // Everything past the clip is the cycle; no cycle is a cycle of one.
+                        Cycle = pair.Length > 2
+                                    ? new System.Collections.Generic.List<string>(pair).GetRange(2, pair.Length - 2).ToArray()
+                                    : new[] { Clip };
+
                         if (missing.Count > 0)
                         {
                             Log.Info(what + ": not in this build, skipped - " +
                                      string.Join(", ", missing.ToArray()));
                         }
 
-                        Log.Info(what + ": using " + Dict + " / " + Clip + ".");
+                        Log.Info(what + ": using " + Dict + " / " + Clip +
+                                 (Cycle.Length > 1 ? ", cycling " + string.Join(", ", Cycle) : "") + ".");
                         return;
                     }
                 }
@@ -590,7 +611,19 @@ namespace BareMinimum.Food
                 var d = options[i]["dict"].AsString("");
                 var c = options[i]["clip"].AsString("");
 
-                if (d.Length > 0 && c.Length > 0) list.Add(new[] { d, c });
+                if (d.Length == 0 || c.Length == 0) continue;
+
+                // dict, clip, then whatever the option wants cycled through. See AnimRef.Cycle.
+                var entry = new System.Collections.Generic.List<string> { d, c };
+
+                var cycle = options[i]["cycle"];
+                for (var j = 0; j < cycle.Count; j++)
+                {
+                    var name = cycle[j].AsString("");
+                    if (name.Length > 0) entry.Add(name);
+                }
+
+                list.Add(entry.ToArray());
             }
 
             if (list.Count > 0)
@@ -602,6 +635,7 @@ namespace BareMinimum.Food
             {
                 // One named pair is a list of one, so everything downstream has a single path.
                 into.Options = new[] { new[] { into.Dict, into.Clip } };
+                into.Cycle = new[] { into.Clip };
                 into.Resolved = false;
             }
 

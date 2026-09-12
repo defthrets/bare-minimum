@@ -693,6 +693,12 @@ namespace BareMinimum.UI
 
             Group("SHOPS");
 
+            Float("A smoke lasts", "Eating", "SmokeSeconds",
+                  () => _cfg.SmokeSeconds, v => _cfg.SmokeSeconds = v,
+                  1f, 0f, 120f, "0",
+                  "Real seconds. He draws on it, exhales and pauses for as long as this says, " +
+                  "and can walk about while he does. 0 uses the item's own time, which is six.");
+
             Bool("Hide the game's shop", "Counters", "BlockVanillaMenu",
                  () => _cfg.BlockVanillaCounter, v => _cfg.BlockVanillaCounter = v,
                  "Keeps the game's own counter list off the screen. Turn off if E stops working in a shop.");

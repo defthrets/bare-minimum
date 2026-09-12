@@ -1693,6 +1693,21 @@ namespace BareMinimum.Core
         /// Food only. Drinks and the cigarette sit right as they are; turning those with the
         /// same numbers would break two things to fix one.
         /// </summary>
+        /// <summary>
+        /// HOW LONG A SMOKE LASTS, in real seconds, whatever the item says.
+        ///
+        /// A cigarette's own Seconds is six, which was long enough for a thing you put in your
+        /// mouth once. Smoking is not that: it is a drag, an exhale, a pause, and another
+        /// drag, and six seconds of it is a man deciding against it. Twenty is a cigarette's
+        /// worth of standing about.
+        ///
+        /// It is HIS OWN setting rather than a bigger number on each of the four smokeable
+        /// items, because Seconds is also what a drive-through meal is eaten over and what the
+        /// card on screen counts down -- one number doing two jobs, and a smoke wants only one
+        /// of them changed. 0 hands it back to the item.
+        /// </summary>
+        public float SmokeSeconds = 20f;
+
         public float FoodSpinX = 0f;
         public float FoodSpinY = 0f;
         public float FoodSpinZ = 90f;
@@ -2141,6 +2156,7 @@ namespace BareMinimum.Core
                 cfg.DiscoverCarts = ini.GetBool("Counters", "DiscoverCarts", cfg.DiscoverCarts);
                 cfg.WalkIns = ini.GetBool("Counters", "WalkIns", cfg.WalkIns);
 
+                cfg.SmokeSeconds = ini.GetFloat("Eating", "SmokeSeconds", cfg.SmokeSeconds, 0f, 120f);
                 cfg.FoodSpinX = ini.GetFloat("Eating", "FoodSpinX", cfg.FoodSpinX, -180f, 180f);
                 cfg.FoodSpinY = ini.GetFloat("Eating", "FoodSpinY", cfg.FoodSpinY, -180f, 180f);
                 cfg.FoodSpinZ = ini.GetFloat("Eating", "FoodSpinZ", cfg.FoodSpinZ, -180f, 180f);

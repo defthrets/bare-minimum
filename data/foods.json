@@ -4009,10 +4009,22 @@
       "Scenarios cannot be missing the way an animation can."
     ],
     "smoke": {
+      "_cycle_note": [
+        "THE CYCLE IS WHY HE ACTUALLY SMOKES IT. This dictionary holds three clips and the",
+        "mod used to loop the first one, which is the clip where he stands there holding it.",
+        "The drag and the exhale are the other two. Named here, they are played one after",
+        "another for as long as the smoke lasts -- so which of the three is the drag never",
+        "had to be worked out, because all three are played.",
+        "",
+        "A cycle belongs to ITS OWN option, not to the animation: these clip names are in the",
+        "idle_a dictionary and are not in the base one below it, and an option that wins",
+        "should not inherit a list of clips that are not in it."
+      ],
       "options": [
         {
           "dict": "amb@world_human_smoking@male@male_a@idle_a",
-          "clip": "idle_a"
+          "clip": "idle_a",
+          "cycle": ["idle_a", "idle_b", "idle_c"]
         },
         {
           "dict": "amb@world_human_smoking@male@male_a@base",

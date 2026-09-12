@@ -57,6 +57,10 @@ namespace BareMinimum.Food
 
         private bool _animStarted;
 
+        /// <summary>Which of the cycle's clips is playing, and the backstop for one that never finishes.</summary>
+        private int _clip;
+        private int _clipAt;
+
         /// <summary>
         /// The animation actually started, so Cleanup can stop that one.
         ///
@@ -172,6 +176,10 @@ namespace BareMinimum.Food
             // rather than putting it away in four seconds at a serving window.
             var seconds = driving && item.VehicleSeconds > 0f ? item.VehicleSeconds : item.Seconds;
 
+            // A SMOKE TAKES AS LONG AS A SMOKE TAKES. See Settings.SmokeSeconds: six seconds
+            // is a man deciding against it, and Seconds is doing another job as well.
+            if (item.Smoke && _cfg.SmokeSeconds > 0.5f) seconds = _cfg.SmokeSeconds;
+
             // BEFORE THE PROP AND THE ANIMATION, so the line lands while his hands are
             // still empty. Said after, he is thanking the cashier around a mouthful.
             // WHAT HE IS HAVING, not only that he paid for it. The game's bank has GENERIC_EAT
@@ -188,6 +196,8 @@ namespace BareMinimum.Food
 
             _item = item;
             _animStarted = false;
+            _clip = 0;
+            _clipAt = 0;
             _drinking = false;
             _finishAt = Game.GameTime + (int)(Math.Max(0.5f, seconds) * 1000f);
 
@@ -228,6 +238,10 @@ namespace BareMinimum.Food
                     {
                         Animate(me, _item, _drinking);
                     }
+                }
+                else
+                {
+                    Puff(now);
                 }
 
                 // AND KEEP TRYING TO PUT IT IN HIS HAND, for exactly the same reason.
@@ -597,15 +611,68 @@ namespace BareMinimum.Food
                     return;
                 }
 
-                Function.Call(Hash.TASK_PLAY_ANIM, me.Handle, anim.Dict, anim.Clip,
-                              4f, -4f, -1, 49, 0f, false, false, false);
+                // 48, NOT 49. Both are upper body and secondary -- the legs stay the game's,
+                // which is what lets him walk about with it -- and 49 adds LOOPING. A looping
+                // idle is exactly the bug: he holds the thing forever and never draws on it.
+                // Each clip of the cycle is played ONCE and Puff moves to the next.
+                var clip = anim.Cycle.Length > 0 ? anim.Cycle[_clip % anim.Cycle.Length] : anim.Clip;
 
+                Function.Call(Hash.TASK_PLAY_ANIM, me.Handle, anim.Dict, clip,
+                              4f, -4f, -1, 48, 0f, false, false, false);
+
+                _clipAt = Game.GameTime;
                 _animStarted = true;
             }
             catch (Exception ex)
             {
                 Log.Once("anim-fail-" + anim.Dict, "Could not play " + anim.Dict + ": " + ex.Message);
             }
+        }
+
+        /// <summary>
+        /// The next clip of the cycle, once the one playing has finished.
+        ///
+        /// THE CLIP SAYS WHEN IT IS DONE. GET_ENTITY_ANIM_DURATION is not in the vendored
+        /// 3.6.0 enum; GET_ENTITY_ANIM_CURRENT_TIME is, and it hands back the phase from 0 to
+        /// 1 -- so a clip of any length is followed to its end without anybody writing down
+        /// how long it is. Swapped a hair before the end so the two blend rather than snap.
+        ///
+        /// AND A WALL CLOCK BEHIND IT. A phase that never moves -- a clip name that is not in
+        /// the dictionary, which this game plays as silence -- would otherwise leave him
+        /// holding it exactly as before, which is the bug this is fixing. Five seconds and it
+        /// moves on regardless.
+        ///
+        /// Nothing here when the cycle is one clip long, which is every animation but the
+        /// smoke: it plays, it ends, and the prop stays in his hand until Finish.
+        /// </summary>
+        private void Puff(int now)
+        {
+            if (_playing == null || _playing.Cycle.Length < 2) return;
+
+            var me = Game.Player.Character;
+            if (me == null || !me.Exists() || me.IsDead) return;
+
+            var done = now - _clipAt > 5000;
+
+            if (!done)
+            {
+                try
+                {
+                    var clip = _playing.Cycle[_clip % _playing.Cycle.Length];
+
+                    done = Function.Call<float>(Hash.GET_ENTITY_ANIM_CURRENT_TIME,
+                                                me.Handle, _playing.Dict, clip) >= 0.93f;
+                }
+                catch
+                {
+                    // Then the wall clock above is the whole answer.
+                }
+            }
+
+            if (!done) return;
+
+            _clip++;
+            _animStarted = false;
         }
 
         /// <summary>
