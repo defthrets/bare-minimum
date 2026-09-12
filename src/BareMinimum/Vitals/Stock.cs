@@ -93,6 +93,35 @@ namespace BareMinimum.Vitals
         private bool _wasPaused, _wasFaded, _wasSwitching, _wasCutscene;
         private int _wasPed = -1;
 
+        /// <summary>
+        /// The second set of edges, added after the strip came back a third time with none of
+        /// the first set having fired. Each is a moment the game is known or suspected to run
+        /// its HUD layout again. -1 and false to start, so the first frame is not a change.
+        /// </summary>
+        private bool _wasInCar, _wasHudHidden, _wasOnPhone;
+        private int _wasWanted = -1, _wasInterior = -1;
+
+        /// <summary>Which edge asked for the re-ask, for the log. The log is how the next trigger gets found.</summary>
+        private string _askWhy = "";
+
+        /// <summary>
+        /// THE QUIET HEARTBEAT. Re-ask this often while no waypoint is set.
+        ///
+        /// The every-frame ask came out because a relayout tears down the GPS route and rebuilds
+        /// it, and sixty of those a second strobed the route. With NO route on the map there is
+        /// nothing to tear down, so an ask then is free -- and it puts a ceiling on how long the
+        /// game's own strip can stay back when an edge is missed: five seconds, whenever nobody
+        /// is navigating. It stands down the instant a waypoint goes up, so it cannot bring the
+        /// strobe back; while a route is drawn, the edges are the whole defence.
+        ///
+        /// Only the player's waypoint is asked about. A mission's own route is not a waypoint
+        /// and cannot be asked about, so during one this may blink the route once every five
+        /// seconds -- a single frame, not a strobe -- which is the trade.
+        /// </summary>
+        private const int QuietEveryMs = 5000;
+        private int _quietAt;
+        private bool _saidQuiet;
+
         /// <summary>How many times the layout has had to be asked for again. The number that says whether the list in Upheaval is long enough.</summary>
         private int _reasks;
 
@@ -171,6 +200,7 @@ namespace BareMinimum.Vitals
                     _hidden = true;
                     _needRefresh = true;
                     _askAgain = true;
+                    _askWhy = "the strip was asked to be hidden again";
                 }
             }
 
@@ -215,14 +245,50 @@ namespace BareMinimum.Vitals
             if (!_asked || _askAgain) return true;
 
             // The minimap is being rebuilt, and a rebuild wipes the layout. See _settleUntil.
-            if (Game.GameTime < _settleUntil) return true;
+            var now = Game.GameTime;
+            if (now < _settleUntil) return true;
 
-            return cfg.VitalsHideRepeatMs > 0 && Game.GameTime >= _repeatAt;
+            if (cfg.VitalsHideRepeatMs > 0 && now >= _repeatAt) return true;
+
+            // The quiet heartbeat: free while there is no route to disturb. See QuietEveryMs.
+            if (now >= _quietAt && !Routing())
+            {
+                _askWhy = "the quiet heartbeat (no waypoint set)";
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Whether the player has a waypoint set, which is when a relayout would show.</summary>
+        private static bool Routing()
+        {
+            try { return Function.Call<bool>(Hash.IS_WAYPOINT_ACTIVE); }
+            catch { return true; }   // cannot tell, so assume the worst and stay quiet
         }
 
         /// <summary>The layout call went in. Counted, because the count is the evidence.</summary>
         private void Landed(Settings cfg)
         {
+            var now = Game.GameTime;
+            _quietAt = now + QuietEveryMs;
+
+            // A heartbeat ask is routine and is said once, so the log shows it is running and
+            // is not then filled with it. An EDGE ask is the interesting kind, and is counted.
+            if (_asked && !_askAgain && _askWhy.StartsWith("the quiet heartbeat"))
+            {
+                if (!_saidQuiet)
+                {
+                    _saidQuiet = true;
+                    Log.Info("The minimap layout is re-asked every " + (QuietEveryMs / 1000) +
+                             "s while no waypoint is set, which is free; this is the first of those.");
+                }
+
+                _askWhy = "";
+                _repeatAt = now + Math.Max(1, cfg.VitalsHideRepeatMs);
+                return;
+            }
+
             if (_asked && _askAgain)
             {
                 _reasks++;
@@ -235,21 +301,24 @@ namespace BareMinimum.Vitals
                 // written and its silence read as nothing happening. Loud for the first three
                 // and thinned after: if it climbs steadily with nobody touching anything, the
                 // list in Upheaval is firing on something that is not an edge.
-                if (_reasks <= 3)
+                // NAMED. When the game's strip comes back, this line is the evidence of which
+                // edge did or did not fire, and a re-ask that does not say why is a re-ask that
+                // teaches nothing.
+                if (_reasks <= 6)
                 {
                     Log.Info("Asked the minimap for layout " + cfg.VitalsHideType + " again (" +
-                             _reasks + " since the load). Something had a chance to put the " +
-                             "game's own strip back.");
+                             _reasks + " since the load) because " + _askWhy + ".");
                 }
                 else if (_reasks % 50 == 0)
                 {
-                    Log.Info("The minimap layout has now been re-asked " + _reasks + " times.");
+                    Log.Info("The minimap layout has now been re-asked " + _reasks + " times; the last was " + _askWhy + ".");
                 }
             }
 
             _asked = true;
             _askAgain = false;
-            _repeatAt = Game.GameTime + Math.Max(1, cfg.VitalsHideRepeatMs);
+            _askWhy = "";
+            _repeatAt = now + Math.Max(1, cfg.VitalsHideRepeatMs);
         }
 
         /// <summary>
@@ -272,6 +341,8 @@ namespace BareMinimum.Vitals
         private bool Upheaval()
         {
             bool paused = false, faded = false, switching = false, cutscene = false;
+            bool inCar = _wasInCar, hudHidden = _wasHudHidden, onPhone = _wasOnPhone;
+            int wanted = _wasWanted, interior = _wasInterior;
             var ped = _wasPed;
 
             try
@@ -287,6 +358,21 @@ namespace BareMinimum.Vitals
 
                 var me = Game.Player == null ? null : Game.Player.Character;
                 ped = me == null ? 0 : me.Handle;
+
+                // THE SECOND SET. The strip came back once with none of the above having
+                // fired, so these are every other moment the game is known or suspected to
+                // run its HUD layout: the radar changes shape getting in and out of a car; a
+                // menu, the phone or the weapon wheel hides the HUD and gives it back; the
+                // wanted stars redraw the top of it; an interior swaps the map; a call ends.
+                if (me != null && ped != 0)
+                {
+                    inCar = Function.Call<bool>(Hash.IS_PED_IN_ANY_VEHICLE, ped, false);
+                    interior = Function.Call<int>(Hash.GET_INTERIOR_FROM_ENTITY, ped);
+                }
+
+                hudHidden = Function.Call<bool>(Hash.IS_HUD_HIDDEN);
+                onPhone = Function.Call<bool>(Hash.IS_MOBILE_PHONE_CALL_ONGOING);
+                wanted = Game.Player == null ? wanted : Function.Call<int>(Hash.GET_PLAYER_WANTED_LEVEL, Game.Player.Handle);
             }
             catch (Exception ex)
             {
@@ -297,11 +383,24 @@ namespace BareMinimum.Vitals
                 return false;
             }
 
-            if ((_wasPaused && !paused) || (_wasFaded && !faded) ||
-                (_wasSwitching && !switching) || (_wasCutscene && !cutscene) ||
-                (_wasPed != -1 && ped != _wasPed))
+            // Each edge names itself, because the name is what the log is for.
+            string why = null;
+
+            if (_wasPaused && !paused) why = "the pause menu closed";
+            else if (_wasFaded && !faded) why = "the screen faded back in";
+            else if (_wasSwitching && !switching) why = "a character switch finished";
+            else if (_wasCutscene && !cutscene) why = "a cutscene ended";
+            else if (_wasPed != -1 && ped != _wasPed) why = "the player's ped changed";
+            else if (_wasInCar != inCar) why = inCar ? "he got into a vehicle" : "he got out of a vehicle";
+            else if (_wasHudHidden && !hudHidden) why = "the game's HUD came back from hidden";
+            else if (_wasOnPhone && !onPhone) why = "a phone call ended";
+            else if (_wasWanted != -1 && wanted != _wasWanted) why = "the wanted level changed";
+            else if (_wasInterior != -1 && interior != _wasInterior) why = "he crossed an interior boundary";
+
+            if (why != null)
             {
                 _askAgain = true;
+                _askWhy = why;
             }
 
             _wasPaused = paused;
@@ -309,6 +408,11 @@ namespace BareMinimum.Vitals
             _wasSwitching = switching;
             _wasCutscene = cutscene;
             _wasPed = ped;
+            _wasInCar = inCar;
+            _wasHudHidden = hudHidden;
+            _wasOnPhone = onPhone;
+            _wasWanted = wanted;
+            _wasInterior = interior;
 
             return paused || faded || switching || cutscene;
         }
