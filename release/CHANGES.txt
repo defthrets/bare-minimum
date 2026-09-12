@@ -3,6 +3,36 @@
 ===============================================================================
 
 
+0.4.0  --  EVERY TILE GETS A PICTURE
+-------------------------------------------------------------------------------
+
+  157 OF THE 201 THINGS YOU CAN BUY HAVE A PICTURE OF THEIR OWN NOW, and so do
+  all nine drugs. Pixel art, in colour, drawn per item: the Bleeder drips, the
+  Bacon Triple Cheese Melt has the bacon, the Money Shot has the egg, al Pastor
+  has the pineapple, the Blue Plate has the blue rim, the Sludgie is the blue
+  slush cup. Every tile in the shop, the pocket and the fridge, and the toast
+  when you eat.
+
+  THE WHITE SHAPES ARE STILL THERE, UNDERNEATH. An item's own picture wins over
+  its group's; anything not drawn yet shows the group's white shape, tinted as
+  it always was. Drop i_<id>.png into the icons folder and that item has a
+  picture -- no rebuild, no field to edit. The mod looks at the file to decide
+  whether it is coloured art or a white shape, so nothing has to be told.
+
+  [MINIMAP] X AND Y. For the HUD-mover mods on ultrawide screens: they drag the
+  radar to the corner, the game still reports its original position, and this
+  mod built its frame round an empty rectangle in the middle of the screen.
+  Two live rows under Vitals move the frame, the bars, the strip and the fuel
+  gauge to wherever your map actually is. Asked for on the mod page.
+
+  CUTSCENES HIDE THE HUD BY NAME. It hid before only because the game hides its
+  own HUD for them; it is now a rule of its own, gone the instant a cutscene
+  starts. Also asked for.
+
+  Two posters in release\ for anyone writing about it: the food, and the drugs
+  on a picture of their own so the food one can go anywhere.
+
+
 0.3.1  --  HINDI IN LETTERS THE GAME CAN DRAW
 -------------------------------------------------------------------------------
 
