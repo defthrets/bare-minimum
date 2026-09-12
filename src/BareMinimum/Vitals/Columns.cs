@@ -100,7 +100,8 @@ namespace BareMinimum.Vitals
 
             var t = m.Time;
             var phase = (int)kind * 0.37f;
-            var wave = Ink.Clamp01(cfg.HudBarWave);
+            // HELD STILL, IF THAT IS WHAT WAS ASKED FOR. See Settings.HudBarLevel.
+            var wave = cfg.HudBarLevel ? Ink.Clamp01(cfg.HudBarWave) : 0f;
 
             // The bar's width as a HEIGHT fraction, for anything measured across the bar in
             // the same unit as along it.
@@ -133,8 +134,8 @@ namespace BareMinimum.Vitals
             //
             // Positive is toward the surface, which up here means UP: a hit drops the level
             // and it rebounds; a hard stop throws it up the tube and it settles back.
-            var thrown = spring.S * h;
-            var speed = Ink.Clamp(spring.V * 1.8f, -1f, 1f);
+            var thrown = cfg.HudBarLevel ? spring.S * h : 0f;
+            var speed = cfg.HudBarLevel ? Ink.Clamp(spring.V * 1.8f, -1f, 1f) : 0f;
 
             bow += speed * 0.40f * thick;
             tilt += speed * 0.25f * thick;
@@ -170,14 +171,14 @@ namespace BareMinimum.Vitals
             // A slow warmth drifting UP toward the surface: two broad humps on periods
             // nothing else uses, so the fill reads as something turning over rather than a
             // flat colour with a line across it.
-            var inside = t / 7f + phase * 3f;
+            var inside = cfg.HudBarInsides ? t / 7f + phase * 3f : 0f;
             var warmTo = Color.FromArgb(body.A, 255, 250, 235);
 
             var bodyH = floor - bodyTop;
 
             if (bodyH > 0f)
             {
-                var bands = Bands(bodyH);
+                var bands = Bands(bodyH, cfg.HudBarInsides);
 
                 for (var i = 0; i < bands; i++)
                 {
@@ -235,7 +236,7 @@ namespace BareMinimum.Vitals
             // share of the machine's one list of rectangles the decoration stops and the bars
             // carry on, because a bar with no sparkle is a bar and half a bar is a bug. See
             // BareMinimum.UI.Draw.Room, which is where the share is kept.
-            if (!BareMinimum.UI.Draw.Room) return;
+            if (!cfg.HudBarInsides || !BareMinimum.UI.Draw.Room) return;
 
             // THE RELIEF ON EVERY BAR, before whatever this one keeps inside it.
             Relief(cfg, x, w, floor, surface, body, t, strength);
@@ -707,8 +708,11 @@ namespace BareMinimum.Vitals
         }
 
         /// <summary>How many bands the body is drawn in: one per five pixels of height, 1 to 48.</summary>
-        private static int Bands(float h)
+        private static int Bands(float h, bool insides)
         {
+            // NOTHING TURNING OVER, NOTHING TO BAND. See Settings.HudBarInsides.
+            if (!insides) return 1;
+
             // ONE EVERY THIRTY PIXELS, WHICH USED TO BE ONE EVERY FOURTEEN AND, BEFORE THAT,
             // ONE EVERY FIVE. Rectangles come out of one list the whole machine shares, and
             // three columns of them beside the minimap were part of what took the background

@@ -89,7 +89,8 @@ namespace BareMinimum.Vitals
 
             var t = m.Time;
             var phase = (int)kind * 0.37f;
-            var wave = Ink.Clamp01(cfg.HudBarWave);
+            // HELD STILL, IF THAT IS WHAT WAS ASKED FOR. See Settings.HudBarLevel.
+            var wave = cfg.HudBarLevel ? Ink.Clamp01(cfg.HudBarWave) : 0f;
 
             // ---- the idle motion ----
             //
@@ -112,8 +113,8 @@ namespace BareMinimum.Vitals
             // The spring throws the whole surface, and its SPEED bends it: liquid moving fast
             // toward a wall piles up against it, which is a bow in the direction of travel
             // and a lean behind it.
-            var thrown = spring.S * w;
-            var speed = Ink.Clamp(spring.V * 1.8f, -1f, 1f);
+            var thrown = cfg.HudBarLevel ? spring.S * w : 0f;
+            var speed = cfg.HudBarLevel ? Ink.Clamp(spring.V * 1.8f, -1f, 1f) : 0f;
 
             bow += speed * 0.40f * thickW;
             tilt += speed * 0.25f * thickW;
@@ -149,14 +150,14 @@ namespace BareMinimum.Vitals
             // A slow warmth drifting toward the surface: two broad humps on periods nothing
             // else uses, so the fill reads as something turning over rather than a flat
             // colour with a line at the end.
-            var inside = t / 7f + phase * 3f;
+            var inside = cfg.HudBarInsides ? t / 7f + phase * 3f : 0f;
             var warmTo = Color.FromArgb(body.A, 255, 250, 235);
 
             var bodyW = bodyRight - x0;
 
             if (bodyW > 0f)
             {
-                var bands = Bands(bodyW);
+                var bands = Bands(bodyW, cfg.HudBarInsides);
 
                 for (var i = 0; i < bands; i++)
                 {
@@ -208,7 +209,8 @@ namespace BareMinimum.Vitals
             // ONLY IF THE FRAME CAN AFFORD IT. Everything above is the instrument; this is
             // decoration, and decoration is what gives way when this mod's share of the
             // machine's one list of rectangles runs out. See BareMinimum.UI.Draw.Room.
-            if (cfg.VitalsParticles <= 0.001f || !BareMinimum.UI.Draw.Room) return;
+            if (!cfg.HudBarInsides || cfg.VitalsParticles <= 0.001f ||
+                !BareMinimum.UI.Draw.Room) return;
 
             switch (kind)
             {
@@ -411,8 +413,11 @@ namespace BareMinimum.Vitals
         }
 
         /// <summary>How many bands the body is drawn in: one per five pixels of length, 1 to 48.</summary>
-        private static int Bands(float w)
+        private static int Bands(float w, bool insides)
         {
+            // NOTHING TURNING OVER, NOTHING TO BAND. See Settings.HudBarInsides.
+            if (!insides) return 1;
+
             // ONE EVERY FOURTEEN PIXELS, WHICH USED TO BE ONE EVERY FIVE. Rectangles come
             // out of one list the whole machine shares, and three columns of them beside
             // the minimap were part of what took the background off Hoodrich's phone in a

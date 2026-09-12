@@ -1134,23 +1134,43 @@ namespace BareMinimum.UI
                   2.5f, 0.15f, 120f, "0.00",
                   "How fast everything in both bars moves - surface, fill and all. 42 is normal.");
 
+            // THE TWO MASTERS, ABOVE THE SLIDERS THEY MASTER. A slider at 0 is not off: the
+            // drift slider stops the specks moving and still draws them, and the wave slider
+            // flattens the wobble and leaves the jolt. These are the whole of each half.
+            Bool("Movement inside the bars", "HUD", "BarInsides",
+                 () => _cfg.HudBarInsides, v => _cfg.HudBarInsides = v,
+                 "The cells in health, the crumbs in hunger, the bubbles in thirst, the charge " +
+                 "in energy, and the warmth turning over. Off, the fill is one flat colour and " +
+                 "the row costs the frame fewer rectangles.",
+                 () => _cfg.HudAnimate, "~y~Turn the HUD animation ON first.");
+
+            Bool("Movement of the level", "HUD", "BarLevel",
+                 () => _cfg.HudBarLevel, v => _cfg.HudBarLevel = v,
+                 "The surface drifting, bowing and leaning, and the jolt when a meal or a hit " +
+                 "moves it. Off, the level sits exactly where the number says.",
+                 () => _cfg.HudAnimate, "~y~Turn the HUD animation ON first.");
+
             Float("Surface movement", "HUD", "BarWave",
                   () => _cfg.HudBarWave, v => _cfg.HudBarWave = v,
                   0.05f, 0f, 1f, "0.00",
                   "How far the levels move. Hunger bows; sleep takes a drop and settles.",
-                  () => _cfg.Style == HudStyle.Bars, "Bars only.");
+                  () => _cfg.Style == HudStyle.Bars && _cfg.HudBarLevel,
+                  "~y~Movement of the level is OFF.");
 
             Float("Bar drift speed", "HUD", "BarDrift",
                   () => _cfg.HudBarDrift, v => _cfg.HudBarDrift = v,
                   0.05f, 0f, 1f, "0.00",
-                  "How fast the specks inside the bars move. 0 stops them.",
-                  () => _cfg.Style == HudStyle.Bars, "Bars only.");
+                  "How fast the specks inside the bars move. 0 stops them where they are; " +
+                  "Movement inside the bars takes them away entirely.",
+                  () => _cfg.Style == HudStyle.Bars && _cfg.HudBarInsides,
+                  "~y~Movement inside the bars is OFF.");
 
             Float("Jolt on a change", "HUD", "BarSlosh",
                   () => _cfg.HudBarSlosh, v => _cfg.HudBarSlosh = v,
                   0.05f, 0f, 1f, "0.00",
                   "How hard a level sloshes when a meal, a pill or a sleep moves it. 0 is never.",
-                  () => _cfg.Style == HudStyle.Bars, "Bars only.");
+                  () => _cfg.Style == HudStyle.Bars && _cfg.HudBarLevel,
+                  "~y~Movement of the level is OFF.");
 
             Float("Moves with you", "HUD", "BarLean",
                   () => _cfg.HudBarLean, v => _cfg.HudBarLean = v,

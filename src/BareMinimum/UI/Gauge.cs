@@ -967,6 +967,11 @@ namespace BareMinimum.UI
         /// </summary>
         private int Bands(float h)
         {
+            // NOTHING TURNING OVER, NOTHING TO BAND. The bands exist to draw the slow warmth
+            // moving up through the fill; with the insides switched off there is no gradient,
+            // so one rectangle draws the same picture. See Settings.HudBarInsides.
+            if (!_cfg.HudBarInsides) return 1;
+
             if (_screenH <= 0)
             {
                 try { _screenH = GTA.UI.Screen.Resolution.Height; }
@@ -1020,14 +1025,14 @@ namespace BareMinimum.UI
 
             // The waterline reads the clock straight; everything inside the fill reads it
             // slowed, so one dial still drives both and the ratio between them is fixed.
-            var inside = t / InsideSlow;
+            var inside = _cfg.HudBarInsides ? t / InsideSlow : 0f;
 
             var level = h * fraction;
             var empty = 1f - fraction;
 
             // THE THROW. The spring's offset is a share of the bar's length, up when positive,
             // and it moves the whole surface; its speed bends the surface as well. See Slosh.
-            var thrown = _foodSpring.S * h;
+            var thrown = _cfg.HudBarLevel ? _foodSpring.S * h : 0f;
             var speed = Clamp(_foodSpring.V * 1.8f, -1f, 1f);
 
             var surfaceY = Clamp(y + h - level - thrown, y, y + h);
@@ -1097,6 +1102,8 @@ namespace BareMinimum.UI
                 Hud.Bar(left, topY, right - left, crestH, crest);
             }
 
+            if (!_cfg.HudBarInsides) return;
+
             Relief(x, w, floor, surfaceY, body, t / PaceOf());
 
             // The crumbs are decoration and yield when the frame's share has gone. See Draw.Room.
@@ -1131,7 +1138,7 @@ namespace BareMinimum.UI
         private void Slake(float x, float y, float w, float h, float fraction, Color body)
         {
             var t = Clock();
-            var inside = t / InsideSlow;
+            var inside = _cfg.HudBarInsides ? t / InsideSlow : 0f;
 
             var level = h * fraction;
 
@@ -1140,7 +1147,7 @@ namespace BareMinimum.UI
             // that slops is the one with room to slop in.
             var lively = 4f * fraction * (1f - fraction);
 
-            var thrown = _thirstSpring.S * h;
+            var thrown = _cfg.HudBarLevel ? _thirstSpring.S * h : 0f;
             var speed = Clamp(_thirstSpring.V * 1.8f, -1f, 1f);
 
             var surfaceY = Clamp(y + h - level - thrown, y, y + h);
@@ -1194,6 +1201,8 @@ namespace BareMinimum.UI
 
                 Hud.Bar(left, topY, right - left, crestH, crest);
             }
+
+            if (!_cfg.HudBarInsides) return;
 
             Relief(x, w, floor, surfaceY, body, t / PaceOf());
 
@@ -1409,7 +1418,7 @@ namespace BareMinimum.UI
 
             // The waterline reads the clock straight; everything inside the fill reads it
             // slowed, so one dial still drives both and the ratio between them is fixed.
-            var inside = t / InsideSlow;
+            var inside = _cfg.HudBarInsides ? t / InsideSlow : 0f;
 
             var level = h * fraction;
             var floor = y + h;
@@ -1417,7 +1426,7 @@ namespace BareMinimum.UI
             var empty = tired;
 
             // THE THROW, as the food bar has it, off this bar's own spring. See Slosh.
-            var thrown = _sleepSpring.S * h;
+            var thrown = _cfg.HudBarLevel ? _sleepSpring.S * h : 0f;
             var speed = Clamp(_sleepSpring.V * 1.8f, -1f, 1f);
 
             var surfaceY = Clamp(y + h - level - thrown, y, floor);
@@ -1482,7 +1491,7 @@ namespace BareMinimum.UI
                 Hud.Bar(left, topY, right - left, cap, capC);
             }
 
-            Relief(x, w, y + h, surfaceY, body, t / PaceOf());
+            if (_cfg.HudBarInsides) Relief(x, w, y + h, surfaceY, body, t / PaceOf());
         }
 
         /// <summary>
@@ -1985,7 +1994,11 @@ namespace BareMinimum.UI
                                 float tempo, float phase, float speed, float capH)
         {
             var floor = y + h;
-            var wave = Clamp01(_cfg.HudBarWave);
+
+            // HELD STILL, IF THAT IS WHAT WAS ASKED FOR. See Settings.HudBarLevel: the wobble
+            // and the lean are this, and the throw on the level is at the three call sites.
+            var wave = _cfg.HudBarLevel ? Clamp01(_cfg.HudBarWave) : 0f;
+            if (!_cfg.HudBarLevel) speed = 0f;
 
             // The width as a HEIGHT fraction, for anything measured across the bar in the same
             // unit as along it.

@@ -953,6 +953,30 @@ namespace BareMinimum.Core
         public float HudBarWave = 1f;
 
         /// <summary>
+        /// WHAT LIVES INSIDE THE FILL: the cells in health, the crumbs in hunger, the bubbles
+        /// in thirst, the charge streaks in energy, the bevel down the side, and the slow
+        /// warmth turning over in the body. Off, the fill is one flat colour.
+        ///
+        /// NOT THE SAME AS BarDrift = 0, which is why it is its own switch. That stops the
+        /// specks MOVING and still draws them; this stops there being any.
+        ///
+        /// It also costs the row fewer rectangles. The body is banded to draw the gradient --
+        /// up to eight a bar, six bars in the row, out of the one list the whole machine
+        /// shares -- and with nothing turning over there is no gradient to band, so it is one.
+        /// </summary>
+        public bool HudBarInsides = true;
+
+        /// <summary>
+        /// THE FILL'S OWN SURFACE: the drift up and down, the bow across the width, the lean,
+        /// and the slosh when a meal or a hit moves the level. Off, the level sits exactly
+        /// where the number says it is and nothing about it moves.
+        ///
+        /// NOT THE SAME AS BarWave = 0, which flattens the idle wobble and leaves the jolt.
+        /// This is both, because somebody who asks for a still level means a still level.
+        /// </summary>
+        public bool HudBarLevel = true;
+
+        /// <summary>
         /// Overall speed of everything that moves inside a bar. 1 is as shipped.
         ///
         /// ONE DIAL OVER THE LOT, on top of the individual ones, because "too fast" has now
@@ -1962,6 +1986,8 @@ namespace BareMinimum.Core
                 cfg.HudBarIconScale = ini.GetFloat("HUD", "BarIconScale",
                                                    cfg.HudBarIconScale, 0.2f, 2f);
                 cfg.HudBarWave = ini.GetFloat("HUD", "BarWave", cfg.HudBarWave, 0f, 1f);
+                cfg.HudBarInsides = ini.GetBool("HUD", "BarInsides", cfg.HudBarInsides);
+                cfg.HudBarLevel = ini.GetBool("HUD", "BarLevel", cfg.HudBarLevel);
                 cfg.HudBarDrift = ini.GetFloat("HUD", "BarDrift", cfg.HudBarDrift, 0f, 1f);
                 cfg.HudBarPace = ini.GetFloat("HUD", "BarPace", cfg.HudBarPace, 0.15f, 120f);
                 cfg.HudBarEffort = ini.GetFloat("HUD", "BarEffort", cfg.HudBarEffort, 1f, 6f);
