@@ -154,7 +154,9 @@ BIND = [
     ("tin", 0, "Tin of Sardines"),            # the flat tin with the pull ring
     ("tin", 1, "Tin of Beans"),               # the can actually labelled BEANS, and it is from Bean's
     ("tin", 2, "Dented Can"),                 # crushed, no label left -- "could be peaches"
-    ("tin", 1, "group:tin"),
+    # THE GROUP'S OWN, from the later cans batch: tin #1 is Tin of Beans' own picture and a
+    # fallback that is a copy of one member is no fallback. A tin of soup is a tin of SOMETHING.
+    ("cans", 4, "group:tin"),
     # ice_cream_cone
     ("cone", 6, "Ice Maiden Cone"),           # two scoops, chocolate and vanilla
     ("cone", 4, "Cherry Popper Cone"),        # sprinkles, which is the one you remember
@@ -275,6 +277,13 @@ BIND = [
     ("beverages", 7,   "Bubble Tea"),         # its own picture is the group's; now it has it by name too
     ("food", 14,       "Ready Meal"),         # the compartment tray
     ("bakery", 6,      "Bagel and Schmear"),  # the same bagel as the plain one; better than a white shape
+    # PIPE DOWN, and the two grocery boxes. The tobacconist sells the only two smokeables that
+    # had no picture of their own; the bag group already had its plain paper bag, so the veg
+    # box and the pantry shop get theirs by name.
+    ("cigar",     15, "item:cigar"),          # dark wrapper, red and gold band -- the band is what says cigar
+    ("pipe",      0,  "Pipe and Tobacco"),    # the classic briar: brown bowl, dark bent stem
+    ("groceries", 8,  "Organic Veg Box"),     # the canvas tote, carrots and beetroot with the tops still on
+    ("groceries", 5,  "Pantry Basics"),       # the tote with the packets standing in it -- staples, not a meal
 ]
 
 

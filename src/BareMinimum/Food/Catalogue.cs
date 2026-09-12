@@ -709,8 +709,9 @@ namespace BareMinimum.Food
         /// The model this item leaves on the ground, or "" for nothing.
         ///
         /// The item's own answer if it gave one, and the default for its kind if it did not.
-        /// A SMOKE LEAVES NOTHING by default and that is deliberate rather than missing: this
-        /// build has no cigarette butt to drop.
+        /// A SMOKE LEAVES NOTHING by default because a pipe is not a thing anybody throws away.
+        /// The two packets and the cigar name ng_proc_cigarette01a for themselves -- the game's
+        /// own littered cigarette, which is exactly what it is.
         /// </summary>
         public string LitterFor(Item item)
         {

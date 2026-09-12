@@ -847,6 +847,7 @@
     },
     {
       "id": "cig_redwood",
+      "litter": "ng_proc_cigarette01a",
       "name": "Redwood",
       "category": "Snacks",
       "price": 12,
@@ -867,6 +868,7 @@
     },
     {
       "id": "cig_debonaire",
+      "litter": "ng_proc_cigarette01a",
       "name": "Debonaire",
       "category": "Snacks",
       "price": 16,
@@ -1297,6 +1299,7 @@
     {
       "_note": "Pipe Down. THE PRICES ARE THE CHARACTER: this is the only shop on the list where one item costs more than a whole meal anywhere else, which is what a tobacconist on a good street is. Smoke items report in words rather than a hunger percentage -- see Eating.Report.",
       "id": "cigar",
+      "litter": "ng_proc_cigarette01a",
       "name": "Cigar",
       "category": "Snacks",
       "price": 32,

@@ -48,7 +48,7 @@ namespace BareMinimum.Food
         ///
         /// <paramref name="what"/> is the prop's model name, already decided by the catalogue
         /// -- empty means this one leaves nothing behind, which is a real answer and not a
-        /// missing one: a cigarette in this build has no butt to drop.
+        /// missing one: nobody throws a pipe away when they have finished with it.
         /// </summary>
         public void Drop(Ped me, string what)
         {
