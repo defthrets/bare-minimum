@@ -811,6 +811,24 @@ namespace BareMinimum.UI
                   "it. 0 is flush to the map.",
                   () => _cfg.MinimapFrame, "~y~Turn the minimap frame ON first.");
 
+            // FOR A RADAR SOMETHING ELSE HAS MOVED. The game reports where it put the map, not
+            // where a HUD-mover mod dragged it, and on an ultrawide that left the frame round
+            // an empty rectangle in the middle of the screen. These write straight through to
+            // Layout so the frame, the bars, the strip and the fuel gauge move together as the
+            // row is turned, not after the next ini load.
+            Float("Map left/right", "Minimap", "X",
+                  () => _cfg.MinimapNudgeX,
+                  v => { _cfg.MinimapNudgeX = v; BareMinimum.Vitals.Layout.Renudge(v, _cfg.MinimapNudgeY); },
+                  0.002f, -0.5f, 0.5f, "0.000",
+                  "If another mod has moved your radar, move the frame, the bars and the fuel " +
+                  "gauge to it. 0 is where the game says the map is.");
+
+            Float("Map up/down", "Minimap", "Y",
+                  () => _cfg.MinimapNudgeY,
+                  v => { _cfg.MinimapNudgeY = v; BareMinimum.Vitals.Layout.Renudge(_cfg.MinimapNudgeX, v); },
+                  0.002f, -0.5f, 0.5f, "0.000",
+                  "The same, up and down. Positive is down.");
+
             Bool("Compass in the frame", "Minimap", "Compass",
                  () => _cfg.MinimapCompass, v => _cfg.MinimapCompass = v,
                  "A compass tape at the top left of the minimap's frame: which way you are heading.",
@@ -1033,7 +1051,8 @@ namespace BareMinimum.UI
                   () => _cfg.HudGroupX, v => _cfg.HudGroupX = v,
                   0.005f, -1f, 1f, "0.000",
                   "Moves the bars and the cash readout together. The map stays where the game's " +
-                  "safe zone puts it; the frame follows the map.");
+                  "safe zone puts it; the frame follows the map. If another mod has moved the " +
+                  "map itself, use Map left/right under Vitals instead.");
 
             Float("Whole HUD up/down", "HUD", "GroupY",
                   () => _cfg.HudGroupY, v => _cfg.HudGroupY = v,

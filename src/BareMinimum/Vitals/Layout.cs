@@ -285,6 +285,34 @@ namespace BareMinimum.Vitals
             return plateTop > bandTop;
         }
 
+        /// <summary>
+        /// WHERE THE PLAYER SAYS THE MAP IS, RELATIVE TO WHERE THE GAME SAYS IT IS. Screen
+        /// fractions; [Minimap] X and Y; zero by default.
+        ///
+        /// A HUD-mover mod on an ultrawide drags the radar to the corner of the screen. Anchor
+        /// asks the GAME where the radar is, and the game answers with where it put it, not
+        /// where somebody else moved it to -- so the frame, the row beside it, the lying-down
+        /// strip and the fuel gauge on the far side all stayed in the middle of the screen
+        /// with nothing inside the frame. There is no native that reports a third-party move,
+        /// and this mod cannot see another script's draw calls, so the honest fix is a number
+        /// the player types once.
+        ///
+        /// Applied INSIDE Anchor and nowhere else. Map, Outer, Frame, the strip's own layout
+        /// and the row published to Fumes all reach the map through it, so every one of them
+        /// moves by the same amount without knowing the setting exists. Set through Renudge,
+        /// which also throws Map's cache away so the frame moves the same frame the menu row
+        /// is turned, not a quarter of a second later.
+        /// </summary>
+        public static float NudgeX;
+        public static float NudgeY;
+
+        public static void Renudge(float x, float y)
+        {
+            NudgeX = x;
+            NudgeY = y;
+            _cached = false;
+        }
+
         /// <summary>Last frame's answer, and when it is worth asking again. See Map.</summary>
         private static bool _cached;
         private static bool _cachedOk;
@@ -396,6 +424,11 @@ namespace BareMinimum.Vitals
                                               "and Width instead.");
                 return false;
             }
+
+            // AFTER the plausibility check, which is about the GAME's answer. A player who has
+            // nudged the frame to the far corner of an ultrawide has not made the game wrong.
+            left += NudgeX; right += NudgeX;
+            top += NudgeY; bottom += NudgeY;
 
             return true;
         }

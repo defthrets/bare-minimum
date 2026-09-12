@@ -1284,6 +1284,19 @@ namespace BareMinimum.Core
         public float MinimapFrameGap = 0.006f;
 
         /// <summary>
+        /// WHERE THE MAP REALLY IS, if something else has moved it. Screen fractions, added to
+        /// where the game says the radar stands; zero is "the game is right".
+        ///
+        /// For the HUD-mover mods on ultrawide screens: they drag the radar to the corner, the
+        /// game still reports its original position, and this mod built its frame round an
+        /// empty rectangle in the middle of the screen. Moves the frame, the bars beside it,
+        /// the strip and the fuel gauge on the far side together, because all of them read the
+        /// map from the one place this is applied. See Vitals.Layout.NudgeX.
+        /// </summary>
+        public float MinimapNudgeX = 0f;
+        public float MinimapNudgeY = 0f;
+
+        /// <summary>
         /// How far DOWN INTO the map the frame's top band reaches, as a fraction of the map's
         /// height. The radar fades out at the top and lets the world through, and the band
         /// comes down over that so the map ends hard -- but every bit of it past the fade is
@@ -1942,6 +1955,9 @@ namespace BareMinimum.Core
                 cfg.HudDrawBudget = ini.GetInt("HUD", "DrawBudget", cfg.HudDrawBudget, 40, 350);
                 cfg.HudNotifyLift = ini.GetFloat("HUD", "NotifyLift", cfg.HudNotifyLift, -0.5f, 0.5f);
                 UI.Draw.Budget = cfg.HudDrawBudget;
+
+                // Where the map really is, for everything that reads it. See Layout.NudgeX.
+                Vitals.Layout.Renudge(cfg.MinimapNudgeX, cfg.MinimapNudgeY);
                 cfg.HudBarWidth = ini.GetFloat("HUD", "BarWidth", cfg.HudBarWidth, 0.001f, 0.2f);
                 cfg.HudBarIconScale = ini.GetFloat("HUD", "BarIconScale",
                                                    cfg.HudBarIconScale, 0.2f, 2f);
@@ -2013,6 +2029,8 @@ namespace BareMinimum.Core
                 cfg.MinimapOpacity = ini.GetFloat("Minimap", "Opacity", cfg.MinimapOpacity, 0.05f, 1f);
                 cfg.MinimapLabel = ini.GetBool("Minimap", "Label", cfg.MinimapLabel);
                 cfg.MinimapFrameGap = ini.GetFloat("Minimap", "FrameGap", cfg.MinimapFrameGap, 0f, 0.03f);
+                cfg.MinimapNudgeX = ini.GetFloat("Minimap", "X", cfg.MinimapNudgeX, -0.5f, 0.5f);
+                cfg.MinimapNudgeY = ini.GetFloat("Minimap", "Y", cfg.MinimapNudgeY, -0.5f, 0.5f);
                 cfg.MinimapTopCover = ini.GetFloat("Minimap", "TopCover", cfg.MinimapTopCover, 0f, 0.5f);
                 cfg.MinimapBandHeight = ini.GetFloat("Minimap", "BandHeight", cfg.MinimapBandHeight, 0.004f, 0.15f);
                 cfg.MinimapPlateDrop = ini.GetFloat("Minimap", "PlateDrop", cfg.MinimapPlateDrop, 0f, 0.05f);

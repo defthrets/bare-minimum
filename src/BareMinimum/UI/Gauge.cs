@@ -240,7 +240,10 @@ namespace BareMinimum.UI
 
                 // A minimap in the left half of the screen is the only sane answer. Anything
                 // else means the native reported something this code should not build on.
-                if (at.X > 0.0001f && at.X < 0.5f) return at.X;
+                //
+                // Nudged the same as Layout.Anchor is, so the fallback and the real answer are
+                // at least wrong in the same direction when a HUD mod has moved the radar.
+                if (at.X > 0.0001f && at.X < 0.5f) return at.X + BareMinimum.Vitals.Layout.NudgeX;
             }
             catch
             {
