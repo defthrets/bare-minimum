@@ -1619,6 +1619,20 @@ namespace BareMinimum.Core
         /// animation, and this rides along with that rather than replacing it -- you drank
         /// something, so the meter should notice, and that is all it should do.
         /// </summary>
+        /// <summary>
+        /// AT A MACHINE HE USES IT THERE AND THEN, rather than putting it in his pocket.
+        ///
+        /// BuyToPantry is right for a shop and wrong for a machine. You do not walk to a
+        /// vending machine to do the week's shopping; you walk to one because you want a drink
+        /// now, and the game itself has always had him drink it standing at the thing. A can
+        /// that goes straight into a pocket is a purchase you have to remember to finish.
+        ///
+        /// Only machines. Tills, shelves and stalls are shops and keep the pocket.
+        ///
+        /// Off, a machine behaves like every other counter and BuyToPantry decides.
+        /// </summary>
+        public bool VendingUseNow = true;
+
         public float VendingSipHunger = 0.05f;
 
         /// <summary>
@@ -2140,6 +2154,7 @@ namespace BareMinimum.Core
                                                   cfg.VendingMachines);
                 cfg.FruitStalls = ini.GetBool("Counters", "FruitStalls", cfg.FruitStalls);
                 cfg.StallItems = ini.GetString("Counters", "StallItems", cfg.StallItems);
+                cfg.VendingUseNow = ini.GetBool("Counters", "VendingUseNow", cfg.VendingUseNow);
                 cfg.VendingSipHunger = ini.GetFloat("Counters", "VendingSipHunger",
                                                     cfg.VendingSipHunger, 0f, 0.5f);
                 cfg.VendingSipThirst = ini.GetFloat("Counters", "VendingSipThirst",

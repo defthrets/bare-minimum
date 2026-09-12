@@ -419,6 +419,7 @@ namespace BareMinimum.UI
             { "Bed hours",                "s_bed.png"    },
             { "Car hours",                "s_car.png"    },
 
+            { "Use it at the machine",    "s_cart.png"   },
             { "Buy to pocket",            "s_cart.png"   },
             { "Hide the game's shop",     "s_cart.png"   },
             { "Fridge storage",           "s_layout.png" },
@@ -703,9 +704,16 @@ namespace BareMinimum.UI
                  () => _cfg.BlockVanillaCounter, v => _cfg.BlockVanillaCounter = v,
                  "Keeps the game's own counter list off the screen. Turn off if E stops working in a shop.");
 
+            Bool("Use it at the machine", "Counters", "VendingUseNow",
+                 () => _cfg.VendingUseNow, v => _cfg.VendingUseNow = v,
+                 "A vending machine is not a shop: he drinks it standing there, the way the " +
+                 "game always has, instead of pocketing it. Tills, shelves and stalls keep " +
+                 "the pocket either way.");
+
             Bool("Buy to pocket", "Money", "BuyToPantry",
                  () => _cfg.BuyToPantry, v => _cfg.BuyToPantry = v,
-                 "Buying puts it in your pocket to eat later. Off eats it on the spot.");
+                 "Buying puts it in your pocket to eat later. Off eats it on the spot. A " +
+                 "vending machine has its own answer above.");
 
             Float("Pocket size", "Money", "PantrySlots",
                   () => _cfg.PantrySlots, v => _cfg.PantrySlots = (int)Math.Round(v),

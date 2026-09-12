@@ -40,6 +40,13 @@ namespace BareMinimum.UI
         private Counter _at = Counter.None;
 
         /// <summary>
+        /// Bought out of a machine and waiting for the machine's own animation to finish
+        /// before he uses it. Null when nothing is waiting. See Vend and Waiting.
+        /// </summary>
+        private Item _vending;
+        private int _vendUntil;
+
+        /// <summary>
         /// The chains we know how to brand, and their marks. See Brands.
         ///
         /// The counter is found by till prop, which is what lets it work in every shop in
@@ -81,6 +88,7 @@ namespace BareMinimum.UI
                 // has to keep being shut up while our menu is open, or dismissing ours hands
                 // the counter straight back to theirs.
                 Quieten();
+                Waiting();
 
                 if (suspended) { if (_ui.IsOpen) _ui.Close(); return; }
 
@@ -359,7 +367,16 @@ namespace BareMinimum.UI
         /// machine that grabs control for two seconds every time you buy a bag of crisps is
         /// worse than no animation.
         /// </summary>
-        private static void Vend()
+        /// <summary>
+        /// The game's own reach-and-press at the machine.
+        ///
+        /// <paramref name="using_"/> is what he is about to use, or null when it is going in
+        /// his pocket and there is nothing to wait for. When it is not null the item is held
+        /// here until the animation has had its nine hundred milliseconds, because Eating.Begin
+        /// used to be called on the line after this one and replaced the reach instantly -- the
+        /// press never played and the can appeared in his hand out of nowhere.
+        /// </summary>
+        private void Vend(Item using_ = null)
         {
             try
             {
@@ -369,14 +386,58 @@ namespace BareMinimum.UI
                 const string dict = "mini@sprunk";
 
                 Function.Call(Hash.REQUEST_ANIM_DICT, dict);
-                if (!Function.Call<bool>(Hash.HAS_ANIM_DICT_LOADED, dict)) return;
 
+                if (!Function.Call<bool>(Hash.HAS_ANIM_DICT_LOADED, dict))
+                {
+                    // The dictionary is on its way. Without the animation there is nothing to
+                    // wait for, so whatever he was going to use he uses now.
+                    if (using_ != null) _eating.Begin(using_, true);
+                    return;
+                }
+
+                // pt1 of three. pt2 and pt3 are the rest of the game's own sequence -- it
+                // bends down for the can and drinks it -- and they are deliberately not
+                // played: the drinking here is Eating's, with the item's real prop in his
+                // hand, and miming a second invisible can before it would look like two.
                 Function.Call(Hash.TASK_PLAY_ANIM, me.Handle, dict, "plyr_buy_drink_pt1",
                               8f, -8f, 900, 48, 0f, false, false, false);
+
+                if (using_ == null) return;
+
+                _vending = using_;
+                _vendUntil = Game.GameTime + 900;
             }
             catch (Exception ex)
             {
                 Core.Log.Once("vend-anim", "Could not play the machine animation: " + ex.Message);
+
+                // The reach failed; the drink must not fail with it.
+                if (using_ != null) _eating.Begin(using_, true);
+            }
+        }
+
+        /// <summary>
+        /// Uses whatever the machine just sold him, once its animation has finished.
+        ///
+        /// Called every tick from Update and not from Open, because the menu has CLOSED by
+        /// then -- the purchase shuts it -- and a wait that only ran while the menu was up
+        /// would never come round.
+        /// </summary>
+        private void Waiting()
+        {
+            if (_vending == null) return;
+            if (Game.GameTime < _vendUntil) return;
+
+            var item = _vending;
+            _vending = null;
+
+            try
+            {
+                if (!_eating.Busy) _eating.Begin(item, true);
+            }
+            catch (Exception ex)
+            {
+                Core.Log.Once("vend-use", "Could not use what the machine sold: " + ex.Message);
             }
         }
 
@@ -505,7 +566,13 @@ namespace BareMinimum.UI
             // with fifteen things on the shelf sold you exactly one of them per visit -- the
             // second was refused while you were still chewing the first. Shopping is a thing
             // you do once, for several items.
-            if (_cfg.BuyToPantry)
+            // A MACHINE IS NOT A SHOP. See Settings.VendingUseNow: you walk to one because
+            // you want a drink now, and the game itself has always had him drink it standing
+            // there. Tills, shelves and stalls keep the pocket.
+            var pocket = _cfg.BuyToPantry &&
+                         !(_at == Counter.Machine && _cfg.VendingUseNow);
+
+            if (pocket)
             {
                 // FULL POCKETS ARE NOT A REFUSAL, THEY ARE A MEAL. Being told at the counter
                 // that you cannot buy a burger because you are already carrying five is the
@@ -555,7 +622,8 @@ namespace BareMinimum.UI
 
             _ui.Close();
 
-            if (_at == Counter.Machine) Vend();
+            // At a machine the reach plays first and Vend starts the eating when it is done.
+            if (_at == Counter.Machine) { Vend(item); return; }
 
             if (!_eating.Begin(item, true))
             {
@@ -585,7 +653,7 @@ namespace BareMinimum.UI
 
             _ui.Close();
 
-            if (_at == Counter.Machine) Vend();
+            if (_at == Counter.Machine) { Vend(item); return; }
 
             if (_eating.Begin(item, true))
             {
