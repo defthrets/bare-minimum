@@ -36,7 +36,14 @@ ICONS = os.path.join(HERE, "data", "icons")
 INBOX = os.path.join(HERE, "tools", "pixelart-in")
 PREVIOUS = os.path.join(HERE, "tools", "icons-previous")
 
-CANVAS = 256
+# THE CANVAS THE SET SHIPS AT. 128, not 256, and the reason is in tools/icon-size.py: every
+# icon is a texture held for the whole session, the sprites are 48 pixels with no detail past
+# that, and they are drawn about seventy-five pixels tall -- so 256 cost four times the video
+# memory to be scaled DOWN by three. At 128 the blow-up is a whole x2 and the draw is close to
+# one to one. Anything bound after this lands at the same size as everything already here.
+#
+# icon-size.py sets this itself when it re-renders the set, so the two can never disagree.
+CANVAS = 128
 MARGIN = 8
 
 # The bridge's drug ids -- Food/Dope.cs's dose table. Not in foods.json, so listed here.

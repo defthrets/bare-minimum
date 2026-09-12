@@ -150,6 +150,21 @@ BIND = [
     ("alcohol", 5,  "group:bottle"),
     ("alcohol", 3,  "group:wine"),            # the fallbacks follow the rebinds above
     ("alcohol", 9,  "group:flask"),
+    # tin_can -- three, and they map one to one
+    ("tin", 0, "Tin of Sardines"),            # the flat tin with the pull ring
+    ("tin", 1, "Tin of Beans"),               # the can actually labelled BEANS, and it is from Bean's
+    ("tin", 2, "Dented Can"),                 # crushed, no label left -- "could be peaches"
+    ("tin", 1, "group:tin"),
+    # ice_cream_cone
+    ("cone", 6, "Ice Maiden Cone"),           # two scoops, chocolate and vanilla
+    ("cone", 4, "Cherry Popper Cone"),        # sprinkles, which is the one you remember
+    ("cone", 3, "Kiosk Cone"),                # soft serve out of a machine
+    ("cone", 2, "group:cone"),                # a plain scoop on a cone, for anything added later
+    # a_towering_reuben_with_a_cocktail_stick
+    ("sandwich", 3, "The Reuben"),            # rye, overflowing, held together with a stick
+    ("sandwich", 4, "Deli Sandwich"),         # cut properly and stacked neatly
+    ("sandwich", 5, "Freshly Made Sandwich"), # made in front of you
+    ("sandwich", 2, "group:sandwich"),
     # platter_9_Heavy_Shells_Sp -- sixteen boards and trays
     ("platter", 0,  "Mezze Plate"),           # the tray of dips, breads and olives
     ("platter", 1,  "Half Dozen Oysters"),    # oysters on a board -- the plate group's one gap, filled from here
