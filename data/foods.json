@@ -3972,6 +3972,22 @@
     "The scenario stays a neutral idle on purpose. The only two eating scenarios in the game",
     "-- WORLD_HUMAN_SEAT_LEDGE_EATING and WORLD_HUMAN_SEAT_WALL_EATING -- both sit him down."
   ],
+  "litter": {
+    "_note": [
+      "WHAT IS LEFT ON THE PAVEMENT when he has finished. Three defaults by what the thing",
+      "was, and any item may name its own with a \"litter\" of its own -- or an empty one,",
+      "which means it leaves nothing. A cigarette leaves nothing here because this build has",
+      "no butt to drop: prop_cigarette_01 is not a model in it.",
+      "",
+      "These are real model names and they were checked against this build before they went",
+      "in. A name the game does not have drops nothing and says so once in the log."
+    ],
+
+    "drink": "prop_ld_can_01",
+    "booze": "prop_beer_bottle",
+    "food": "prop_paper_bag_01"
+  },
+
   "animations": {
     "eat": {
       "hand": "left",

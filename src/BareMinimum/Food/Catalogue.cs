@@ -134,6 +134,15 @@ namespace BareMinimum.Food
 
         /// <summary>False once the prop is known not to exist in this build, so it is tried once.</summary>
         public bool PropUsable = true;
+
+        /// <summary>
+        /// The model left on the ground when this is finished, or "" for nothing.
+        ///
+        /// NULL MEANS THE ITEM DID NOT SAY, which is not the same as saying nothing: null
+        /// takes the default for its kind, "" leaves the pavement clean. Resolved once at
+        /// load into a name that is really in this build -- see Litter in Catalogue.
+        /// </summary>
+        public string Litter;
     }
 
     /// <summary>A movement of animation dictionary and clip, as read from the file.</summary>
@@ -396,7 +405,10 @@ namespace BareMinimum.Food
                         VehicleSeconds = node["vehicleSeconds"].AsFloat(0f),
                         Combo = node["combo"].AsBool(false),
                         DrinkProps = PropNames(node["drinkProp"]),
-                        Eat = ItemAnim(node["anim"])
+                        Eat = ItemAnim(node["anim"]),
+
+                        // Absent is not the same as empty. See Item.Litter.
+                        Litter = node.Has("litter") ? node["litter"].AsString("") : null
                     };
 
                     if (string.IsNullOrEmpty(item.Name)) continue;
@@ -446,6 +458,14 @@ namespace BareMinimum.Food
 
                 ReadAnim(doc["animations"]["eat"], Eat);
                 ReadAnim(doc["animations"]["drink"], Sip);
+
+                // What a finished thing leaves on the pavement. Beside the props and the
+                // animations because that is what it is -- see Food.Litter.
+                var litter = doc["litter"];
+
+                LitterDrink = litter["drink"].AsString("");
+                LitterBooze = litter["booze"].AsString("");
+                LitterFood = litter["food"].AsString("");
 
                 Lines.Clear();
 
@@ -656,6 +676,29 @@ namespace BareMinimum.Food
         /// is in full or it is not an override, and ReadAnim's own "one pair is a list of one"
         /// rule is what decides that: no dict, no options, no override.
         /// </summary>
+        /// <summary>What a drink, a beer and a meal leave behind. From foods.json; see Litter.</summary>
+        public string LitterDrink = "";
+        public string LitterBooze = "";
+        public string LitterFood = "";
+
+        /// <summary>
+        /// The model this item leaves on the ground, or "" for nothing.
+        ///
+        /// The item's own answer if it gave one, and the default for its kind if it did not.
+        /// A SMOKE LEAVES NOTHING by default and that is deliberate rather than missing: this
+        /// build has no cigarette butt to drop.
+        /// </summary>
+        public string LitterFor(Item item)
+        {
+            if (item == null) return "";
+            if (item.Litter != null) return item.Litter;
+
+            if (item.Smoke) return "";
+            if (item.Booze > 0f) return LitterBooze;
+
+            return item.Drink ? LitterDrink : LitterFood;
+        }
+
         private static AnimRef ItemAnim(Json node)
         {
             if (node == null || node.IsNull) return null;

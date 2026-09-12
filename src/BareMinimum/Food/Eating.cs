@@ -98,7 +98,12 @@ namespace BareMinimum.Food
             _menu = menu;
             _needs = needs;
             _speech = speech;
+
+            _litter = new Litter(cfg);
         }
+
+        /// <summary>What he leaves on the pavement. See Food.Litter.</summary>
+        private readonly Litter _litter;
 
         /// <summary>True while something is being eaten. Stops a second one being started.</summary>
         public bool Busy => _item != null;
@@ -339,6 +344,24 @@ namespace BareMinimum.Food
                      "%, rested " + Pct(_needs.Sleep.Value) + "%" +
                      (item.Thirst != 0f ? "  (thirst " + (item.Thirst > 0f ? "+" : "") +
                                           Pct(item.Thirst) + ")" : "") + ".");
+
+            // DROPPED BEFORE THE HAND IS EMPTIED, so the can leaves from where the can was.
+            // Cleanup deletes the held prop, and a litter drop after it would come off a hand
+            // that is already empty -- which is the same half-second of nothing this is here
+            // to remove.
+            try
+            {
+                var me = Game.Player.Character;
+
+                if (me != null && me.Exists() && !InVehicle(me))
+                {
+                    _litter.Drop(me, _menu.LitterFor(item));
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Once("litter", "Could not drop the empty: " + ex.Message);
+            }
 
             Cleanup();
             Report(item);
@@ -805,6 +828,11 @@ namespace BareMinimum.Food
         public void Shutdown()
         {
             Abandon();
+
+            // The empties are NOT swept up. They are handed back to the game, which clears
+            // them on its own terms like any other rubbish in the world -- a reload should not
+            // tidy a street somebody spent an afternoon littering. See Litter.Shutdown.
+            _litter.Shutdown();
         }
     }
 }

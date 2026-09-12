@@ -419,6 +419,8 @@ namespace BareMinimum.UI
             { "Bed hours",                "s_bed.png"    },
             { "Car hours",                "s_car.png"    },
 
+            { "Drop the empties",         "s_cart.png"   },
+            { "Empties left lying",       "s_cart.png"   },
             { "Use it at the machine",    "s_cart.png"   },
             { "Buy to pocket",            "s_cart.png"   },
             { "Hide the game's shop",     "s_cart.png"   },
@@ -693,6 +695,18 @@ namespace BareMinimum.UI
                   1f, 1f, 24f, "0", "How long a sleep in the car lasts.");
 
             Group("SHOPS");
+
+            Bool("Drop the empties", "Eating", "Litter",
+                 () => _cfg.Litter, v => _cfg.Litter = v,
+                 "He drops the can, the bottle or the bag when he has finished with it, and it " +
+                 "stays where it falls. Not in a car.");
+
+            Float("Empties left lying", "Eating", "LitterMax",
+                  () => _cfg.LitterMax, v => _cfg.LitterMax = (int)Math.Round(v),
+                  1f, 0f, 60f, "0",
+                  "How many stay on the ground. The oldest goes when the newest lands, because " +
+                  "props are a limited resource and nothing else is taking them away.",
+                  () => _cfg.Litter, "~y~Turn dropping the empties ON first.");
 
             Float("A smoke lasts", "Eating", "SmokeSeconds",
                   () => _cfg.SmokeSeconds, v => _cfg.SmokeSeconds = v,

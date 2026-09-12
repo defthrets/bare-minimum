@@ -1722,6 +1722,24 @@ namespace BareMinimum.Core
         /// </summary>
         public float SmokeSeconds = 20f;
 
+        /// <summary>
+        /// HE DROPS IT WHEN HE HAS FINISHED. An empty can that vanishes out of a man's hand
+        /// the instant he stops drinking is the one moment this mod stops modelling anything.
+        ///
+        /// What each thing leaves is in foods.json beside everything else about the food, so
+        /// a can, a bottle and a bag are three lines somebody can change. See Food.Litter.
+        /// </summary>
+        public bool Litter = true;
+
+        /// <summary>
+        /// HOW MANY BITS STAY ON THE GROUND. The oldest goes when the newest arrives.
+        ///
+        /// Props are a limited resource in this game, and a mod that adds one every time you
+        /// have a drink and never takes one away is a mod that eventually costs somebody their
+        /// traffic. Twelve is a long walk's worth. 0 drops nothing that stays.
+        /// </summary>
+        public int LitterMax = 12;
+
         public float FoodSpinX = 0f;
         public float FoodSpinY = 0f;
         public float FoodSpinZ = 90f;
@@ -2172,6 +2190,8 @@ namespace BareMinimum.Core
                 cfg.WalkIns = ini.GetBool("Counters", "WalkIns", cfg.WalkIns);
 
                 cfg.SmokeSeconds = ini.GetFloat("Eating", "SmokeSeconds", cfg.SmokeSeconds, 0f, 120f);
+                cfg.Litter = ini.GetBool("Eating", "Litter", cfg.Litter);
+                cfg.LitterMax = (int)ini.GetFloat("Eating", "LitterMax", cfg.LitterMax, 0f, 60f);
                 cfg.FoodSpinX = ini.GetFloat("Eating", "FoodSpinX", cfg.FoodSpinX, -180f, 180f);
                 cfg.FoodSpinY = ini.GetFloat("Eating", "FoodSpinY", cfg.FoodSpinY, -180f, 180f);
                 cfg.FoodSpinZ = ini.GetFloat("Eating", "FoodSpinZ", cfg.FoodSpinZ, -180f, 180f);
