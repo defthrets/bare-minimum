@@ -158,6 +158,17 @@ namespace BareMinimum.UI
                     return true;
                 }
 
+                // A CUTSCENE IS ITS OWN REASON, not an inference from the HUD being hidden.
+                // The game does hide its HUD for cutscenes, and the soft tests below would
+                // catch that six frames in -- but "the HUD disappears in cutscenes" was asked
+                // for by name on the mod page, and a promise made by name should rest on the
+                // native that says so, not on a side effect that holds for most of them.
+                if (Function.Call<bool>(Hash.IS_CUTSCENE_ACTIVE))
+                {
+                    why = "a cutscene is playing";
+                    return true;
+                }
+
                 var me = Game.Player == null ? 0 : Game.Player.Handle;
 
                 if (Function.Call<bool>(Hash.IS_PLAYER_DEAD, me)) { why = "he is dead"; return true; }
