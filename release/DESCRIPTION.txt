@@ -1,13 +1,18 @@
 ================================================================================
-  BARE MINIMUM 0.2.0 -- copy for the mod page
+  BARE MINIMUM 0.4.1 -- copy for the mod page
 ================================================================================
 
-Three lengths and a changelog. Use whichever the site's fields want.
+Three lengths. Use whichever the site's fields want.
 
 MARKUP: the page allows <b> <i> <u> <a> <ul> <ol> <li> and nothing else. No
 headings, no <br>, no tables -- so headings are bold lines, breaks are real
-newlines, and every list is a <ul>. Sections 3 and 4 below are written in that
-set and are meant to be pasted as they are. Sections 1 and 2 are plain text.
+newlines, and every list is a <ul>. Section 3 is written in that set and is meant
+to be pasted as it is. Sections 1 and 2 are plain text.
+
+THE CHANGELOG IS NOT ON THE PAGE ANY MORE. A moderator pointed out, rightly, that
+it had fallen two versions behind the downloads. It lives in CHANGES.txt in every
+zip and on the GitHub releases page, both of which are written at the same moment
+the zip is built and cannot fall behind it. Section 3 ends with the pointer.
 
 If Hoodrich has a page of its own, its name in section 3 is the one place an
 <a href="..."> belongs. It is left unwrapped because the URL is not known here.
@@ -24,22 +29,22 @@ Franklin gets hungry, thirsty and tired. 211 real shops to do something about it
   2. ONE PARAGRAPH  (short description -- plain text)
 --------------------------------------------------------------------------------
 
-Hunger, thirst and sleep for GTA V, standing in one row of gauges low on the
-screen with health, armour and your sprint energy. They do not just drain --
+Hunger, thirst and sleep for GTA V, standing in one row of gauges beside the
+minimap with health, armour and your sprint energy. They do not just drain --
 hunger churns and gets more agitated the emptier it is, thirst runs clean with
 bubbles going up through it, sleep breathes, and the health bar has a heartbeat
 you can take, quicker the worse he is hurt. There are 211 places to eat and drink
 and they are the real ones: the taco windows, the hot dog carts, Burger Shot,
 Bean Machine, Rob's Liquor, the delis and the restaurants nobody ever gets to
-walk into. 201 things to buy, each with its own price, its own effect and its own
-line about itself. Every vending machine you walk past is remembered on the map
-for good. Shops with a full menu, stalls that just hand you a hot dog, and
-drive-throughs you order from without leaving the car. What you buy goes in your
-pocket for later, or into the fridge in any safehouse kitchen. Sleep in any bed.
-Run everywhere and you will pay for it in all three -- and being dry costs you
-your wind before it costs you anything else. 206 settings, all live in an in-game
-menu, and every shop and every item is a plain text file you can edit. Drop-in
-install, works on Legacy and Enhanced, and your save is never touched.
+walk into. 201 things to buy, most of them with a picture of their own drawn for
+the tile, each with its own price, its own effect and its own line about itself.
+Every vending machine you walk past is remembered on the map for good. What you
+buy goes in your pocket for later, or into the fridge in any safehouse kitchen.
+Sleep in any bed. Run everywhere and you will pay for it in all three -- and
+being dry costs you your wind before it costs you anything else. Ten languages
+off the first row of the menu. 213 settings, all live, and every shop, item and
+picture is a plain file you can edit. Drop-in install, works on Legacy and
+Enhanced, and your save is never touched.
 
 
 --------------------------------------------------------------------------------
@@ -48,7 +53,11 @@ install, works on Legacy and Enhanced, and your save is never touched.
 
 <b>🍗 BARE MINIMUM 🌙</b>
 
-Franklin gets hungry and he gets tired. Two thin gauges sit low on the screen and quietly empty until you do something about it.
+Franklin gets hungry, he gets thirsty and he gets tired. A row of thin gauges sits beside the minimap and quietly empties until you do something about it.
+
+🇬🇧 🇺🇸 🇧🇷 🇪🇸 🇫🇷 🇩🇪 🇷🇺 🇵🇱 🇮🇳 🇨🇳 — English, Português (BR), Español, Français, Deutsch, Русский, Polski, Hindi, 中文. First row of the settings menu. Anything a translation has not covered shows in English rather than going blank.
+
+Free. Open source under MIT. Nightly builds at spitmux.me if you want it before it lands here.
 
 
 <b>📊 ONE ROW OF GAUGES THAT ACTUALLY MOVE</b>
@@ -69,9 +78,11 @@ The colour carries the state as much as the level does, and every bar follows on
 
 <b>Franklin's special ability runs off the energy bar.</b> Use it and you watch it go.
 
-<b>There is a second HUD in the box.</b> Switch HUD style to ICONS and the bars come off entirely, leaving the drumstick and the moon on their own, still carrying the same colour. It tells you less on purpose. One press in the menu, either way.
+<b>Go under the water and an air meter takes the plate under the map</b>, drawn where the game's own used to be, and it beats faster the less you have left.
 
-Both run on the <i>game</i> clock, so a full day of them is about 48 minutes of play, and both pause when the game does.
+<b>There is a second HUD in the box.</b> Switch HUD style to ICONS and the bars come off entirely, leaving the marks on their own, still carrying the same colour. It tells you less on purpose. One press in the menu, either way.
+
+All three needs run on the <i>game</i> clock, so a full day of them is about 48 minutes of play, and they pause when the game does.
 
 
 <b>🌮 TWO HUNDRED PLACES TO EAT AND DRINK</b>
@@ -80,7 +91,7 @@ Both run on the <i>game</i> clock, so a full day of them is about 48 minutes of 
 
 Each has its own menu, its own prices, its own hours and its own voice. A breakfast menu at midnight is shown greyed with its hours on it rather than quietly missing, so you learn to come back.
 
-201 things to buy — 111 meals, 50 snacks and 40 drinks. Drink enough of the wrong ones and you will feel it, and the walk goes with it.
+201 things to buy — 111 meals, 50 snacks and 40 drinks — and <b>most of them have a picture of their own</b>, pixel art drawn per item rather than per kind: the Bleeder Burger drips, the Bacon Triple Cheese Melt has the bacon, the Tacos al Pastor have the pineapple, the Blue Plate has the blue rim. Drink enough of the wrong ones and you will feel it, and the walk goes with it.
 
 <b>🥤 Every vending machine and fruit stall you walk past goes on the map for good.</b> They are found by model rather than from a list, so every one in the world works — and they are remembered by where they stand, so the map fills itself in as you play and stays filled in between sessions. There is a survey on the menu that will fly the map and find the lot for you if you would rather not wait.
 
@@ -89,127 +100,109 @@ Each has its own menu, its own prices, its own hours and its own voice. A breakf
 
 <b>🛒 HOW YOU BUY IT</b>
 
-Walk up and press <b>E</b>. A counter or a shelf opens a list with tabs, a picture and a price on every row, and a line about each one.
+Walk up and press <b>E</b>. A counter or a shelf opens a list with tabs, a picture and a price on every row, and a line about each one. Some shops have a door as well — hold E instead of tapping it and you go inside.
 
 <ul>
 <li>🌭 <b>A hot dog cart just hands you a hot dog</b>, and he eats it on the spot.</li>
 <li>🚗 <b>Drive-throughs work from the driver's seat.</b> A meal at the wheel is eaten slowly between junctions instead of in four seconds at the window, and the horn is held off while you are ordering.</li>
-<li>🎒 <b>What you buy goes in your pocket</b> by default — five things, on <b>F11</b> — so a shop is somewhere you go back to rather than a place you stand and eat.</li>
+<li>🎒 <b>What you buy goes in your pocket</b> by default — five things, on <b>F12</b> — so a shop is somewhere you go back to rather than a place you stand and eat. Turn up with full pockets and he eats it there and then rather than refusing the sale.</li>
 <li>🧊 <b>Every safehouse kitchen has a working fridge</b> that holds forty things. Your pocket on one side, the fridge on the other, one key to move things across and another to eat from either side. It is found by looking for a fridge rather than by a coordinate, so interior mods work too.</li>
 </ul>
 
 
 <b>⚠️ IT COSTS SOMETHING TO IGNORE</b>
 
-Sprinting empties both faster than walking, and the gauges visibly speed up while you do it, so the reason is on screen.
+Sprinting empties all three faster than walking, and the gauges visibly speed up while you do it, so the reason is on screen.
 
 <ul>
 <li>🍗 <b>Let hunger reach nothing</b> and it starts costing health, slowly, with a warning first. It stops well above the floor — it will never kill you.</li>
-<li>💧 <b>Let thirst run low</b> and it takes your <i>wind</i> before anything else: the sprint meter empties more than twice as fast, so you lose your legs halfway across a forecourt. Then he starts breathing hard — in his own voice, out of the game's own sounds — and the rate of it tells you how bad it is without looking at the bar.</li>
+<li>💧 <b>Let thirst run low</b> and it takes your <i>wind</i> before anything else: the sprint meter empties more than twice as fast, so you lose your legs halfway across a forecourt. Then he starts breathing hard — in his own voice, out of the game's own sounds — and the rate of it tells you how bad it is without looking at the bar. Thirst empties in a game day against hunger's two and a bit, so it is usually the one that gets you first, and a can fixes it.</li>
 <li>🌙 <b>Let sleep reach nothing</b> and the picture starts to swim. Stay up through that and you collapse where you stand and wake up four hours later.</li>
 </ul>
 
 Sleep in any bed, and how well you sleep depends on whose bed it is. A car is worse than a safehouse and better than nothing. Sleeping also sobers you up, because it advances the same clock everything else runs on.
 
+<b>A beer is a drink and a whisky is not.</b> Anything wet fills the thirst bar, food fills a little of it, and alcohol subtracts on a curve — so a pint is genuinely hydrating and a spirit is very nearly a net loss. Nothing on the shelf had to be told which it was; it falls out of one rule.
+
 
 <b>🔧 YOURS TO CHANGE</b>
 
-206 settings across six tabs in an in-game menu on <b>F11</b>, each with a line saying what it does, everything live as you turn it, and the changes written back to the ini without disturbing your comments or your ordering.
+213 settings across seven tabs in an in-game menu on <b>F11</b>, each with a line saying what it does, everything live as you turn it, and the changes written back to the ini without disturbing your comments or your ordering.
 
-Every shop and every item is a plain text file. Add a shop, change a price, write a menu, move something that is in the wrong place. Anything the game cannot find is skipped with a line in the log rather than breaking the mod.
+Every shop, every item and every picture is a plain file. Add a shop, change a price, write a menu, drop a PNG in the icons folder and that item has a picture. Anything the game cannot find is skipped with a line in the log rather than breaking the mod.
+
+<b>🖥️ Ultrawide, or a HUD mod that moves your radar?</b> Map left/right and Map up/down under Vitals drag the frame, the bars and the fuel gauge to wherever your map actually is.
 
 
 <b>📱 IF YOU ALSO RUN HOODRICH</b>
 
-The shops talk on its social feed — 71 accounts and 475 lines, written as people who sell lunch rather than as gang members. Entirely optional, entirely one-way, and completely silent if you do not have it.
+The shops talk on its social feed — 71 accounts and 475 lines, written as people who sell lunch rather than as gang members.
+
+And its drugs do something to the meters. A stimulant pins the energy bar at the top and then costs you a comedown; two bars of a sedative and the screen starts going out for a second at a time, with no warning and with your controls still yours, because where you have got to by the time it comes back is the point. Acid gets twelve minutes of the game's own peyote look, swelling on two periods that do not divide into each other so it never settles into a filter and never falls into a rhythm.
+
+All of it is entirely optional, entirely one-way, and completely silent if you do not have it.
 
 
 <b>💾 INSTALL</b>
 
-Drag into your GTA V folder, say yes to merging, load a save. Needs ScriptHookV and ScriptHookVDotNet 3. Works on Legacy and Enhanced from the same files. No game file is modified and nothing is written to your save — delete three things and it never happened.
+Drag into your GTA V folder, say yes to merging, load a save. Needs ScriptHookV and ScriptHookVDotNet 3.6 or newer. Works on Legacy and Enhanced from the same files. No game file is modified and nothing is written to your save — delete three things and it never happened.
 
-<b>❗ Unblock the ZIP before you extract it</b>, or ScriptHookVDotNet will refuse to load the DLL and say nothing about it.
+<b>❗ Unblock the ZIP before you extract it</b>, or ScriptHookVDotNet will refuse to load the DLL and say nothing about it. If you already run script mods, take the plain zip — the -full one bundles its own ScriptHookVDotNet and two of those fight.
 
 
 <b>⌨️ KEYS</b>
 
 <ul>
-<li><b>E</b> — interact: the counter, the bed and the car alike</li>
+<li><b>E</b> — interact: the counter, the bed and the car alike. Hold it at a door to go in.</li>
 <li><b>F11</b> — settings</li>
 <li><b>F12</b> — your pocket</li>
+<li><b>Scroll Lock</b> — fly the map and find every vending machine. You only ever want this once.</li>
 </ul>
 
-All three can be changed in the ini.
+All four can be changed in the ini.
 
 🎮 <b>On a controller:</b> the context button does everything E does. The panels open on a chord, because a pad has no button spare — <b>LB + D-pad Up</b> for settings, <b>RB + A</b> for your pocket. Inside a panel the d-pad moves, A chooses and B closes, and the on-screen hints switch to those glyphs the moment you pick a pad up.
 
 
+<b>📋 WHAT CHANGED</b>
+
+The full changelog lives in <b>CHANGES.txt</b> inside every zip and on the GitHub releases page — both written the moment the zip is built, so they cannot fall behind it. The recent entries are below.
+
+
 --------------------------------------------------------------------------------
-  4. CHANGELOG  (changelog field -- paste from here to the next divider)
+  4. CHANGELOG  (changelog field -- the recent releases only; CHANGES.txt has all)
 --------------------------------------------------------------------------------
 
-<b>0.2.0</b>
+<b>0.4.1</b>
 
 <ul>
-<li>💧 <b>A third need: thirst.</b> Twenty-four game hours from full to dry — well under half of hunger's, so it empties about as often as you sleep — and one can fixes it where a day's food is several meals. What fills it is worked out rather than typed: a drink is most of the bar, food carries across a fifth of its own hunger value, and <i>alcohol subtracts on a curve</i>, so a beer is a drink and a whisky is very much not.</li>
-<li>🫁 <b>Being dry takes your wind, not your speed.</b> Three needs each slowing you down is a man walking at a third pace with nothing on screen saying why. The sprint meter empties more than twice as fast instead — on a bar already in the row, so the cause and the effect sit two columns apart — and he moves like somebody who has run himself into the ground.</li>
-<li>❤️ <b>Health, armour and energy moved in.</b> They were a mod of their own; they are part of this row now, drawn through the same code with the same frame, plate and mark. Franklin's special ability runs off the energy bar.</li>
-<li>💓 <b>Health went red the whole way</b> with a heartbeat you can take — cells shoved up the column on every beat, quicker when he runs and when he is hurt. It throbs <i>dark</i> as it empties and flashes white the instant he is hit, armour included.</li>
-<li>🗺️ <b>Every vending machine and stall you pass stays on the map</b>, remembered by position and kept between sessions, with a map survey that will go and find them all.</li>
-<li>💊 <b>The drugs cost something.</b> A stimulant used to pin the energy bar and then simply let go; now there is a comedown. Two bars of a sedative and the screen starts going out for a second at a time — no warning, and your controls stay yours, because where you have got to by the time it comes back is the point.</li>
-<li>🌀 <b>LSD</b>, if you run Hoodrich: twelve minutes of the game's own peyote timecycle, swelling on two periods that do not divide into each other so it never settles into a filter and never falls into a rhythm.</li>
-<li>🖼️ <b>A frame round the minimap</b> in the bars' own black, with the street and the suburb above it and a speedo and dash lights below.</li>
-<li>⚙️ 206 settings, up from 105. Settings is <b>F11</b> now and the pocket is <b>F12</b>.</li>
+<li>🩹 <b>The game's own health and armour strip could creep back under the map and stay.</b> The layout that hides it was re-asked only on a handful of moments, and the game undid it on one that was none of them. Six more moments are watched now — in and out of a car, the HUD hidden and given back, the wanted level, an interior, a phone call ending — and every re-ask is logged with its cause, so a repeat names the trigger.</li>
+<li>💓 <b>A quiet heartbeat</b> re-asks every five seconds while no waypoint is set. Free, because with no route on the map there is nothing for a relayout to disturb, and it stands down the moment one goes up.</li>
 </ul>
 
-<b>0.1.4</b>
+<b>0.4.0</b>
 
 <ul>
-<li>🗺️ <b>114 shops to 190.</b> Every one ridden to in game and measured against the list before it was added — none within six metres of anything already there.</li>
-<li>🐟 <b>43 new things to eat</b> for the twenty-six that needed their own food. The Big Puffa does fish and chips off the pier, Pearls does oysters, Cluckin' Bell does a bucket, the Mojito Inn does a mojito. Where a sign said what it sold, that is what it sells.</li>
-<li>🏪 <b>The other fifty inherit their chain's menu</b> — one chain, one menu — but keep their own sign over the door.</li>
-<li>⚙️ 201 things to eat, up from 158.</li>
+<li>🎨 <b>Most of the menu has a picture of its own</b> — 157 of the 201 things you can buy, and all nine drugs. Pixel art, in colour, drawn per item: the Bleeder Burger drips, the Bacon Triple Cheese Melt has the bacon, the Money Shot has the egg, the Tacos al Pastor have the pineapple, the Blue Plate has the blue rim. In the shop, the pocket, the fridge and the toast when you eat.</li>
+<li>⬜ <b>The white shapes are still underneath.</b> Anything not drawn yet shows its group's shape, tinted as before. Drop an i_&lt;id&gt;.png in the icons folder and that item has a picture — no rebuild, no field to edit.</li>
+<li>🖥️ <b>Map left/right and Map up/down</b> under Vitals, for HUD mods that move the radar on ultrawide screens: they drag the frame, the bars and the fuel gauge to wherever your map actually is. <i>Asked for by Blackheart117.</i></li>
+<li>🎬 <b>Cutscenes hide the HUD by name</b>, the instant one starts, rather than as a side effect of the game hiding its own. <i>Also asked for.</i></li>
 </ul>
 
-<b>0.1.3</b>
+<b>0.3.1</b>
 
 <ul>
-<li>🍫 <b>The candy machines sell to you now</b> — snacks and drinks, never hot food, and he does the game's own vending animation when he buys. Found by model, so every one in the world works without a coordinate list.</li>
-<li>🥤 <b>The soda machines deliberately do not.</b> The game already sells a drink out of one and plays its own animation; a second purchase on top would be two mods fighting over one prop. Instead it just notices — drink from one and the hunger meter ticks up.</li>
-<li>🍎 <b>Roadside fruit and veg stalls</b>, the same way. The game repeats one stall from the Chumash coast to Chiliad, so one model finds all of them. What is on the trestle is a list in the ini.</li>
-<li>⚙️ 105 settings, up from 101.</li>
+<li>🇮🇳 <b>Hindi in Latin letters.</b> 0.3.0 shipped it in Devanagari, every word correct, and the game has no font with those letters in it, so it drew as boxes. Romanised Hindi draws everywhere; the Devanagari is kept as hi-Deva for the day a font has it.</li>
 </ul>
 
-<b>0.1.2</b>
+<b>0.3.0</b>
 
 <ul>
-<li>🎮 <b>It works on a controller now.</b> The counter and the shelf drew the pad's own button on their prompt and then read the keyboard only — shown a button, pressed it, nothing happened. Both read the pad now. The panels open on a chord too: <b>LB + D-pad Up</b> for settings, <b>RB + X</b> for your pocket. <i>Asked for by Jodosodojo.</i></li>
-<li>🚗 <b>Dozing off in a car is a hold, not a tap</b> — in a car that button also orders at a drive-through, so a press meant for lunch put you to sleep for four hours. A second and a half, with a meter while it fills. Beds are untouched. <i>Asked for by jerome74.</i></li>
-<li>🧊 <b>A fridge this build has not heard of can be named in the ini.</b> Fridge/ExtraModels takes a comma-separated list on top of the built-in fourteen, and the log now names the models that did not resolve instead of counting them. <i>Reported by jerome74.</i></li>
-<li>💤 <b>The sleep offer is a small chip at the bottom of the screen</b>, not the game's help box in the top corner — and the hold draws as a thin fill under the words.</li>
-<li>⚙️ 101 settings, up from 97.</li>
-</ul>
-
-<b>0.1.1</b>
-
-<ul>
-<li>🍗 <b>The bars are the default HUD now.</b> The drumstick-and-moon icons are still in the box and still one press away in the F7 menu, they are just no longer what you get without asking for it.</li>
-<li>⚙️ <b>Ships set up the way it is actually played</b> — the gauges' size and animation, the pocket at five slots, the hunger and sleep clocks, and shop markers on the pause map.</li>
-<li>🧑 <b>Michael, Franklin and Trevor were labelled wrong internally</b> and had been since the first build; the model hashes were a person out of step. Nothing was shared or lost between characters, but the names in the log and in the save files were wrong. Your save is corrected once, automatically, the first time 0.1.1 runs.</li>
-</ul>
-
-<b>0.1.0</b>
-
-First release.
-
-<ul>
-<li>Hunger and sleep on the game clock, with a bar HUD and an icon HUD.</li>
-<li>108 shops, stalls, windows and drive-throughs. 157 items.</li>
-<li>A pocket, a fridge in every safehouse kitchen, and sleeping in any bed.</li>
-<li>Sprinting costs you both. Hunger at zero takes health slowly and will not kill you. Sleep at zero swims the picture and then puts you on the floor.</li>
-<li>97 settings in an in-game menu. Every shop and every item is editable text.</li>
-<li>Optional one-way integration with Hoodrich's social feed.</li>
-<li>A work in progress. Not every food location is in yet — the convenience stores and the fuel stations especially — and more go in with each update.</li>
+<li>🌍 <b>Ten languages</b>, first row of the settings menu: English UK and US, Português (BR), Español, Français, Deutsch, Русский, Polski, 中文, Hindi. Every prompt, screen, tab and row label. <b>Anything a translation has not covered shows in English</b> — a language file is a plain map from what the mod says to what it should say instead, so a half-finished one is a working mod in two languages. Copy lang/en-GB.json, fill in the right-hand side, save it under your own code.</li>
+<li>🫧 <b>The air meter is back.</b> The game's breath bar is drawn in the same part of the minimap as its health strip, so hiding one hid the other. It is drawn on the plate under the map now, only while you are under, and it beats faster the less you have. <i>Reported by jerome74.</i></li>
+<li>🖼️ <b>The HUD stopped blinking.</b> Four screens each asked the game whether its HUD was hidden and each hid the instant it said yes — a this-frame native that any other script can flick. One answer now, asked once a frame, held for six frames before anything goes.</li>
+<li>🗺️ <b>The minimap stopped flickering the GPS.</b> The call that hides the game's health strip is a re-layout of the minimap and was being made sixty times a second; the GPS route is rebuilt by that movie and strobed with it. Asked once now, and again only when something could have undone it.</li>
+<li>🌭 <b>The hot dogs were being drunk.</b> Four carried an animation whose name says eat and which is a bottle going to the mouth. Five bar drinks had the opposite problem.</li>
 </ul>
 
 
