@@ -3985,7 +3985,31 @@
 
     "drink": "prop_ld_can_01",
     "booze": "prop_beer_bottle",
-    "food": "prop_paper_bag_01"
+    "food": "prop_paper_bag_01",
+
+    "_byIcon_note": [
+      "AND WHAT HE ATE IT OFF, WHERE HE ATE IT OFF SOMETHING. A rack of ribs does not leave",
+      "a paper bag; it leaves the plate. The icon group is already this mod's answer to what",
+      "shape a thing is -- sixteen items share the plate picture because they are all a",
+      "plate -- so it is also the answer to what is left when the food has gone.",
+      "",
+      "Keyed by the item's icon. Anything not named here falls to the three above, and an",
+      "item's own \"litter\" still beats both."
+    ],
+
+    "byIcon": {
+      "plate": "v_res_tt_plate01",
+      "platter": "v_res_tt_plate01",
+      "bowl": "prop_cs_bowl_01",
+      "ramen": "prop_cs_bowl_01",
+      "noodleplate": "v_res_tt_plate01",
+      "pizza": "v_res_tt_pizzaplate",
+      "slice": "prop_cs_plate_01",
+      "egg": "v_res_tt_plate01",
+      "sundae": "prop_cs_bowl_01",
+      "cake": "prop_cs_plate_01",
+      "pie": "prop_cs_plate_01"
+    }
   },
 
   "animations": {

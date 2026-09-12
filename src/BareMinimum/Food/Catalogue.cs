@@ -467,6 +467,20 @@ namespace BareMinimum.Food
                 LitterBooze = litter["booze"].AsString("");
                 LitterFood = litter["food"].AsString("");
 
+                LitterByIcon.Clear();
+
+                var byIcon = litter["byIcon"];
+
+                foreach (var icon in byIcon.Keys)
+                {
+                    // _comment is documentation, not data. Every json in this mod carries its
+                    // own explanation inside itself.
+                    if (icon.StartsWith("_")) continue;
+
+                    var name = byIcon[icon].AsString("");
+                    if (name.Length > 0) LitterByIcon[icon] = name;
+                }
+
                 Lines.Clear();
 
                 var speech = doc["speech"];
@@ -682,6 +696,16 @@ namespace BareMinimum.Food
         public string LitterFood = "";
 
         /// <summary>
+        /// What he ate it OFF, by icon group -- a plate, a bowl, a pizza tray.
+        ///
+        /// The icon is already this mod's answer to what shape a thing is, so it is also the
+        /// answer to what is left when the food has gone. From foods.json; anything not in
+        /// here falls to the three above.
+        /// </summary>
+        public readonly System.Collections.Generic.Dictionary<string, string> LitterByIcon =
+            new System.Collections.Generic.Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
         /// The model this item leaves on the ground, or "" for nothing.
         ///
         /// The item's own answer if it gave one, and the default for its kind if it did not.
@@ -694,6 +718,14 @@ namespace BareMinimum.Food
             if (item.Litter != null) return item.Litter;
 
             if (item.Smoke) return "";
+
+            // WHAT IT WAS SERVED ON BEATS WHAT IT WAS. A bowl of chilli leaves a bowl, not a
+            // paper bag -- and a beer in a glass, if one is ever added, would leave the glass
+            // rather than a bottle, which is why this is asked before the booze.
+            string on;
+            if (!string.IsNullOrEmpty(item.Icon) &&
+                LitterByIcon.TryGetValue(item.Icon, out on) && on.Length > 0) return on;
+
             if (item.Booze > 0f) return LitterBooze;
 
             return item.Drink ? LitterDrink : LitterFood;
