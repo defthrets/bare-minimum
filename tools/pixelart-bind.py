@@ -284,6 +284,31 @@ BIND = [
     ("pipe",      0,  "Pipe and Tobacco"),    # the classic briar: brown bowl, dark bent stem
     ("groceries", 8,  "Organic Veg Box"),     # the canvas tote, carrots and beetroot with the tops still on
     ("groceries", 5,  "Pantry Basics"),       # the tote with the packets standing in it -- staples, not a meal
+    # chinese_food -- the wok shop and the noodle bar, and two things that were standing in
+    ("chinese", 8,  "Steamed Dumplings"),     # the bamboo steamer with the pleated tops: steamed, and dumplings
+    ("chinese", 2,  "Pad Thai"),              # the only plate of noodles in the batch
+    ("chinese", 3,  "Wonton Soup"),           # REBOUND off bowl 10, a clear noodle soup -- these are wontons
+    ("chinese", 6,  "Special Lunch Menu"),    # REBOUND off plate2 3, which was sushi in front of a wok shop
+    # THE STAND-INS. This is the last of the art, so everything still drawing a white shape
+    # takes the nearest honest thing in a month of batches -- and takes it as the GROUP, so
+    # every item under it is covered at once. Where the stand-in is a stretch, the line says so.
+    ("food", 5,      "group:fruit"),          # the fruit bowl, with apples in it -- for the Apple
+    ("food", 8,      "group:egg"),            # eggs on a plate -- for the Eggs Benedict
+    ("junk", 24,     "Junk Energy"),          # a can of fizzy: not the brand, but the right vessel
+    ("junk", 26,     "group:cake"),           # a slice of cake -- for the Cheesecake, which is not chocolate
+    ("junk", 12,     "group:box"),            # the open box, counted out -- for the Baker's Dozen
+    ("junk", 3,      "group:slice"),          # a slice on a paper plate -- for the one folded at the door
+    ("taco", 6,      "group:wrap"),           # wrapped in paper: The Big One, the Quesadilla and the Cluckin' Wrap
+    ("bakery", 2,    "group:calzone"),        # the folded, crimped pastry, which is exactly what a calzone is
+    ("bakery", 5,    "group:muffin"),         # the cinnamon roll. No muffin was ever drawn; a sweet bake stands in
+    ("sandwich", 0,  "group:toastie"),        # a stacked sandwich for the pressed one
+    ("hotdog", 12,   "group:corndog"),        # a grilled sausage in a bun; nothing on a stick was ever drawn
+    ("weed", 0,      "group:jerky"),          # the kraft pouch with a window and brown strips behind it
+    ("shake", 13,    "group:sundae"),         # the sundae glass -- for the Banana Split and the tub
+    ("beverages", 1, "group:espresso"),       # black coffee in a cup: small, black, and rude about it
+    ("shake", 15,    "Green Juice"),          # the green one. Kale and celery is not orange juice
+    ("shake", 5,     "Wheatgrass Shot"),      # the other green one, mint on top
+    ("beverages", 2, "Mojito"),               # a tall clear glass with the bubbles going up it
 ]
 
 
