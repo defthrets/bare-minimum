@@ -3,6 +3,52 @@
 ===============================================================================
 
 
+0.5.0  --  HE FINISHES WHAT HE BUYS, AND LEAVES IT ON THE PAVEMENT
+-------------------------------------------------------------------------------
+
+  HE DROPS THE EMPTY. A can that vanishes out of a man's hand the instant he
+  stops drinking was the one moment this mod stopped modelling anything. Now he
+  drops it and it stays where it falls -- a can for a drink, a bottle for a beer,
+  and whatever he ate it off where he ate it off something: a bowl of chilli
+  leaves a bowl, a slice of pie leaves the plate, a sundae leaves the glass. A
+  slice with nothing under it in its own picture leaves the wrapper instead,
+  which is judged per item because only the picture knows.
+
+  Capped at twelve and the oldest goes when the newest lands -- props are a
+  limited resource in this game and nothing else was going to take them away.
+  A reload does not sweep them up; they are handed back to the game, which
+  clears them on its own terms like any other rubbish in the world.
+
+  HE ACTUALLY SMOKES IT. The smoking dictionary holds three clips and the mod
+  played the first on a loop -- which is the one where he stands there holding
+  it. All three are played now, one after another, for twenty seconds, and he
+  can walk about while he does. The clip itself says when it has finished, so
+  none of the three had to be timed by hand.
+
+  A VENDING MACHINE IS NOT A SHOP. He drinks it standing at the thing, the way
+  the game always has, instead of putting it in his pocket. And the machine's own
+  reach-and-press gets to finish first: it was being replaced on the very next
+  line, so the press never played and the can appeared in his hand out of air.
+
+  BLACK OUT AT THE WHEEL AND THE POLICE ALWAYS COME. The kerbside wake-up is a
+  gamble on purpose -- you chose to park in the street and sleep. Passing out is
+  not that: you did not choose the spot, the car is stopped dead in a lane you
+  were driving down, and that gets found. They ask what happened rather than
+  telling you to move along.
+
+  TWO SWITCHES FOR THE BARS' MOVEMENT, one for each half of it: what lives inside
+  the fill, and the fill's own surface. There were sliders for both and a slider
+  at 0 is not off -- one stopped the specks moving and still drew them, the other
+  flattened the wobble and left the jolt. Turning the insides off also costs the
+  frame fewer rectangles, which is a real lever for anyone fighting the ceiling.
+
+  AND THE HUD'S DECORATION COMES BACK. One frame over the shared rectangle line
+  -- a menu opening -- priced the decoration at three times what it costs and the
+  release test could then never be met, so the cells, crumbs, bubbles and streaks
+  went for the rest of the session. Measured on an ordinary frame now, and a trim
+  needs three frames in a row rather than one.
+
+
 0.4.1  --  THE GAME'S HEALTH STRIP STAYS HIDDEN
 -------------------------------------------------------------------------------
 
