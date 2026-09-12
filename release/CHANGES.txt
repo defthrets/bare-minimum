@@ -3,6 +3,31 @@
 ===============================================================================
 
 
+0.4.1  --  THE GAME'S HEALTH STRIP STAYS HIDDEN
+-------------------------------------------------------------------------------
+
+  THE GAME'S OWN HEALTH AND ARMOUR STRIP COULD COME BACK under the map and stay.
+  The layout that hides it was asked for once and then again only on a handful
+  of moments -- a pause, a fade, a switch, a cutscene -- and the game undid it on
+  a moment that was not one of those, with no re-ask to follow. The log for the
+  session shows it: the ask, the rebuild, then nothing for three minutes while
+  the strip was back on screen.
+
+  SIX MORE MOMENTS ARE WATCHED, and every re-ask is written to the log WITH THE
+  MOMENT THAT CAUSED IT, so if it ever comes back again the log names the trigger
+  instead of leaving it to guesswork. In and out of a vehicle, the HUD hidden and
+  given back, the wanted level, an interior boundary, a phone call ending.
+
+  AND A QUIET HEARTBEAT: every five seconds while no waypoint is set. Asking
+  every frame was what made the GPS route strobe, but with no route on the map
+  there is nothing to disturb, so the ask is free. It puts a five-second ceiling
+  on how long the strip can stay back whenever you are not navigating, and it
+  stands down the moment a waypoint goes up, so the strobe cannot return.
+
+  Nothing else changed. If you have 0.4.0 and the strip has not come back, this
+  is not worth the download -- but it will, and then it is.
+
+
 0.4.0  --  EVERY TILE GETS A PICTURE
 -------------------------------------------------------------------------------
 
