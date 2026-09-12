@@ -103,6 +103,27 @@ namespace BareMinimum.Needs
             "Next time find a car park. Go on."
         };
 
+        /// <summary>
+        /// What they say to a man who did not park -- who went out at the wheel and stopped
+        /// where he was.
+        ///
+        /// THE OTHER SET IS FOR SOMEBODY WHO CHOSE THE SPOT. "You can't sleep here, move it
+        /// along" is what you say to a man having a nap in his car; it is the wrong thing
+        /// entirely to say to one you have just found slumped over the wheel in a live lane,
+        /// and saying it would give away that the mod does not know the difference. It does.
+        /// </summary>
+        private static readonly string[] Collapsed =
+        {
+            "Sir? Sir. Look at me. What happened here?",
+            "We got a call about a car stopped in the lane. What happened?",
+            "You were out cold at the wheel. Start talking.",
+            "You alright? Because you were not moving and this is a live lane.",
+            "Nobody stops dead in the road for nothing. What happened?"
+        };
+
+        /// <summary>Whether this one is a man found passed out rather than a man having a nap.</summary>
+        private bool _passedOut;
+
         private readonly Core.Settings _cfg;
         private readonly Random _dice = new Random();
 
@@ -159,7 +180,16 @@ namespace BareMinimum.Needs
         /// a populated area is one with people in it, and a dirt track in Blaine County at 3am
         /// has neither cars nor pedestrians on it whatever the map thinks of the road.
         /// </summary>
-        public bool Exposed(Vehicle car)
+        /// <param name="certain">
+        /// TRUE when he did not choose this spot -- he passed out at the wheel and the car
+        /// stopped where it was. The neighbour count and the roll are skipped and the police
+        /// always come; see Settings.PoliceOnCollapse.
+        ///
+        /// THE ROAD AND THE WIDTH ARE STILL ASKED, because those are facts about the PLACE and
+        /// the gamble was never about the place. Black out in a car park or on a farm track and
+        /// nobody turns up, the same as if you had parked there on purpose.
+        /// </param>
+        public bool Exposed(Vehicle car, bool certain = false)
         {
             if (!_cfg.PoliceWake) return false;
             if (car == null || !car.Exists()) return false;
@@ -197,6 +227,16 @@ namespace BareMinimum.Needs
                     Log.Info("Kerbside nap: only " + wide.ToString("0.#") +
                              "m of road across - not a carriageway. No police.");
                     return false;
+                }
+
+                // A CAR STOPPED DEAD IN A LANE GETS FOUND. Everything above is about the
+                // place and still applies; everything below is about the odds, and there are
+                // no odds here.
+                if (certain)
+                {
+                    Log.Info("Passed out at the wheel on " + Across(car).ToString("0.#") +
+                             "m of road. The police always come to that one.");
+                    return true;
                 }
 
                 var about = Busyness(car);
@@ -356,10 +396,13 @@ namespace BareMinimum.Needs
         // ======================================================================
 
         /// <summary>Asks for what the scene needs. It is built a frame or two later.</summary>
-        public bool Begin(Vehicle car)
+        public bool Begin(Vehicle car, bool passedOut = false)
         {
             if (Busy) return false;
             if (car == null || !car.Exists()) return false;
+
+            // Only changes what they say. See Collapsed.
+            _passedOut = passedOut;
 
             var me = Game.Player.Character;
             if (me == null || !me.Exists()) return false;
@@ -611,7 +654,8 @@ namespace BareMinimum.Needs
 
             try
             {
-                var line = Lines[_dice.Next(Lines.Length)];
+                var set = _passedOut ? Collapsed : Lines;
+                var line = set[_dice.Next(set.Length)];
 
                 Function.Call(Hash.BEGIN_TEXT_COMMAND_DISPLAY_TEXT, "STRING");
                 Function.Call(Hash.ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME, "~y~Officer:~s~ " + line);

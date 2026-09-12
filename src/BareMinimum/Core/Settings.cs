@@ -461,6 +461,22 @@ namespace BareMinimum.Core
         public float PoliceWakeChance = 0.6f;
 
         /// <summary>
+        /// PASSING OUT AT THE WHEEL IN A LIVE LANE ALWAYS FETCHES THEM, chance and neighbour
+        /// count both skipped.
+        ///
+        /// The kerbside odds above are a gamble on purpose: you chose to park in the street and
+        /// sleep, and something that happens every single time stops being a hazard and becomes
+        /// a cutscene you learn to avoid. A collapse is not that. You did not choose the spot,
+        /// the car is stopped dead in a lane you were driving down, and that gets found.
+        ///
+        /// It still has to be a road and a carriageway -- see Knock.Exposed. Those are facts
+        /// about the place, and the gamble was never about the place.
+        ///
+        /// Off, a collapse is judged on the same odds as a nap. PoliceWake off stops both.
+        /// </summary>
+        public bool PoliceOnCollapse = true;
+
+        /// <summary>
         /// How many people and cars have to be about for the street to count as public.
         ///
         /// Counted within seventy metres, pedestrians and vehicles together. Six is a normal
@@ -1902,6 +1918,7 @@ namespace BareMinimum.Core
                 cfg.BedReach = ini.GetFloat("Sleeping", "BedReach", cfg.BedReach, 0.5f, 6f);
 
                 cfg.PoliceWake = ini.GetBool("Sleeping", "PoliceWake", cfg.PoliceWake);
+                cfg.PoliceOnCollapse = ini.GetBool("Sleeping", "PoliceOnCollapse", cfg.PoliceOnCollapse);
                 cfg.PoliceWakeChance = ini.GetFloat("Sleeping", "PoliceWakeChance",
                                                     cfg.PoliceWakeChance, 0f, 1f);
                 cfg.PoliceWakeNeighbours = (int)ini.GetFloat("Sleeping", "PoliceWakeNeighbours",

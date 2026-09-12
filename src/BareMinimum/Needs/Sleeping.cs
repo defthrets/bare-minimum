@@ -854,7 +854,15 @@ namespace BareMinimum.Needs
                 var car = me.CurrentVehicle;
                 if (car == null || !car.Exists()) return;
 
-                if (_knock.Exposed(car)) _knock.Begin(car);
+                // TWO DIFFERENT QUESTIONS, AND THEY ARE NOT THE SAME FLAG. Whether they are
+                // CERTAIN to come is about how he got here and whether the setting allows it;
+                // what they SAY is about how he got here and nothing else. A collapse that the
+                // setting has turned back into a gamble, and then wins the gamble, still gets
+                // asked what happened -- because that is what happened.
+                var passedOut = _bunk == Bunk.Collapse;
+                var certain = passedOut && _cfg.PoliceOnCollapse;
+
+                if (_knock.Exposed(car, certain)) _knock.Begin(car, passedOut);
             }
             catch (Exception ex)
             {

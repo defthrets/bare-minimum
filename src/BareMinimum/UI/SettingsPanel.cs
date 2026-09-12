@@ -664,6 +664,13 @@ namespace BareMinimum.UI
                  () => _cfg.PoliceWake, v => _cfg.PoliceWake = v,
                  "Sleep in a car in the road and you may wake to two officers at the windows.");
 
+            Bool("Always after passing out", "Sleeping", "PoliceOnCollapse",
+                 () => _cfg.PoliceOnCollapse, v => _cfg.PoliceOnCollapse = v,
+                 "Black out at the wheel and stop in a live lane and they always come, whatever " +
+                 "the chance below says. It still has to be a road: a car park is nobody's " +
+                 "business.",
+                 () => _cfg.PoliceWake, "~y~Turn the police wake-up ON first.");
+
             Float("Police wake-up chance", "Sleeping", "PoliceWakeChance",
                   () => _cfg.PoliceWakeChance, v => _cfg.PoliceWakeChance = v,
                   0.05f, 0f, 1f, "0.00",
