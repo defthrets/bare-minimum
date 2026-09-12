@@ -151,5 +151,67 @@ def main():
     print("  %s  %dx%d  %d items" % (os.path.relpath(OUT, HERE), W, H, total))
 
 
+# ====================================================================== the drugs
+#
+# A SEPARATE PICTURE, ON PURPOSE. The food poster can go on any mod site's gallery; this one
+# goes where the site allows it. Keeping them apart means the food one never has to come down
+# because of what is on the other.
+DRUGS = [
+    ("weed", "Weed"), ("meth", "Meth"), ("coke", "Cocaine"), ("crack", "Crack"),
+    ("ecstasy", "Ecstasy"), ("lsd", "LSD"), ("xanax", "Xanax"), ("heroin", "Heroin"),
+    ("oxycodone", "Oxycodone"),
+]
+
+OUT_DRUGS = os.path.join(HERE, "release", "showcase-drugs.png")
+
+
+def drugs():
+    got = [(i, n) for i, n in DRUGS if os.path.exists(os.path.join(ICONS, "i_%s.png" % i))]
+
+    tile = 176
+    per_row = len(got)
+    cell_w = (W - 2 * MARGIN) // per_row
+    cell_h = tile + 52
+    H = HEAD_H + 40 + cell_h + 30 + FOOT_H
+
+    im = Image.new("RGBA", (W, H), BG)
+    dr = ImageDraw.Draw(im)
+
+    title = font(64, bold=True)
+    x = MARGIN
+    for ch in "BARE MINIMUM":
+        dr.text((x, 44), ch, font=title, fill=TEXT)
+        x += dr.textlength(ch, font=title) + (14 if ch != " " else 22)
+    dr.rectangle([MARGIN, 124, MARGIN + 160, 128], fill=RAIL)
+    dr.text((MARGIN, 136), "The pocket's own pictures for the nine drugs, drawn to sit beside the food. "
+                           "What they do to him comes from Hoodrich, over the bridge.",
+            font=font(24), fill=DIM)
+
+    y = HEAD_H
+    label = font(26, bold=True)
+    dr.text((MARGIN, y), "THE POCKET", font=label, fill=RAIL)
+    dr.rectangle([MARGIN + dr.textlength("THE POCKET", font=label) + 16, y + 16, W - MARGIN, y + 17],
+                 fill=(60, 60, 68, 255))
+    y += 40
+
+    name_font = font(22)
+    for k, (iid, nm) in enumerate(got):
+        cx = MARGIN + k * cell_w
+        dr.rounded_rectangle([cx + 6, y, cx + cell_w - 6, y + tile + 6], radius=12, fill=PLATE)
+        icon = Image.open(os.path.join(ICONS, "i_%s.png" % iid)).convert("RGBA")
+        icon = icon.resize((tile - 20, tile - 20), Image.NEAREST)
+        im.alpha_composite(icon, (cx + (cell_w - (tile - 20)) // 2, y + 13))
+        tw = dr.textlength(nm, font=name_font)
+        dr.text((cx + (cell_w - tw) / 2, y + tile + 16), nm, font=name_font, fill=TEXT)
+
+    dr.text((MARGIN, H - FOOT_H + 14),
+            "Comedowns, blackouts and a twelve-minute trip. Sold by Hoodrich; carried, eaten and paid for here.  spitmux.me",
+            font=font(20), fill=DIM)
+
+    im.convert("RGB").save(OUT_DRUGS, optimize=True)
+    print("  %s  %dx%d  %d drugs" % (os.path.relpath(OUT_DRUGS, HERE), W, H, len(got)))
+
+
 if __name__ == "__main__":
     main()
+    drugs()
