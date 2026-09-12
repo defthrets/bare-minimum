@@ -9,10 +9,12 @@ headings, no <br>, no tables -- so headings are bold lines, breaks are real
 newlines, and every list is a <ul>. Section 3 is written in that set and is meant
 to be pasted as it is. Sections 1 and 2 are plain text.
 
-THE CHANGELOG IS NOT ON THE PAGE ANY MORE. A moderator pointed out, rightly, that
-it had fallen two versions behind the downloads. It lives in CHANGES.txt in every
-zip and on the GitHub releases page, both of which are written at the same moment
-the zip is built and cannot fall behind it. Section 3 ends with the pointer.
+THE PAGE CHANGELOG IS SHORT AND RECENT, ON PURPOSE. A moderator pointed out,
+rightly, that it had fallen two versions behind the downloads. Section 4 is the
+short, emoji-free version for the site's changelog field -- the last few releases,
+a line or two each. The DETAIL lives in CHANGES.txt in every zip and in README.md
+on GitHub, both written the moment the zip is, so they cannot fall behind it.
+Section 3 ends with the pointer.
 
 If Hoodrich has a page of its own, its name in section 3 is the one place an
 <a href="..."> belongs. It is left unwrapped because the URL is not known here.
