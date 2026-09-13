@@ -401,7 +401,12 @@ namespace BareMinimum.Food
 
                 if (me != null && me.Exists() && !InVehicle(me))
                 {
-                    _litter.Drop(me, _menu.LitterFor(item));
+                    // FROM WHERE IT WAS, when it is still there to ask. See Litter.Drop.
+                    var was = _held != null && _held.Exists()
+                            ? (Vector3?)_held.Position
+                            : null;
+
+                    _litter.Drop(me, _menu.LitterFor(item), was);
                 }
             }
             catch (Exception ex)

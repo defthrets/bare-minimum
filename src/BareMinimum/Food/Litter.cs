@@ -50,7 +50,7 @@ namespace BareMinimum.Food
         /// -- empty means this one leaves nothing behind, which is a real answer and not a
         /// missing one: nobody throws a pipe away when they have finished with it.
         /// </summary>
-        public void Drop(Ped me, string what)
+        public void Drop(Ped me, string what, Vector3? from = null)
         {
             if (!_cfg.Litter || string.IsNullOrEmpty(what)) return;
             if (me == null || !me.Exists()) return;
@@ -80,14 +80,18 @@ namespace BareMinimum.Food
                 // A LITTLE IN FRONT AND A LITTLE ABOVE, so it falls rather than appearing on
                 // the floor, and falls away from his feet rather than through them.
                 //
-                // LOW AND CLOSE. It used to leave from half a metre in front of him at nearly
-                // chest height, which is a man putting a can down on a table that is not there
-                // -- it appeared beside him rather than coming out of his hand. A ped's
-                // position is at his FEET, so the height here is measured off the pavement:
-                // this is about where a hand hangs. Both are in the ini.
-                var at = me.Position
+                // OUT OF THE HAND IT WAS IN. The can he has just finished is still attached
+                // to him on this call -- that is why the drop happens before the cleanup --
+                // so the empty starts from exactly where the full one was and there is no
+                // jump between the two. Nothing here has to know where a hand is.
+                //
+                // THE TWO NUMBERS BELOW ARE THE FALLBACK and nothing else: eaten in a build
+                // missing the model, or from a menu with nothing in his hand, and there is no
+                // prop to take a place from. A ped's position is at his FEET, so the height
+                // is measured off the pavement and this is about where a hand hangs.
+                var at = from ?? (me.Position
                        + me.ForwardVector * _cfg.LitterOut
-                       + Vector3.WorldUp * _cfg.LitterUp;
+                       + Vector3.WorldUp * _cfg.LitterUp);
 
                 // Dynamic, because the whole point is that it lands and rolls. The fourth
                 // argument places it on the ground, which is exactly what must NOT happen --
