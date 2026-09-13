@@ -312,6 +312,12 @@ namespace BareMinimum.Food
                         Give(him, _item, _drinking);
                     }
                 }
+                else
+                {
+                    // AND PUT BACK WHERE IT BELONGS EVERY FRAME, so the three rows on the
+                    // menu move the thing that is already in his hand. See Seat.
+                    Seat(Game.Player.Character, _item, _drinking);
+                }
 
                 // Halfway through a stretch, put down the sandwich and pick up the cup, or
                 // the other way about. The need is untouched until the whole thing is done.
@@ -581,26 +587,7 @@ namespace BareMinimum.Food
                 _held = World.CreateProp(model, me.Position, false, false);
                 if (_held == null || !_held.Exists()) { _held = null; return; }
 
-                var anim = item.Smoke ? _menu.Smoke
-                         : (item.Drink || drinking) ? _menu.Sip
-                         : (item.Eat ?? _menu.Eat);
-
-                var bone = Function.Call<int>(Hash.GET_PED_BONE_INDEX, me.Handle,
-                                              anim.LeftHanded ? LeftHandBone : RightHandBone);
-
-                // The last six arguments are Fumes' proven set for a prop in a hand:
-                // no soft pinning, no collision, not treated as a ped, vertex 2, fixed
-                // rotation. The version here used to pass a different combination copied from
-                // a general-purpose example, which is not what a held object wants.
-                //
-                // The three angles are the food spin -- see Settings.FoodSpinX. Zero for a
-                // drink or a smoke, which sit right without it.
-                var spin = SpinFor(item, drinking);
-                var sits = SitsFor(item, drinking);
-
-                Function.Call(Hash.ATTACH_ENTITY_TO_ENTITY, _held.Handle, me.Handle, bone,
-                              sits.X, sits.Y, sits.Z,
-                              spin.X, spin.Y, spin.Z, false, false, false, false, 2, true);
+                Seat(me, item, drinking);
 
                 // The model is released as soon as the object exists; holding the request open
                 // pins it in memory for the rest of the session for no reason.
@@ -612,6 +599,42 @@ namespace BareMinimum.Food
                                          ex.Message + " - eaten empty-handed.");
                 _held = null;
             }
+        }
+
+        /// <summary>
+        /// Puts what he is holding where it belongs, and does it again every frame.
+        ///
+        /// AGAIN, BECAUSE OTHERWISE THE NUDGE IS NOT LIVE. The three rows on the menu are
+        /// there so somebody can walk a burger into place while holding one -- which only
+        /// works if turning the row moves the burger. Attaching happens once, so it did not:
+        /// you had to buy another one to see the number you had just typed, which is exactly
+        /// the loop those rows exist to avoid.
+        ///
+        /// ATTACH_ENTITY_TO_ENTITY on something already attached MOVES it rather than
+        /// refusing -- the same fact Hoodrich leans on to pass a bag from one hand to another
+        /// -- so this is one native call a frame while he is eating and nothing else.
+        ///
+        /// The last six arguments are Fumes' proven set for a prop in a hand: no soft
+        /// pinning, no collision, not treated as a ped, vertex 2, fixed rotation.
+        /// </summary>
+        private void Seat(Ped me, Item item, bool drinking)
+        {
+            if (me == null || !me.Exists() || item == null) return;
+            if (_held == null || !_held.Exists()) return;
+
+            var anim = item.Smoke ? _menu.Smoke
+                     : (item.Drink || drinking) ? _menu.Sip
+                     : (item.Eat ?? _menu.Eat);
+
+            var bone = Function.Call<int>(Hash.GET_PED_BONE_INDEX, me.Handle,
+                                          anim.LeftHanded ? LeftHandBone : RightHandBone);
+
+            var spin = SpinFor(item, drinking);
+            var sits = SitsFor(item, drinking);
+
+            Function.Call(Hash.ATTACH_ENTITY_TO_ENTITY, _held.Handle, me.Handle, bone,
+                          sits.X, sits.Y, sits.Z,
+                          spin.X, spin.Y, spin.Z, false, false, false, false, 2, true);
         }
 
         /// <summary>

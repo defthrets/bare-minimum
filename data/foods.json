@@ -4007,9 +4007,9 @@
       "[Eating] HoldX/Y/Z in the ini is ADDED to whatever is here, and is on the F11 menu",
       "live, so a number can be found by watching it move rather than by guessing at it."
     ],
-    "food": [0.04, 0.02, 0.0],
-    "drink": [0.03, 0.01, 0.0],
-    "smoke": [0.02, 0.01, 0.0]
+    "food": [0.015, 0.01, -0.035],
+    "drink": [0.01, 0.0, -0.04],
+    "smoke": [0.01, 0.0, -0.01]
   },
   "litter": {
     "_note": [
