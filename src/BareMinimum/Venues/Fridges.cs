@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using GTA;
 using GTA.Math;
@@ -108,14 +108,36 @@ namespace BareMinimum.Venues
                 wanted.Add(name);
             }
 
+            // IS_MODEL_VALID IS THE WRONG QUESTION AND IT COST THE BEST FRIDGE IN THE GAME.
+            //
+            // It asks whether a model can be STREAMED IN AND SPAWNED, which is the right test
+            // for something this mod is about to create. Nothing here is created: the fridge
+            // is somebody else's object, already standing in a kitchen, and it is found by
+            // hash with GET_CLOSEST_OBJECT_OF_TYPE -- a native that searches what is in the
+            // world and does not care whether the model could also be spawned.
+            //
+            // A lot of interior fixtures are map-only and answer NO to that question while
+            // sitting right there in front of you. v_res_tt_fridge is one, and it is the
+            // fridge at his aunt's on Forum Drive -- so the one kitchen Franklin actually
+            // lives in was struck off the list at startup, by name, with a line in the log
+            // saying the game did not have it. It is in PropList.txt. It was always there.
+            //
+            // So every name is searched for. A name the game has never heard of hashes to
+            // something no object in the world has, GET_CLOSEST_OBJECT_OF_TYPE returns
+            // nothing, and that costs one native call per scan -- which is the whole price of
+            // not second-guessing this.
             foreach (var name in wanted)
             {
                 try
                 {
                     var model = new Model(name);
 
-                    if (Function.Call<bool>(Hash.IS_MODEL_VALID, model.Hash)) good.Add(model.Hash);
-                    else missing.Add(name);
+                    good.Add(model.Hash);
+
+                    // Still worth saying, because a typed-in name that answers no here is
+                    // MUCH more likely to be a typo than a map-only fixture -- see the log
+                    // line below, which says which it is rather than pretending to know.
+                    if (!Function.Call<bool>(Hash.IS_MODEL_VALID, model.Hash)) missing.Add(name);
                 }
                 catch
                 {
@@ -129,17 +151,16 @@ namespace BareMinimum.Venues
             // ExtraModels is that somebody types a model name into an ini, and a typo and a
             // model this game does not have look identical from the kitchen -- no fridge,
             // either way. Reading them back is the only way to tell which one it was.
-            Log.Info("Fridges: " + _hashes.Length + " of " + wanted.Count +
-                     " model(s) exist in this build" +
-                     (missing.Count == 0
-                          ? "."
-                          : ". Not in this game: " + string.Join(", ", missing.ToArray()) + "."));
+            Log.Info("Fridges: looking for " + _hashes.Length + " model(s).");
 
             if (missing.Count > 0)
             {
-                // Named rather than counted, so a bad guess above can be corrected from
-                // somebody else's log without them having to reproduce anything.
-                Log.Info("Fridges: not in this build, ignored - " +
+                // NAMED, AND NOT WRITTEN OFF. These are the ones the game will not spawn,
+                // which for a fixture bolted into an interior is normal and means nothing --
+                // they are searched for like all the rest. It is worth reading only when a
+                // name typed into ExtraModels never finds anything: then it is probably a
+                // typo, and this is the line that shows it.
+                Log.Info("Fridges: these are map-only or unknown, and are searched for anyway - " +
                          string.Join(", ", missing.ToArray()));
             }
 
