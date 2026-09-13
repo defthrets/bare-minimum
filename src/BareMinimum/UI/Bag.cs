@@ -506,11 +506,12 @@ namespace BareMinimum.UI
             if (item != null && item.Smoke) return new GTA.Math.Vector3(it[0], it[1], it[2]);
 
             var food = item != null && !item.Drink;
+            var mine = Mine(item);
 
             return new GTA.Math.Vector3(
-                it[0] + _cfg.TurnX + (food ? _cfg.FoodSpinX : 0f),
-                it[1] + _cfg.TurnY + (food ? _cfg.FoodSpinY : 0f),
-                it[2] + _cfg.TurnZ + (food ? _cfg.FoodSpinZ : 0f));
+                it[0] + (mine ? _cfg.TurnX : 0f) + (food ? _cfg.FoodSpinX : 0f),
+                it[1] + (mine ? _cfg.TurnY : 0f) + (food ? _cfg.FoodSpinY : 0f),
+                it[2] + (mine ? _cfg.TurnZ : 0f) + (food ? _cfg.FoodSpinZ : 0f));
         }
 
         /// <summary>Where the thing under the cursor sits in his hand. See Catalogue.HoldFor.</summary>
@@ -525,7 +526,21 @@ namespace BareMinimum.UI
             // to them, and a cigarette was right where it was.
             if (item != null && item.Smoke) return new GTA.Math.Vector3(it[0], it[1], it[2]);
 
+            // AND ONLY THE KIND BEING TUNED, the same as Eating.SitsFor. Without this the
+            // preview was the one place the nudge still reached everything -- so tuning the
+            // food visibly moved the drinks in the pocket, which is exactly how it looks
+            // when something has gone wrong.
+            if (!Mine(item)) return new GTA.Math.Vector3(it[0], it[1], it[2]);
+
             return new GTA.Math.Vector3(it[0] + _cfg.HoldX, it[1] + _cfg.HoldY, it[2] + _cfg.HoldZ);
+        }
+
+        /// <summary>Whether the six nudges are pointed at this item's kind. See Settings.HoldWhat.</summary>
+        private bool Mine(Food.Item item)
+        {
+            if (item == null || item.Smoke) return false;
+
+            return _cfg.HoldWhat == 1 ? !item.Drink : item.Drink;
         }
 
         /// <summary>The item under the cursor, or null for a drug -- which is not ours to place.</summary>

@@ -4013,7 +4013,7 @@
       "The live nudge does not touch a smoke either, so dialling a cup in cannot drag the",
       "cigarettes out with it. See Eating.SitsFor."
     ],
-    "food": [0.015, 0.01, -0.035],
+    "food": [0.09, 0.0, -0.035],
     "drink": [0.055, -0.02, -0.06],
     "smoke": [0.0, 0.0, 0.0],
 

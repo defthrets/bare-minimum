@@ -167,6 +167,22 @@ namespace BareMinimum.UI
 
         public bool IsOpen => _ui.IsOpen;
 
+        /// <summary>
+        /// The kind the six rows are moving, on the end of every one of their names.
+        ///
+        /// BECAUSE A ROW THAT DOES NOT SAY WHAT IT IS MOVING GETS USED ON THE WRONG THING.
+        /// The Placing row above them is one line and it was missed: six rows were turned
+        /// with it left on Drink, in a sitting that was meant to be the food, and the only
+        /// tell was the shape in his hand. Now the rows themselves say it.
+        ///
+        /// The rows are rebuilt after every nudge, so this follows the Placing row the
+        /// instant it is turned.
+        /// </summary>
+        private string Kind()
+        {
+            return _cfg != null && _cfg.HoldWhat == 1 ? "(food)" : "(drink)";
+        }
+
         /// <summary>Where the sample sits: the kind's own numbers plus the nudge.</summary>
         private GTA.Math.Vector3 Placed()
         {
@@ -827,7 +843,7 @@ namespace BareMinimum.UI
                    "his hand while you use them. The other kind is left exactly where it is, " +
                    "so finishing one cannot undo the other. Cigarettes are never moved.");
 
-            Float("Held left/right", "Eating", "HoldX",
+            Float("Held left/right " + Kind(), "Eating", "HoldX",
                   () => _cfg.HoldX, v => _cfg.HoldX = v,
                   0.005f, -0.5f, 0.5f, "0.000",
                   "Where the thing in his hand sits, out of the palm. The hand bone is a grip " +
@@ -835,27 +851,27 @@ namespace BareMinimum.UI
                   "through his hand. Added to whatever the item itself says; 0 leaves it " +
                   "alone. Cigarettes are not moved by this - they were already right.");
 
-            Float("Held forward/back", "Eating", "HoldY",
+            Float("Held forward/back " + Kind(), "Eating", "HoldY",
                   () => _cfg.HoldY, v => _cfg.HoldY = v,
                   0.005f, -0.5f, 0.5f, "0.000",
                   "The same, towards the fingers and back towards the wrist.");
 
-            Float("Held up/down", "Eating", "HoldZ",
+            Float("Held up/down " + Kind(), "Eating", "HoldZ",
                   () => _cfg.HoldZ, v => _cfg.HoldZ = v,
                   0.005f, -0.5f, 0.5f, "0.000",
                   "The same, up through the back of the hand.");
 
-            Float("Turn roll", "Eating", "TurnX",
+            Float("Turn roll " + Kind(), "Eating", "TurnX",
                   () => _cfg.TurnX, v => _cfg.TurnX = v,
                   5f, -180f, 180f, "0",
                   "Turns the thing in his hand, in degrees. Rolls it over.");
 
-            Float("Turn pitch", "Eating", "TurnY",
+            Float("Turn pitch " + Kind(), "Eating", "TurnY",
                   () => _cfg.TurnY, v => _cfg.TurnY = v,
                   5f, -180f, 180f, "0",
                   "Tips the near end of it up and down.");
 
-            Float("Turn yaw", "Eating", "TurnZ",
+            Float("Turn yaw " + Kind(), "Eating", "TurnZ",
                   () => _cfg.TurnZ, v => _cfg.TurnZ = v,
                   5f, -180f, 180f, "0",
                   "Swings it round. Added to whatever the item says, and to [Eating] FoodSpin " +
