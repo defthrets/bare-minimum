@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using GTA;
@@ -93,7 +93,40 @@ namespace BareMinimum.UI
         private readonly Core.Settings _cfg;
         private readonly Catalogue _menu;
         private readonly Pantry _pantry;
-        private readonly Larder _larder;
+        /// <summary>
+        /// The far side of the screen: what it is, what it is called, and when it can be
+        /// opened at all.
+        ///
+        /// THIS CLASS WAS THE FRIDGE AND IS NOW THE SHAPE. Two grids with a transfer between
+        /// them is not a fact about fridges -- a bag wants exactly the same screen, with a
+        /// different store behind it and a different reason to be standing there -- and the
+        /// alternative was a second eight hundred lines that would drift out of step with
+        /// this one by the second bug fix.
+        /// </summary>
+        internal sealed class Far
+        {
+            /// <summary>What is on the right.</summary>
+            public Store Store;
+
+            /// <summary>What the caption over it says.</summary>
+            public string Name = "FRIDGE";
+
+            /// <summary>Whether this screen exists at all -- a setting, usually.</summary>
+            public Func<bool> On = () => true;
+
+            /// <summary>Whether it can be reached from where he is standing right now.</summary>
+            public Func<bool> InReach = () => true;
+
+            /// <summary>
+            /// The line offered before it opens, or null for a screen opened by its own key.
+            ///
+            /// A fridge is a thing you walk up to, so it asks. A bag is on your back, so it
+            /// does not -- there is nowhere to stand and nothing to prompt.
+            /// </summary>
+            public string Prompt;
+        }
+
+        private readonly Far _far;
         private readonly Eating _eating;
         private readonly Fridges _fridges;
 
@@ -121,16 +154,19 @@ namespace BareMinimum.UI
 
         public bool IsOpen { get; private set; }
 
-        public FridgeScreen(Core.Settings cfg, Catalogue menu, Pantry pantry, Larder larder,
+        public FridgeScreen(Core.Settings cfg, Catalogue menu, Pantry pantry, Far far,
                             Eating eating, Fridges fridges)
         {
             _cfg = cfg;
             _menu = menu;
             _pantry = pantry;
-            _larder = larder;
+            _far = far;
             _eating = eating;
             _fridges = fridges;
         }
+
+        /// <summary>Opened by a key rather than by walking up to something. See Far.Prompt.</summary>
+        public bool ByKey => _far.Prompt == null;
 
         // ======================================================================
 
@@ -144,7 +180,7 @@ namespace BareMinimum.UI
                     return;
                 }
 
-                if (!_cfg.FridgeEnabled)
+                if (!_far.On())
                 {
                     if (IsOpen) Close();
                     return;
@@ -194,11 +230,24 @@ namespace BareMinimum.UI
             // Not from a car -- there is no drive-through fridge -- and not mid-meal, for the
             // same reason the counter refuses: a second sandwich while still chewing the first
             // is how a hunger meter gets filled by a queue of overlapping timers.
-            if (me.IsInVehicle() || _eating.Busy) { Forget(); return; }
+            //
+            // A BAG COMES WITH HIM INTO THE CAR. It is on his back rather than in a kitchen,
+            // and with it on this screen is the only pocket there is -- refusing at the wheel
+            // would leave a man in a car with a bag of food and no way to open either.
+            if ((me.IsInVehicle() && !ByKey) || _eating.Busy) { Forget(); return; }
 
-            if (_fridges.Nearest(me.Position, _cfg.FridgeReach) == null) { Forget(); return; }
+            if (!_far.InReach()) { Forget(); return; }
 
-            Hud.Help("Press ~INPUT_CONTEXT~ to open the fridge.");
+            // A BAG IS NOT A PLACE YOU WALK UP TO. It is on his back, so there is nothing to
+            // stand at and nothing to prompt: its own key opens it, wherever he is. See
+            // Far.Prompt.
+            if (ByKey)
+            {
+                if (Keyed()) Open();
+                return;
+            }
+
+            Hud.Help(_far.Prompt);
 
             if (!Pressed()) return;
 
@@ -211,11 +260,12 @@ namespace BareMinimum.UI
             try
             {
                 var me = Game.Player.Character;
-                if (me == null || !me.Exists() || me.IsDead || me.IsInVehicle()) return false;
+                if (me == null || !me.Exists() || me.IsDead) return false;
+                if (me.IsInVehicle() && !ByKey) return false;
 
                 // A little more than the reach that opened it, so shifting your feet at the
                 // fridge door does not slam it in your face.
-                return _fridges.Nearest(me.Position, _cfg.FridgeReach + 0.6f) != null;
+                return _far.InReach();
             }
             catch
             {
@@ -254,7 +304,7 @@ namespace BareMinimum.UI
         private void Refill()
         {
             _mine = _pantry.Ids();
-            _cold = _larder.Ids();
+            _cold = _far.Store.Ids();
 
             Settle(0, _mine.Count);
             Settle(1, _cold.Count);
@@ -278,7 +328,7 @@ namespace BareMinimum.UI
 
         private int Count(int side) => List(side).Count;
 
-        private Store Bin(int side) => side == 0 ? (Store)_pantry : _larder;
+        private Store Bin(int side) => side == 0 ? (Store)_pantry : _far.Store;
 
         /// <summary>The id under the cursor, or null.</summary>
         private string Picked()
@@ -292,6 +342,30 @@ namespace BareMinimum.UI
         // ======================================================================
         // Input
         // ======================================================================
+
+        /// <summary>
+        /// The pocket key's edge, for a screen that opens on a key rather than at a door.
+        ///
+        /// The same shape as the pocket's own toggle, kept here rather than shared because
+        /// the two screens are never open at once and each wants its own memory of the key --
+        /// one of them closing on a key the other then sees held is the bug this avoids.
+        /// </summary>
+        private bool Keyed()
+        {
+            var down = false;
+
+            try { down = Game.IsKeyPressed(_cfg.BagKey); }
+            catch { down = false; }
+
+            var edge = down && !_bagWas;
+            _bagWas = down;
+
+            if (!edge) return false;
+
+            return Game.GameTime >= _quietUntil;
+        }
+
+        private bool _bagWas;
 
         private bool Pressed()
         {
@@ -589,7 +663,7 @@ namespace BareMinimum.UI
             var coldX = x + paneW + Gutter;
 
             Caption(x, y, paneW, "POCKET", _pantry, 0, Palette.Brand, arrive);
-            Caption(coldX, y, paneW, "FRIDGE", _larder, 1, Palette.Cold, arrive);
+            Caption(coldX, y, paneW, _far.Name, _far.Store, 1, Palette.Cold, arrive);
 
             y += CapH;
 

@@ -70,6 +70,12 @@ namespace BareMinimum
         /// <summary>Health, armour and energy -- the vitals, once a mod of their own. See Vitals.VitalsHud.</summary>
         private readonly VitalsHud _vitals;
         private readonly Pantry _pantry;
+
+        /// <summary>What is in the bag on his back, when there is one. See Food.Knapsack.</summary>
+        private readonly Knapsack _knapsack;
+
+        /// <summary>The pocket beside the bag, with a transfer between them.</summary>
+        private readonly FridgeScreen _bagScreen;
         private readonly Bag _bag;
 
         /// <summary>The fridge: where it is, what is in it, and the screen over it.</summary>
@@ -143,7 +149,31 @@ namespace BareMinimum
             _shop = new Shop(_cfg, _catalogue, _counters, _eating, _needs, _pantry);
 
             _bag = new Bag(_cfg, _catalogue, _pantry, _eating, _needs);
-            _fridge = new FridgeScreen(_cfg, _catalogue, _pantry, _larder, _eating, _fridges);
+            _fridge = new FridgeScreen(_cfg, _catalogue, _pantry,
+                new FridgeScreen.Far
+                {
+                    Store = _larder,
+                    Name = "FRIDGE",
+                    On = () => _cfg.FridgeEnabled,
+                    InReach = NearAFridge,
+                    Prompt = "Press ~INPUT_CONTEXT~ to open the fridge."
+                },
+                _eating, _fridges);
+
+            // THE BAG IS THE SAME SCREEN WITH A DIFFERENT FAR SIDE. Two grids, a transfer
+            // between them, and no door to stand at -- the pocket key opens it wherever he
+            // is, and only while there is a bag on his back. See Food.Knapsack.
+            _knapsack = new Knapsack(_catalogue);
+
+            _bagScreen = new FridgeScreen(_cfg, _catalogue, _pantry,
+                new FridgeScreen.Far
+                {
+                    Store = _knapsack,
+                    Name = "BAG",
+                    On = () => Knapsack.Worn,
+                    InReach = () => Knapsack.Worn
+                },
+                _eating, _fridges);
 
             // The bridge other mods reach by reflection. Wired LAST, so anything that finds
             // the type finds a working one behind it -- Api.Pantry.Ready is false until this
@@ -242,6 +272,32 @@ namespace BareMinimum
             }
         }
 
+        /// <summary>
+        /// Whether he is stood at a fridge, for the fridge screen's far side.
+        ///
+        /// A LITTLE MORE THAN THE REACH THAT OPENED IT once it is open, so shifting your feet
+        /// at the fridge door does not slam it in your face. The screen asks this both to
+        /// offer itself and to stay up, so the slack lives here rather than in two places.
+        /// </summary>
+        private bool NearAFridge()
+        {
+            try
+            {
+                var me = Game.Player.Character;
+                if (me == null || !me.Exists() || me.IsDead || me.IsInVehicle()) return false;
+
+                var reach = _fridge != null && _fridge.IsOpen
+                          ? _cfg.FridgeReach + 0.6f
+                          : _cfg.FridgeReach;
+
+                return _fridges.Nearest(me.Position, reach) != null;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private void OnTick(object sender, EventArgs e)
         {
             Core.Pace.Begin();
@@ -311,8 +367,20 @@ namespace BareMinimum
                 // The pocket stands down for every other menu for the same reason the settings
                 // panel does: its key is RAW, so control suppression cannot keep it out of a
                 // menu that is already up.
+                // WITH A BAG ON, THE POCKET KEY OPENS THE BAG. One key, and what it opens
+                // is the more useful of the two: the plain pocket is five tiles you eat from,
+                // and the bag screen is those same five beside the bag with a transfer
+                // between them -- and it eats from either side, so nothing is lost by it
+                // standing in. See FridgeScreen.Far.
+                var carrying = Knapsack.Worn;
+
                 _bag.Update(_sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
-                            _vendors.MenuOpen || _fridge.IsOpen);
+                            _vendors.MenuOpen || _fridge.IsOpen || _bagScreen.IsOpen ||
+                            carrying);
+
+                _bagScreen.Update(_sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
+                                  _vendors.MenuOpen || _fridge.IsOpen || _bag.IsOpen ||
+                                  !carrying);
 
                 // THE FRIDGE STANDS DOWN FOR EVERY OTHER MENU AND FOR THE VENDORS' PROMPT.
                 // It reads the same interact key a stall does, so a fridge somehow within
@@ -364,6 +432,7 @@ namespace BareMinimum
 
                 _pantry.Update(dt);
                 _larder.Update(dt);
+                _knapsack.Update(dt);
 
                 // AND WHAT IS IN IT, FOR THE OTHER MOD. A bong is kit rather than food: the
                 // whole of its effect is elsewhere, so the fact of carrying one is published
@@ -529,6 +598,7 @@ namespace BareMinimum
             // seconds of shopping. The needs were written down on the way out and the food
             // was not.
             try { _pantry.SaveNow(); } catch (Exception ex) { Log.Error("Pantry save", ex); }
+            try { _knapsack.SaveNow(); } catch (Exception ex) { Log.Error("Bag save", ex); }
             try { _larder.SaveNow(); } catch (Exception ex) { Log.Error("Fridge save", ex); }
             try { _needs.SaveNow(); } catch (Exception ex) { Log.Error("Final save", ex); }
 

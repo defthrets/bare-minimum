@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -241,6 +241,9 @@ namespace BareMinimum.Core
 
         /// <summary>What is in the fridge, per character. Written by the mod, never shipped.</summary>
         public static string FridgeFile => Path.Combine(Writable, "fridge.json");
+
+        /// <summary>What is in the bag on his back. See Food.Knapsack.</summary>
+        public static string BagFile => Path.Combine(Writable, "bag.json");
 
         /// <summary>
         /// Every cart this mod has found the game had left empty, across every session.

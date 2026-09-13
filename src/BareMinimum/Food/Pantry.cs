@@ -29,24 +29,19 @@ namespace BareMinimum.Food
         }
 
         /// <summary>
-        /// How much he can carry, plus whatever is lending him room.
+        /// How much he can carry, and that is all it is.
         ///
-        /// See Api.Pantry.ExtraSlots -- Hoodrich's bag, when it is on his back. Never below
-        /// one, because a pocket with no slots in it is a mod that has stopped working rather
-        /// than a player with full hands.
+        /// IT USED TO GROW BY WHATEVER THE BAG LENT and that was the wrong shape. A bag is a
+        /// second PLACE -- things go in it and come out of it, and the difference between
+        /// what is on you and what is in your bag is the whole point of carrying one -- so
+        /// lending its twenty slots to the pocket made one flat list of twenty-five and threw
+        /// that difference away. The room the bag is worth is the bag's own store now, with
+        /// two grids and a transfer between them. See Food.Knapsack.
+        ///
+        /// Never below one, because a pocket with no slots in it is a mod that has stopped
+        /// working rather than a player with full hands.
         /// </summary>
-        public override int Slots
-        {
-            get
-            {
-                var mine = _cfg.PantrySlots < 1 ? 1 : _cfg.PantrySlots;
-
-                var lent = 0;
-                try { lent = Api.Pantry.ExtraSlots; } catch { /* nobody is lending */ }
-
-                return lent <= 0 ? mine : mine + lent;
-            }
-        }
+        public override int Slots => _cfg.PantrySlots < 1 ? 1 : _cfg.PantrySlots;
 
         protected override string File => Paths.PantryFile;
 
