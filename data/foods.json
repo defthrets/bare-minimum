@@ -4013,8 +4013,8 @@
       "The live nudge does not touch a smoke either, so dialling a cup in cannot drag the",
       "cigarettes out with it. See Eating.SitsFor."
     ],
-    "food": [0.0, 0.0, 0.0],
-    "drink": [0.0, 0.0, 0.0],
+    "food": [0.06, 0.035, -0.035],
+    "drink": [0.06, 0.035, -0.035],
     "smoke": [0.0, 0.0, 0.0],
 
     "_turn_note": [
@@ -4026,8 +4026,8 @@
       "[Eating] FoodSpin is the old food-only setting, still read and still added for food.",
       "A smoke is not turned by either of them."
     ],
-    "turnFood": [0.0, 0.0, 0.0],
-    "turnDrink": [0.0, 0.0, 0.0],
+    "turnFood": [-75.0, 0.0, 0.0],
+    "turnDrink": [-75.0, 0.0, 0.0],
     "turnSmoke": [0.0, 0.0, 0.0]
   },
   "litter": {
