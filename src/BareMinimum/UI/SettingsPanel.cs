@@ -831,6 +831,13 @@ namespace BareMinimum.UI
                   "props are a limited resource and nothing else is taking them away.",
                   () => _cfg.Litter, "~y~Turn dropping the empties ON first.");
 
+            Float("A meal lasts longer by", "Eating", "Longer",
+                  () => _cfg.Longer, v => _cfg.Longer = v,
+                  0.5f, 0f, 30f, "0.0",
+                  "Seconds added to every meal and every drink, on top of the item's own time. " +
+                  "Four seconds is the animation blending in and out with very little in " +
+                  "between. Smokes have their own, below. 0 uses the catalogue's times.");
+
             Float("A smoke lasts", "Eating", "SmokeSeconds",
                   () => _cfg.SmokeSeconds, v => _cfg.SmokeSeconds = v,
                   1f, 0f, 120f, "0",

@@ -208,6 +208,14 @@ namespace BareMinimum.Food
             // is a man deciding against it, and Seconds is doing another job as well.
             if (item.Smoke && _cfg.SmokeSeconds > 0.5f) seconds = _cfg.SmokeSeconds;
 
+            // AND EVERYTHING ELSE GETS THE SAME LONGER SIT. Four seconds is enough time for
+            // the animation to blend in and out and not much else in between, which reads as
+            // a man remembering he is holding something rather than eating it. One number
+            // over the whole catalogue rather than two hundred edits: the relative lengths
+            // are already right -- a coffee is quicker than a plate of ribs -- and what was
+            // wrong is all of them. See Settings.Longer.
+            else seconds += _cfg.Longer;
+
             // BEFORE THE PROP AND THE ANIMATION, so the line lands while his hands are
             // still empty. Said after, he is thanking the cashier around a mouthful.
             // WHAT HE IS HAVING, not only that he paid for it. The game's bank has GENERIC_EAT

@@ -1723,6 +1723,19 @@ namespace BareMinimum.Core
         public float SmokeSeconds = 20f;
 
         /// <summary>
+        /// SECONDS ADDED TO EVERY MEAL AND EVERY DRINK. Not to a smoke, which has its own.
+        ///
+        /// The times in foods.json are relative to each other and that part is right -- a
+        /// coffee is quicker than a rack of ribs. What was wrong was all of them: four
+        /// seconds is the blend in, the blend out, and very little in between. This is added
+        /// on top of whatever the item says rather than written into two hundred of them.
+        ///
+        /// It lengthens the animation and the card on screen with it, because they are the
+        /// same clock. 0 uses the catalogue's own times.
+        /// </summary>
+        public float Longer = 2f;
+
+        /// <summary>
         /// WHETHER HE BREATHES IT OUT. One small plume of smoke out of his face on the beat
         /// the animation lowers his hand, once per drag. See Food.Exhale.
         ///
@@ -2255,6 +2268,7 @@ namespace BareMinimum.Core
                 cfg.WalkIns = ini.GetBool("Counters", "WalkIns", cfg.WalkIns);
 
                 cfg.SmokeSeconds = ini.GetFloat("Eating", "SmokeSeconds", cfg.SmokeSeconds, 0f, 120f);
+                cfg.Longer = ini.GetFloat("Eating", "Longer", cfg.Longer, 0f, 30f);
                 cfg.Puffs = ini.GetBool("Eating", "Puffs", cfg.Puffs);
                 cfg.HoldX = ini.GetFloat("Eating", "HoldX", cfg.HoldX, -0.5f, 0.5f);
                 cfg.HoldY = ini.GetFloat("Eating", "HoldY", cfg.HoldY, -0.5f, 0.5f);
