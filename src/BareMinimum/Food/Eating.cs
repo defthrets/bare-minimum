@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using GTA;
 using GTA.Math;
 using GTA.Native;
@@ -61,6 +61,9 @@ namespace BareMinimum.Food
         private int _clip;
         private int _clipAt;
 
+        /// <summary>The weapon he had when this started. See Interrupted.</summary>
+        private WeaponHash _armed = WeaponHash.Unarmed;
+
         /// <summary>
         /// The animation actually started, so Cleanup can stop that one.
         ///
@@ -107,6 +110,26 @@ namespace BareMinimum.Food
 
         /// <summary>True while something is being eaten. Stops a second one being started.</summary>
         public bool Busy => _item != null;
+
+        /// <summary>What is in his hands right now, or unarmed if that cannot be read.</summary>
+        private static WeaponHash Weapon()
+        {
+            try
+            {
+                var me = Game.Player.Character;
+
+                if (me == null || !me.Exists() || me.Weapons == null || me.Weapons.Current == null)
+                {
+                    return WeaponHash.Unarmed;
+                }
+
+                return me.Weapons.Current.Hash;
+            }
+            catch
+            {
+                return WeaponHash.Unarmed;
+            }
+        }
 
         /// <summary>
         /// Asks for everything an item needs, ahead of time.
@@ -203,6 +226,10 @@ namespace BareMinimum.Food
             _animStarted = false;
             _clip = 0;
             _clipAt = 0;
+
+            // What he was holding at the first bite. See Interrupted: a change is the signal,
+            // not the weapon itself.
+            _armed = Weapon();
             _drinking = false;
             _finishAt = Game.GameTime + (int)(Math.Max(0.5f, seconds) * 1000f);
 
@@ -228,6 +255,19 @@ namespace BareMinimum.Food
                 var now = Game.GameTime;
 
                 if (now >= _finishAt) { Finish(); return; }
+
+                // HANDS ARE FOR ONE THING AT A TIME. A man eating a burger through a gunfight
+                // is the kind of detail that makes everything else in the mod look careless,
+                // and the upper-body flag that lets him walk while he eats is exactly what
+                // lets him do this. So the moment he draws on somebody it goes: the food is
+                // lost, which is what dropping it means. See Interrupted.
+                if (Interrupted())
+                {
+                    Log.Info("Put down mid-" + (_playing != null && _playing.Cycle.Length > 1 ? "smoke" : "meal") +
+                             ": he reached for a weapon.");
+                    Abandon();
+                    return;
+                }
 
                 // KEEP TRYING TO START IT. Animate asks for a dictionary and gives up for
                 // that frame rather than spinning on it, so the very first attempt fails
@@ -694,6 +734,13 @@ namespace BareMinimum.Food
 
             if (!done) return;
 
+            // AND HE BREATHES OUT. This is the beat the clip lowers his hand on, which is the
+            // beat a man breathing out would be breathing out on -- so the plume goes here
+            // rather than on a clock of its own, and it is in step with the animation for
+            // free. Only for the things that are actually smoked: everything else in the
+            // catalogue has a one-clip cycle and never reaches this line. See Exhale.
+            if (_cfg.Puffs) Exhale.Now(me, 0.16f);
+
             _clip++;
             _animStarted = false;
         }
@@ -812,6 +859,51 @@ namespace BareMinimum.Food
         }
 
         /// <summary>Drops everything without crediting the need. For a failure mid-meal.</summary>
+        /// <summary>
+        /// Whether he has just picked a fight, and the meal is over.
+        ///
+        /// NOT SIMPLY "IS HE ARMED". Half the city eats with a pistol on their hip and this
+        /// mod is not going to refuse them a sandwich; what matters is a CHANGE -- he has
+        /// reached for something he was not holding when he started -- or an act: a shot, a
+        /// swing, or sights going up. The weapon he had at the first bite is remembered for
+        /// exactly this reason.
+        ///
+        /// A BARE-HANDED PUNCH IS NOT MELEE COMBAT until it lands, so the button is read as
+        /// well. Only when he is unarmed: with a gun in his hand that same button is the
+        /// trigger, and IS_PED_SHOOTING has that covered without guessing at intent.
+        /// </summary>
+        private bool Interrupted()
+        {
+            try
+            {
+                var me = Game.Player.Character;
+                if (me == null || !me.Exists() || me.IsDead) return false;
+
+                var now = me.Weapons.Current != null ? me.Weapons.Current.Hash : WeaponHash.Unarmed;
+                // A CHANGE TO SOMETHING, NOT A CHANGE TO NOTHING. The game takes a weapon
+                // off him itself for some of these animations -- a synchronised scene empties
+                // his hands -- and reading that as "he drew" would cancel the very clip that
+                // caused it on its second frame. Putting one away is not drawing one.
+                if (now != _armed && now != WeaponHash.Unarmed) return true;
+
+                if (Function.Call<bool>(Hash.IS_PED_SHOOTING, me.Handle)) return true;
+                if (Function.Call<bool>(Hash.IS_PED_IN_MELEE_COMBAT, me.Handle)) return true;
+                if (Function.Call<bool>(Hash.IS_PLAYER_FREE_AIMING, Game.Player.Handle)) return true;
+
+                // AND NOT AT THE WHEEL. Attack is a driving control as well, and a meal
+                // eaten through a drive-through is eaten sitting on it.
+                if (now == WeaponHash.Unarmed && !me.IsInVehicle() &&
+                    Game.IsControlJustPressed(Control.Attack)) return true;
+
+                return false;
+            }
+            catch
+            {
+                // A test that cannot be made is not an interruption.
+                return false;
+            }
+        }
+
         private void Abandon()
         {
             _item = null;

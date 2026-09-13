@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Windows.Forms;
 
 namespace BareMinimum.Core
@@ -1723,6 +1723,18 @@ namespace BareMinimum.Core
         public float SmokeSeconds = 20f;
 
         /// <summary>
+        /// WHETHER HE BREATHES IT OUT. One small plume of smoke out of his face on the beat
+        /// the animation lowers his hand, once per drag. See Food.Exhale.
+        ///
+        /// A switch because the particle it uses is the one thing in this mod that could not
+        /// be checked against a list before it was written down -- nothing on this machine
+        /// dumps the particle library the way Menyoo dumps the animations -- so it is asked
+        /// for, verified, and if somebody's install renders it as something ridiculous this
+        /// is how they turn it off without losing the animation with it.
+        /// </summary>
+        public bool Puffs = true;
+
+        /// <summary>
         /// HE DROPS IT WHEN HE HAS FINISHED. An empty can that vanishes out of a man's hand
         /// the instant he stops drinking is the one moment this mod stops modelling anything.
         ///
@@ -2190,6 +2202,7 @@ namespace BareMinimum.Core
                 cfg.WalkIns = ini.GetBool("Counters", "WalkIns", cfg.WalkIns);
 
                 cfg.SmokeSeconds = ini.GetFloat("Eating", "SmokeSeconds", cfg.SmokeSeconds, 0f, 120f);
+                cfg.Puffs = ini.GetBool("Eating", "Puffs", cfg.Puffs);
                 cfg.Litter = ini.GetBool("Eating", "Litter", cfg.Litter);
                 cfg.LitterMax = (int)ini.GetFloat("Eating", "LitterMax", cfg.LitterMax, 0f, 60f);
                 cfg.FoodSpinX = ini.GetFloat("Eating", "FoodSpinX", cfg.FoodSpinX, -180f, 180f);
