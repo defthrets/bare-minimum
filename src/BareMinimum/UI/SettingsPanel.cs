@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using GTA;
@@ -713,6 +713,24 @@ namespace BareMinimum.UI
                   1f, 0f, 120f, "0",
                   "Real seconds. He draws on it, exhales and pauses for as long as this says, " +
                   "and can walk about while he does. 0 uses the item's own time, which is six.");
+
+            Float("Held left/right", "Eating", "HoldX",
+                  () => _cfg.HoldX, v => _cfg.HoldX = v,
+                  0.005f, -0.5f, 0.5f, "0.000",
+                  "Where the thing in his hand sits, out of the palm. The hand bone is a grip " +
+                  "point rather than a shelf, so a model centred on itself comes out halfway " +
+                  "through his hand. Added to whatever the item itself says; 0 leaves it alone.");
+
+            Float("Held forward/back", "Eating", "HoldY",
+                  () => _cfg.HoldY, v => _cfg.HoldY = v,
+                  0.005f, -0.5f, 0.5f, "0.000",
+                  "The same, towards the fingers and back towards the wrist.");
+
+            Float("Held up/down", "Eating", "HoldZ",
+                  () => _cfg.HoldZ, v => _cfg.HoldZ = v,
+                  0.005f, -0.5f, 0.5f, "0.000",
+                  "The same, up through the back of the hand. Watch it move with something in " +
+                  "your hand: eat, open this, and turn the row.");
 
             Bool("Hide the game's shop", "Counters", "BlockVanillaMenu",
                  () => _cfg.BlockVanillaCounter, v => _cfg.BlockVanillaCounter = v,

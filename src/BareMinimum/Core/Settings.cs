@@ -1752,6 +1752,24 @@ namespace BareMinimum.Core
         /// </summary>
         public int LitterMax = 12;
 
+        /// <summary>
+        /// A NUDGE ON TOP OF WHEREVER THE CATALOGUE PUTS THE THING IN HIS HAND, in metres.
+        /// Positive X is out of the palm, Y is towards the fingers, Z is up through the back
+        /// of the hand.
+        ///
+        /// FOR WALKING ONE INTO PLACE WITH IT IN YOUR HAND. Every item's own position is in
+        /// foods.json and the sensible way to find a number is to watch it move, so these
+        /// three are on the F11 menu, live, and are ADDED to whatever the item said. Nought
+        /// on all three leaves every item where the catalogue put it.
+        ///
+        /// It is deliberately one nudge for everything rather than one per item: an item that
+        /// needs its own answer gets it written into foods.json, which is where a permanent
+        /// answer belongs.
+        /// </summary>
+        public float HoldX = 0f;
+        public float HoldY = 0f;
+        public float HoldZ = 0f;
+
         public float FoodSpinX = 0f;
         public float FoodSpinY = 0f;
         public float FoodSpinZ = 90f;
@@ -2203,6 +2221,9 @@ namespace BareMinimum.Core
 
                 cfg.SmokeSeconds = ini.GetFloat("Eating", "SmokeSeconds", cfg.SmokeSeconds, 0f, 120f);
                 cfg.Puffs = ini.GetBool("Eating", "Puffs", cfg.Puffs);
+                cfg.HoldX = ini.GetFloat("Eating", "HoldX", cfg.HoldX, -0.5f, 0.5f);
+                cfg.HoldY = ini.GetFloat("Eating", "HoldY", cfg.HoldY, -0.5f, 0.5f);
+                cfg.HoldZ = ini.GetFloat("Eating", "HoldZ", cfg.HoldZ, -0.5f, 0.5f);
                 cfg.Litter = ini.GetBool("Eating", "Litter", cfg.Litter);
                 cfg.LitterMax = (int)ini.GetFloat("Eating", "LitterMax", cfg.LitterMax, 0f, 60f);
                 cfg.FoodSpinX = ini.GetFloat("Eating", "FoodSpinX", cfg.FoodSpinX, -180f, 180f);

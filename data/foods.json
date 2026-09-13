@@ -3992,6 +3992,25 @@
     "The scenario stays a neutral idle on purpose. The only two eating scenarios in the game",
     "-- WORLD_HUMAN_SEAT_LEDGE_EATING and WORLD_HUMAN_SEAT_WALL_EATING -- both sit him down."
   ],
+  "hold": {
+    "_note": [
+      "WHERE A THING SITS IN HIS HAND, in metres: out of the palm, towards the fingers, up",
+      "through the back of the hand. The bone is the game's own prop hand, which is a GRIP",
+      "POINT and not a shelf -- a prop attached at nought puts its own origin on that point,",
+      "and these models are centred on themselves, so a can comes out halfway through his",
+      "palm. That is what this fixes.",
+      "",
+      "Three defaults by what the thing is, and any item may name its own \"hold\" of three",
+      "numbers -- the same shape as the litter below, and for the same reason: a burger and",
+      "a cigarette have nothing to say to each other and only the model knows.",
+      "",
+      "[Eating] HoldX/Y/Z in the ini is ADDED to whatever is here, and is on the F11 menu",
+      "live, so a number can be found by watching it move rather than by guessing at it."
+    ],
+    "food": [0.04, 0.02, 0.0],
+    "drink": [0.03, 0.01, 0.0],
+    "smoke": [0.02, 0.01, 0.0]
+  },
   "litter": {
     "_note": [
       "WHAT IS LEFT ON THE PAVEMENT when he has finished. Three defaults by what the thing",

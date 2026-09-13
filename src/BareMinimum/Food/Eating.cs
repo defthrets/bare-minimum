@@ -596,9 +596,11 @@ namespace BareMinimum.Food
                 // The three angles are the food spin -- see Settings.FoodSpinX. Zero for a
                 // drink or a smoke, which sit right without it.
                 var spin = SpinFor(item, drinking);
+                var sits = SitsFor(item, drinking);
 
                 Function.Call(Hash.ATTACH_ENTITY_TO_ENTITY, _held.Handle, me.Handle, bone,
-                              0f, 0f, 0f, spin.X, spin.Y, spin.Z, false, false, false, false, 2, true);
+                              sits.X, sits.Y, sits.Z,
+                              spin.X, spin.Y, spin.Z, false, false, false, false, 2, true);
 
                 // The model is released as soon as the object exists; holding the request open
                 // pins it in memory for the rest of the session for no reason.
@@ -610,6 +612,24 @@ namespace BareMinimum.Food
                                          ex.Message + " - eaten empty-handed.");
                 _held = null;
             }
+        }
+
+        /// <summary>
+        /// Where this item sits in his hand: what the catalogue says, plus the live nudge.
+        ///
+        /// THE HAND BONE IS A GRIP POINT AND NOT A SHELF. A prop attached at nought puts its
+        /// own origin on that point, and these models are centred on themselves, so the thing
+        /// he is holding comes out halfway through his palm. The catalogue carries a number
+        /// for each kind and any item may name its own -- see Catalogue.HoldFor -- and the
+        /// three on top are the ini's, so somebody with a burger in their hand can walk it
+        /// into place on the menu rather than guessing at a json file. Those are ADDED, so
+        /// nought on the menu leaves every item exactly where the catalogue put it.
+        /// </summary>
+        private Vector3 SitsFor(Item item, bool drinking)
+        {
+            var it = _menu.HoldFor(item, drinking);
+
+            return new Vector3(it[0] + _cfg.HoldX, it[1] + _cfg.HoldY, it[2] + _cfg.HoldZ);
         }
 
         /// <summary>The turn this item gets in the hand. Food is turned; drink and smoke are not.</summary>

@@ -76,6 +76,19 @@ namespace BareMinimum.Food
         public bool Smoke;
 
         /// <summary>
+        /// WHERE IT SITS IN HIS HAND, in metres, or null if the item did not say.
+        ///
+        /// The hand bone is a grip point, not a shelf: a prop attached at nought sits with
+        /// its OWN origin on that point, and most of these models are centred on themselves,
+        /// so a can ends up halfway through his palm. Which is exactly what it looked like.
+        ///
+        /// A default for each kind and an override for anything odd -- the same shape as
+        /// Litter, and for the same reason: what a burger wants and what a cigarette wants
+        /// have nothing to do with each other, and only the model knows. See Catalogue.HoldFor.
+        /// </summary>
+        public float[] Hold;
+
+        /// <summary>
         /// KIT, NOT FOOD. Something you buy once and keep: it takes a place in the pocket and
         /// stays there, is never consumed, and does nothing at all when it is chosen.
         ///
@@ -415,6 +428,7 @@ namespace BareMinimum.Food
                         Desc = node["desc"].AsString(""),
                         Smoke = node["smoke"].AsBool(false),
                         Keep = node["keep"].AsBool(false),
+                        Hold = Three(node["hold"]),
                         Props = PropNames(node["prop"]),
                         Seconds = node["seconds"].AsFloat(4f),
                         VehicleSeconds = node["vehicleSeconds"].AsFloat(0f),
@@ -481,6 +495,14 @@ namespace BareMinimum.Food
                 LitterDrink = litter["drink"].AsString("");
                 LitterBooze = litter["booze"].AsString("");
                 LitterFood = litter["food"].AsString("");
+
+                // AND WHERE IT SITS WHILE HE HAS IT. Beside the litter for the same reason
+                // the litter is beside the props: it is a fact about the model. See HoldFor.
+                var hold = doc["hold"];
+
+                HoldFood = Three(hold["food"]) ?? HoldFood;
+                HoldDrink = Three(hold["drink"]) ?? HoldDrink;
+                HoldSmoke = Three(hold["smoke"]) ?? HoldSmoke;
 
                 LitterByIcon.Clear();
 
@@ -705,6 +727,36 @@ namespace BareMinimum.Food
         /// is in full or it is not an override, and ReadAnim's own "one pair is a list of one"
         /// rule is what decides that: no dict, no options, no override.
         /// </summary>
+        /// <summary>
+        /// WHERE EACH KIND SITS IN HIS HAND, in metres, out along the grip.
+        ///
+        /// These are the numbers everything falls back on, and they are deliberately small:
+        /// the bone is the game's own prop hand, so the prop is already nearly right and
+        /// this is a nudge out of the palm rather than a placement. An item may say its own.
+        /// </summary>
+        public float[] HoldFood = { 0.04f, 0.02f, 0.0f };
+        public float[] HoldDrink = { 0.03f, 0.01f, 0.0f };
+        public float[] HoldSmoke = { 0.02f, 0.01f, 0.0f };
+
+        /// <summary>Where this one sits: its own answer if it gave one, else its kind's.</summary>
+        public float[] HoldFor(Item item, bool drinking)
+        {
+            if (item == null) return HoldDrink;
+            if (item.Hold != null) return item.Hold;
+
+            if (item.Smoke) return HoldSmoke;
+
+            return item.Drink || drinking ? HoldDrink : HoldFood;
+        }
+
+        /// <summary>Three numbers off a json node, or null if it did not give three.</summary>
+        private static float[] Three(Json node)
+        {
+            if (node == null || node.IsNull || node.Count < 3) return null;
+
+            return new[] { node[0].AsFloat(0f), node[1].AsFloat(0f), node[2].AsFloat(0f) };
+        }
+
         /// <summary>What a drink, a beer and a meal leave behind. From foods.json; see Litter.</summary>
         public string LitterDrink = "";
         public string LitterBooze = "";
