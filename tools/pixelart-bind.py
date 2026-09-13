@@ -52,16 +52,17 @@ BIND = [
     ("plate", 0,  "Beach Breakfast"),         # smiley pancake (rebound below, to plate2 4)
     ("plate", 1,  "Carne Asada Plate"),       # on the wooden board
     ("plate", 2,  "Mixed Grill"),             # the biggest cut
-    ("plate", 3,  "All You Can Eat"),
+    ("chinese", 12, "All You Can Eat"),      # REBOUND off plate 3, a steak dinner. It is a Chinese buffet: the split hotpot
     ("plate", 4,  "Mama's Meatloaf"),         # the gravy
     ("fastfood", 8, "Mexican-American Combo"),  # REBOUND off plate 5, which was steak and mash: tacos, chips and a bottle
-    ("plate", 7,  "Rack of Ribs"),            # orange rim
+    ("platter", 10, "Rack of Ribs"),          # REBOUND off plate 7, which was a steak. The only rack in the library,
+                                              # shared with Pipeline Ribs at the other end of town
     ("plate", 8,  "Tasting Plate"),           # yellow rim, arranged
     ("plate", 9,  "Secondo"),                 # green rim
     ("plate", 10, "Plato Chido"),             # the patterned plate
     ("plate", 11, "Diner Plate"),             # mac and cheese on the side
     ("plate", 12, "Blue Plate"),              # blue rim, gravy over everything
-    ("plate", 13, "Chef's Garden Plate"),
+    ("plate2", 14, "Chef's Garden Plate"),    # REBOUND off plate 13, a canteen tray. A GARDEN plate, at the health shop: the salad
     ("plate", 14, "Grilled Fish Plate"),      # a steak (rebound below, to plate2 11)
     ("plate", 15, "Catch of the Day"),        # wooden board, seaside
     # beverages
