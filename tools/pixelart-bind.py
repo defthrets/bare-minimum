@@ -54,7 +54,7 @@ BIND = [
     ("plate", 2,  "Mixed Grill"),             # the biggest cut
     ("plate", 3,  "All You Can Eat"),
     ("plate", 4,  "Mama's Meatloaf"),         # the gravy
-    ("plate", 5,  "Mexican-American Combo"),
+    ("fastfood", 8, "Mexican-American Combo"),  # REBOUND off plate 5, which was steak and mash: tacos, chips and a bottle
     ("plate", 7,  "Rack of Ribs"),            # orange rim
     ("plate", 8,  "Tasting Plate"),           # yellow rim, arranged
     ("plate", 9,  "Secondo"),                 # green rim
@@ -121,7 +121,7 @@ BIND = [
     ("bucket", 6,  "Hookies Basket"),         # wicker basket, fish, shrimp, lemon
     ("bucket", 10, "Cluckin' Bucket"),        # the striped chicken bucket
     ("bucket", 0,  "group:bucket"),
-    ("bucket", 7,  "French Fries"),           # paper cup of fries
+    ("junk", 20,   "French Fries"),           # REBOUND off bucket 7: the plain carton, no shop name printed on it
     ("bucket", 9,  "Rings of Fire"),          # tin of onion rings with dip
     # junk_food
     ("junk", 0,  "Sharkies Burger"),          # burger in a paper wrap -- REBOUND, it is the item's own line
@@ -172,7 +172,7 @@ BIND = [
     ("platter", 1,  "Half Dozen Oysters"),    # oysters on a board -- the plate group's one gap, filled from here
     ("platter", 2,  "Heavy Shells"),          # tortilla chips, salsa, guac: shells and sides
     ("platter", 3,  "Fish and Chips"),        # in the paper, tartare on the side
-    ("platter", 5,  "Small Plates"),          # the charcuterie board
+    ("platter", 12, "Small Plates"),          # REBOUND off platter 5, which the jerky now needs: the round mezze board
     ("platter", 5,  "group:platter"),
     ("platter", 7,  "Seafood Platter"),       # crab, shrimp, corn, lemon
     ("platter", 8,  "Meat Pie"),              # a whole golden pie -- the Food pie, unpictured till now
@@ -228,7 +228,7 @@ BIND = [
     ("sub", 5, "Torta"),                      # ham and cheese on the pale seeded roll
     ("sub", 6, "Pastrami Combo"),             # pastrami piled on a round roll -- a sandwich, from the sub batch
     # grocery_bag -- four bags
-    ("grocery", 0, "Bag of Groceries"),       # the plastic carrier, full
+    ("groceries", 2, "Bag of Groceries"),     # REBOUND off grocery 0, a white carrier: the paper bag with the milk and the bread out the top
     ("grocery", 2, "Bag of Produce"),         # paper bag with handles
     ("grocery", 1, "group:bag"),              # plain paper bag; the Organic Veg Box stays white -- it is a box
     # bakery_produce -- eight
@@ -303,7 +303,8 @@ BIND = [
     ("bakery", 5,    "group:muffin"),         # the cinnamon roll. No muffin was ever drawn; a sweet bake stands in
     ("sandwich", 0,  "group:toastie"),        # a stacked sandwich for the pressed one
     ("hotdog", 12,   "group:corndog"),        # a grilled sausage in a bun; nothing on a stick was ever drawn
-    ("weed", 0,      "group:jerky"),          # the kraft pouch with a window and brown strips behind it
+    ("platter", 5,   "group:jerky"),          # the cured meat off the charcuterie board. No packet of jerky was ever drawn,
+                                              # and a bag with green in it read as the wrong thing entirely
     ("shake", 13,    "group:sundae"),         # the sundae glass -- for the Banana Split and the tub
     ("beverages", 1, "group:espresso"),       # black coffee in a cup: small, black, and rude about it
     ("shake", 15,    "Green Juice"),          # the green one. Kale and celery is not orange juice
