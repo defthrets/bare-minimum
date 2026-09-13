@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using GTA;
 using BareMinimum.Core;
@@ -238,31 +238,42 @@ namespace BareMinimum.Vitals
             // BareMinimum.UI.Draw.Room, which is where the share is kept.
             if (!cfg.HudBarInsides || !BareMinimum.UI.Draw.Room) return;
 
-            // THE RELIEF ON EVERY BAR, before whatever this one keeps inside it.
-            Relief(cfg, x, w, floor, surface, body, t, strength);
-
-            if (cfg.VitalsParticles <= 0.001f) return;
-
-            switch (kind)
+            // AND EVERYTHING BELOW IS COUNTED AS DECORATION while it draws, so the latch
+            // that turned it off knows what turning it back on would really cost rather
+            // than guessing it off two whole frames. See BareMinimum.UI.Ledger.Decorating.
+            BareMinimum.UI.Ledger.Decorating(true);
+            try
             {
-                case Kind.Health:
-                    // Plate while it is armour, a heartbeat once it is blood.
-                    if (r.Armour > 0.002f)
-                    {
-                        Plating(cfg, x, w, floor, surface, body, t, m.Wall, r, strength);
-                    }
-                    else
-                    {
-                        // HEARTBEAT FIRST AND ALWAYS. It is what advances the beat clock every
-                        // frame -- the phase, the period and when the last beat fell -- and it
-                        // returns early once the flash has faded, so the cells cannot be folded
-                        // into it. They read that clock; they must not be the ones running it.
-                        Heartbeat(cfg, x, w, floor, surface, body, spring, m.Wall, r.Health, strength);
-                        Cells(cfg, x, w, floor, surface, body, m.Wall, strength);
-                    }
-                    break;
-                case Kind.Armour: Plating(cfg, x, w, floor, surface, body, t, m.Wall, r, strength); break;
-                default: Streaks(cfg, x, w, floor, surface, body, m.Charge, r, strength); break;
+                // THE RELIEF ON EVERY BAR, before whatever this one keeps inside it.
+                Relief(cfg, x, w, floor, surface, body, t, strength);
+
+                if (cfg.VitalsParticles <= 0.001f) return;
+
+                switch (kind)
+                {
+                    case Kind.Health:
+                        // Plate while it is armour, a heartbeat once it is blood.
+                        if (r.Armour > 0.002f)
+                        {
+                            Plating(cfg, x, w, floor, surface, body, t, m.Wall, r, strength);
+                        }
+                        else
+                        {
+                            // HEARTBEAT FIRST AND ALWAYS. It is what advances the beat clock every
+                            // frame -- the phase, the period and when the last beat fell -- and it
+                            // returns early once the flash has faded, so the cells cannot be folded
+                            // into it. They read that clock; they must not be the ones running it.
+                            Heartbeat(cfg, x, w, floor, surface, body, spring, m.Wall, r.Health, strength);
+                            Cells(cfg, x, w, floor, surface, body, m.Wall, strength);
+                        }
+                        break;
+                    case Kind.Armour: Plating(cfg, x, w, floor, surface, body, t, m.Wall, r, strength); break;
+                    default: Streaks(cfg, x, w, floor, surface, body, m.Charge, r, strength); break;
+                }
+            }
+            finally
+            {
+                BareMinimum.UI.Ledger.Decorating(false);
             }
         }
 

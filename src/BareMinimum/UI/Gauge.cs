@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using GTA;
@@ -1107,7 +1107,14 @@ namespace BareMinimum.UI
             Relief(x, w, floor, surfaceY, body, t / PaceOf());
 
             // The crumbs are decoration and yield when the frame's share has gone. See Draw.Room.
-            if (Hud.Room) Sediment(x, y, w, h, surfaceY, inside, empty);
+            if (Hud.Room)
+            {
+                // COUNTED APART FROM THE INSTRUMENT while they draw, so the latch that
+                // turned them off knows what putting them back costs. See Ledger.Decorating.
+                Ledger.Decorating(true);
+                try { Sediment(x, y, w, h, surfaceY, inside, empty); }
+                finally { Ledger.Decorating(false); }
+            }
         }
 
         /// <summary>
@@ -1208,7 +1215,14 @@ namespace BareMinimum.UI
 
             // Decoration, and it yields when the frame's share of rectangles has gone. Same
             // rule as the crumbs. See Draw.Room.
-            if (Hud.Room) Bubbles(x, y, w, h, surfaceY, inside, lively);
+            if (Hud.Room)
+            {
+                // COUNTED APART FROM THE INSTRUMENT while they draw, so the latch that
+                // turned them off knows what putting them back costs. See Ledger.Decorating.
+                Ledger.Decorating(true);
+                try { Bubbles(x, y, w, h, surfaceY, inside, lively); }
+                finally { Ledger.Decorating(false); }
+            }
         }
 
         /// <summary>

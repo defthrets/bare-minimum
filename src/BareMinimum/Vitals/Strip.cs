@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using GTA;
 using BareMinimum.Core;
@@ -212,11 +212,22 @@ namespace BareMinimum.Vitals
             if (!cfg.HudBarInsides || cfg.VitalsParticles <= 0.001f ||
                 !BareMinimum.UI.Draw.Room) return;
 
-            switch (kind)
+            // AND EVERYTHING BELOW IS COUNTED AS DECORATION while it draws, so the latch
+            // that turned it off knows what turning it back on would really cost rather
+            // than guessing it off two whole frames. See BareMinimum.UI.Ledger.Decorating.
+            BareMinimum.UI.Ledger.Decorating(true);
+            try
             {
-                case Kind.Health: Heartbeat(cfg, x0, y0, h, surface, body, spring, m.Wall, r.Health, strength); break;
-                case Kind.Armour: Plating(cfg, x0, y0, h, surface, body, t, m.Wall, r, strength); break;
-                default: Streaks(cfg, x0, y0, h, surface, body, m.Wall, r, strength); break;
+                switch (kind)
+                {
+                    case Kind.Health: Heartbeat(cfg, x0, y0, h, surface, body, spring, m.Wall, r.Health, strength); break;
+                    case Kind.Armour: Plating(cfg, x0, y0, h, surface, body, t, m.Wall, r, strength); break;
+                    default: Streaks(cfg, x0, y0, h, surface, body, m.Wall, r, strength); break;
+                }
+            }
+            finally
+            {
+                BareMinimum.UI.Ledger.Decorating(false);
             }
         }
 
