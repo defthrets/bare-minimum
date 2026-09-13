@@ -652,6 +652,13 @@ namespace BareMinimum.Food
         {
             var it = _menu.HoldFor(item, drinking);
 
+            // AND A SMOKE IS LOCKED WHERE IT IS. A cigarette at the middle of the hand was
+            // right before any of this existed -- it is a small thing between two fingers and
+            // the grip point is exactly where it belongs -- so it takes the catalogue's
+            // number and nothing else. The nudge is a dial for walking a CUP into place, and
+            // a dial that drags the cigarettes out with it is a dial nobody can use.
+            if (item != null && item.Smoke) return new Vector3(it[0], it[1], it[2]);
+
             return new Vector3(it[0] + _cfg.HoldX, it[1] + _cfg.HoldY, it[2] + _cfg.HoldZ);
         }
 

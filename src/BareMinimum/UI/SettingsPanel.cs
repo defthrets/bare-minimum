@@ -783,7 +783,8 @@ namespace BareMinimum.UI
                   0.005f, -0.5f, 0.5f, "0.000",
                   "Where the thing in his hand sits, out of the palm. The hand bone is a grip " +
                   "point rather than a shelf, so a model centred on itself comes out halfway " +
-                  "through his hand. Added to whatever the item itself says; 0 leaves it alone.");
+                  "through his hand. Added to whatever the item itself says; 0 leaves it " +
+                  "alone. Cigarettes are not moved by this - they were already right.");
 
             Float("Held forward/back", "Eating", "HoldY",
                   () => _cfg.HoldY, v => _cfg.HoldY = v,

@@ -497,9 +497,14 @@ namespace BareMinimum.UI
         /// <summary>Where the thing under the cursor sits in his hand. See Catalogue.HoldFor.</summary>
         private GTA.Math.Vector3 Where()
         {
-            var it = _menu == null ? null : _menu.HoldFor(Shown(), false);
+            var item = Shown();
+            var it = _menu == null ? null : _menu.HoldFor(item, false);
 
             if (it == null || _cfg == null) return GTA.Math.Vector3.Zero;
+
+            // Locked, the same as Eating.SitsFor -- the nudge is for the things with a body
+            // to them, and a cigarette was right where it was.
+            if (item != null && item.Smoke) return new GTA.Math.Vector3(it[0], it[1], it[2]);
 
             return new GTA.Math.Vector3(it[0] + _cfg.HoldX, it[1] + _cfg.HoldY, it[2] + _cfg.HoldZ);
         }

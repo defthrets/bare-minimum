@@ -4005,11 +4005,17 @@
       "a cigarette have nothing to say to each other and only the model knows.",
       "",
       "[Eating] HoldX/Y/Z in the ini is ADDED to whatever is here, and is on the F11 menu",
-      "live, so a number can be found by watching it move rather than by guessing at it."
+      "live, so a number can be found by watching it move rather than by guessing at it.",
+      "",
+      "THE SMOKES ARE NOUGHT AND THEY ARE NOT TO BE MOVED. A cigarette held at the middle",
+      "of the hand was right all along -- it is a small thing between two fingers and the",
+      "grip point is where it belongs. Only the things with a body to them needed shifting.",
+      "The live nudge does not touch a smoke either, so dialling a cup in cannot drag the",
+      "cigarettes out with it. See Eating.SitsFor."
     ],
     "food": [0.015, 0.01, -0.035],
     "drink": [0.01, 0.0, -0.04],
-    "smoke": [0.01, 0.0, -0.01]
+    "smoke": [0.0, 0.0, 0.0]
   },
   "litter": {
     "_note": [
