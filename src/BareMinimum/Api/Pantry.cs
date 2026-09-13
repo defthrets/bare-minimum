@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace BareMinimum.Api
@@ -61,6 +61,11 @@ namespace BareMinimum.Api
         /// <summary>The meters, for Drain. Nothing else out here reads them.</summary>
         private static Needs.Needs _needs;
 
+        /// <summary>The screens, so MenuOpen can answer. Nothing else out here reads them.</summary>
+        private static UI.Bag _pocket;
+        private static UI.FridgeScreen _fridge;
+        private static Venues.Vendors _shop;
+
         /// <summary>
         /// Called by Main once the real objects exist. Not part of the public contract -- the
         /// other side never calls this, it only ever reads.
@@ -72,6 +77,14 @@ namespace BareMinimum.Api
             _menu = menu;
             _eating = eating;
             _needs = needs;
+        }
+
+        /// <summary>The screens, wired separately so Wire's shape is left alone.</summary>
+        internal static void Screens(UI.Bag pocket, UI.FridgeScreen fridge, Venues.Vendors shop)
+        {
+            _pocket = pocket;
+            _fridge = fridge;
+            _shop = shop;
         }
 
         /// <summary>
@@ -111,10 +124,56 @@ namespace BareMinimum.Api
             get { try { return _bag == null ? 0 : _bag.Total; } catch { return 0; } }
         }
 
-        /// <summary>How many fit.</summary>
+        /// <summary>How many fit, the extra room below included.</summary>
         public static int Slots
         {
             get { try { return _bag == null ? 0 : _bag.Slots; } catch { return 0; } }
+        }
+
+        /// <summary>
+        /// Room somebody else is lending the pocket.
+        ///
+        /// ADDED WITHOUT BUMPING ApiVersion, which is safe in this one direction: a caller that
+        /// never sets it leaves it at nought and the pocket is exactly the size it always was.
+        ///
+        /// WHAT IT IS FOR. Hoodrich has a bag now -- a real one, worn on the back, dropped on
+        /// the pavement -- and while it is on, everything the player is carrying gets bigger.
+        /// Food is carried in THIS mod's pocket, so that pocket has to grow with it or the bag
+        /// is a thing that holds drugs and lies about holding sandwiches.
+        ///
+        /// SET, NOT ADDED TO, and set from one fact on the other side -- is the bag on him --
+        /// so it cannot compound and there is no state here to get out of step with a bag this
+        /// mod cannot see.
+        /// </summary>
+        public static int ExtraSlots { get; set; }
+
+        /// <summary>
+        /// Whether one of this mod's own screens is up and owns the buttons.
+        ///
+        /// ADDED WITHOUT BUMPING ApiVersion, the same way ExtraSlots is: a caller that never
+        /// asks is unaffected.
+        ///
+        /// TWO MODS, ONE KEYBOARD. The shop menu, the fridge and the pocket are full-screen
+        /// things that read arrows and a confirm key -- and so is the phone next door. A
+        /// player buying a burger and pressing the wrong button ends up with a phone over the
+        /// top of the shop, and neither mod did anything wrong on its own. This is how the
+        /// other one knows to stay shut.
+        /// </summary>
+        public static bool MenuOpen
+        {
+            get
+            {
+                try
+                {
+                    return (_pocket != null && _pocket.IsOpen) ||
+                           (_fridge != null && _fridge.IsOpen) ||
+                           (_shop != null && _shop.MenuOpen);
+                }
+                catch
+                {
+                    return false;
+                }
+            }
         }
 
         // ---- describing an item ----------------------------------------------

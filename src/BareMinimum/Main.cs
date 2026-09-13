@@ -150,6 +150,10 @@ namespace BareMinimum
             // line runs, and the caller is expected to keep asking rather than resolve once.
             Api.Pantry.Wire(_pantry, _catalogue, _eating, _needs);
 
+            // And the screens, so the mod next door knows when one of ours owns the
+            // buttons. See Api.Pantry.MenuOpen.
+            Api.Pantry.Screens(_bag, _fridge, _vendors);
+
             _settings = new SettingsPanel(_cfg, _needs);
 
             // THE MENU ASKS RATHER THAN HOLDS. See SettingsPanel.ForgetMachines -- a menu that

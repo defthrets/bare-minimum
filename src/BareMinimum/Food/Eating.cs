@@ -739,7 +739,7 @@ namespace BareMinimum.Food
             // rather than on a clock of its own, and it is in step with the animation for
             // free. Only for the things that are actually smoked: everything else in the
             // catalogue has a one-clip cycle and never reaches this line. See Exhale.
-            if (_cfg.Puffs) Exhale.Now(me, 0.16f);
+            if (_cfg.Puffs) Exhale.Now(me);
 
             _clip++;
             _animStarted = false;

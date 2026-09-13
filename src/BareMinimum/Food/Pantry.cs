@@ -1,4 +1,4 @@
-using BareMinimum.Core;
+﻿using BareMinimum.Core;
 
 namespace BareMinimum.Food
 {
@@ -28,7 +28,25 @@ namespace BareMinimum.Food
             Load();
         }
 
-        public override int Slots => _cfg.PantrySlots < 1 ? 1 : _cfg.PantrySlots;
+        /// <summary>
+        /// How much he can carry, plus whatever is lending him room.
+        ///
+        /// See Api.Pantry.ExtraSlots -- Hoodrich's bag, when it is on his back. Never below
+        /// one, because a pocket with no slots in it is a mod that has stopped working rather
+        /// than a player with full hands.
+        /// </summary>
+        public override int Slots
+        {
+            get
+            {
+                var mine = _cfg.PantrySlots < 1 ? 1 : _cfg.PantrySlots;
+
+                var lent = 0;
+                try { lent = Api.Pantry.ExtraSlots; } catch { /* nobody is lending */ }
+
+                return lent <= 0 ? mine : mine + lent;
+            }
+        }
 
         protected override string File => Paths.PantryFile;
 
