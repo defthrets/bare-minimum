@@ -1,4 +1,4 @@
-﻿{
+{
   "_comment": [
     "Everything you can buy and eat. Edit freely -- this file is not overwritten by an update",
     "unless you deploy with -FreshData.",
@@ -4013,8 +4013,8 @@
       "The live nudge does not touch a smoke either, so dialling a cup in cannot drag the",
       "cigarettes out with it. See Eating.SitsFor."
     ],
-    "food": [0.09, 0.0, -0.035],
-    "drink": [0.055, -0.02, -0.06],
+    "food": [0.0, 0.0, 0.0],
+    "drink": [0.0, 0.0, 0.0],
     "smoke": [0.0, 0.0, 0.0],
 
     "_turn_note": [
@@ -4027,7 +4027,7 @@
       "A smoke is not turned by either of them."
     ],
     "turnFood": [0.0, 0.0, 0.0],
-    "turnDrink": [-70.0, 0.0, -15.0],
+    "turnDrink": [0.0, 0.0, 0.0],
     "turnSmoke": [0.0, 0.0, 0.0]
   },
   "litter": {
