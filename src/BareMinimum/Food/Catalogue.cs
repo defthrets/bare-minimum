@@ -767,7 +767,7 @@ namespace BareMinimum.Food
         /// <summary>How this one is turned: its own answer if it gave one, else its kind's.</summary>
         public float[] TurnFor(Item item, bool drinking)
         {
-            if (item == null) return TurnDrink;
+            if (item == null) return drinking ? TurnDrink : TurnFood;
             if (item.Turn != null) return item.Turn;
 
             if (item.Smoke) return TurnSmoke;
@@ -778,7 +778,9 @@ namespace BareMinimum.Food
         /// <summary>Where this one sits: its own answer if it gave one, else its kind's.</summary>
         public float[] HoldFor(Item item, bool drinking)
         {
-            if (item == null) return HoldDrink;
+            // NO ITEM IS A QUESTION ABOUT THE KIND. The menu's tuning sample is a cup or a
+            // burger and not anything in the catalogue, so it asks with nothing and the flag.
+            if (item == null) return drinking ? HoldDrink : HoldFood;
             if (item.Hold != null) return item.Hold;
 
             if (item.Smoke) return HoldSmoke;

@@ -1792,6 +1792,19 @@ namespace BareMinimum.Core
         public float TurnY = 0f;
         public float TurnZ = 0f;
 
+        /// <summary>
+        /// WHICH KIND THE SIX NUDGES ABOVE ARE FOR. 0 is a drink, 1 is food.
+        ///
+        /// ONE DIAL AND TWO THINGS TO TUNE. A cup and a burger want different answers, and a
+        /// nudge that moved both would drag a finished drink back out of his hand the moment
+        /// somebody started on the food. So it applies to one kind at a time and the other is
+        /// left exactly where it was baked -- the same protection the smokes get permanently.
+        ///
+        /// It also picks what the menu puts in his hand while the rows are selected: a cup or
+        /// a burger, so the thing being watched is the thing being tuned.
+        /// </summary>
+        public int HoldWhat = 0;
+
         public float FoodSpinX = 0f;
         public float FoodSpinY = 0f;
         public float FoodSpinZ = 90f;
@@ -2249,6 +2262,11 @@ namespace BareMinimum.Core
                 cfg.TurnX = ini.GetFloat("Eating", "TurnX", cfg.TurnX, -180f, 180f);
                 cfg.TurnY = ini.GetFloat("Eating", "TurnY", cfg.TurnY, -180f, 180f);
                 cfg.TurnZ = ini.GetFloat("Eating", "TurnZ", cfg.TurnZ, -180f, 180f);
+
+                // Words in the file, a number in here. Anything else is a drink, which is the
+                // safe way round: the nudge then cannot touch the food that is already right.
+                cfg.HoldWhat = string.Equals(ini.GetString("Eating", "HoldWhat", "Drink"),
+                                             "Food", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
                 cfg.Litter = ini.GetBool("Eating", "Litter", cfg.Litter);
                 cfg.LitterMax = (int)ini.GetFloat("Eating", "LitterMax", cfg.LitterMax, 0f, 60f);
                 cfg.LitterOut = ini.GetFloat("Eating", "LitterOut", cfg.LitterOut, 0f, 2f);

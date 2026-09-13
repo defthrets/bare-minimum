@@ -114,26 +114,34 @@ namespace BareMinimum.UI
         /// </summary>
         private readonly Peek _hand = new Peek();
 
-        /// <summary>What it holds while tuning. A cup, because a cup is the shape that showed
-        /// the problem: tall, off-centre, and obviously wrong when it is wrong.</summary>
-        private const string Sample = "prop_cs_bs_cup";
+        /// <summary>
+        /// What it holds while tuning, by what is being tuned. See Settings.HoldWhat.
+        ///
+        /// A cup and a burger, because those are the two shapes that show the problem: one is
+        /// tall and obviously wrong when it leans, the other is flat and obviously wrong when
+        /// it is on its side. Both are in this build; both are checked against PropList.
+        /// </summary>
+        private const string SampleDrink = "prop_cs_bs_cup";
+        private const string SampleFood = "prop_cs_burger_01";
 
-        public SettingsPanel(Core.Settings cfg, Needs.Needs needs)
+        /// <summary>The catalogue, for the tuning sample's own numbers. See Placed.</summary>
+        private readonly Food.Catalogue _menu;
+
+        public SettingsPanel(Core.Settings cfg, Needs.Needs needs, Food.Catalogue menu)
         {
             _cfg = cfg;
             _needs = needs;
+            _menu = menu;
 
             // The drink's own place in the hand plus the live nudge, which is exactly what
             // Eating.SitsFor works out for a cup. See Catalogue.HoldFor.
-            _hand.Sits = () => _cfg == null
-                ? GTA.Math.Vector3.Zero
-                : new GTA.Math.Vector3(0.01f + _cfg.HoldX, 0.0f + _cfg.HoldY, -0.04f + _cfg.HoldZ);
+            // THE SAMPLE IS PLACED THE WAY THE REAL THING WOULD BE: the kind's own numbers
+            // out of foods.json plus the live nudge, so what is on screen is what will be
+            // baked. Asked of the catalogue rather than written down here, or this would be a
+            // third copy of the numbers to keep in step. See Catalogue.HoldFor.
+            _hand.Sits = Placed;
 
-            // And turned by the live nudge alone: a cup's own turn is nothing, which is what
-            // makes it the right thing to be holding while these six are found.
-            _hand.Spin = () => _cfg == null
-                ? GTA.Math.Vector3.Zero
-                : new GTA.Math.Vector3(_cfg.TurnX, _cfg.TurnY, _cfg.TurnZ);
+            _hand.Spin = Turned;
 
             _ui.Title = "BARE MINIMUM";
             _ui.LeftRightAdjusts = true;
@@ -159,6 +167,33 @@ namespace BareMinimum.UI
 
         public bool IsOpen => _ui.IsOpen;
 
+        /// <summary>Where the sample sits: the kind's own numbers plus the nudge.</summary>
+        private GTA.Math.Vector3 Placed()
+        {
+            var it = _menu == null ? null
+                   : _menu.HoldFor(null, _cfg.HoldWhat != 1);
+
+            if (it == null || _cfg == null) return GTA.Math.Vector3.Zero;
+
+            return new GTA.Math.Vector3(it[0] + _cfg.HoldX, it[1] + _cfg.HoldY, it[2] + _cfg.HoldZ);
+        }
+
+        /// <summary>And how it is turned, the same way. The food spin is in it, as it is for food.</summary>
+        private GTA.Math.Vector3 Turned()
+        {
+            var it = _menu == null ? null
+                   : _menu.TurnFor(null, _cfg.HoldWhat != 1);
+
+            if (it == null || _cfg == null) return GTA.Math.Vector3.Zero;
+
+            var food = _cfg.HoldWhat == 1;
+
+            return new GTA.Math.Vector3(
+                it[0] + _cfg.TurnX + (food ? _cfg.FoodSpinX : 0f),
+                it[1] + _cfg.TurnY + (food ? _cfg.FoodSpinY : 0f),
+                it[2] + _cfg.TurnZ + (food ? _cfg.FoodSpinZ : 0f));
+        }
+
         /// <summary>Whether the row under the cursor is one of the three hold nudges.</summary>
         private bool Tuning()
         {
@@ -172,7 +207,8 @@ namespace BareMinimum.UI
                 var option = _ui.Rows[at].Tag as Option;
                 if (option == null || option.Section != "Eating") return false;
 
-                return option.Key == "HoldX" || option.Key == "HoldY" || option.Key == "HoldZ"
+                return option.Key == "HoldWhat"
+                    || option.Key == "HoldX" || option.Key == "HoldY" || option.Key == "HoldZ"
                     || option.Key == "TurnX" || option.Key == "TurnY" || option.Key == "TurnZ";
             }
             catch
@@ -186,7 +222,7 @@ namespace BareMinimum.UI
         {
             try
             {
-                _hand.Show(want ? Sample : "");
+                _hand.Show(want ? (_cfg.HoldWhat == 1 ? SampleFood : SampleDrink) : "");
                 _hand.Tick();
             }
             catch
@@ -784,6 +820,12 @@ namespace BareMinimum.UI
                   1f, 0f, 120f, "0",
                   "Real seconds. He draws on it, exhales and pauses for as long as this says, " +
                   "and can walk about while he does. 0 uses the item's own time, which is six.");
+
+            Choice("Placing", "Eating", "HoldWhat", new[] { "Drink", "Food" },
+                   () => _cfg.HoldWhat, v => _cfg.HoldWhat = v,
+                   "Which of the two the six rows below are moving, and what the menu puts in " +
+                   "his hand while you use them. The other kind is left exactly where it is, " +
+                   "so finishing one cannot undo the other. Cigarettes are never moved.");
 
             Float("Held left/right", "Eating", "HoldX",
                   () => _cfg.HoldX, v => _cfg.HoldX = v,

@@ -664,7 +664,21 @@ namespace BareMinimum.Food
             // a dial that drags the cigarettes out with it is a dial nobody can use.
             if (item != null && item.Smoke) return new Vector3(it[0], it[1], it[2]);
 
+            // AND ONLY THE KIND BEING TUNED. See Settings.HoldWhat: one dial, two things to
+            // tune, and a dial that moved both would undo whichever was finished first.
+            if (!Tuning(item, drinking)) return new Vector3(it[0], it[1], it[2]);
+
             return new Vector3(it[0] + _cfg.HoldX, it[1] + _cfg.HoldY, it[2] + _cfg.HoldZ);
+        }
+
+        /// <summary>Whether the six nudges are pointed at this item's kind. See Settings.HoldWhat.</summary>
+        private bool Tuning(Item item, bool drinking)
+        {
+            if (item == null || item.Smoke) return false;
+
+            var drink = item.Drink || drinking;
+
+            return _cfg.HoldWhat == 1 ? !drink : drink;
         }
 
         /// <summary>
@@ -683,11 +697,12 @@ namespace BareMinimum.Food
             if (item != null && item.Smoke) return new Vector3(it[0], it[1], it[2]);
 
             var food = item != null && !item.Drink && !drinking;
+            var mine = Tuning(item, drinking);
 
             return new Vector3(
-                it[0] + _cfg.TurnX + (food ? _cfg.FoodSpinX : 0f),
-                it[1] + _cfg.TurnY + (food ? _cfg.FoodSpinY : 0f),
-                it[2] + _cfg.TurnZ + (food ? _cfg.FoodSpinZ : 0f));
+                it[0] + (mine ? _cfg.TurnX : 0f) + (food ? _cfg.FoodSpinX : 0f),
+                it[1] + (mine ? _cfg.TurnY : 0f) + (food ? _cfg.FoodSpinY : 0f),
+                it[2] + (mine ? _cfg.TurnZ : 0f) + (food ? _cfg.FoodSpinZ : 0f));
         }
 
         // ======================================================================

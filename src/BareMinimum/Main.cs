@@ -154,7 +154,7 @@ namespace BareMinimum
             // buttons. See Api.Pantry.MenuOpen.
             Api.Pantry.Screens(_bag, _fridge, _vendors);
 
-            _settings = new SettingsPanel(_cfg, _needs);
+            _settings = new SettingsPanel(_cfg, _needs, _catalogue);
 
             // THE MENU ASKS RATHER THAN HOLDS. See SettingsPanel.ForgetMachines -- a menu that
             // took a MachineBlips would be a menu that has to be rebuilt every time that class
