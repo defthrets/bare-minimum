@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using GTA;
@@ -517,6 +517,20 @@ namespace BareMinimum.UI
 
             var item = _menu.Find(id);
             if (item == null) { Sound("ERROR"); return; }
+
+            // KIT IS NOT FOOD. It is not taken out of the pocket, it is not consumed, and
+            // nothing happens -- carrying it IS the effect, and what it is for happens when
+            // he smokes rather than when he presses this. Said on the tile rather than
+            // beeped at, because a button that does nothing and does not say why is broken.
+            // See Catalogue.Item.Keep.
+            if (item.Keep)
+            {
+                Sound("ERROR");
+
+                _refused = Core.Lingo.Say("Not for here. Carry it, and smoke your weed with it.");
+                _refusedUntil = Game.GameTime + 2600;
+                return;
+            }
 
             // TAKEN FIRST, AND PUT BACK IF IT WILL NOT START. Begin can refuse -- mid-meal, in
             // a vehicle the animation cannot play in -- and eating a thing that stayed in your

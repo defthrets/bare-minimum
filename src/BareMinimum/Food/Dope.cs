@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Reflection;
@@ -56,6 +56,60 @@ namespace BareMinimum.Food
 
         private static PropertyInfo _ready, _unit, _carried, _capacity;
         private static MethodInfo _ids, _gramsOf, _nameOf, _iconOf, _countedOf, _amountOf, _use;
+
+        // ======================================================================
+        // The kit he is carrying
+        // ======================================================================
+
+        /// <summary>
+        /// The one piece of kit the other mod asks about. The item id in foods.json, and the
+        /// only thing in the catalogue marked Keep. See Catalogue.Item.Keep.
+        /// </summary>
+        public const string Bong = "bong";
+
+        /// <summary>
+        /// Where the answer is left for the other mod to find.
+        ///
+        /// THE SAME CHANNEL THE RECTANGLE TALLY USES, and for the same reason: SHVDN loads
+        /// every script into one AppDomain, so a value put there is readable by all of them
+        /// without either mod referencing the other. A string rather than a type of ours --
+        /// a type of ours would be a different type in every assembly and the cast would
+        /// fail. See UI.Ledger for the longer version of this argument.
+        /// </summary>
+        private const string KitKey = "spitmux.kit.bong";
+
+        private static bool _saidKit;
+        private static bool _kitKnown;
+
+        /// <summary>
+        /// Says whether there is a bong in his pocket, for the other mod to read when he
+        /// smokes.
+        ///
+        /// THIS MOD OWNS THE POCKET AND THAT MOD OWNS THE SMOKING, and neither can reach into
+        /// the other. So the fact is published and that is all: what is done about it is the
+        /// other mod's business, and if it is not installed, nothing reads it and nothing
+        /// happens. It is written only when it changes -- this is called every frame.
+        /// </summary>
+        public static void Kit(bool bong)
+        {
+            if (_kitKnown && bong == _saidKit) return;
+
+            try
+            {
+                AppDomain.CurrentDomain.SetData(KitKey, bong);
+
+                _saidKit = bong;
+                _kitKnown = true;
+
+                Log.Info(bong
+                    ? "Kit: there is a bong in his pocket. If Posted Up is here, his weed goes through it."
+                    : "Kit: no bong in his pocket any more.");
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("The bong could not be announced: " + ex.Message);
+            }
+        }
 
         // ======================================================================
         // The bridge

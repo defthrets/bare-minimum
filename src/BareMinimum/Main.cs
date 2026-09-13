@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using GTA;
 using BareMinimum.Core;
 using BareMinimum.Food;
@@ -360,6 +360,11 @@ namespace BareMinimum
 
                 _pantry.Update(dt);
                 _larder.Update(dt);
+
+                // AND WHAT IS IN IT, FOR THE OTHER MOD. A bong is kit rather than food: the
+                // whole of its effect is elsewhere, so the fact of carrying one is published
+                // and nothing here acts on it. Written only when it changes. See Dope.Kit.
+                Food.Dope.Kit(_pantry.CountOf(Food.Dope.Bong) > 0);
 
                 // The officers at the window run their own little scene, and it must tick
                 // whatever else is happening -- it is watching for you to drive off.

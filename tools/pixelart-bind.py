@@ -311,6 +311,10 @@ BIND = [
     ("shake", 15,    "Green Juice"),          # the green one. Kale and celery is not orange juice
     ("shake", 5,     "Wheatgrass Shot"),      # the other green one, mint on top
     ("beverages", 2, "Mojito"),               # a tall clear glass with the bubbles going up it
+    # THE BONG, which is kit rather than food -- see Catalogue.Item.Keep. The plain glass
+    # beaker: the silhouette everybody knows, and the only one of the sixteen that still
+    # reads as a bong at the size a shop tile draws it.
+    ("bong", 11, "item:bong"),
 ]
 
 

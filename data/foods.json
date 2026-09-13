@@ -1341,6 +1341,20 @@
       "seconds": 9.0
     },
     {
+      "_note": "KIT RATHER THAN FOOD, and the only one. It is never eaten and never used up -- see Catalogue.Item.Keep. CARRYING IT IS THE WHOLE OF ITS EFFECT: the drug mod asks whether there is one in the pocket when he smokes his weed, and if there is, he takes it out of this instead of rolling a joint. Without that mod it is an ornament, which is said on the tile rather than hidden.",
+      "id": "bong",
+      "name": "Bong",
+      "category": "Snacks",
+      "price": 140,
+      "hunger": 0.0,
+      "wake": 0.0,
+      "shop": false,
+      "keep": true,
+      "icon": "bong",
+      "tint": "#7cc4a8",
+      "desc": "Glass, water, and a lifetime of being asked to move it off the table."
+    },
+    {
       "id": "boiled_sweets",
       "name": "Boiled Sweets",
       "category": "Snacks",

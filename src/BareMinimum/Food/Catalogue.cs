@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using GTA;
 using GTA.Native;
@@ -74,6 +74,20 @@ namespace BareMinimum.Food
 
         /// <summary>Something you smoke rather than eat or drink. Cigarettes.</summary>
         public bool Smoke;
+
+        /// <summary>
+        /// KIT, NOT FOOD. Something you buy once and keep: it takes a place in the pocket and
+        /// stays there, is never consumed, and does nothing at all when it is chosen.
+        ///
+        /// The bong is the only one, and what it is for is not in this mod. Carrying it is
+        /// the whole of its effect -- the other mod asks whether there is one in the pocket
+        /// when he smokes, and if there is, he smokes it out of the bong instead of a joint.
+        /// See Food.Dope.Kit.
+        ///
+        /// Everything else about an item -- the hunger, the animation, the litter -- is
+        /// meaningless on one of these and is not read.
+        /// </summary>
+        public bool Keep;
 
         /// <summary>
         /// The model held while consuming it: the one that was found to exist.
@@ -400,6 +414,7 @@ namespace BareMinimum.Food
                         Tint = Colour(node["tint"].AsString("")),
                         Desc = node["desc"].AsString(""),
                         Smoke = node["smoke"].AsBool(false),
+                        Keep = node["keep"].AsBool(false),
                         Props = PropNames(node["prop"]),
                         Seconds = node["seconds"].AsFloat(4f),
                         VehicleSeconds = node["vehicleSeconds"].AsFloat(0f),

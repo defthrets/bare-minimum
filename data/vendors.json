@@ -1503,6 +1503,7 @@
       "id": "pipe_down",
       "name": "Pipe Down",
       "item": [
+    "bong",
         "cigar",
         "pipe_tobacco",
         "boiled_sweets",
@@ -3767,6 +3768,7 @@
       "z": 54.502,
       "heading": 28.995,
       "item": [
+    "bong",
         "cigar",
         "pipe_tobacco",
         "boiled_sweets",

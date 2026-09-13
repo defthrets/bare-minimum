@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Globalization;
 using GTA;
 using GTA.Native;
@@ -556,6 +556,43 @@ namespace BareMinimum.UI
                 // mod, a wanted level. Re-checked at the moment of payment, which is the only
                 // moment that counts.
                 Notify("~r~Not enough money.");
+                Refill();
+                return;
+            }
+
+            // ---- kit ----
+            //
+            // AND KIT IS NEVER EATEN. Everything below has the same fallback for a thing that
+            // will not fit in the pocket -- he consumes it standing there rather than being
+            // refused at the counter -- which is right for a burger and nonsense for a bong.
+            // So this one goes in the pocket or it is not sold, and a second one is refused
+            // because it would cost him a place for nothing. See Catalogue.Item.Keep.
+            if (item.Keep)
+            {
+                if (_pantry.CountOf(item.Id) > 0)
+                {
+                    Notify("~y~You already have one.");
+                    return;
+                }
+
+                if (_pantry.Full)
+                {
+                    Notify("~y~Your pockets are full, and this is not something you can use here.");
+                    return;
+                }
+
+                if (!Charge(item.Price)) return;
+
+                if (!_pantry.Add(item.Id))
+                {
+                    Refund(item.Price);
+                    Notify("~r~No room for that - refunded.");
+                    return;
+                }
+
+                Notify("~g~" + item.Name + "~s~ - in your pocket. " +
+                       _pantry.Total + " of " + _pantry.Slots + ".");
+
                 Refill();
                 return;
             }
