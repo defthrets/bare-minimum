@@ -1753,6 +1753,16 @@ namespace BareMinimum.Core
         public int LitterMax = 12;
 
         /// <summary>
+        /// WHERE THE EMPTY LEAVES HIM FROM, in metres: out in front, and up off the pavement.
+        ///
+        /// A ped's position is at his feet, so Up is measured off the ground and about where
+        /// a hand hangs is right. It started at 0.45 out and 0.55 up, which read as a man
+        /// setting a can down on a table that was not there rather than dropping one.
+        /// </summary>
+        public float LitterOut = 0.22f;
+        public float LitterUp = 0.34f;
+
+        /// <summary>
         /// A NUDGE ON TOP OF WHEREVER THE CATALOGUE PUTS THE THING IN HIS HAND, in metres.
         /// Positive X is out of the palm, Y is towards the fingers, Z is up through the back
         /// of the hand.
@@ -2226,6 +2236,8 @@ namespace BareMinimum.Core
                 cfg.HoldZ = ini.GetFloat("Eating", "HoldZ", cfg.HoldZ, -0.5f, 0.5f);
                 cfg.Litter = ini.GetBool("Eating", "Litter", cfg.Litter);
                 cfg.LitterMax = (int)ini.GetFloat("Eating", "LitterMax", cfg.LitterMax, 0f, 60f);
+                cfg.LitterOut = ini.GetFloat("Eating", "LitterOut", cfg.LitterOut, 0f, 2f);
+                cfg.LitterUp = ini.GetFloat("Eating", "LitterUp", cfg.LitterUp, 0f, 2f);
                 cfg.FoodSpinX = ini.GetFloat("Eating", "FoodSpinX", cfg.FoodSpinX, -180f, 180f);
                 cfg.FoodSpinY = ini.GetFloat("Eating", "FoodSpinY", cfg.FoodSpinY, -180f, 180f);
                 cfg.FoodSpinZ = ini.GetFloat("Eating", "FoodSpinZ", cfg.FoodSpinZ, -180f, 180f);

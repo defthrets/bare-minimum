@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using GTA;
 using GTA.Math;
@@ -79,7 +79,15 @@ namespace BareMinimum.Food
 
                 // A LITTLE IN FRONT AND A LITTLE ABOVE, so it falls rather than appearing on
                 // the floor, and falls away from his feet rather than through them.
-                var at = me.Position + me.ForwardVector * 0.45f + Vector3.WorldUp * 0.55f;
+                //
+                // LOW AND CLOSE. It used to leave from half a metre in front of him at nearly
+                // chest height, which is a man putting a can down on a table that is not there
+                // -- it appeared beside him rather than coming out of his hand. A ped's
+                // position is at his FEET, so the height here is measured off the pavement:
+                // this is about where a hand hangs. Both are in the ini.
+                var at = me.Position
+                       + me.ForwardVector * _cfg.LitterOut
+                       + Vector3.WorldUp * _cfg.LitterUp;
 
                 // Dynamic, because the whole point is that it lands and rolls. The fourth
                 // argument places it on the ground, which is exactly what must NOT happen --
@@ -92,7 +100,10 @@ namespace BareMinimum.Food
                 // effort into it, and a can that sails six feet reads as a pitch.
                 try
                 {
-                    bit.Velocity = me.ForwardVector * 1.6f + Vector3.WorldUp * 0.6f;
+                    // AND LESS OF A THROW WITH IT. Leaving from lower down, the old flick
+                    // sent it skating off across the pavement -- the drop has further to fall
+                    // now and less speed to carry it, which is what dropping something is.
+                    bit.Velocity = me.ForwardVector * 0.9f + Vector3.WorldUp * 0.25f;
                     Function.Call(Hash.SET_ENTITY_ANGULAR_VELOCITY, bit.Handle, 2.5f, 1.5f, 3.5f);
                 }
                 catch
