@@ -1780,6 +1780,18 @@ namespace BareMinimum.Core
         public float HoldY = 0f;
         public float HoldZ = 0f;
 
+        /// <summary>
+        /// AND THE TURN, in degrees, the same way: added on top of whatever the item says,
+        /// live on the F11 menu, and not applied to a smoke.
+        ///
+        /// Moving a thing into the middle of his palm and leaving it pointing the wrong way
+        /// is half a job. [Eating] FoodSpin still works and is still added for food -- this
+        /// is the one that can be turned while you watch, and for anything, not just food.
+        /// </summary>
+        public float TurnX = 0f;
+        public float TurnY = 0f;
+        public float TurnZ = 0f;
+
         public float FoodSpinX = 0f;
         public float FoodSpinY = 0f;
         public float FoodSpinZ = 90f;
@@ -2234,6 +2246,9 @@ namespace BareMinimum.Core
                 cfg.HoldX = ini.GetFloat("Eating", "HoldX", cfg.HoldX, -0.5f, 0.5f);
                 cfg.HoldY = ini.GetFloat("Eating", "HoldY", cfg.HoldY, -0.5f, 0.5f);
                 cfg.HoldZ = ini.GetFloat("Eating", "HoldZ", cfg.HoldZ, -0.5f, 0.5f);
+                cfg.TurnX = ini.GetFloat("Eating", "TurnX", cfg.TurnX, -180f, 180f);
+                cfg.TurnY = ini.GetFloat("Eating", "TurnY", cfg.TurnY, -180f, 180f);
+                cfg.TurnZ = ini.GetFloat("Eating", "TurnZ", cfg.TurnZ, -180f, 180f);
                 cfg.Litter = ini.GetBool("Eating", "Litter", cfg.Litter);
                 cfg.LitterMax = (int)ini.GetFloat("Eating", "LitterMax", cfg.LitterMax, 0f, 60f);
                 cfg.LitterOut = ini.GetFloat("Eating", "LitterOut", cfg.LitterOut, 0f, 2f);

@@ -662,12 +662,27 @@ namespace BareMinimum.Food
             return new Vector3(it[0] + _cfg.HoldX, it[1] + _cfg.HoldY, it[2] + _cfg.HoldZ);
         }
 
-        /// <summary>The turn this item gets in the hand. Food is turned; drink and smoke are not.</summary>
+        /// <summary>
+        /// How this item is turned in his hand, in degrees.
+        ///
+        /// THREE THINGS ADDED UP, and each of them is somewhere different on purpose. The
+        /// catalogue's is the permanent answer and belongs in foods.json; [Eating] FoodSpin
+        /// is the old food-only setting, kept because somebody may have tuned it; and the
+        /// live nudge is the one on the menu, for finding a number with the thing in his
+        /// hand. A smoke takes the catalogue's and nothing else -- see SitsFor for why.
+        /// </summary>
         private Vector3 SpinFor(Item item, bool drinking)
         {
-            if (item == null || item.Smoke || item.Drink || drinking) return Vector3.Zero;
+            var it = _menu.TurnFor(item, drinking);
 
-            return new Vector3(_cfg.FoodSpinX, _cfg.FoodSpinY, _cfg.FoodSpinZ);
+            if (item != null && item.Smoke) return new Vector3(it[0], it[1], it[2]);
+
+            var food = item != null && !item.Drink && !drinking;
+
+            return new Vector3(
+                it[0] + _cfg.TurnX + (food ? _cfg.FoodSpinX : 0f),
+                it[1] + _cfg.TurnY + (food ? _cfg.FoodSpinY : 0f),
+                it[2] + _cfg.TurnZ + (food ? _cfg.FoodSpinZ : 0f));
         }
 
         // ======================================================================

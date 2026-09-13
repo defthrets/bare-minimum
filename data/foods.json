@@ -4015,7 +4015,20 @@
     ],
     "food": [0.015, 0.01, -0.035],
     "drink": [0.01, 0.0, -0.04],
-    "smoke": [0.0, 0.0, 0.0]
+    "smoke": [0.0, 0.0, 0.0],
+
+    "_turn_note": [
+      "AND HOW IT IS TURNED, in degrees, which is the other half of the same question and",
+      "has the same answer: only the model knows. An item may name its own \"turn\" of three",
+      "numbers the way it names its own \"hold\".",
+      "",
+      "[Eating] TurnX/Y/Z is the live nudge on the F11 menu, added on top of these, and",
+      "[Eating] FoodSpin is the old food-only setting, still read and still added for food.",
+      "A smoke is not turned by either of them."
+    ],
+    "turnFood": [0.0, 0.0, 0.0],
+    "turnDrink": [0.0, 0.0, 0.0],
+    "turnSmoke": [0.0, 0.0, 0.0]
   },
   "litter": {
     "_note": [

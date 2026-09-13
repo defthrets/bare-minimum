@@ -89,6 +89,15 @@ namespace BareMinimum.Food
         public float[] Hold;
 
         /// <summary>
+        /// HOW IT IS TURNED IN HIS HAND, in degrees, or null if the item did not say.
+        ///
+        /// Beside Hold because it is the other half of the same question and has the same
+        /// answer: only the model knows. A cup wants no turn at all and a burger wants to be
+        /// laid flat, and a pizza box would want something else again.
+        /// </summary>
+        public float[] Turn;
+
+        /// <summary>
         /// KIT, NOT FOOD. Something you buy once and keep: it takes a place in the pocket and
         /// stays there, is never consumed, and does nothing at all when it is chosen.
         ///
@@ -429,6 +438,7 @@ namespace BareMinimum.Food
                         Smoke = node["smoke"].AsBool(false),
                         Keep = node["keep"].AsBool(false),
                         Hold = Three(node["hold"]),
+                        Turn = Three(node["turn"]),
                         Props = PropNames(node["prop"]),
                         Seconds = node["seconds"].AsFloat(4f),
                         VehicleSeconds = node["vehicleSeconds"].AsFloat(0f),
@@ -503,6 +513,10 @@ namespace BareMinimum.Food
                 HoldFood = Three(hold["food"]) ?? HoldFood;
                 HoldDrink = Three(hold["drink"]) ?? HoldDrink;
                 HoldSmoke = Three(hold["smoke"]) ?? HoldSmoke;
+
+                TurnFood = Three(hold["turnFood"]) ?? TurnFood;
+                TurnDrink = Three(hold["turnDrink"]) ?? TurnDrink;
+                TurnSmoke = Three(hold["turnSmoke"]) ?? TurnSmoke;
 
                 LitterByIcon.Clear();
 
@@ -737,6 +751,29 @@ namespace BareMinimum.Food
         public float[] HoldFood = { 0.04f, 0.02f, 0.0f };
         public float[] HoldDrink = { 0.03f, 0.01f, 0.0f };
         public float[] HoldSmoke = { 0.02f, 0.01f, 0.0f };
+
+        /// <summary>
+        /// HOW EACH KIND IS TURNED IN HIS HAND, in degrees.
+        ///
+        /// The food's ninety is the one number here that is not nought, and it is old: a
+        /// burger comes out of the model on its side and has to be laid flat. It used to live
+        /// in the ini as FoodSpinZ, which still works and is still added on top -- this is
+        /// where a permanent answer belongs now.
+        /// </summary>
+        public float[] TurnFood = { 0f, 0f, 0f };
+        public float[] TurnDrink = { 0f, 0f, 0f };
+        public float[] TurnSmoke = { 0f, 0f, 0f };
+
+        /// <summary>How this one is turned: its own answer if it gave one, else its kind's.</summary>
+        public float[] TurnFor(Item item, bool drinking)
+        {
+            if (item == null) return TurnDrink;
+            if (item.Turn != null) return item.Turn;
+
+            if (item.Smoke) return TurnSmoke;
+
+            return item.Drink || drinking ? TurnDrink : TurnFood;
+        }
 
         /// <summary>Where this one sits: its own answer if it gave one, else its kind's.</summary>
         public float[] HoldFor(Item item, bool drinking)

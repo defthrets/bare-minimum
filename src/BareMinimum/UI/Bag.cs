@@ -192,9 +192,10 @@ namespace BareMinimum.UI
 
             // The same turn it takes when it is eaten, so a thing looks the same in the pocket
             // as it does going in. See Eating.SpinFor and [Eating] FoodSpinX.
-            _peek.Spin = () => _cfg == null
-                ? GTA.Math.Vector3.Zero
-                : new GTA.Math.Vector3(_cfg.FoodSpinX, _cfg.FoodSpinY, _cfg.FoodSpinZ);
+            // The same turn it takes when it is eaten, worked out the same way. See
+            // Eating.SpinFor -- this used to be the food spin for everything, so a cup under
+            // the cursor was laid on its side and a cigarette with it.
+            _peek.Spin = Turned;
 
             // AND THE SAME PLACE IN THE HAND, so a thing looks the same under the cursor as
             // it does going in. Without this the pocket showed everything at the middle of
@@ -494,6 +495,24 @@ namespace BareMinimum.UI
         /// on the first frame rather than the third, and that is the difference between right
         /// and nearly right.
         /// </summary>
+        /// <summary>How the thing under the cursor is turned. See Eating.SpinFor.</summary>
+        private GTA.Math.Vector3 Turned()
+        {
+            var item = Shown();
+            var it = _menu == null ? null : _menu.TurnFor(item, false);
+
+            if (it == null || _cfg == null) return GTA.Math.Vector3.Zero;
+
+            if (item != null && item.Smoke) return new GTA.Math.Vector3(it[0], it[1], it[2]);
+
+            var food = item != null && !item.Drink;
+
+            return new GTA.Math.Vector3(
+                it[0] + _cfg.TurnX + (food ? _cfg.FoodSpinX : 0f),
+                it[1] + _cfg.TurnY + (food ? _cfg.FoodSpinY : 0f),
+                it[2] + _cfg.TurnZ + (food ? _cfg.FoodSpinZ : 0f));
+        }
+
         /// <summary>Where the thing under the cursor sits in his hand. See Catalogue.HoldFor.</summary>
         private GTA.Math.Vector3 Where()
         {

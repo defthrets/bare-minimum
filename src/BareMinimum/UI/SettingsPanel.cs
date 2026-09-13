@@ -129,6 +129,12 @@ namespace BareMinimum.UI
                 ? GTA.Math.Vector3.Zero
                 : new GTA.Math.Vector3(0.01f + _cfg.HoldX, 0.0f + _cfg.HoldY, -0.04f + _cfg.HoldZ);
 
+            // And turned by the live nudge alone: a cup's own turn is nothing, which is what
+            // makes it the right thing to be holding while these six are found.
+            _hand.Spin = () => _cfg == null
+                ? GTA.Math.Vector3.Zero
+                : new GTA.Math.Vector3(_cfg.TurnX, _cfg.TurnY, _cfg.TurnZ);
+
             _ui.Title = "BARE MINIMUM";
             _ui.LeftRightAdjusts = true;
             _ui.ConfirmWord = "SET";
@@ -166,7 +172,8 @@ namespace BareMinimum.UI
                 var option = _ui.Rows[at].Tag as Option;
                 if (option == null || option.Section != "Eating") return false;
 
-                return option.Key == "HoldX" || option.Key == "HoldY" || option.Key == "HoldZ";
+                return option.Key == "HoldX" || option.Key == "HoldY" || option.Key == "HoldZ"
+                    || option.Key == "TurnX" || option.Key == "TurnY" || option.Key == "TurnZ";
             }
             catch
             {
@@ -794,8 +801,23 @@ namespace BareMinimum.UI
             Float("Held up/down", "Eating", "HoldZ",
                   () => _cfg.HoldZ, v => _cfg.HoldZ = v,
                   0.005f, -0.5f, 0.5f, "0.000",
-                  "The same, up through the back of the hand. Watch it move with something in " +
-                  "your hand: eat, open this, and turn the row.");
+                  "The same, up through the back of the hand.");
+
+            Float("Turn roll", "Eating", "TurnX",
+                  () => _cfg.TurnX, v => _cfg.TurnX = v,
+                  5f, -180f, 180f, "0",
+                  "Turns the thing in his hand, in degrees. Rolls it over.");
+
+            Float("Turn pitch", "Eating", "TurnY",
+                  () => _cfg.TurnY, v => _cfg.TurnY = v,
+                  5f, -180f, 180f, "0",
+                  "Tips the near end of it up and down.");
+
+            Float("Turn yaw", "Eating", "TurnZ",
+                  () => _cfg.TurnZ, v => _cfg.TurnZ = v,
+                  5f, -180f, 180f, "0",
+                  "Swings it round. Added to whatever the item says, and to [Eating] FoodSpin " +
+                  "for food. Cigarettes are not turned by this - they were already right.");
 
             Bool("Hide the game's shop", "Counters", "BlockVanillaMenu",
                  () => _cfg.BlockVanillaCounter, v => _cfg.BlockVanillaCounter = v,
