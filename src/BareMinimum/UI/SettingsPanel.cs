@@ -101,10 +101,33 @@ namespace BareMinimum.UI
         public Func<float> SurveyLeft;
         public Action ToggleSurvey;
 
+        /// <summary>
+        /// A SAMPLE IN HIS HAND WHILE THE HOLD ROWS ARE SELECTED.
+        ///
+        /// The three Held rows are for walking a thing into place by watching it move, and
+        /// there was no way to watch: to have something in his hand you open the POCKET, and
+        /// the pocket and this menu cannot both be up. So this holds one itself. Move onto
+        /// Held left/right and a cup appears in his hand; move off and it goes.
+        ///
+        /// The same class the pocket uses to show what is under the cursor -- nothing is
+        /// eaten, nothing is dropped, and it is taken off him the moment the menu shuts.
+        /// </summary>
+        private readonly Peek _hand = new Peek();
+
+        /// <summary>What it holds while tuning. A cup, because a cup is the shape that showed
+        /// the problem: tall, off-centre, and obviously wrong when it is wrong.</summary>
+        private const string Sample = "prop_cs_bs_cup";
+
         public SettingsPanel(Core.Settings cfg, Needs.Needs needs)
         {
             _cfg = cfg;
             _needs = needs;
+
+            // The drink's own place in the hand plus the live nudge, which is exactly what
+            // Eating.SitsFor works out for a cup. See Catalogue.HoldFor.
+            _hand.Sits = () => _cfg == null
+                ? GTA.Math.Vector3.Zero
+                : new GTA.Math.Vector3(0.01f + _cfg.HoldX, 0.0f + _cfg.HoldY, -0.04f + _cfg.HoldZ);
 
             _ui.Title = "BARE MINIMUM";
             _ui.LeftRightAdjusts = true;
@@ -129,6 +152,41 @@ namespace BareMinimum.UI
         }
 
         public bool IsOpen => _ui.IsOpen;
+
+        /// <summary>Whether the row under the cursor is one of the three hold nudges.</summary>
+        private bool Tuning()
+        {
+            try
+            {
+                if (_ui.Rows.Count == 0) return false;
+
+                var at = _ui.Index;
+                if (at < 0 || at >= _ui.Rows.Count) return false;
+
+                var option = _ui.Rows[at].Tag as Option;
+                if (option == null || option.Section != "Eating") return false;
+
+                return option.Key == "HoldX" || option.Key == "HoldY" || option.Key == "HoldZ";
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>Holds the sample, or does not, and keeps it seated either way.</summary>
+        private void Sample_(bool want)
+        {
+            try
+            {
+                _hand.Show(want ? Sample : "");
+                _hand.Tick();
+            }
+            catch
+            {
+                // A menu that cannot show a cup is still a menu.
+            }
+        }
 
         // ======================================================================
 
@@ -167,6 +225,8 @@ namespace BareMinimum.UI
 
                 if (!_ui.IsOpen)
                 {
+                    _hand.Clear();
+
                     // A save can still be owed after the menu has gone -- closing flushes,
                     // but a settle timer left running by anything else must not be stranded.
                     if (Due()) Flush();
@@ -175,7 +235,11 @@ namespace BareMinimum.UI
 
                 _ui.Update();
 
-                if (_ui.JustClosed) { Flush(); return; }
+                if (_ui.JustClosed) { _hand.Clear(); Flush(); return; }
+
+                // WHAT THE HIGHLIGHTED ROW IS ABOUT. Only the three Held rows put anything in
+                // his hand, and the moment the cursor leaves them it goes again.
+                Sample_(Tuning());
 
                 // A new page of rows. The pending write is NOT flushed here -- paging is not
                 // finishing, and a settle timer that survives the page is the whole point of

@@ -195,6 +195,11 @@ namespace BareMinimum.UI
             _peek.Spin = () => _cfg == null
                 ? GTA.Math.Vector3.Zero
                 : new GTA.Math.Vector3(_cfg.FoodSpinX, _cfg.FoodSpinY, _cfg.FoodSpinZ);
+
+            // AND THE SAME PLACE IN THE HAND, so a thing looks the same under the cursor as
+            // it does going in. Without this the pocket showed everything at the middle of
+            // his hand while eating had already been taught better. See Eating.SitsFor.
+            _peek.Sits = Where;
         }
 
         // ======================================================================
@@ -489,6 +494,31 @@ namespace BareMinimum.UI
         /// on the first frame rather than the third, and that is the difference between right
         /// and nearly right.
         /// </summary>
+        /// <summary>Where the thing under the cursor sits in his hand. See Catalogue.HoldFor.</summary>
+        private GTA.Math.Vector3 Where()
+        {
+            var it = _menu == null ? null : _menu.HoldFor(Shown(), false);
+
+            if (it == null || _cfg == null) return GTA.Math.Vector3.Zero;
+
+            return new GTA.Math.Vector3(it[0] + _cfg.HoldX, it[1] + _cfg.HoldY, it[2] + _cfg.HoldZ);
+        }
+
+        /// <summary>The item under the cursor, or null for a drug -- which is not ours to place.</summary>
+        private Food.Item Shown()
+        {
+            try
+            {
+                if (_ids.Count == 0 || IsDope(_index)) return null;
+
+                return _menu.Find(_ids[Clamp(_index, 0, _ids.Count - 1)]);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         private void Warm()
         {
             // Food only. A drug's animation belongs to the other mod and is loaded by it;

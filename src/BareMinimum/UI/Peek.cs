@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using GTA;
 using GTA.Math;
@@ -68,6 +68,12 @@ namespace BareMinimum.UI
         public Func<Vector3> Spin;
 
         /// <summary>
+        /// And where it sits, the same as Eating.SitsFor. Null is the middle of the hand,
+        /// which is where everything used to be and is what it looked like.
+        /// </summary>
+        public Func<Vector3> Sits;
+
+        /// <summary>
         /// Show this model, or nothing.
         ///
         /// The name is the one the catalogue already settled on -- Item.Prop is chosen from the
@@ -133,14 +139,7 @@ namespace BareMinimum.UI
 
                 _made.Add(_held.Handle);
 
-                var bone = Function.Call<int>(Hash.GET_PED_BONE_INDEX, me.Handle, RightHandBone);
-                var spin = Spin == null ? Vector3.Zero : Spin();
-
-                // The same six trailing arguments the eating code uses: no soft pinning, no
-                // collision, not treated as a ped, vertex 2, fixed rotation. They are the set
-                // that was arrived at for a prop in a hand and there is no reason to differ.
-                Function.Call(Hash.ATTACH_ENTITY_TO_ENTITY, _held.Handle, me.Handle, bone,
-                              0f, 0f, 0f, spin.X, spin.Y, spin.Z, false, false, false, false, 2, true);
+                Seat(me);
 
                 _showing = _want;
                 _want = "";
@@ -155,9 +154,39 @@ namespace BareMinimum.UI
         }
 
         /// <summary>Called every frame the pocket is open, so a model still arriving still lands.</summary>
+        /// <summary>
+        /// Puts it where it belongs, again, every tick.
+        ///
+        /// AGAIN, SO THE NUMBERS CAN BE DIALLED WITH IT IN HIS HAND. Attaching once means a
+        /// change to the offset does nothing until the next thing is picked up, and the whole
+        /// reason this class holds a real prop is that somebody is looking at it.
+        ///
+        /// ATTACH_ENTITY_TO_ENTITY on something already attached moves it rather than
+        /// refusing. The six trailing arguments are the eating code's: no soft pinning, no
+        /// collision, not treated as a ped, vertex 2, fixed rotation.
+        /// </summary>
+        private void Seat(Ped me)
+        {
+            if (me == null || !me.Exists() || _held == null || !_held.Exists()) return;
+
+            var bone = Function.Call<int>(Hash.GET_PED_BONE_INDEX, me.Handle, RightHandBone);
+
+            var spin = Spin == null ? Vector3.Zero : Spin();
+            var sits = Sits == null ? Vector3.Zero : Sits();
+
+            Function.Call(Hash.ATTACH_ENTITY_TO_ENTITY, _held.Handle, me.Handle, bone,
+                          sits.X, sits.Y, sits.Z,
+                          spin.X, spin.Y, spin.Z, false, false, false, false, 2, true);
+        }
+
         public void Tick()
         {
             Build();
+
+            // AND AGAIN, so a number turned on the menu moves the thing he is holding while
+            // you watch it. See Seat.
+            try { Seat(Game.Player.Character); }
+            catch { /* it stays where it was, which is in his hand */ }
         }
 
         public void Clear()
