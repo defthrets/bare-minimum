@@ -210,6 +210,14 @@ namespace BareMinimum.UI
                     // be reaching into the fridge.
                     if (!StillThere()) { Close(); return; }
 
+                    // THE KEY THAT OPENED IT SHUTS IT. A screen opened by a key is a TOGGLE
+                    // -- the pocket has always worked that way and the bag stands in for the
+                    // pocket, so the same press has to do the same thing. Only for the
+                    // by-key screens: the fridge is opened by walking up to it and has no
+                    // key of its own to press again. Close puts a three hundred millisecond
+                    // hush on the key, so this cannot shut and reopen on one press.
+                    if (ByKey && Keyed()) { Close(); return; }
+
                     Suppress();
                     Navigate();
 
@@ -244,6 +252,11 @@ namespace BareMinimum.UI
             // fired on a release that had already happened. See Keyed.
             try { _bagWas = Game.IsKeyPressed(_cfg.BagKey); }
             catch { _bagWas = false; }
+
+            // The chord keeps its own memory of the buttons and goes stale exactly the same
+            // way, so it is asked here too and the answer thrown away. See Keyed.
+            try { Core.Pad.Chord(GTA.Control.FrontendRb, GTA.Control.FrontendAccept, ref _padWas); }
+            catch { _padWas = false; }
         }
 
         /// <summary>The prompt, when you are stood at one on foot with your hands free.</summary>
@@ -385,12 +398,28 @@ namespace BareMinimum.UI
             var edge = down && !_bagWas;
             _bagWas = down;
 
-            if (!edge) return false;
+            // AND THE PAD'S CHORD, the same one the pocket uses -- RB and A. This screen
+            // stands in for the pocket while a bag is on, so a controller that could open the
+            // pocket yesterday has to be able to open this today; without it a pad had no way
+            // in at all. Asked EVERY time, even when the key has already fired, so the
+            // chord's own memory of the buttons stays in step and releasing it cannot fire a
+            // second time. See Bag.Toggled, which is where this comes from.
+            var chord = false;
+
+            try
+            {
+                chord = _cfg.BagPad &&
+                        Core.Pad.Chord(GTA.Control.FrontendRb, GTA.Control.FrontendAccept, ref _padWas);
+            }
+            catch { chord = false; }
+
+            if (!edge && !chord) return false;
 
             return Game.GameTime >= _quietUntil;
         }
 
         private bool _bagWas;
+        private bool _padWas;
 
         private bool Pressed()
         {
