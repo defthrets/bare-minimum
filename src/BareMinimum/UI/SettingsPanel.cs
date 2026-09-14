@@ -162,6 +162,9 @@ namespace BareMinimum.UI
         /// <summary>The catalogue, for the tuning sample's own numbers. See Placed.</summary>
         private readonly Food.Catalogue _menu;
 
+        /// <summary>Opens the fitting bench. Set by Main, which owns the screen. See FitScreen.</summary>
+        public Action Bench;
+
         public SettingsPanel(Core.Settings cfg, Needs.Needs needs, Food.Catalogue menu)
         {
             _cfg = cfg;
@@ -929,72 +932,12 @@ namespace BareMinimum.UI
 
             Add(new Option
             {
-                Name = "Placing",
-                Note = "Which MODEL the six rows below are moving. It appears in his hand while " +
-                       "any of them is selected, and what you dial belongs to that model alone - " +
-                       "a cup and a mug want different answers and always did. Left and right " +
-                       "walk the list, most-used first.",
-                Section = "",
-                Key = "",
-                Show = () =>
-                {
-                    var prop = Sample;
-                    if (prop.Length == 0) return "-";
-
-                    var item = _menu == null ? null : _menu.ItemWithProp(prop);
-                    var fitted = _cfg.Fit.ContainsKey(prop) ? " *" : "";
-
-                    return (item != null ? item.Name : prop) + fitted;
-                },
-                Nudge = (dir, fine) => { _prop += dir >= 0 ? 1 : -1; _props = null; }
+                Name = "Fit a model to his hand",
+                Note = "Opens the fitting bench: one model at a time, in his hand, with the " +
+                       "animation he eats it in running underneath it, and a key that writes " +
+                       "the answer against that model for good. This is where it is done now.",
+                Activate = () => { _ui.Close(); if (Bench != null) Bench(); }
             });
-
-            Add(new Option
-            {
-                Name = "Lock it in",
-                Note = "Writes where it is now against this model, for good, and puts the six " +
-                       "rows back to nought. Everything that holds this model moves with it. " +
-                       "A model that has been locked in has a star beside its name above.",
-                Section = "Eating",
-                Key = "Fit",
-                Show = () => _cfg.Fit.Count + " model(s)",
-                Persist = () => _cfg.FitLine,
-                Activate = Lock_
-            });
-
-            Float("Held left/right " + Kind(), "Eating", "HoldX",
-                  () => _cfg.HoldX, v => _cfg.HoldX = v,
-                  0.005f, -0.5f, 0.5f, "0.000",
-                  "Where the thing in his hand sits, out of the palm. The hand bone is a grip " +
-                  "point rather than a shelf, so a model centred on itself comes out halfway " +
-                  "through his hand. Added to whatever the item itself says; 0 leaves it " +
-                  "alone. Cigarettes are not moved by this - they were already right.");
-
-            Float("Held forward/back " + Kind(), "Eating", "HoldY",
-                  () => _cfg.HoldY, v => _cfg.HoldY = v,
-                  0.005f, -0.5f, 0.5f, "0.000",
-                  "The same, towards the fingers and back towards the wrist.");
-
-            Float("Held up/down " + Kind(), "Eating", "HoldZ",
-                  () => _cfg.HoldZ, v => _cfg.HoldZ = v,
-                  0.005f, -0.5f, 0.5f, "0.000",
-                  "The same, up through the back of the hand.");
-
-            Float("Turn roll " + Kind(), "Eating", "TurnX",
-                  () => _cfg.TurnX, v => _cfg.TurnX = v,
-                  5f, -180f, 180f, "0",
-                  "Turns the thing in his hand, in degrees. Rolls it over.");
-
-            Float("Turn pitch " + Kind(), "Eating", "TurnY",
-                  () => _cfg.TurnY, v => _cfg.TurnY = v,
-                  5f, -180f, 180f, "0",
-                  "Tips the near end of it up and down.");
-
-            Float("Turn yaw " + Kind(), "Eating", "TurnZ",
-                  () => _cfg.TurnZ, v => _cfg.TurnZ = v,
-                  5f, -180f, 180f, "0",
-                  "Swings it round. Added to whatever the item says, and to [Eating] FoodSpin " +
-                  "for food. Cigarettes are not turned by this - they were already right.");
 
             Bool("Hide the game's shop", "Counters", "BlockVanillaMenu",
                  () => _cfg.BlockVanillaCounter, v => _cfg.BlockVanillaCounter = v,

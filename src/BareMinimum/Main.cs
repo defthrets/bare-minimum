@@ -79,6 +79,9 @@ namespace BareMinimum
 
         /// <summary>The pocket beside the bag, with a transfer between them.</summary>
         private readonly FridgeScreen _bagScreen;
+
+        /// <summary>One model in his hand until it sits right. See UI.FitScreen.</summary>
+        private readonly FitScreen _fit;
         private readonly Bag _bag;
 
         /// <summary>The fridge: where it is, what is in it, and the screen over it.</summary>
@@ -204,6 +207,11 @@ namespace BareMinimum
             // AND WHERE THE OVERFLOW GOES. Anything given to this mod from outside -- looted
             // off a body, handed over by another mod -- goes in the pocket, and into the bag
             // when the pocket is full and there is a bag on him. See Api.Pantry.Give.
+            // THE FITTING BENCH, off the settings page. One model at a time with the real
+            // animation running under it -- see UI.FitScreen for why that matters.
+            _fit = new FitScreen(_cfg, _catalogue);
+            _settings.Bench = () => _fit.Open();
+
             Api.Pantry.Bag(_knapsack);
 
             // AND HOW THE PHONE NEXT DOOR OPENS IT. The bag screen when there is a bag on
@@ -422,6 +430,9 @@ namespace BareMinimum
                 _bag.Update(_sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
                             _vendors.MenuOpen || _fridge.IsOpen || _bagScreen.IsOpen ||
                             carrying);
+
+                _fit.Update(_sleeping.Busy || _shop.IsOpen || _vendors.MenuOpen ||
+                            _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen);
 
                 _bagScreen.Update(_sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
                                   _vendors.MenuOpen || _fridge.IsOpen || _bag.IsOpen ||
