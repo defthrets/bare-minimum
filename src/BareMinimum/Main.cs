@@ -207,11 +207,6 @@ namespace BareMinimum
             // AND WHERE THE OVERFLOW GOES. Anything given to this mod from outside -- looted
             // off a body, handed over by another mod -- goes in the pocket, and into the bag
             // when the pocket is full and there is a bag on him. See Api.Pantry.Give.
-            // THE FITTING BENCH, off the settings page. One model at a time with the real
-            // animation running under it -- see UI.FitScreen for why that matters.
-            _fit = new FitScreen(_cfg, _catalogue);
-            _settings.Bench = () => _fit.Open();
-
             Api.Pantry.Bag(_knapsack);
 
             // AND HOW THE PHONE NEXT DOOR OPENS IT. The bag screen when there is a bag on
@@ -238,6 +233,15 @@ namespace BareMinimum
                                      _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen);
 
             _settings = new SettingsPanel(_cfg, _needs, _catalogue);
+
+            // THE FITTING BENCH, off the settings page. One model at a time with the real
+            // animation running under it -- see UI.FitScreen for why that matters.
+            //
+            // AFTER THE PANEL EXISTS. This was written above where the panel is built, so the
+            // very next line set a property on null, the constructor threw, and the mod did
+            // not load at all -- the log stops dead after "Brands".
+            _fit = new FitScreen(_cfg, _catalogue);
+            _settings.Bench = () => _fit.Open();
 
             // THE MENU ASKS RATHER THAN HOLDS. See SettingsPanel.ForgetMachines -- a menu that
             // took a MachineBlips would be a menu that has to be rebuilt every time that class
