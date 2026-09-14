@@ -216,14 +216,12 @@ namespace BareMinimum
                 if (_bag.IsOpen || _bagScreen.IsOpen || _fridge.IsOpen ||
                     _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen) return false;
 
-                // THE POCKET, NOT THE TRANSFER SCREEN, EVEN WITH A BAG ON. The phone is
-                // asking "what am I carrying" and the pocket is the only screen that answers
-                // it whole: it lists the food AND the other mod's drugs, which the two-grid
-                // bag screen does not. Opening that from a phone would hide the drugs behind
-                // a transfer screen, and the drugs are the reason that phone exists.
-                //
-                // The bag is still one press of the pocket key away, which is where a
-                // transfer belongs.
+                // EXACTLY WHAT THE POCKET KEY OPENS, and for the same reason: there is one
+                // inventory and two ways into it, and they had better be the same place. A
+                // bag on his back means the two grids with the transfer between them; no bag
+                // means the five slots on their own.
+                if (Knapsack.Worn) { _bagScreen.Open(); return _bagScreen.IsOpen; }
+
                 _bag.Open();
                 return _bag.IsOpen;
             });
