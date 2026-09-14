@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using GTA;
 using GTA.Math;
@@ -226,6 +226,18 @@ namespace BareMinimum.Venues
         // ---- live state ----
         public Prop Stand;
         public Ped Seller;
+
+        /// <summary>
+        /// The scenario-blocking box around this stand, while it is spawned.
+        ///
+        /// THE GAME PUTS ITS OWN MAN BEHIND ITS OWN CARTS. Ours is spawned at the post and
+        /// the game's wanders up to the same spot, and then there are two of them serving one
+        /// cart -- which is what it looks like. A blocking area is the game's own way of
+        /// saying "no ambient scenario peds here", so the spot is ours for as long as we are
+        /// standing in it. Removed when the vendor despawns, or the street would stay empty
+        /// of its own people after we had driven off.
+        /// </summary>
+        public int Blocker;
         public Blip Marker;
 
         /// <summary>
@@ -1497,6 +1509,17 @@ namespace BareMinimum.Venues
             v.PostAt = where;
             v.SmokeAt = v.Position + forward * (v.PedBack + v.SmokeBack);
 
+            // NOBODY ELSE SERVES AT THIS CART. Two and a half metres around the post, which
+            // covers the cart and the yard of pavement behind it and nothing further. Put
+            // down BEFORE ours is created so the game cannot fill the spot in the same frame.
+            Block(v, where);
+
+            // AND ANYONE ALREADY STOOD THERE IS SENT ON THEIR WAY. The box stops the next
+            // one; it does nothing about the man who was already serving when we arrived, and
+            // he is the one in the screenshot. Only a ped actually performing a scenario at
+            // the post is touched -- a customer stood at the cart is a customer.
+            Shoo(where);
+
             var ped = World.CreatePed(model, where, v.Heading + 180f);
 
             // As the stand: the model is locked in by Stream and only the success path let it
@@ -1879,6 +1902,72 @@ namespace BareMinimum.Venues
             }
         }
 
+        /// <summary>
+        /// Tells the game not to spawn its own scenario people at this stand.
+        ///
+        /// ADD_SCENARIO_BLOCKING_AREA takes a box and the game stops filling scenario points
+        /// inside it. It is the same mechanism the game uses around its own set pieces, and
+        /// it is the difference between one man behind a cart and two.
+        /// </summary>
+        private static void Block(Vendor v, Vector3 at)
+        {
+            if (v.Blocker != 0) return;
+
+            try
+            {
+                var r = 2.5f;
+
+                v.Blocker = Function.Call<int>(Hash.ADD_SCENARIO_BLOCKING_AREA,
+                                               at.X - r, at.Y - r, at.Z - 2f,
+                                               at.X + r, at.Y + r, at.Z + 3f,
+                                               false, true, true, true);
+            }
+            catch (Exception ex)
+            {
+                // A stand with two men behind it is a blemish; a stand that failed to spawn
+                // because of one native is a shop that is not there.
+                Log.Once("vendor-block-" + v.Id, "Could not reserve the post: " + ex.Message);
+                v.Blocker = 0;
+            }
+        }
+
+        /// <summary>
+        /// Moves on whoever the game already had serving here.
+        ///
+        /// ONLY SOMEBODY PERFORMING A SCENARIO, and only within a stride of the post. A ped
+        /// stood at a cart doing nothing in particular is a customer and this mod has no
+        /// business touching him; the one being moved is the game's own vendor, standing in
+        /// the exact spot ours is about to occupy, doing the exact job ours is about to do.
+        ///
+        /// He is not deleted. The scenario is taken off him and he walks away like anybody
+        /// else who has finished a shift, which is both kinder and cheaper than deleting a
+        /// ped the streamer still thinks it owns.
+        /// </summary>
+        private static void Shoo(Vector3 post)
+        {
+            try
+            {
+                foreach (var ped in World.GetNearbyPeds(post, 1.6f))
+                {
+                    if (ped == null || !ped.Exists() || !ped.IsAlive) continue;
+                    if (ped == Game.Player.Character) continue;
+                    if (ped.IsPersistent) continue;          // somebody's, and not the street's
+
+                    if (!Function.Call<bool>(Hash.IS_PED_USING_ANY_SCENARIO, ped.Handle)) continue;
+
+                    Function.Call(Hash.CLEAR_PED_TASKS, ped.Handle);
+                    Function.Call(Hash.TASK_WANDER_STANDARD, ped.Handle, 10f, 10);
+
+                    Log.Info("Stand: the game already had somebody serving here, so he has " +
+                             "been sent on his way.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Once("vendor-shoo", "Could not move the other vendor on: " + ex.Message);
+            }
+        }
+
         private static void Despawn(Vendor v)
         {
             try
@@ -1892,6 +1981,16 @@ namespace BareMinimum.Venues
             catch (Exception ex)
             {
                 Log.Once("vendor-despawn-" + v.Id, "Could not remove " + v.Name + ": " + ex.Message);
+            }
+
+            // THE BOX COMES UP WITH IT. Left down, the street stays empty of its own people
+            // everywhere this mod has ever parked a cart, for the rest of the session.
+            if (v.Blocker != 0)
+            {
+                try { Function.Call(Hash.REMOVE_SCENARIO_BLOCKING_AREA, v.Blocker, false); }
+                catch { /* the area outlives the stand, which is a smaller problem */ }
+
+                v.Blocker = 0;
             }
 
             v.Stand = null;

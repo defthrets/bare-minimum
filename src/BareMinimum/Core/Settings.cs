@@ -1631,7 +1631,7 @@ namespace BareMinimum.Core
         ///
         /// Off, a machine behaves like every other counter and BuyToPantry decides.
         /// </summary>
-        public bool VendingUseNow = true;
+        public bool VendingUseNow = false;
 
         public float VendingSipHunger = 0.05f;
 

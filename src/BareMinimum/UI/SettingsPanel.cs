@@ -117,11 +117,19 @@ namespace BareMinimum.UI
         /// <summary>
         /// What it holds while tuning, by what is being tuned. See Settings.HoldWhat.
         ///
-        /// A cup and a burger, because those are the two shapes that show the problem: one is
-        /// tall and obviously wrong when it leans, the other is flat and obviously wrong when
-        /// it is on its side. Both are in this build; both are checked against PropList.
+        /// THE MODEL THE ITEMS ACTUALLY HOLD, WHICH IS THE WHOLE POINT AND WAS NOT TRUE.
+        /// This used to be prop_cs_bs_cup -- a perfectly good cup that NOT ONE of the forty
+        /// drinks uses. So a number dialled until the sample sat right was a number for a
+        /// model nobody would ever be holding, and it was baked in and still looked wrong,
+        /// which is exactly how it was reported.
+        ///
+        /// These two are the most-used prop of each kind, counted out of foods.json:
+        /// prop_plastic_cup_02 is fifteen of the forty drinks, prop_cs_burger_01 is
+        /// thirty-two of the meals. Tune against these and it is right for those, which is as
+        /// close as one number per kind can get -- the rest want their own, and foods.json
+        /// takes a "hold" and a "turn" per item for exactly that.
         /// </summary>
-        private const string SampleDrink = "prop_cs_bs_cup";
+        private const string SampleDrink = "prop_plastic_cup_02";
         private const string SampleFood = "prop_cs_burger_01";
 
         /// <summary>The catalogue, for the tuning sample's own numbers. See Placed.</summary>
