@@ -448,6 +448,39 @@ namespace BareMinimum.Api
             catch { return false; }
         }
 
+        /// <summary>
+        /// Opens this mod's own pocket, and returns whether it did.
+        ///
+        /// FOR THE PHONE NEXT DOOR. Posted Up lists this mod's food on its phone because it
+        /// can read it over the bridge -- but a list you cannot eat from, move, or drop into a
+        /// bag is a worse version of the screen that is already here. So it asks for the real
+        /// one instead, and only draws its own when this mod is not installed to ask.
+        ///
+        /// THE BAG IF THERE IS ONE. With a bag on his back the pocket screen is the two-grid
+        /// one -- pocket beside bag, with the transfer -- which is the same thing the pocket
+        /// key opens, so the phone lands where the key lands.
+        ///
+        /// False means it could not: mid-meal, in a menu of ours already, or a screen that is
+        /// not wired yet. The caller falls back to whatever it was going to do.
+        /// </summary>
+        public static bool Open()
+        {
+            try
+            {
+                if (_opener == null) return false;
+                return _opener();
+            }
+            catch { return false; }
+        }
+
+        /// <summary>Set by Main, which is the only thing that knows which screen is the right one.</summary>
+        private static Func<bool> _opener;
+
+        internal static void Opener(Func<bool> opener)
+        {
+            _opener = opener;
+        }
+
         /// <summary>The bag on his back, when there is one. See Give.</summary>
         private static Food.Knapsack _knapsack;
 

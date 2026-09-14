@@ -206,6 +206,28 @@ namespace BareMinimum
             // when the pocket is full and there is a bag on him. See Api.Pantry.Give.
             Api.Pantry.Bag(_knapsack);
 
+            // AND HOW THE PHONE NEXT DOOR OPENS IT. The bag screen when there is a bag on
+            // him, the plain pocket when there is not -- the same choice the pocket key
+            // makes, so the two ways in land in the same place. Refused while anything else
+            // of ours is up or he is mid-meal. See Api.Pantry.Open.
+            Api.Pantry.Opener(() =>
+            {
+                if (_eating.Busy) return false;
+                if (_bag.IsOpen || _bagScreen.IsOpen || _fridge.IsOpen ||
+                    _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen) return false;
+
+                // THE POCKET, NOT THE TRANSFER SCREEN, EVEN WITH A BAG ON. The phone is
+                // asking "what am I carrying" and the pocket is the only screen that answers
+                // it whole: it lists the food AND the other mod's drugs, which the two-grid
+                // bag screen does not. Opening that from a phone would hide the drugs behind
+                // a transfer screen, and the drugs are the reason that phone exists.
+                //
+                // The bag is still one press of the pocket key away, which is where a
+                // transfer belongs.
+                _bag.Open();
+                return _bag.IsOpen;
+            });
+
             Api.Pantry.Screens(() => _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen ||
                                      _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen);
 
