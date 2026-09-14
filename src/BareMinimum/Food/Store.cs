@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using BareMinimum.Core;
 
@@ -56,6 +56,28 @@ namespace BareMinimum.Food
         /// <summary>What to call it in the log, in words. "Pantry", "Fridge".</summary>
         protected abstract string What { get; }
 
+        /// <summary>
+        /// Places taken by something this store does not itself hold.
+        ///
+        /// THE POCKET HAS DRUGS IN IT THAT BELONG TO ANOTHER MOD. They are drawn in the same
+        /// grid as the food, one tile a kind, and until now they cost nothing: the screen
+        /// showed five tiles over a header reading "2 of 5", and you could fill all five food
+        /// slots on top of them. A pocket with eight things in it is not a pocket.
+        ///
+        /// COUNTED HERE RATHER THAN SUBTRACTED FROM Slots, because Slots is the player's own
+        /// setting and a store that quietly reports a smaller cap than the one they typed is
+        /// a store nobody can reason about. The cap is what they set; this is what is already
+        /// in the way.
+        ///
+        /// Return DELIBERATELY IGNORES ALL OF IT, as it always has. Putting back something
+        /// this mod took out of your hand must never fail, or a pocket that filled up with
+        /// drugs mid-meal would eat the sandwich.
+        /// </summary>
+        protected virtual int Reserved => 0;
+
+        /// <summary>Places used: what is in it, plus what is in the way.</summary>
+        public int Taken => Total + Reserved;
+
         /// <summary>The once-only log key, so two stores do not silence each other.</summary>
         private string Key => What.ToLowerInvariant();
 
@@ -72,14 +94,14 @@ namespace BareMinimum.Food
             }
         }
 
-        public bool Full => Total >= Slots;
+        public bool Full => Taken >= Slots;
 
         /// <summary>How much more will fit. Never negative, even if the cap was lowered.</summary>
         public int Room
         {
             get
             {
-                var left = Slots - Total;
+                var left = Slots - Taken;
                 return left < 0 ? 0 : left;
             }
         }
@@ -139,7 +161,7 @@ namespace BareMinimum.Food
 
             var bag = Bag();
 
-            if (Total + howMany > Slots) return false;
+            if (Taken + howMany > Slots) return false;
 
             int have;
             bag.TryGetValue(id, out have);

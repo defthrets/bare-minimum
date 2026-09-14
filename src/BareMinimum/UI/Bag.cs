@@ -763,10 +763,15 @@ namespace BareMinimum.UI
 
             Theme.Panel(left, top, panelW, height, arrive);
 
-            // FOOD ONLY IN THE COUNT. Slots is this mod's rule about how many sandwiches fit
-            // in a pocket; the product has a capacity of its own over in the other mod and is
-            // reported beside it rather than folded into it.
-            var held = _pantry.Total + " of " + _pantry.Slots;
+            // EVERYTHING IN THE GRID IS IN THE COUNT, which is what it was not. This read
+            // the food only, so five tiles sat over a header saying "2 of 5" -- and the three
+            // that were not counted were not costing a slot either. A drug is one place, the
+            // same as a packet of crisps is one place, however much of it there is. See
+            // Store.Reserved.
+            //
+            // THE GRAMS ARE STILL REPORTED BESIDE IT rather than folded into it: how much
+            // product fits is the other mod's rule and its own number.
+            var held = _pantry.Taken + " of " + _pantry.Slots;
 
             if (_dope.Count > 0)
             {

@@ -1,4 +1,5 @@
-﻿using BareMinimum.Core;
+﻿using GTA;
+using BareMinimum.Core;
 
 namespace BareMinimum.Food
 {
@@ -42,6 +43,47 @@ namespace BareMinimum.Food
         /// working rather than a player with full hands.
         /// </summary>
         public override int Slots => _cfg.PantrySlots < 1 ? 1 : _cfg.PantrySlots;
+
+        /// <summary>
+        /// ONE PLACE PER KIND OF DRUG ON YOU. See Store.Reserved.
+        ///
+        /// PER KIND, NOT PER GRAM, because that is what the pocket screen draws: one tile for
+        /// the weed however much of it there is, the same as one tile for the crisps however
+        /// many packets. The grams have a capacity of their own over in the other mod and are
+        /// reported beside this rather than folded into it.
+        ///
+        /// CACHED FOR A FIFTH OF A SECOND. Ids() reaches into the other mod by reflection and
+        /// Full is asked on every frame a shop is open. The answer only changes when somebody
+        /// picks something up, so a stale one is at most three frames behind.
+        /// </summary>
+        protected override int Reserved
+        {
+            get
+            {
+                var now = Game.GameTime;
+
+                if (now >= _dopeAt)
+                {
+                    _dopeAt = now + 200;
+
+                    try
+                    {
+                        var ids = Dope.Ids();
+                        _dope = ids == null ? 0 : ids.Length;
+                    }
+                    catch
+                    {
+                        // The other mod is not there, or is mid-reload. Nothing is in the way.
+                        _dope = 0;
+                    }
+                }
+
+                return _dope;
+            }
+        }
+
+        private int _dope;
+        private int _dopeAt;
 
         protected override string File => Paths.PantryFile;
 
