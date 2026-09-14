@@ -100,6 +100,33 @@ namespace BareMinimum.Food
 
                 if (bit == null || !bit.Exists()) return;
 
+                // WAKE IT UP, OR IT HANGS IN THE AIR.
+                //
+                // This is what "it gets stuck in the air" was. A prop made by CREATE_OBJECT
+                // arrives with its rigid body ASLEEP: the physics engine parks bodies that
+                // are not moving so it has less to solve, and one that has never moved has
+                // never been woken. Dropped into empty air it simply stays there, and the
+                // velocity set below is written to a body that is not being simulated, so it
+                // does nothing at all -- which is why it looked frozen rather than slow.
+                //
+                // ACTIVATE_PHYSICS is the one that does it. The four before it are the
+                // conditions that make activating mean anything: not frozen, not static, has
+                // gravity, has collision. Each is set rather than assumed because a prop's
+                // defaults come from its own model file and the packets, cans and cartons in
+                // this mod come from a dozen different ones.
+                try
+                {
+                    Function.Call(Hash.FREEZE_ENTITY_POSITION, bit.Handle, false);
+                    Function.Call(Hash.SET_ENTITY_DYNAMIC, bit.Handle, true);
+                    Function.Call(Hash.SET_ENTITY_HAS_GRAVITY, bit.Handle, true);
+                    Function.Call(Hash.SET_ENTITY_COLLISION, bit.Handle, true, true);
+                    Function.Call(Hash.ACTIVATE_PHYSICS, bit.Handle);
+                }
+                catch (Exception ex)
+                {
+                    Log.Once("litter-physics", "Could not wake the dropped " + what + ": " + ex.Message);
+                }
+
                 // A flick of the wrist, not a throw. Somebody dropping a can does not put any
                 // effort into it, and a can that sails six feet reads as a pitch.
                 try

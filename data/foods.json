@@ -653,9 +653,11 @@
       "category": "Snacks",
       "price": 3,
       "hunger": 0.14,
+      "_prop": "prop_food_bs_chips LED THIS LIST AND IT IS THE BURGER SHOT FRIES CARTON -- open, red, full of chips. A bag of crisps was being served as a box of fries. It is still right for French Fries and it still leads THAT item's list; it was never right here. prop_cs_crisps_01 is the cutscene crisp packet.",
       "prop": [
-        "prop_food_bs_chips",
         "prop_cs_crisps_01",
+        "prop_crisp",
+        "prop_ld_snack_01",
         "prop_food_chips"
       ],
       "seconds": 3.0,
