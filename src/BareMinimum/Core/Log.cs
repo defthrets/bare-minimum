@@ -162,7 +162,7 @@ namespace BareMinimum.Core
     /// </summary>
     internal static class Build
     {
-        public const string Version = "0.6.0";
+        public const string Version = "0.7.0";
         public const string Name = "Bare Minimum";
         public const string By = "spitmux";
     }
