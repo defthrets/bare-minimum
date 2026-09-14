@@ -271,7 +271,7 @@ namespace BareMinimum.Food
                 // lost, which is what dropping it means. See Interrupted.
                 if (Interrupted())
                 {
-                    Log.Info("Put down mid-" + (_playing != null && _playing.Cycle.Length > 1 ? "smoke" : "meal") +
+                    Log.Info("Put down mid-" + (_item != null && _item.Smoke ? "smoke" : "meal") +
                              ": he reached for a weapon.");
                     Abandon();
                     return;
@@ -886,7 +886,11 @@ namespace BareMinimum.Food
             // rather than on a clock of its own, and it is in step with the animation for
             // free. Only for the things that are actually smoked: everything else in the
             // catalogue has a one-clip cycle and never reaches this line. See Exhale.
-            if (_cfg.Puffs) Exhale.Now(me);
+            // ONLY OFF A SMOKE. This used to be guarded by "has a cycle", which was true of
+            // exactly one thing at the time. The drink now repeats its loop through this same
+            // path so it lasts as long as the drink does, and without this line he would
+            // breathe out a lungful of smoke every time he lowered a can of Sprunk.
+            if (_cfg.Puffs && _item != null && _item.Smoke) Exhale.Now(me);
 
             _clip++;
             _animStarted = false;

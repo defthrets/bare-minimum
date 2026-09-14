@@ -114,6 +114,10 @@ namespace BareMinimum.UI
             _at = 0;
             _loaded = false;
 
+            // OFF TO ONE SIDE. Centred, this panel stands exactly on top of the man whose
+            // hand you are trying to see into, which is the one thing this screen is for.
+            _ui.PanelX = _cfg.FitPanelX;
+
             Words();
             Load();
             Refill();
@@ -439,6 +443,21 @@ namespace BareMinimum.UI
                 return;
             }
 
+            if (tag == "hand")
+            {
+                _cfg.RightHand = !_menu.RightHand;
+                _menu.Hand(_cfg.RightHand);
+
+                try { IniFile.SetValue(Paths.Ini, "Eating", "RightHand",
+                                       _cfg.RightHand ? "true" : "false"); }
+                catch (Exception ex) { Log.Once("fit-hand", "Could not write the hand: " + ex.Message); }
+
+                // The clip changed, so the one running underneath is the old hand's. Dropped
+                // here rather than waited out: Show re-asks within the frame.
+                _animAt = 0;
+                return;
+            }
+
             int axis;
             if (!int.TryParse(tag, out axis) || axis < 0 || axis > 5) return;
 
@@ -738,6 +757,17 @@ namespace BareMinimum.UI
                     Tag = i.ToString()
                 });
             }
+
+            _ui.Rows.Add(new Row
+            {
+                Left = "Hand",
+                Right = _menu.RightHand ? "RIGHT" : "LEFT",
+                Note = "Which hand he eats and drinks with. This moves the ANIMATION and the " +
+                       "prop together -- they cannot be split, or he mimes it with an empty " +
+                       "fist. Nothing in the game's name lists says which arm a clip raises, " +
+                       "so look at him and pick. Saved, and live the moment you press it.",
+                Tag = "hand"
+            });
 
             _ui.Rows.Add(new Row
             {

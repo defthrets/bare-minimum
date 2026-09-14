@@ -4081,11 +4081,42 @@
         }
       ]
     },
+    "_hand": "The eat/drink blocks come in pairs: the ones below are the LEFT-handed set and eatRight/drinkRight are the RIGHT-handed set. Settings.RightHand (and the Hand row on the fitting bench) says which pair is live. A hand is a property of the CLIP -- nothing in the game's name lists records which arm a clip raises -- so the animation and the prop's hand bone move together and can never be split.",
+
     "drink": {
-      "dict": "mp_player_intdrink",
-      "clip": "loop_bottle",
+      "_lasts": "THE CYCLE IS THE SAME CLIP TWICE, and that is what makes a drink last as long as the drink. loop_bottle runs about two seconds and the drink runs six, so played once he lowered the can and stood holding it. It is NOT looped with the LOOPING flag -- that restarts it against a blend every pass and visibly janks. Two entries puts it on the same path the smoke has always used: the clip is played out to its end and then played again, which is smooth because it is how that code already worked.",
       "hand": "left",
-      "scenario": "WORLD_HUMAN_DRINKING"
+      "scenario": "WORLD_HUMAN_DRINKING",
+      "options": [
+        {
+          "dict": "mp_player_intdrink",
+          "clip": "loop_bottle",
+          "cycle": [ "loop_bottle", "loop_bottle" ]
+        }
+      ]
+    },
+
+    "eatRight": {
+      "_note": "The ambient wander-eating set: the pedestrian walking along with a donut. Every dict and clip named here was checked against menyooStuff/PedAnimList.txt on this install.",
+      "hand": "right",
+      "scenario": "WORLD_HUMAN_STAND_IMPATIENT",
+      "options": [
+        { "dict": "amb@code_human_wander_eating_donut@male@base", "clip": "base" },
+        { "dict": "amb@code_human_wander_eating_donut@male@idle_a", "clip": "idle_a" },
+        { "dict": "mp_player_inteat@pnq", "clip": "loop" }
+      ]
+    },
+
+    "drinkRight": {
+      "_note": "The ambient drinking set -- the one every ped stood outside a bar uses. Same two-entry cycle as the left-handed drink, for the same reason.",
+      "hand": "right",
+      "scenario": "WORLD_HUMAN_DRINKING",
+      "options": [
+        { "dict": "amb@world_human_drinking@beer@male@base", "clip": "base",
+          "cycle": [ "base", "base" ] },
+        { "dict": "amb@world_human_drinking@coffee@male@base", "clip": "base",
+          "cycle": [ "base", "base" ] }
+      ]
     },
     "_comment": [
       "How eating, drinking and smoking look.",

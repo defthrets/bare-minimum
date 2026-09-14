@@ -230,6 +230,28 @@ namespace BareMinimum.Food
         public bool Resolved;
 
         /// <summary>
+        /// Becomes a copy of another. How the hand switch works.
+        ///
+        /// COPIED INTO RATHER THAN SWAPPED FOR, because Eat and Sip are handed out to half
+        /// the mod at construction and every one of those references has to see the change.
+        /// Resolved goes back to false so the new dictionary is checked against this build
+        /// before it is asked for -- the alternative is the mod asking for a dictionary it
+        /// has never verified, which is the failure this class exists to stop.
+        /// </summary>
+        public void Become(AnimRef other)
+        {
+            if (other == null) return;
+
+            Dict = other.Dict;
+            Clip = other.Clip;
+            Options = other.Options;
+            Cycle = other.Cycle;
+            Scenario = other.Scenario;
+            LeftHanded = other.LeftHanded;
+            Resolved = false;
+        }
+
+        /// <summary>
         /// Which hand this animation brings to the mouth. Left for the MP eat and drink sets.
         ///
         /// In the file rather than in code because it is a thing you can only learn by
@@ -327,6 +349,56 @@ namespace BareMinimum.Food
                                                     Clip = "loop_bottle" };
 
         /// <summary>
+        /// THE SAME TWO ANIMATIONS AGAIN, IN THE OTHER HAND, AND WHY THIS IS NOT ONE SETTING.
+        ///
+        /// Which hand a clip brings to the mouth is a property of the CLIP. You cannot move
+        /// the food to the other hand and keep the animation: you get a man raising an empty
+        /// fist while the burger rides along at the other hip. So the hand and the clip change
+        /// TOGETHER, always, and that is what these two pairs are -- a left-handed set and a
+        /// right-handed set, each one internally consistent.
+        ///
+        /// AND IT IS A SWITCH IN THE GAME BECAUSE IT CANNOT BE READ OFF A LIST. Nothing in
+        /// PedAnimList says which arm a clip moves; the only way to know is to stand there and
+        /// watch it. Guessing it in a build and waiting to be told cost days. Settings.RightHand
+        /// flips it, the fitting bench has a row for it, and it takes effect on the spot.
+        /// </summary>
+        private readonly AnimRef _eatLeft = new AnimRef { Dict = "mp_player_inteat@burger",
+                                                          Clip = "mp_player_int_eat_burger" };
+
+        private readonly AnimRef _eatRight = new AnimRef {
+            Dict = "amb@code_human_wander_eating_donut@male@base", Clip = "base",
+            LeftHanded = false };
+
+        private readonly AnimRef _sipLeft = new AnimRef { Dict = "mp_player_intdrink",
+                                                          Clip = "loop_bottle" };
+
+        private readonly AnimRef _sipRight = new AnimRef {
+            Dict = "amb@world_human_drinking@beer@male@base", Clip = "base",
+            LeftHanded = false };
+
+        /// <summary>Which set is live. See the two pairs above.</summary>
+        public bool RightHand { get; private set; }
+
+        /// <summary>
+        /// Puts the eat and drink animations in one hand or the other, now.
+        ///
+        /// Nothing is rebuilt and nothing is reloaded: Eat and Sip BECOME the chosen pair, so
+        /// every reference already handed out sees it, and the prop follows because both the
+        /// game and the fitting bench attach to whichever bone LeftHanded names. One press.
+        /// </summary>
+        public void Hand(bool right)
+        {
+            RightHand = right;
+
+            Eat.Become(right ? _eatRight : _eatLeft);
+            Sip.Become(right ? _sipRight : _sipLeft);
+
+            Log.Info("Eating and drinking are " + (right ? "RIGHT" : "LEFT") + "-handed: " +
+                     Eat.Dict + " / " + Sip.Dict + ", prop on the " +
+                     (Eat.LeftHanded ? "left" : "right") + " hand bone.");
+        }
+
+        /// <summary>
         /// Ambient speech names, by occasion. Read from foods.json, handed to Speech.
         ///
         /// HERE RATHER THAN IN Speech BECAUSE THIS IS THE FILE READER. Every other piece of
@@ -393,6 +465,9 @@ namespace BareMinimum.Food
             _cfg = cfg;
 
             Load(cfg);
+
+            // LAST, so it copies the sets the file just filled in rather than the built-ins.
+            Hand(cfg != null && cfg.RightHand);
         }
 
         /// <summary>Everything in one category, in file order.</summary>
@@ -500,8 +575,13 @@ namespace BareMinimum.Food
                     if (!string.IsNullOrEmpty(name)) _categories.Add(name);
                 }
 
-                ReadAnim(doc["animations"]["eat"], Eat);
-                ReadAnim(doc["animations"]["drink"], Sip);
+                // BOTH SETS, out of the file, so either hand can be corrected without a
+                // rebuild. The right-handed blocks are optional: no block, and the built-in
+                // pair above stands.
+                ReadAnim(doc["animations"]["eat"], _eatLeft);
+                ReadAnim(doc["animations"]["drink"], _sipLeft);
+                ReadAnim(doc["animations"]["eatRight"], _eatRight);
+                ReadAnim(doc["animations"]["drinkRight"], _sipRight);
 
                 // What a finished thing leaves on the pavement. Beside the props and the
                 // animations because that is what it is -- see Food.Litter.

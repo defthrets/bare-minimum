@@ -1748,6 +1748,26 @@ namespace BareMinimum.Core
         public bool Puffs = true;
 
         /// <summary>
+        /// WHICH HAND HE EATS AND DRINKS WITH.
+        ///
+        /// Not a preference -- a fact about the animation, and one that cannot be looked up.
+        /// Nothing in the game's own name lists says which arm a clip raises; the only way to
+        /// know is to watch it. So it is a switch, here and on the fitting bench, and it moves
+        /// the ANIMATION and the PROP together: see Catalogue.Hand. Getting this wrong is a
+        /// man miming a burger with an empty fist while the burger rides on his other hip.
+        /// </summary>
+        public bool RightHand;
+
+        /// <summary>
+        /// Where the fitting bench stands, across the screen. 0.5 is the middle, 1 the edge.
+        ///
+        /// OFF TO ONE SIDE BECAUSE YOU HAVE TO SEE PAST IT. The whole point of that screen is
+        /// the model in his hand, and a panel in the middle of the screen is a panel over the
+        /// top of him.
+        /// </summary>
+        public float FitPanelX = 0.76f;
+
+        /// <summary>
         /// HE DROPS IT WHEN HE HAS FINISHED. An empty can that vanishes out of a man's hand
         /// the instant he stops drinking is the one moment this mod stops modelling anything.
         ///
@@ -2413,6 +2433,8 @@ namespace BareMinimum.Core
                 cfg.SmokeSeconds = ini.GetFloat("Eating", "SmokeSeconds", cfg.SmokeSeconds, 0f, 120f);
                 cfg.Longer = ini.GetFloat("Eating", "Longer", cfg.Longer, 0f, 30f);
                 cfg.Puffs = ini.GetBool("Eating", "Puffs", cfg.Puffs);
+                cfg.RightHand = ini.GetBool("Eating", "RightHand", cfg.RightHand);
+                cfg.FitPanelX = ini.GetFloat("Eating", "FitPanelX", cfg.FitPanelX, 0.15f, 0.85f);
                 cfg.HoldX = ini.GetFloat("Eating", "HoldX", cfg.HoldX, -0.5f, 0.5f);
                 cfg.HoldY = ini.GetFloat("Eating", "HoldY", cfg.HoldY, -0.5f, 0.5f);
                 cfg.HoldZ = ini.GetFloat("Eating", "HoldZ", cfg.HoldZ, -0.5f, 0.5f);

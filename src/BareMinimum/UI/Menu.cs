@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using GTA;
@@ -65,7 +65,15 @@ namespace BareMinimum.UI
     internal sealed class Menu
     {
         // ---- layout, all fractions of the screen ------------------------------
-        private const float PanelX = 0.5f;      // centre
+        /// <summary>
+        /// The middle of the panel, across the screen. 0.5 is centred, 1.0 is the right edge.
+        ///
+        /// A FIELD RATHER THAN A CONSTANT BECAUSE ONE OF THESE MENUS IS LOOKED THROUGH. The
+        /// fitting bench exists to show a model in his hand, and centred it stands directly
+        /// on top of the man holding it -- you are adjusting something you cannot see. Every
+        /// other menu in the mod is read rather than looked past and stays in the middle.
+        /// </summary>
+        public float PanelX = 0.5f;
         private const float Top = 0.180f;
 
         /// <summary>
