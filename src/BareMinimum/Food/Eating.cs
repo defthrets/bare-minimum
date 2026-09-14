@@ -784,14 +784,35 @@ namespace BareMinimum.Food
                     return;
                 }
 
-                // 48, NOT 49. Both are upper body and secondary -- the legs stay the game's,
-                // which is what lets him walk about with it -- and 49 adds LOOPING. A looping
-                // idle is exactly the bug: he holds the thing forever and never draws on it.
-                // Each clip of the cycle is played ONCE and Puff moves to the next.
                 var clip = anim.Cycle.Length > 0 ? anim.Cycle[_clip % anim.Cycle.Length] : anim.Clip;
 
+                // THE FOOD LOOPS FOR THE LENGTH OF THE MEAL. NOTHING ELSE DOES.
+                //
+                // Both flags are upper body and secondary -- the legs stay the game's, which
+                // is what lets him walk about with it -- and 49 adds LOOPING.
+                //
+                // A BITE IS ABOUT A SECOND LONG. Played once, he took one and then stood
+                // there holding a burger for the other five, which is what "the eating
+                // animation is too short" is. So the eat clip is looped, and given the meal's
+                // remaining time as its length so it can never outlive the food.
+                //
+                // AND THE DRINK IS LEFT ALONE, which is the part that was got wrong the first
+                // time this was tried. mp_player_intdrink / loop_bottle is ALREADY a loop --
+                // the name says so -- and looping a loop restarts it against a four-frame
+                // blend every second. That is the jank. It plays once, for its own length,
+                // exactly as it did at the last release.
+                //
+                // The smoke is three clips played one after another and needs each to END so
+                // Puff can start the next, so it stays on 48 as well.
+                var cycling = anim.Cycle.Length >= 2;
+                var chewing = !cycling && item != null && !item.Smoke && !item.Drink && !drinking;
+
+                var left = _finishAt - Game.GameTime;
+                if (left < 500) left = 500;
+
                 Function.Call(Hash.TASK_PLAY_ANIM, me.Handle, anim.Dict, clip,
-                              4f, -4f, -1, 48, 0f, false, false, false);
+                              4f, -4f, chewing ? left : -1, chewing ? 49 : 48,
+                              0f, false, false, false);
 
                 _clipAt = Game.GameTime;
                 _animStarted = true;
