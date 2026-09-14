@@ -201,6 +201,11 @@ namespace BareMinimum
             // confirm key and the phone next door must stay shut over any of them; naming
             // three of them in the API meant the till, the settings panel and the bag screen
             // were invisible to it. See Api.Pantry.MenuOpen.
+            // AND WHERE THE OVERFLOW GOES. Anything given to this mod from outside -- looted
+            // off a body, handed over by another mod -- goes in the pocket, and into the bag
+            // when the pocket is full and there is a bag on him. See Api.Pantry.Give.
+            Api.Pantry.Bag(_knapsack);
+
             Api.Pantry.Screens(() => _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen ||
                                      _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen);
 

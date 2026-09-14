@@ -422,7 +422,18 @@ namespace BareMinimum.Api
             }
         }
 
-        /// <summary>Puts one in, if there is room. For a mod that wants to GIVE you food.</summary>
+        /// <summary>
+        /// Puts one in, if there is room. For a mod that wants to GIVE you food.
+        ///
+        /// THE POCKET FIRST AND THEN THE BAG, which is the whole reason a man carries one.
+        /// This used to be the pocket and only the pocket -- five slots -- so everything
+        /// looted off a body after the fifth was refused with "your pockets are full" while
+        /// there were twenty empty slots on his back. Reported as nothing looted ever showing
+        /// up, which is exactly what it looks like from the other side of the bridge.
+        ///
+        /// The bag is only tried when it is actually on him: putting a sandwich into a bag
+        /// lying on the pavement two streets away is worse than refusing it.
+        /// </summary>
         public static bool Give(string id, int howMany = 1)
         {
             try
@@ -430,9 +441,19 @@ namespace BareMinimum.Api
                 if (_bag == null || _menu == null) return false;
                 if (_menu.Find(id) == null) return false;
 
-                return _bag.Add(id, howMany);
+                if (_bag.Add(id, howMany)) return true;
+
+                return _knapsack != null && Food.Knapsack.Worn && _knapsack.Add(id, howMany);
             }
             catch { return false; }
+        }
+
+        /// <summary>The bag on his back, when there is one. See Give.</summary>
+        private static Food.Knapsack _knapsack;
+
+        internal static void Bag(Food.Knapsack knapsack)
+        {
+            _knapsack = knapsack;
         }
 
         /// <summary>
