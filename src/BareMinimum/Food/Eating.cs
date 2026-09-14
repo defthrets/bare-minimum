@@ -61,6 +61,19 @@ namespace BareMinimum.Food
         private int _clip;
         private int _clipAt;
 
+        /// <summary>
+        /// How many passes of the clip have been played, and when the rest between them ends.
+        ///
+        /// ANIMATION, BREAK, ANIMATION. See Settings.Bites. A single-clip eat or drink plays
+        /// its pass, stands holding the thing for BreakSeconds, plays it again, and the meal
+        /// ends with the last one -- so what you watch and how long it takes are the same
+        /// thing by construction rather than two numbers somebody has to keep in step.
+        ///
+        /// Not used by the smoke, which is three different clips in a deliberate order.
+        /// </summary>
+        private int _passes;
+        private int _restUntil;
+
         /// <summary>The weapon he had when this started. See Interrupted.</summary>
         private WeaponHash _armed = WeaponHash.Unarmed;
 
@@ -234,6 +247,8 @@ namespace BareMinimum.Food
             _animStarted = false;
             _clip = 0;
             _clipAt = 0;
+            _passes = 0;
+            _restUntil = 0;
 
             // What he was holding at the first bite. See Interrupted: a change is the signal,
             // not the weapon itself.
@@ -285,7 +300,11 @@ namespace BareMinimum.Food
                 // between an animation that usually plays and one that always does.
                 if (!_animStarted)
                 {
-                    var me = Game.Player.Character;
+                    // THE REST IS THE GAP IN ANIMATION, BREAK, ANIMATION. He stands holding
+                    // the thing with nothing playing over the top, which is what a beat
+                    // between two bites looks like. Asking for the clip again here would
+                    // close the gap the moment it opened.
+                    var me = now < _restUntil ? null : Game.Player.Character;
 
                     if (me != null && me.Exists() && !me.IsDead)
                     {
@@ -802,32 +821,29 @@ namespace BareMinimum.Food
 
                 var clip = anim.Cycle.Length > 0 ? anim.Cycle[_clip % anim.Cycle.Length] : anim.Clip;
 
-                // THE FOOD LOOPS FOR THE LENGTH OF THE MEAL. NOTHING ELSE DOES.
+                // ONE PASS AT A TIME. NOTHING HERE LOOPS ANY MORE.
                 //
                 // Both flags are upper body and secondary -- the legs stay the game's, which
                 // is what lets him walk about with it -- and 49 adds LOOPING.
                 //
-                // A BITE IS ABOUT A SECOND LONG. Played once, he took one and then stood
-                // there holding a burger for the other five, which is what "the eating
-                // animation is too short" is. So the eat clip is looped, and given the meal's
-                // remaining time as its length so it can never outlive the food.
+                // A BITE IS ABOUT A SECOND LONG, and the meal is several. The first answer
+                // to that was the LOOPING flag with the meal's remaining time as the length,
+                // which does fill the time and reads as a man winding a handle: the same
+                // motion three or four times over with no beat between them.
                 //
-                // AND THE DRINK IS LEFT ALONE, which is the part that was got wrong the first
-                // time this was tried. mp_player_intdrink / loop_bottle is ALREADY a loop --
-                // the name says so -- and looping a loop restarts it against a four-frame
-                // blend every second. That is the jank. It plays once, for its own length,
-                // exactly as it did at the last release.
+                // SO IT IS ONE PASS, A REST, AND ANOTHER PASS. Flag 48 for everything --
+                // upper body and secondary, so his legs stay the game's and he can walk and
+                // drive -- and no duration, so the clip runs its own length and ENDS. Puff
+                // sees it end, waits BreakSeconds, and asks for the next one.
                 //
-                // The smoke is three clips played one after another and needs each to END so
-                // Puff can start the next, so it stays on 48 as well.
-                var cycling = anim.Cycle.Length >= 2;
-                var chewing = !cycling && item != null && !item.Smoke && !item.Drink && !drinking;
-
-                var left = _finishAt - Game.GameTime;
-                if (left < 500) left = 500;
-
+                // AND LOOPING A LOOP WAS ALWAYS THE JANK. mp_player_intdrink / loop_bottle
+                // is already a loop; the LOOPING flag restarted it against a four-frame blend
+                // every pass. Nothing on this line loops any more, so that cannot come back.
+                //
+                // The smoke is three clips in a deliberate order and reaches the same code
+                // by the same route: each has to END before the next can start.
                 Function.Call(Hash.TASK_PLAY_ANIM, me.Handle, anim.Dict, clip,
-                              4f, -4f, chewing ? left : -1, chewing ? 49 : 48,
+                              4f, -4f, -1, 48,
                               0f, false, false, false);
 
                 _clipAt = Game.GameTime;
@@ -857,7 +873,11 @@ namespace BareMinimum.Food
         /// </summary>
         private void Puff(int now)
         {
-            if (_playing == null || _playing.Cycle.Length < 2) return;
+            // ONE CLIP REACHES HERE NOW TOO. This used to leave immediately unless there
+            // was a cycle to advance, because the eat and the drink were looped by the game
+            // and never ended. They are played one pass at a time instead, so this is what
+            // spaces them: see Settings.Bites.
+            if (_playing == null) return;
 
             var me = Game.Player.Character;
             if (me == null || !me.Exists() || me.IsDead) return;
@@ -868,7 +888,9 @@ namespace BareMinimum.Food
             {
                 try
                 {
-                    var clip = _playing.Cycle[_clip % _playing.Cycle.Length];
+                    var clip = _playing.Cycle.Length > 0
+                             ? _playing.Cycle[_clip % _playing.Cycle.Length]
+                             : _playing.Clip;
 
                     done = Function.Call<float>(Hash.GET_ENTITY_ANIM_CURRENT_TIME,
                                                 me.Handle, _playing.Dict, clip) >= 0.93f;
@@ -894,6 +916,36 @@ namespace BareMinimum.Food
 
             _clip++;
             _animStarted = false;
+
+            // A CYCLE IS A SEQUENCE AND RUNS TO THE CLOCK. The smoke is three clips in a
+            // deliberate order -- idle_a, idle_b, idle_c -- and a rest inside that would be
+            // a man stopping halfway through raising a cigarette. It keeps going until
+            // SmokeSeconds is up, exactly as it always has.
+            if (_playing.Cycle.Length >= 2) return;
+
+            // AND NEITHER DOES A SMOKE THAT FELL BACK TO ITS ONE-CLIP OPTION. The smoking
+            // set's second rung is a single base clip, and without this line a cigarette
+            // whose three-clip dictionary did not stream would quietly end after two passes
+            // instead of after SmokeSeconds. A smoke is timed, not counted.
+            if (_item != null && _item.Smoke) return;
+
+            // ONE CLIP IS A PASS, AND THERE ARE Bites OF THEM WITH A REST BETWEEN.
+            _passes++;
+
+            if (_passes < Math.Max(1, _cfg.Bites))
+            {
+                _restUntil = now + (int)(Math.Max(0f, _cfg.BreakSeconds) * 1000f);
+                return;
+            }
+
+            // AND THE MEAL ENDS WITH THE LAST PASS, which is what makes the animation and the
+            // duration one thing instead of two that have to be kept in step.
+            //
+            // BY MOVING THE CLOCK, NOT BY CALLING Finish HERE. Finish clears _item, and the
+            // rest of this tick still reads it -- the prop block below would hand a null to
+            // Give. Bringing the deadline forward lets the top of the next tick take the
+            // path it already takes, which is the one that has always worked.
+            if (_finishAt > now) _finishAt = now;
         }
 
         /// <summary>

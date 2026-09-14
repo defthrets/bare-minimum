@@ -1770,6 +1770,27 @@ namespace BareMinimum.Core
         public bool Aisles = true;
 
         /// <summary>
+        /// HOW MANY TIMES THE EATING OR DRINKING CLIP PLAYS, and how long he rests between.
+        ///
+        /// ANIMATION, BREAK, ANIMATION. A clip looped back to back for the length of a meal
+        /// reads as a man winding a handle -- the same motion three or four times with no
+        /// beat between them, which is not how anybody eats. Two passes with a pause in the
+        /// middle, holding the thing, is the shape of taking a bite and then taking another.
+        ///
+        /// THE MEAL ENDS WHEN THE LAST PASS DOES. That is what makes the animation and the
+        /// duration the same thing rather than two numbers that have to be kept in step --
+        /// the bug where a two second clip sat inside a six second drink and left him stood
+        /// there holding a can. Seconds is still read and is still the backstop.
+        ///
+        /// Smoking is untouched: it is three different clips in a deliberate order, not one
+        /// clip played more than once, and it has its own SmokeSeconds.
+        /// </summary>
+        public int Bites = 2;
+
+        /// <summary>The rest between them, in seconds. The gap in animation, break, animation.</summary>
+        public float BreakSeconds = 1.1f;
+
+        /// <summary>
         /// Models to force into one aisle group, comma separated, taking them out of the
         /// other two.
         ///
@@ -2459,6 +2480,8 @@ namespace BareMinimum.Core
                 cfg.Puffs = ini.GetBool("Eating", "Puffs", cfg.Puffs);
                 cfg.RightHand = ini.GetBool("Eating", "RightHand", cfg.RightHand);
                 cfg.Aisles = ini.GetBool("Counters", "Aisles", cfg.Aisles);
+                cfg.Bites = ini.GetInt("Eating", "Bites", cfg.Bites, 1, 8);
+                cfg.BreakSeconds = ini.GetFloat("Eating", "BreakSeconds", cfg.BreakSeconds, 0f, 6f);
                 cfg.AisleDrinks = ini.GetString("Counters", "AisleDrinks", cfg.AisleDrinks);
                 cfg.AisleFood = ini.GetString("Counters", "AisleFood", cfg.AisleFood);
                 cfg.AisleShelf = ini.GetString("Counters", "AisleShelf", cfg.AisleShelf);

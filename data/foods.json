@@ -4086,14 +4086,13 @@
     "_hand": "The eat/drink blocks come in pairs: the ones below are the LEFT-handed set and eatRight/drinkRight are the RIGHT-handed set. Settings.RightHand (and the Hand row on the fitting bench) says which pair is live. A hand is a property of the CLIP -- nothing in the game's name lists records which arm a clip raises -- so the animation and the prop's hand bone move together and can never be split.",
 
     "drink": {
-      "_lasts": "THE CYCLE IS THE SAME CLIP TWICE, and that is what makes a drink last as long as the drink. loop_bottle runs about two seconds and the drink runs six, so played once he lowered the can and stood holding it. It is NOT looped with the LOOPING flag -- that restarts it against a blend every pass and visibly janks. Two entries puts it on the same path the smoke has always used: the clip is played out to its end and then played again, which is smooth because it is how that code already worked.",
+      "_lasts": "ONE CLIP, NOT A CYCLE. A cycle of two or more means a SEQUENCE -- the three smoking clips in a deliberate order -- and a sequence runs to the clock with no rest in it. A drink is one clip played [Eating] Bites times with [Eating] BreakSeconds between: animation, break, animation, and the drink ends with the last pass.",
       "hand": "left",
       "scenario": "WORLD_HUMAN_DRINKING",
       "options": [
         {
           "dict": "mp_player_intdrink",
-          "clip": "loop_bottle",
-          "cycle": [ "loop_bottle", "loop_bottle" ]
+          "clip": "loop_bottle"
         }
       ]
     },
@@ -4114,10 +4113,8 @@
       "hand": "right",
       "scenario": "WORLD_HUMAN_DRINKING",
       "options": [
-        { "dict": "amb@world_human_drinking@beer@male@base", "clip": "base",
-          "cycle": [ "base", "base" ] },
-        { "dict": "amb@world_human_drinking@coffee@male@base", "clip": "base",
-          "cycle": [ "base", "base" ] }
+        { "dict": "amb@world_human_drinking@beer@male@base", "clip": "base" },
+        { "dict": "amb@world_human_drinking@coffee@male@base", "clip": "base" }
       ]
     },
     "_comment": [
