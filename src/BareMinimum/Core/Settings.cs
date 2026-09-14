@@ -1902,7 +1902,7 @@ namespace BareMinimum.Core
         // food-only setting kept because somebody may have tuned it. The shipped ini says 0;
         // a default of 90 meant an install whose ini predated that line held every piece of
         // food a quarter turn round from the one the numbers were tuned against.
-        public float FoodSpinZ = 0f;
+        public float FoodSpinZ = 90f;
 
         /// <summary>
         /// Opens the settings menu. F11 and F12 are where these two live on this install.

@@ -193,8 +193,7 @@ namespace BareMinimum.UI
             // The same turn it takes when it is eaten, so a thing looks the same in the pocket
             // as it does going in. See Eating.SpinFor and [Eating] FoodSpinX.
             // The same turn it takes when it is eaten, worked out the same way. See
-            // Eating.SpinFor -- this used to be the food spin for everything, so a cup under
-            // the cursor was laid on its side and a cigarette with it.
+            // Eating.SpinFor.
             _peek.Spin = Turned;
 
             // AND THE SAME PLACE IN THE HAND, so a thing looks the same under the cursor as
