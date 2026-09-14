@@ -473,6 +473,14 @@ namespace BareMinimum.UI
                     _now = new float[6];
                     break;
 
+                case "mirror":
+                    // M = diag(-1, 1, 1). An offset reflects componentwise, so left/right
+                    // flips. A rotation maps to M R M, which leaves the turn about the mirror
+                    // axis alone and negates the other two. Pressing it twice is the identity,
+                    // which is the test that it is a reflection and not an adjustment.
+                    _now = new[] { -_now[0], _now[1], _now[2], _now[3], -_now[4], -_now[5] };
+                    break;
+
                 case "guess":
                     Guess();
                     break;
@@ -770,6 +778,16 @@ namespace BareMinimum.UI
                        "tin. A guess, and a much better starting point than nought; every one " +
                        "of them can still be walked to and fixed.",
                 Tag = "guess"
+            });
+
+            _ui.Rows.Add(new Row
+            {
+                Left = "Mirror to the other hand",
+                Right = "",
+                Note = "Flips these six as if the model had been fitted in the other hand. " +
+                       "The two hand bones are mirror images, so this is a reflection rather " +
+                       "than a guess: left/right flips sign, and so do pitch and yaw.",
+                Tag = "mirror"
             });
 
             _ui.Rows.Add(new Row

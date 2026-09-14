@@ -4072,7 +4072,7 @@
 
   "animations": {
     "eat": {
-      "hand": "right",
+      "hand": "left",
       "scenario": "WORLD_HUMAN_STAND_IMPATIENT",
       "options": [
         {
@@ -4084,7 +4084,7 @@
     "drink": {
       "dict": "mp_player_intdrink",
       "clip": "loop_bottle",
-      "hand": "right",
+      "hand": "left",
       "scenario": "WORLD_HUMAN_DRINKING"
     },
     "_comment": [
