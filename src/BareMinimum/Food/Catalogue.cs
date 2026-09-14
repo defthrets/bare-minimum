@@ -775,6 +775,45 @@ namespace BareMinimum.Food
             return item.Drink || drinking ? TurnDrink : TurnFood;
         }
 
+        /// <summary>
+        /// The models the shops actually put in his hand, the most-used first.
+        ///
+        /// FOR THE ONE SCREEN THAT HAS TO NAME THEM. Fitting a prop is per MODEL -- see
+        /// Settings.Fit -- and a list of two hundred items is not a list of models: fifteen
+        /// drinks share one cup and thirty-two meals share one burger. This is the distinct
+        /// set, in the order that fixes the most items per minute spent.
+        /// </summary>
+        public string[] PropsByUse()
+        {
+            var count = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var item in _items)
+            {
+                if (item == null || string.IsNullOrEmpty(item.Prop)) continue;
+
+                int n;
+                count[item.Prop] = count.TryGetValue(item.Prop, out n) ? n + 1 : 1;
+            }
+
+            var names = new List<string>(count.Keys);
+            names.Sort((a, b) => count[b].CompareTo(count[a]));
+
+            return names.ToArray();
+        }
+
+        /// <summary>The first item that holds this model, so a screen can ask what it is.</summary>
+        public Item ItemWithProp(string prop)
+        {
+            if (string.IsNullOrEmpty(prop)) return null;
+
+            foreach (var item in _items)
+            {
+                if (string.Equals(item.Prop, prop, StringComparison.OrdinalIgnoreCase)) return item;
+            }
+
+            return null;
+        }
+
         /// <summary>Where this one sits: its own answer if it gave one, else its kind's.</summary>
         public float[] HoldFor(Item item, bool drinking)
         {

@@ -1818,6 +1818,83 @@ namespace BareMinimum.Core
         /// </summary>
         public int HoldWhat = 0;
 
+        /// <summary>
+        /// WHERE EACH MODEL SITS IN HIS HAND, by model name. The one that actually works.
+        ///
+        /// A NUMBER PER KIND CANNOT BE RIGHT AND THIS IS WHY. The forty drinks hold twelve
+        /// different models between them -- plastic cups, beer bottles, coffee cups, mugs,
+        /// shot glasses -- and every model has its own origin. Seventy-five degrees of roll
+        /// that stands a cup up lays a mug on its side, which is exactly what shipped. The
+        /// kind defaults in foods.json are a starting point for a model nobody has fitted
+        /// yet; this is the answer for the ones somebody has.
+        ///
+        /// Written by the menu, not by hand: put something in his hand, nudge it until it
+        /// looks right, and press Lock it in. Six numbers per model, in the ini so it
+        /// survives an update of the mod.
+        ///
+        ///   Fit = prop_plastic_cup_02:0.06,0.03,-0.03,0,0,0; v_res_tt_mug01:...
+        /// </summary>
+        public readonly System.Collections.Generic.Dictionary<string, float[]> Fit =
+            new System.Collections.Generic.Dictionary<string, float[]>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>The fit table as one line, for the ini. See Fit.</summary>
+        public string FitLine
+        {
+            get
+            {
+                var sb = new System.Text.StringBuilder();
+
+                foreach (var kv in Fit)
+                {
+                    if (sb.Length > 0) sb.Append("; ");
+
+                    sb.Append(kv.Key).Append(':');
+
+                    for (var i = 0; i < 6; i++)
+                    {
+                        if (i > 0) sb.Append(',');
+                        sb.Append(kv.Value[i].ToString("0.####",
+                            System.Globalization.CultureInfo.InvariantCulture));
+                    }
+                }
+
+                return sb.ToString();
+            }
+        }
+
+        /// <summary>Reads that line back. A row that will not parse is skipped and said once.</summary>
+        public void ReadFit(string line)
+        {
+            Fit.Clear();
+
+            foreach (var entry in (line ?? "").Split(';'))
+            {
+                var text = entry.Trim();
+                if (text.Length == 0) continue;
+
+                var colon = text.IndexOf(':');
+                if (colon <= 0) continue;
+
+                var name = text.Substring(0, colon).Trim();
+                var bits = text.Substring(colon + 1).Split(',');
+
+                if (name.Length == 0 || bits.Length < 6) continue;
+
+                var six = new float[6];
+                var ok = true;
+
+                for (var i = 0; i < 6; i++)
+                {
+                    if (!float.TryParse(bits[i].Trim(),
+                                        System.Globalization.NumberStyles.Float,
+                                        System.Globalization.CultureInfo.InvariantCulture,
+                                        out six[i])) { ok = false; break; }
+                }
+
+                if (ok) Fit[name] = six;
+            }
+        }
+
         public float FoodSpinX = 0f;
         public float FoodSpinY = 0f;
         // NOUGHT, AND IT USED TO BE NINETY. The turn a thing takes in his hand lives in
@@ -2284,6 +2361,8 @@ namespace BareMinimum.Core
 
                 // Words in the file, a number in here. Anything else is a drink, which is the
                 // safe way round: the nudge then cannot touch the food that is already right.
+                cfg.ReadFit(ini.GetString("Eating", "Fit", ""));
+
                 cfg.HoldWhat = string.Equals(ini.GetString("Eating", "HoldWhat", "Drink"),
                                              "Food", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
                 cfg.Litter = ini.GetBool("Eating", "Litter", cfg.Litter);

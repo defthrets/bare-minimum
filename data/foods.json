@@ -4026,8 +4026,8 @@
       "[Eating] FoodSpin is the old food-only setting, still read and still added for food.",
       "A smoke is not turned by either of them."
     ],
-    "turnFood": [-75.0, 0.0, 0.0],
-    "turnDrink": [-75.0, 0.0, 0.0],
+    "turnFood": [0.0, 0.0, 0.0],
+    "turnDrink": [0.0, 0.0, 0.0],
     "turnSmoke": [0.0, 0.0, 0.0]
   },
   "litter": {

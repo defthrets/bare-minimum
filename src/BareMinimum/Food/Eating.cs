@@ -663,6 +663,16 @@ namespace BareMinimum.Food
         /// </summary>
         private Vector3 SitsFor(Item item, bool drinking)
         {
+            // THE MODEL'S OWN ANSWER FIRST, if anybody has fitted this one. See Settings.Fit:
+            // a kind default is a guess that has to serve twelve different models, and this
+            // is the number somebody dialled with THIS model in his hand.
+            float[] fit;
+            if (item != null && !string.IsNullOrEmpty(item.Prop) &&
+                _cfg.Fit.TryGetValue(item.Prop, out fit))
+            {
+                return new Vector3(fit[0], fit[1], fit[2]);
+            }
+
             var it = _menu.HoldFor(item, drinking);
 
             // AND A SMOKE IS LOCKED WHERE IT IS. A cigarette at the middle of the hand was
@@ -700,6 +710,13 @@ namespace BareMinimum.Food
         /// </summary>
         private Vector3 SpinFor(Item item, bool drinking)
         {
+            float[] fit;
+            if (item != null && !string.IsNullOrEmpty(item.Prop) &&
+                _cfg.Fit.TryGetValue(item.Prop, out fit))
+            {
+                return new Vector3(fit[3], fit[4], fit[5]);
+            }
+
             var it = _menu.TurnFor(item, drinking);
 
             if (item != null && item.Smoke) return new Vector3(it[0], it[1], it[2]);

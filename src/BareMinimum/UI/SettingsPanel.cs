@@ -129,8 +129,35 @@ namespace BareMinimum.UI
         /// close as one number per kind can get -- the rest want their own, and foods.json
         /// takes a "hold" and a "turn" per item for exactly that.
         /// </summary>
-        private const string SampleDrink = "prop_plastic_cup_02";
-        private const string SampleFood = "prop_cs_burger_01";
+        /// <summary>
+        /// The models, most-used first, and which one is in his hand right now.
+        ///
+        /// A KIND WAS THE WRONG UNIT AND THE MUG PROVED IT. Twelve models share the word
+        /// "drink" and every one of them has its own origin -- a roll that stands a cup up
+        /// lays a mug on its side, and there is no number that is right for both. So the row
+        /// picks a MODEL, the sample in his hand IS that model, and what is dialled is locked
+        /// to it alone. See Settings.Fit.
+        /// </summary>
+        private string[] _props;
+        private int _prop;
+
+        private string Sample
+        {
+            get
+            {
+                if (_props == null || _props.Length == 0)
+                {
+                    _props = _menu != null ? _menu.PropsByUse() : new string[0];
+                }
+
+                if (_props.Length == 0) return "";
+
+                if (_prop < 0) _prop = _props.Length - 1;
+                if (_prop >= _props.Length) _prop = 0;
+
+                return _props[_prop];
+            }
+        }
 
         /// <summary>The catalogue, for the tuning sample's own numbers. See Placed.</summary>
         private readonly Food.Catalogue _menu;
@@ -188,34 +215,81 @@ namespace BareMinimum.UI
         /// </summary>
         private string Kind()
         {
-            return _cfg != null && _cfg.HoldWhat == 1 ? "(food)" : "(drink)";
+            var prop = Sample;
+            if (prop.Length == 0) return "";
+
+            var item = _menu == null ? null : _menu.ItemWithProp(prop);
+            var name = item != null ? item.Name : prop;
+
+            // The model, not the kind. A row that does not say what it is moving gets used on
+            // the wrong thing, and a kind was not specific enough to be worth saying.
+            return "(" + (name.Length > 18 ? name.Substring(0, 18) : name) + ")";
         }
 
-        /// <summary>Where the sample sits: the kind's own numbers plus the nudge.</summary>
+        /// <summary>
+        /// Where this model sits right now: what it would get in the game, plus the nudge.
+        ///
+        /// ASKED THE SAME WAY EATING ASKS IT -- the model's own fitted numbers if it has
+        /// them, otherwise its kind's -- so the thing on screen is the thing that will be
+        /// locked in, and there is no third copy of these numbers to drift.
+        /// </summary>
+        private float[] Base_()
+        {
+            var prop = Sample;
+
+            float[] fit;
+            if (prop.Length > 0 && _cfg.Fit.TryGetValue(prop, out fit)) return fit;
+
+            var item = _menu == null ? null : _menu.ItemWithProp(prop);
+
+            var hold = _menu == null ? new float[3] : _menu.HoldFor(item, item != null && item.Drink);
+            var turn = _menu == null ? new float[3] : _menu.TurnFor(item, item != null && item.Drink);
+
+            return new[] { hold[0], hold[1], hold[2], turn[0], turn[1], turn[2] };
+        }
+
         private GTA.Math.Vector3 Placed()
         {
-            var it = _menu == null ? null
-                   : _menu.HoldFor(null, _cfg.HoldWhat != 1);
-
-            if (it == null || _cfg == null) return GTA.Math.Vector3.Zero;
-
-            return new GTA.Math.Vector3(it[0] + _cfg.HoldX, it[1] + _cfg.HoldY, it[2] + _cfg.HoldZ);
+            var b = Base_();
+            return new GTA.Math.Vector3(b[0] + _cfg.HoldX, b[1] + _cfg.HoldY, b[2] + _cfg.HoldZ);
         }
 
-        /// <summary>And how it is turned, the same way. The food spin is in it, as it is for food.</summary>
         private GTA.Math.Vector3 Turned()
         {
-            var it = _menu == null ? null
-                   : _menu.TurnFor(null, _cfg.HoldWhat != 1);
+            var b = Base_();
+            return new GTA.Math.Vector3(b[3] + _cfg.TurnX, b[4] + _cfg.TurnY, b[5] + _cfg.TurnZ);
+        }
 
-            if (it == null || _cfg == null) return GTA.Math.Vector3.Zero;
+        /// <summary>
+        /// Writes where it is now against this model and zeroes the nudge.
+        ///
+        /// THE BUTTON THIS WHOLE THING WAS MISSING. Everything before it was a dial with
+        /// nowhere to put the answer: the number was baked by hand afterwards, into a kind
+        /// rather than a model, and the next model undid it. This is one press per model and
+        /// it stays.
+        /// </summary>
+        private void Lock_()
+        {
+            var prop = Sample;
+            if (prop.Length == 0) { Notify("~y~Nothing to fit."); return; }
 
-            var food = _cfg.HoldWhat == 1;
+            var b = Base_();
 
-            return new GTA.Math.Vector3(
-                it[0] + _cfg.TurnX + (food ? _cfg.FoodSpinX : 0f),
-                it[1] + _cfg.TurnY + (food ? _cfg.FoodSpinY : 0f),
-                it[2] + _cfg.TurnZ + (food ? _cfg.FoodSpinZ : 0f));
+            _cfg.Fit[prop] = new[]
+            {
+                b[0] + _cfg.HoldX, b[1] + _cfg.HoldY, b[2] + _cfg.HoldZ,
+                b[3] + _cfg.TurnX, b[4] + _cfg.TurnY, b[5] + _cfg.TurnZ
+            };
+
+            _cfg.HoldX = _cfg.HoldY = _cfg.HoldZ = 0f;
+            _cfg.TurnX = _cfg.TurnY = _cfg.TurnZ = 0f;
+
+            var item = _menu == null ? null : _menu.ItemWithProp(prop);
+
+            Notify("~g~" + (item != null ? item.Name : prop) + "~s~ - fitted. " +
+                   _cfg.Fit.Count + " model(s) done.");
+
+            Refill();
         }
 
         /// <summary>Whether the row under the cursor is one of the three hold nudges.</summary>
@@ -231,8 +305,9 @@ namespace BareMinimum.UI
                 var option = _ui.Rows[at].Tag as Option;
                 if (option == null || option.Section != "Eating") return false;
 
-                return option.Key == "HoldWhat"
-                    || option.Key == "HoldX" || option.Key == "HoldY" || option.Key == "HoldZ"
+                if (option.Name == "Placing" || option.Name == "Lock it in") return true;
+
+                return option.Key == "HoldX" || option.Key == "HoldY" || option.Key == "HoldZ"
                     || option.Key == "TurnX" || option.Key == "TurnY" || option.Key == "TurnZ";
             }
             catch
@@ -246,7 +321,7 @@ namespace BareMinimum.UI
         {
             try
             {
-                _hand.Show(want ? (_cfg.HoldWhat == 1 ? SampleFood : SampleDrink) : "");
+                _hand.Show(want ? Sample : "");
                 _hand.Tick();
             }
             catch
@@ -852,11 +927,40 @@ namespace BareMinimum.UI
                   "Real seconds. He draws on it, exhales and pauses for as long as this says, " +
                   "and can walk about while he does. 0 uses the item's own time, which is six.");
 
-            Choice("Placing", "Eating", "HoldWhat", new[] { "Drink", "Food" },
-                   () => _cfg.HoldWhat, v => _cfg.HoldWhat = v,
-                   "Which of the two the six rows below are moving, and what the menu puts in " +
-                   "his hand while you use them. The other kind is left exactly where it is, " +
-                   "so finishing one cannot undo the other. Cigarettes are never moved.");
+            Add(new Option
+            {
+                Name = "Placing",
+                Note = "Which MODEL the six rows below are moving. It appears in his hand while " +
+                       "any of them is selected, and what you dial belongs to that model alone - " +
+                       "a cup and a mug want different answers and always did. Left and right " +
+                       "walk the list, most-used first.",
+                Section = "",
+                Key = "",
+                Show = () =>
+                {
+                    var prop = Sample;
+                    if (prop.Length == 0) return "-";
+
+                    var item = _menu == null ? null : _menu.ItemWithProp(prop);
+                    var fitted = _cfg.Fit.ContainsKey(prop) ? " *" : "";
+
+                    return (item != null ? item.Name : prop) + fitted;
+                },
+                Nudge = (dir, fine) => { _prop += dir >= 0 ? 1 : -1; _props = null; }
+            });
+
+            Add(new Option
+            {
+                Name = "Lock it in",
+                Note = "Writes where it is now against this model, for good, and puts the six " +
+                       "rows back to nought. Everything that holds this model moves with it. " +
+                       "A model that has been locked in has a star beside its name above.",
+                Section = "Eating",
+                Key = "Fit",
+                Show = () => _cfg.Fit.Count + " model(s)",
+                Persist = () => _cfg.FitLine,
+                Activate = Lock_
+            });
 
             Float("Held left/right " + Kind(), "Eating", "HoldX",
                   () => _cfg.HoldX, v => _cfg.HoldX = v,
