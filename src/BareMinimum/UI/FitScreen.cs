@@ -616,7 +616,14 @@ namespace BareMinimum.UI
                     if (w == v) { score += w.Length; continue; }
 
                     // A cup and a coffeecup are the same thing with a word stuck on the front.
-                    if (w.Length >= 4 && v.Length >= 4 && (w.Contains(v) || v.Contains(w))) score += 2;
+                    //
+                    // THREE, NOT FOUR. At four this test could not see that a cup is a
+                    // coffeecup, because "cup" is three letters -- so prop_plastic_cup_02
+                    // matched nothing at all and the juice went on floating. The three-letter
+                    // words in this list are the ones that matter most: cup, can, tin, jar,
+                    // pie, egg, mug. Below three it would match everything to everything,
+                    // which is what the Noise list above is already there to stop.
+                    if (w.Length >= 3 && v.Length >= 3 && (w.Contains(v) || v.Contains(w))) score += 2;
                 }
             }
 
