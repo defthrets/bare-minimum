@@ -53,8 +53,12 @@ namespace BareMinimum.UI
 
         private readonly Menu _ui = new Menu();
 
-        private string[] _props;
-        private int _prop;
+        /// <summary>Every model anything in the catalogue holds. The set to choose FROM.</summary>
+        private string[] _models;
+
+        /// <summary>The items, and which one is on the bench.</summary>
+        private Item[] _all;
+        private int _at;
 
         /// <summary>What is being worked on, before it is locked. Six numbers, live.</summary>
         private float[] _now = new float[6];
@@ -78,8 +82,14 @@ namespace BareMinimum.UI
 
         public void Open()
         {
-            _props = _menu.PropsByUse();
-            _prop = 0;
+            _models = _menu.PropsByUse();
+
+            var list = new List<Item>();
+            foreach (var i in _menu.Items) if (!string.IsNullOrEmpty(i.Prop)) list.Add(i);
+
+            // The order of the shop's own file, so walking the list is walking the menus.
+            _all = list.ToArray();
+            _at = 0;
             _loaded = false;
 
             Load();
@@ -142,20 +152,62 @@ namespace BareMinimum.UI
         // The model in his hand, in the pose he eats it in
         // ======================================================================
 
+        /// <summary>The item on the bench.</summary>
+        private Item Item_
+        {
+            get
+            {
+                if (_all == null || _all.Length == 0) return null;
+
+                if (_at < 0) _at = _all.Length - 1;
+                if (_at >= _all.Length) _at = 0;
+
+                return _all[_at];
+            }
+        }
+
+        /// <summary>And the model it is holding, which is what gets fitted.</summary>
         private string Prop
         {
             get
             {
-                if (_props == null || _props.Length == 0) return "";
-
-                if (_prop < 0) _prop = _props.Length - 1;
-                if (_prop >= _props.Length) _prop = 0;
-
-                return _props[_prop];
+                var item = Item_;
+                return item == null ? "" : item.Prop;
             }
         }
 
-        private Item Item_ => _menu.ItemWithProp(Prop);
+        /// <summary>
+        /// Puts a different model in this item's hand, now and for good.
+        ///
+        /// FROM WHAT THE SHOPS ALREADY USE, which is the only list where every name is
+        /// guaranteed to exist in this build -- something else is holding it. Written to the
+        /// ini on the press, the same as a fit, and the catalogue is told immediately so the
+        /// bench is holding the new one before the row has finished redrawing.
+        /// </summary>
+        private void Pick(int by)
+        {
+            var item = Item_;
+            if (item == null || _models == null || _models.Length == 0) return;
+
+            var now = Array.IndexOf(_models, item.Prop);
+            if (now < 0) now = 0;
+
+            var next = now + (by >= 0 ? 1 : -1);
+            while (next < 0) next += _models.Length;
+            next %= _models.Length;
+
+            var model = _models[next];
+
+            _cfg.Props[item.Id] = model;
+            item.Prop = model;
+
+            try { IniFile.SetValue(Paths.Ini, "Eating", "Props", _cfg.PropsLine); }
+            catch (Exception ex) { Log.Once("fit-props", "Could not write the model: " + ex.Message); }
+
+            // A different model is a different shape, so what was fitted for the last one
+            // means nothing here. Whatever this one has, or its kind's numbers.
+            Load();
+        }
 
         /// <summary>
         /// Holds it, and keeps the right animation running underneath it.
@@ -255,10 +307,16 @@ namespace BareMinimum.UI
 
         private void Adjust(string tag, int by, bool fine)
         {
-            if (tag == "prop")
+            if (tag == "item")
             {
-                _prop += by >= 0 ? 1 : -1;
+                _at += by >= 0 ? 1 : -1;
                 Load();
+                return;
+            }
+
+            if (tag == "model")
+            {
+                Pick(by);
                 return;
             }
 
@@ -294,6 +352,30 @@ namespace BareMinimum.UI
 
                 case "zero":
                     _now = new float[6];
+                    break;
+
+                case "unpick":
+                    var item = Item_;
+                    if (item == null) break;
+
+                    _cfg.Props.Remove(item.Id);
+
+                    try { IniFile.SetValue(Paths.Ini, "Eating", "Props", _cfg.PropsLine); }
+                    catch { /* said once by Pick */ }
+
+                    // The ladder in the file again, first rung this build has.
+                    foreach (var name in item.Props)
+                    {
+                        try
+                        {
+                            if (!Function.Call<bool>(Hash.IS_MODEL_VALID, new Model(name).Hash)) continue;
+                            item.Prop = name;
+                            break;
+                        }
+                        catch { }
+                    }
+
+                    Load();
                     break;
             }
         }
@@ -357,14 +439,26 @@ namespace BareMinimum.UI
 
             _ui.Rows.Add(new Row
             {
+                Left = "Item",
+                Right = item != null ? item.Name : "-",
+                Note = item == null
+                    ? "Nothing in the catalogue has a model."
+                    : (_at + 1) + " of " + _all.Length + "  --  " + item.Category +
+                      ", " + (item.Drink ? "a drink" : item.Smoke ? "a smoke" : "food") + ".",
+                Tag = "item"
+            });
+
+            _ui.Rows.Add(new Row
+            {
                 Left = "Model",
-                Right = (item != null ? item.Name : prop.Length > 0 ? prop : "-") +
-                        (_loaded ? "  *" : ""),
+                Right = (prop.Length > 0 ? prop : "-") + (_loaded ? "  *" : ""),
                 Note = prop.Length == 0
-                    ? "Nothing in the catalogue has a model yet."
-                    : prop + "  --  " + uses + " item(s) hold this one" +
-                      (_loaded ? ", and it has been fitted." : ", not fitted yet."),
-                Tag = "prop"
+                    ? "This one has no model."
+                    : uses + " item(s) hold this one" +
+                      (_loaded ? ", and it has been fitted. " : ", not fitted yet. ") +
+                      (_cfg.Props.ContainsKey(item.Id) ? "Chosen here." : "From foods.json.") +
+                      "  Left and right change it.",
+                Tag = "model"
             });
 
             for (var i = 0; i < 6; i++)
@@ -397,6 +491,16 @@ namespace BareMinimum.UI
                 Note = "Takes this model back out of the table, so it falls back to the kind's " +
                        "own numbers again.",
                 Tag = "clear"
+            });
+
+            _ui.Rows.Add(new Row
+            {
+                Left = "Back to the file's model",
+                Right = item != null && _cfg.Props.ContainsKey(item.Id) ? "chosen" : "-",
+                Enabled = item != null && _cfg.Props.ContainsKey(item.Id),
+                Note = "Forgets the model chosen here and goes back to the first one in " +
+                       "foods.json that this build has.",
+                Tag = "unpick"
             });
 
             _ui.Rows.Add(new Row

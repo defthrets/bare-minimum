@@ -385,8 +385,13 @@ namespace BareMinimum.Food
         public IList<string> Categories => _categories;
         public int Count => _items.Count;
 
+        /// <summary>The settings, kept for the model overrides. See CheckProps.</summary>
+        private readonly Core.Settings _cfg;
+
         public Catalogue(Core.Settings cfg)
         {
+            _cfg = cfg;
+
             Load(cfg);
         }
 
@@ -938,6 +943,29 @@ namespace BareMinimum.Food
             foreach (var item in _items)
             {
                 item.Prop = "";
+
+                // CHOSEN ON THE BENCH BEATS THE LADDER IN THE FILE. See Settings.Props: the
+                // ladder is a guess made when the item was written and there was no way to
+                // say it was wrong. This is somebody looking at the thing in his hand and
+                // saying so. Still checked against the build, because a name in an ini is a
+                // name somebody typed.
+                string picked;
+                if (_cfg != null && _cfg.Props.TryGetValue(item.Id, out picked) &&
+                    !string.IsNullOrEmpty(picked))
+                {
+                    try
+                    {
+                        if (Function.Call<bool>(Hash.IS_MODEL_VALID, new Model(picked).Hash))
+                        {
+                            item.Prop = picked;
+                            continue;
+                        }
+                    }
+                    catch
+                    {
+                        // Falls through to the ladder, which is the behaviour without it.
+                    }
+                }
 
                 foreach (var name in item.Props)
                 {

@@ -1837,6 +1837,60 @@ namespace BareMinimum.Core
         public readonly System.Collections.Generic.Dictionary<string, float[]> Fit =
             new System.Collections.Generic.Dictionary<string, float[]>(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// WHICH MODEL AN ITEM HOLDS, where the catalogue's own list is wrong.
+        ///
+        /// foods.json names a ladder of models per item and takes the first the game has --
+        /// which is right when the ladder is right, and there was no way to tell it it was
+        /// not. The Pizza Slice is the example: its first rung is ng_proc_pizza01a, that is a
+        /// closed pizza BOX, and no amount of fitting makes a box into a slice.
+        ///
+        /// Chosen on the fitting bench, one item at a time, from what the catalogue actually
+        /// uses -- so the answer is always a model that exists in this build, because
+        /// something else in the shop is already holding it.
+        ///
+        ///   Props = pizza_slice:v_res_tt_pizzaplate; gv_slice:...
+        /// </summary>
+        public readonly System.Collections.Generic.Dictionary<string, string> Props =
+            new System.Collections.Generic.Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>The model overrides as one line, for the ini. See Props.</summary>
+        public string PropsLine
+        {
+            get
+            {
+                var sb = new System.Text.StringBuilder();
+
+                foreach (var kv in Props)
+                {
+                    if (sb.Length > 0) sb.Append("; ");
+                    sb.Append(kv.Key).Append(':').Append(kv.Value);
+                }
+
+                return sb.ToString();
+            }
+        }
+
+        /// <summary>Reads that line back. A row that will not parse is skipped.</summary>
+        public void ReadProps(string line)
+        {
+            Props.Clear();
+
+            foreach (var entry in (line ?? "").Split(';'))
+            {
+                var text = entry.Trim();
+                if (text.Length == 0) continue;
+
+                var colon = text.IndexOf(':');
+                if (colon <= 0) continue;
+
+                var id = text.Substring(0, colon).Trim();
+                var model = text.Substring(colon + 1).Trim();
+
+                if (id.Length > 0 && model.Length > 0) Props[id] = model;
+            }
+        }
+
         /// <summary>The fit table as one line, for the ini. See Fit.</summary>
         public string FitLine
         {
@@ -2362,6 +2416,7 @@ namespace BareMinimum.Core
                 // Words in the file, a number in here. Anything else is a drink, which is the
                 // safe way round: the nudge then cannot touch the food that is already right.
                 cfg.ReadFit(ini.GetString("Eating", "Fit", ""));
+                cfg.ReadProps(ini.GetString("Eating", "Props", ""));
 
                 cfg.HoldWhat = string.Equals(ini.GetString("Eating", "HoldWhat", "Drink"),
                                              "Food", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
