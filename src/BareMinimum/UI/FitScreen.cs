@@ -53,8 +53,29 @@ namespace BareMinimum.UI
 
         private readonly Menu _ui = new Menu();
 
-        /// <summary>Every model anything in the catalogue holds. The set to choose FROM.</summary>
+        /// <summary>Every model anything in the catalogue holds. The fallback set.</summary>
         private string[] _models;
+
+        /// <summary>
+        /// EVERY MODEL IN THE GAME YOU COULD PUT IN A HAND, out of data/props.txt.
+        ///
+        /// THE SIXTY THIS MOD ALREADY USES WERE NOT ENOUGH AND THE PIZZA PROVED IT. Swapping
+        /// a burger for a taco is fine off that list; finding the right model for a slice of
+        /// pizza is not, because the six pizza models this game has are not on it -- nothing
+        /// in the shops holds one. So the list is the game's own, filtered down to what reads
+        /// as food, drink or packaging by tools/props.py, and searched by word.
+        ///
+        /// Fifteen hundred names is far too many to walk one at a time, which is what the
+        /// search row is for: type nothing, choose a word. "pizza" is eleven of them.
+        /// </summary>
+        private string[] _all_models;
+
+        /// <summary>The words offered, built from the item being fitted. See Words.</summary>
+        private string[] _words = new string[0];
+        private int _word;
+
+        /// <summary>What the current word matches, or the catalogue's own set for "in use".</summary>
+        private string[] _matches = new string[0];
 
         /// <summary>The items, and which one is on the bench.</summary>
         private Item[] _all;
@@ -83,6 +104,7 @@ namespace BareMinimum.UI
         public void Open()
         {
             _models = _menu.PropsByUse();
+            _all_models = Models.All();
 
             var list = new List<Item>();
             foreach (var i in _menu.Items) if (!string.IsNullOrEmpty(i.Prop)) list.Add(i);
@@ -92,6 +114,7 @@ namespace BareMinimum.UI
             _at = 0;
             _loaded = false;
 
+            Words();
             Load();
             Refill();
 
@@ -177,6 +200,80 @@ namespace BareMinimum.UI
         }
 
         /// <summary>
+        /// The words this item can be searched by, and what each one matches.
+        ///
+        /// FROM THE ITEM'S OWN NAME AND ITS OWN MODEL, because that is what somebody standing
+        /// at this screen is thinking: the Pizza Slice wants "pizza", the Bottle of Wine
+        /// wants "wine" or "bottle". "In use" is the sixty the shops already hold, which is
+        /// the right list for swapping one known-good model for another, and "everything" is
+        /// there for when none of it helps.
+        /// </summary>
+        private void Words()
+        {
+            var item = Item_;
+            var words = new List<string>();
+
+            if (item != null)
+            {
+                foreach (var raw in item.Name.ToLowerInvariant()
+                                        .Split(' ', '-', '\'', ',', '.', '(', ')'))
+                {
+                    var w = raw.Trim();
+
+                    if (w.Length < 3) continue;
+                    if (w == "the" || w == "and" || w == "with" || w == "of") continue;
+                    if (words.Contains(w)) continue;
+
+                    words.Add(w);
+                }
+
+                foreach (var bit in (item.Prop ?? "").ToLowerInvariant().Split('_'))
+                {
+                    if (bit.Length < 4 || words.Contains(bit)) continue;
+                    if (bit == "prop" || bit == "proc") continue;
+
+                    words.Add(bit);
+                }
+            }
+
+            words.Add("in use");
+            words.Add("everything");
+
+            _words = words.ToArray();
+            _word = 0;
+
+            Matches();
+        }
+
+        /// <summary>What the chosen word matches, in the game's list.</summary>
+        private void Matches()
+        {
+            if (_words.Length == 0) { _matches = _models ?? new string[0]; return; }
+
+            if (_word < 0) _word = _words.Length - 1;
+            if (_word >= _words.Length) _word = 0;
+
+            var word = _words[_word];
+
+            if (word == "in use") { _matches = _models ?? new string[0]; return; }
+
+            var found = new List<string>();
+            var all = _all_models ?? new string[0];
+
+            foreach (var name in all)
+            {
+                if (word == "everything" || name.IndexOf(word, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    found.Add(name);
+                }
+            }
+
+            // A word that finds nothing is worse than no word: fall back rather than showing
+            // an empty list somebody cannot get out of.
+            _matches = found.Count > 0 ? found.ToArray() : (_models ?? new string[0]);
+        }
+
+        /// <summary>
         /// Puts a different model in this item's hand, now and for good.
         ///
         /// FROM WHAT THE SHOPS ALREADY USE, which is the only list where every name is
@@ -189,14 +286,17 @@ namespace BareMinimum.UI
             var item = Item_;
             if (item == null || _models == null || _models.Length == 0) return;
 
-            var now = Array.IndexOf(_models, item.Prop);
-            if (now < 0) now = 0;
+            var list = _matches != null && _matches.Length > 0 ? _matches : _models;
+            if (list == null || list.Length == 0) return;
+
+            var now = Array.IndexOf(list, item.Prop);
+            if (now < 0) now = by >= 0 ? -1 : 0;
 
             var next = now + (by >= 0 ? 1 : -1);
-            while (next < 0) next += _models.Length;
-            next %= _models.Length;
+            while (next < 0) next += list.Length;
+            next %= list.Length;
 
-            var model = _models[next];
+            var model = list[next];
 
             _cfg.Props[item.Id] = model;
             item.Prop = model;
@@ -310,7 +410,15 @@ namespace BareMinimum.UI
             if (tag == "item")
             {
                 _at += by >= 0 ? 1 : -1;
+                Words();
                 Load();
+                return;
+            }
+
+            if (tag == "word")
+            {
+                _word += by >= 0 ? 1 : -1;
+                Matches();
                 return;
             }
 
@@ -446,6 +554,16 @@ namespace BareMinimum.UI
                     : (_at + 1) + " of " + _all.Length + "  --  " + item.Category +
                       ", " + (item.Drink ? "a drink" : item.Smoke ? "a smoke" : "food") + ".",
                 Tag = "item"
+            });
+
+            _ui.Rows.Add(new Row
+            {
+                Left = "Search",
+                Right = _words.Length > 0 ? _words[_word < _words.Length ? _word : 0] : "-",
+                Note = _matches.Length + " model(s) match. The words come from this item's own " +
+                       "name and its model; \"in use\" is what the shops already hold, and " +
+                       "\"everything\" is every holdable model in the game.",
+                Tag = "word"
             });
 
             _ui.Rows.Add(new Row
