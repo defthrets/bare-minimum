@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
 The models you could put in a man's hand, out of the game's own list.
 
@@ -40,8 +40,18 @@ WORDS = (
     "ornge", "veg", "soup", "bowl", "plate", "tray", "cup", "mug", "glass", "bottle",
     "beer", "wine", "whisky", "coffee", "tea", "milk", "juice", "soda", "drink", "food",
     "meal", "snack", "sauce", "ketchup", "mustard", "kebab", "wrap", "burrito", "pretzel",
-    "popcorn", "icecream", "ice_cream", "cone", "lolly", "jar", "tin", "packet", "water",
+    "popcorn", "icecream", "ice_cream", "cone", "lolly", "jar", "packet", "water",
     "shake", "ciggy", "cigar", "joint", "pipe", "bong",
+
+    # TINNED AND PACKAGED, which the first pass missed entirely and the Tin of Sardines
+    # found: v_ret_247_tuna, prop_bar_beans and the caviar tin were all absent, so the one
+    # item that wanted a single tin had nothing to choose from but a six-pack.
+    "tin", "tuna", "sardine", "bean", "corn", "tomato", "tomsoup", "vegsoup", "choptom",
+    "swtcorn", "caviar", "dogfood", "catfood", "petfood", "cereal", "flour", "sugar",
+    "salt", "pepper", "spice", "honey", "jam", "butter", "cheese", "yog", "cream",
+    "pasta", "spag", "curry", "stew", "beans", "peas", "carrot", "potato", "onion",
+    "lettuce", "cabbage", "melon", "grape", "lemon", "lime", "berry", "peach", "pear",
+    "nut", "crackers", "biscuit", "wafer", "gum", "mint",
 )
 
 # The furniture those same words live in.

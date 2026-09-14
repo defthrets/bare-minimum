@@ -2,7 +2,7 @@
 ; tools/props.py. Every name here exists in a stock install; the mod checks each one
 ; against the build before it spawns it anyway.
 ;
-; 1517 of 22897 objects.
+; 1578 of 22897 objects.
 
 apa_mp_h_acc_bottle_01
 apa_mp_h_acc_bottle_02
@@ -60,6 +60,7 @@ bkr_prop_money_wrapped_01
 bkr_prop_tin_cash_01a
 ch_prop_ch_bottle_holder_01a
 ch_prop_ch_duffbag_stealth_01a
+ch_prop_ch_mobile_jammer_01x
 ch_prop_ch_tray_01a
 ch_prop_chip_tray_01a
 ch_prop_chip_tray_01b
@@ -74,12 +75,20 @@ ch_prop_vault_painting_01h
 ch_prop_vault_painting_01i
 ch_prop_vault_painting_01j
 ch_prop_vault_painting_roll_01a
+csx_saltconcclustr_a_
+csx_saltconcclustr_b_
+csx_saltconcclustr_c_
+csx_saltconcclustr_d_
+csx_saltconcclustr_e_
+csx_saltconcclustr_f_
+csx_saltconcclustr_g_
 des_glass_end
 des_glass_root
 des_glass_root2
 des_glass_root3
 des_glass_root4
 des_glass_start
+ex_mapmarker_14_strawberry_1
 ex_mp_h_acc_bottle_01
 ex_mp_h_acc_bowl_ceramic_01
 ex_mp_h_acc_fruitbowl_01
@@ -114,6 +123,7 @@ h4_prop_battle_sniffing_pipe
 h4_prop_battle_waterbottle_01a
 h4_prop_battle_whiskey_bottle_2_s
 h4_prop_battle_whiskey_bottle_s
+h4_prop_bush_seagrape_low_01
 h4_prop_club_glass_opaque
 h4_prop_club_glass_trans
 h4_prop_club_tonic_bottle
@@ -125,6 +135,7 @@ h4_prop_glass_garage_opaque
 h4_prop_glass_rear_office
 h4_prop_glass_rear_opaque
 h4_prop_h4_can_beer_01a
+h4_prop_h4_caviar_spoon_01a
 h4_prop_h4_caviar_tin_01a
 h4_prop_h4_champ_tray_01a
 h4_prop_h4_champ_tray_01b
@@ -138,6 +149,8 @@ h4_prop_h4_coke_powderbottle_01
 h4_prop_h4_glass_cut_01a
 h4_prop_h4_glass_disp_01a
 h4_prop_h4_glass_disp_01b
+h4_prop_h4_jammer_01a
+h4_prop_h4_lime_01a
 h4_prop_h4_painting_01a
 h4_prop_h4_painting_01b
 h4_prop_h4_painting_01c
@@ -205,6 +218,8 @@ m23_1_m231_3_rooms_glass
 m23_1_m231_3_v_med_cor_largecupboard
 m23_1_m231_3_wake_up_glass
 m23_1_prop_arena_pipe_end_02a
+m23_1_prop_m31_ghostsalton_01a
+m23_1_prop_m31_jammer_01a
 m23_1_prop_m31_n_plate_rm_01a
 m23_2_int1_m232_glass_partition
 m23_2_int2_m232_supports_tint
@@ -213,6 +228,7 @@ m23_2_int4_m232_detail_tint
 m23_2_int4_m232_pipes
 m23_2_int5_m232_glass
 m23_2_int5_m232_pipes
+m23_2_int6_m232_corner_guards_1
 m23_2_int6_m232_glass_1
 m23_2_int6_m232_pipes_1
 m23_2_int7_m232_int_w03_pipes
@@ -221,6 +237,8 @@ m23_2_prop_m32_candycane_01a
 m23_2_prop_m32_cashwrapped_01a
 m23_2_prop_m32_cf_meatbox
 m23_2_prop_m32_chickengoop_01a
+m23_2_prop_m32_flourbags_01a
+m23_2_prop_m32_jammer_01a
 m23_2_prop_m32_milkncookies_01a
 m23_2_prop_m32_pipe_01a
 m23_2_prop_m32_roadcone_01a
@@ -267,6 +285,7 @@ m24_1_prop_m24_1_carrier_yah_glass_10
 m24_1_prop_m41_cadavertray_01a
 m24_1_prop_m41_candypile_01a
 m24_1_prop_m41_glass_01a
+m24_1_prop_m41_jammer_01a
 m24_1_prop_m41_nameplate_01a
 m24_1_prop_m41_painting_01a
 m24_1_prop_m41_painting_01b
@@ -276,6 +295,8 @@ m24_2_int_01_2_glass_blocks_01
 m24_2_int_01_glass_off_01
 m24_2_prop_m42_drug_taco_01a
 m24_2_prop_m42_glass_tumbler_01a
+m24_2_prop_m42_jammer_01a
+m24_2_prop_m42_jammer_01b
 m24_2_prop_m42_oegg_01a
 m24_2_prop_m42_oeggtrophy_01a
 m24_2_prop_m42_waterprfcase_01a
@@ -608,6 +629,7 @@ p_ing_coffeecup_01
 p_ing_coffeecup_02
 p_kitch_juicer_s
 p_ld_stinger_s
+p_mr_raspberry_01_s
 p_num_plate_01
 p_num_plate_02
 p_num_plate_03
@@ -624,6 +646,9 @@ p_waterboardc_s
 p_weed_bottle_s
 p_whiskey_bottle_s
 p_wine_glass_s
+p_yoga_mat_01_s
+p_yoga_mat_02_s
+p_yoga_mat_03_s
 physics_glasses
 prop_air_chock_01
 prop_air_chock_03
@@ -640,9 +665,13 @@ prop_balcony_glass_01
 prop_balcony_glass_02
 prop_balcony_glass_03
 prop_balcony_glass_04
+prop_bar_beans
 prop_bar_cockshaker
 prop_bar_drinkstraws
 prop_bar_fruit
+prop_bar_lemons
+prop_bar_limes
+prop_bar_nuts
 prop_beer_am
 prop_beer_amopen
 prop_beer_bar
@@ -676,6 +705,7 @@ prop_bowling_ball
 prop_bowling_pin
 prop_box_tea01a
 prop_brandy_glass
+prop_bush_grape_01
 prop_byard_pipe_01
 prop_byard_pipes01
 prop_candy_pqs
@@ -838,7 +868,12 @@ prop_glass_stack_09
 prop_glass_stack_10
 prop_glass_suck_holder
 prop_glasscutter_01
+prop_grapes_01
+prop_grapes_02
 prop_guard_tower_glass
+prop_gumball_01
+prop_gumball_02
+prop_gumball_03
 prop_hwbowl_pseat_6x1
 prop_hwbowl_seat_01
 prop_hwbowl_seat_02
@@ -861,6 +896,7 @@ prop_jewel_glass
 prop_jewel_glass_root
 prop_kitch_juicer
 prop_ld_flow_bottle
+prop_ld_lab_corner01
 prop_ld_pipe_single_01
 prop_ld_snack_01
 prop_lime_jar
@@ -873,6 +909,8 @@ prop_mp_cone_01
 prop_mp_cone_02
 prop_mp_cone_03
 prop_mp_cone_04
+prop_mr_rasberryclean
+prop_mr_raspberry_01
 prop_mug_01
 prop_mug_02
 prop_mug_03
@@ -912,12 +950,14 @@ prop_plate_02
 prop_plate_03
 prop_plate_04
 prop_plate_warmer
+prop_potatodigger
 prop_roadcone01a
 prop_roadcone01b
 prop_roadcone01c
 prop_roadcone02a
 prop_roadcone02b
 prop_roadcone02c
+prop_rolled_yoga_mat
 prop_rum_bottle
 prop_safety_glasses
 prop_sandwich_01
@@ -1005,11 +1045,15 @@ prop_wine_glass
 prop_wine_red
 prop_wine_rose
 prop_wine_white
+prop_yoga_mat_01
+prop_yoga_mat_02
+prop_yoga_mat_03
 reh_int3_cabletrays
 reh_int3_water_pipes
 reh_int4_pipes
 reh_int4_skirting_tech
 reh_prop_reh_glasses_smt_01a
+reh_prop_reh_jammer_01a
 sf_mp_h_acc_drink_tray_02
 sf_mp_h_acc_fruitbowl_01
 sf_mp_h_acc_jar_03
@@ -1128,6 +1172,8 @@ tr_prop_meth_tray_01a
 tr_prop_meth_tray_01b
 tr_prop_meth_tray_02a
 tr_prop_tr_facility_glass_01j
+tr_prop_tr_flipjam_01a
+tr_prop_tr_flipjam_01b
 tr_prop_tr_plate_sweets_01a
 v_11_ab_pipes
 v_11_ab_pipes001
@@ -1176,6 +1222,7 @@ v_34_shrinkwrap2
 v_34_slurrywrap
 v_44_m_spyglasses
 v_61_bd2_mesh_cupboard
+v_61_bd2_mesh_yogamat
 v_61_hall_mesh_starfish
 v_61_kitch_pizza
 v_61_kitn_mesh_plate
@@ -1204,11 +1251,18 @@ v_club_vu_ashtray
 v_club_vu_coffeecup
 v_club_vu_coffeemug1
 v_club_vu_coffeemug2
+v_corp_facebeanbag
+v_corp_facebeanbagb
+v_corp_facebeanbagc
+v_corp_facebeanbagd
 v_corp_fib_glass1
 v_corp_fib_glass_thin
 v_corp_go_glass2
+v_hair_d_bcream
+v_ilev_mr_rasberryclean
 v_ilev_prop_fib_glass
 v_ilev_tt_plate01
+v_ind_cf_flour
 v_ind_cf_meatbox
 v_ind_cfbottle
 v_ind_cfcup
@@ -1267,6 +1321,8 @@ v_res_fa_potnoodle
 v_res_fa_pottea
 v_res_fa_tincorn
 v_res_fa_tintomsoup
+v_res_fa_yogamat002
+v_res_fa_yogamat1
 v_res_fh_fruitbowl
 v_res_foodjara
 v_res_foodjarb
@@ -1308,8 +1364,10 @@ v_res_tt_plate01
 v_res_tt_platepile
 v_ret_247_bread1
 v_ret_247_cereal1
+v_ret_247_choptom
 v_ret_247_donuts
 v_ret_247_eggs
+v_ret_247_flour
 v_ret_247_fruit
 v_ret_247_ketchup1
 v_ret_247_ketchup2
@@ -1318,7 +1376,9 @@ v_ret_247_noodle1
 v_ret_247_noodle2
 v_ret_247_noodle3
 v_ret_247_sweetcount
+v_ret_247_swtcorn2
 v_ret_247_tomsoup1
+v_ret_247_tuna
 v_ret_247_vegsoup1
 v_ret_fh_ashtray
 v_ret_fh_bscup
@@ -1424,6 +1484,7 @@ xm3_int1_med_bottles2
 xm3_int2_xm3_fruits_01
 xm3_int2_xm3_partition_glass
 xm3_int2_xm3_tint_01
+xm3_int3_carwarecorner_blends
 xm3_int4_bckstrs_pipes
 xm3_prop_hamburgher_wl
 xm3_prop_xm3_bong_01a
