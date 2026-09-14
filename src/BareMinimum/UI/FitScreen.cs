@@ -324,6 +324,17 @@ namespace BareMinimum.UI
             _hand.Sits = () => new Vector3(_now[0], _now[1], _now[2]);
             _hand.Spin = () => new Vector3(_now[3], _now[4], _now[5]);
 
+            // THE HAND THE ANIMATION USES, not the one this class happens to prefer. See
+            // Peek.Lefty: fitting in one hand while the game holds it in the other is a day
+            // of somebody's work thrown away, and it happened.
+            var held = Item_;
+
+            var using_ = held != null && held.Smoke ? _menu.Smoke
+                       : held != null && held.Drink ? _menu.Sip
+                       : (held != null ? held.Eat : null) ?? _menu.Eat;
+
+            _hand.Lefty = using_ != null && using_.LeftHanded;
+
             _hand.Show(prop);
             _hand.Tick();
 
@@ -462,6 +473,10 @@ namespace BareMinimum.UI
                     _now = new float[6];
                     break;
 
+                case "guess":
+                    Guess();
+                    break;
+
                 case "unpick":
                     var item = Item_;
                     if (item == null) break;
@@ -486,6 +501,130 @@ namespace BareMinimum.UI
                     Load();
                     break;
             }
+        }
+
+        /// <summary>How many models the shops use that nobody has fitted yet.</summary>
+        private int Unfitted()
+        {
+            var n = 0;
+
+            foreach (var name in _models ?? new string[0])
+            {
+                if (!_cfg.Fit.ContainsKey(name)) n++;
+            }
+
+            return n;
+        }
+
+        /// <summary>
+        /// Gives every unfitted model the numbers off the fitted one it most resembles.
+        ///
+        /// TWENTY-EIGHT HONEST ANSWERS ARE WORTH MORE THAN TWENTY-EIGHT. A cup is a cup and a
+        /// tin is a tin: prop_plastic_cup_02 fitted by hand is a far better starting point
+        /// for p_ing_coffeecup_02 than nought is, and nought is what every unfitted model has.
+        /// So the name is the evidence -- the words in it, minus the maker's prefixes and the
+        /// numbers on the end -- and the best match wins if it shares a real word.
+        ///
+        /// IT IS A GUESS AND IT IS WRITTEN AS ONE. Every model filled in this way can still be
+        /// walked to and fixed, and fixing one does not touch the others. What it cannot do is
+        /// leave a model at nought, which is the only answer that is certainly wrong.
+        /// </summary>
+        private void Guess()
+        {
+            var fitted = new List<string>(_cfg.Fit.Keys);
+            if (fitted.Count == 0) { Notify("~y~Fit one first."); return; }
+
+            var done = 0;
+
+            foreach (var name in _models ?? new string[0])
+            {
+                if (_cfg.Fit.ContainsKey(name)) continue;
+
+                var best = "";
+                var score = 0;
+
+                foreach (var other in fitted)
+                {
+                    var s = Alike(name, other);
+                    if (s <= score) continue;
+
+                    score = s;
+                    best = other;
+                }
+
+                if (score <= 0 || best.Length == 0) continue;
+
+                var six = _cfg.Fit[best];
+                _cfg.Fit[name] = new[] { six[0], six[1], six[2], six[3], six[4], six[5] };
+                done++;
+            }
+
+            if (done == 0) { Notify("~y~Nothing close enough to guess from."); return; }
+
+            Save();
+            Load();
+
+            Notify("~g~" + done + "~s~ model(s) filled in from the " + fitted.Count +
+                   " you fitted. " + _cfg.Fit.Count + " have numbers now.");
+        }
+
+        /// <summary>
+        /// How alike two model names are: shared words, longest first.
+        ///
+        /// The prefixes every maker puts on the front -- prop, ng, proc, v, ret, res, cs, amb,
+        /// p, and the trailing 01a -- carry no meaning and would match everything to
+        /// everything, so they are dropped before anything is compared.
+        /// </summary>
+        private static int Alike(string a, string b)
+        {
+            var one = Words_(a);
+            var two = Words_(b);
+
+            var score = 0;
+
+            foreach (var w in one)
+            {
+                foreach (var v in two)
+                {
+                    if (w == v) { score += w.Length; continue; }
+
+                    // A cup and a coffeecup are the same thing with a word stuck on the front.
+                    if (w.Length >= 4 && v.Length >= 4 && (w.Contains(v) || v.Contains(w))) score += 2;
+                }
+            }
+
+            return score;
+        }
+
+        private static readonly string[] Noise =
+        {
+            "prop", "proc", "ret", "res", "amb", "ing", "cs", "ng", "sf", "apa", "ba", "bkr",
+            "ch", "ex", "gr", "h4", "hei", "lux", "m23", "m24", "m25", "vw", "xm3", "xs",
+            "int", "ext", "mp", "sh", "tt", "fa", "fh", "lng", "kitch", "247", "61"
+        };
+
+        private static List<string> Words_(string name)
+        {
+            var out_ = new List<string>();
+
+            foreach (var raw in (name ?? "").ToLowerInvariant().Split('_'))
+            {
+                var w = raw.Trim();
+
+                // The 01a on the end of half of them.
+                while (w.Length > 0 && (char.IsDigit(w[w.Length - 1]) ||
+                                        (w.Length > 1 && char.IsDigit(w[w.Length - 2]))))
+                {
+                    w = w.Substring(0, w.Length - 1);
+                }
+
+                if (w.Length < 3) continue;
+                if (Array.IndexOf(Noise, w) >= 0) continue;
+
+                out_.Add(w);
+            }
+
+            return out_;
         }
 
         /// <summary>
@@ -619,6 +758,18 @@ namespace BareMinimum.UI
                 Note = "Forgets the model chosen here and goes back to the first one in " +
                        "foods.json that this build has.",
                 Tag = "unpick"
+            });
+
+            _ui.Rows.Add(new Row
+            {
+                Left = "Guess the rest from these",
+                Right = Unfitted() + " to go",
+                Enabled = _cfg.Fit.Count > 0 && Unfitted() > 0,
+                Note = "Gives every model that has not been done the numbers off the fitted " +
+                       "model whose NAME is most like it -- a cup from a cup, a tin from a " +
+                       "tin. A guess, and a much better starting point than nought; every one " +
+                       "of them can still be walked to and fixed.",
+                Tag = "guess"
             });
 
             _ui.Rows.Add(new Row

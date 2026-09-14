@@ -37,8 +37,21 @@ namespace BareMinimum.UI
     /// </summary>
     internal sealed class Peek
     {
-        /// <summary>The same bone the eating code uses, and for the same reason.</summary>
+        /// <summary>The same bones the eating code uses, and for the same reason.</summary>
         private const int RightHandBone = 28422;
+        private const int LeftHandBone = 60309;
+
+        /// <summary>
+        /// WHICH HAND. Set by whoever is showing something; right unless told otherwise.
+        ///
+        /// THIS WAS HARDCODED TO THE RIGHT AND IT COST A DAY OF SOMEBODY'S WORK. The fitting
+        /// bench shows a model through this class, and the eating code was putting the same
+        /// model in the LEFT hand -- so every number dialled on the bench was a number for
+        /// the wrong hand, and there was nothing on screen to say so. A hand is a property of
+        /// the ANIMATION, and the only place that knows which animation an item uses is the
+        /// catalogue, so it is asked rather than assumed.
+        /// </summary>
+        public bool Lefty;
 
         /// <summary>
         /// How long a model is waited on before that item is shown empty-handed.
@@ -169,7 +182,8 @@ namespace BareMinimum.UI
         {
             if (me == null || !me.Exists() || _held == null || !_held.Exists()) return;
 
-            var bone = Function.Call<int>(Hash.GET_PED_BONE_INDEX, me.Handle, RightHandBone);
+            var bone = Function.Call<int>(Hash.GET_PED_BONE_INDEX, me.Handle,
+                                          Lefty ? LeftHandBone : RightHandBone);
 
             var spin = Spin == null ? Vector3.Zero : Spin();
             var sits = Sits == null ? Vector3.Zero : Sits();
