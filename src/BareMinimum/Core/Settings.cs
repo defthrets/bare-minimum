@@ -1863,7 +1863,7 @@ namespace BareMinimum.Core
 
                 foreach (var kv in Props)
                 {
-                    if (sb.Length > 0) sb.Append("; ");
+                    if (sb.Length > 0) sb.Append(" | ");
                     sb.Append(kv.Key).Append(':').Append(kv.Value);
                 }
 
@@ -1876,7 +1876,7 @@ namespace BareMinimum.Core
         {
             Props.Clear();
 
-            foreach (var entry in (line ?? "").Split(';'))
+            foreach (var entry in (line ?? "").Split('|', ';'))
             {
                 var text = entry.Trim();
                 if (text.Length == 0) continue;
@@ -1900,7 +1900,12 @@ namespace BareMinimum.Core
 
                 foreach (var kv in Fit)
                 {
-                    if (sb.Length > 0) sb.Append("; ");
+                    // A PIPE, NOT A SEMICOLON, AND THIS COST A DAY. A semicolon after a space
+                    // is how this ini starts a COMMENT -- see IniFile.StripInlineComment --
+                    // so a line of entries separated by "; " was read as its first entry and
+                    // nothing else. Every model but the first fell back to nought, which is
+                    // the middle of his hand, which is exactly what it looked like.
+                    if (sb.Length > 0) sb.Append(" | ");
 
                     sb.Append(kv.Key).Append(':');
 
@@ -1921,7 +1926,9 @@ namespace BareMinimum.Core
         {
             Fit.Clear();
 
-            foreach (var entry in (line ?? "").Split(';'))
+            // BOTH SEPARATORS. The pipe is what is written now; the semicolon is what older
+            // files have, and half of one of those is better than none of it.
+            foreach (var entry in (line ?? "").Split('|', ';'))
             {
                 var text = entry.Trim();
                 if (text.Length == 0) continue;
