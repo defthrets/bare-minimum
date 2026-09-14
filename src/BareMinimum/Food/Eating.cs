@@ -414,7 +414,23 @@ namespace BareMinimum.Food
                             ? (Vector3?)_held.Position
                             : null;
 
-                    _litter.Drop(me, _menu.LitterFor(item), was);
+                    // AND IT IS THE THING HE WAS HOLDING. A man finishes a can of Sprunk and
+                    // drops a can of Sprunk -- not "a can", which is what a kind default is
+                    // and which had him dropping the same anonymous tin whatever he had just
+                    // drunk. The model is already in his hand and already fitted; there is no
+                    // reason to swap it for a stand-in at the last moment.
+                    //
+                    // AN ITEM THAT NAMES ITS OWN STILL WINS, because those are the cases where
+                    // what is left is genuinely NOT what he held: a cigarette leaves a butt, a
+                    // slice of cheesecake leaves the bag it came in, and the smokes were asked
+                    // for that way on purpose. See Catalogue.LitterFor.
+                    var drops = item != null && item.Litter != null
+                              ? _menu.LitterFor(item)
+                              : (!string.IsNullOrEmpty(item != null ? item.Prop : null)
+                                    ? item.Prop
+                                    : _menu.LitterFor(item));
+
+                    _litter.Drop(me, drops, was);
                 }
             }
             catch (Exception ex)
