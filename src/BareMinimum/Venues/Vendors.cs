@@ -979,13 +979,22 @@ namespace BareMinimum.Venues
                 var text = line.Trim();
                 if (!text.StartsWith("{")) continue;
 
-                _harvest.Add("    " + text.TrimEnd(','));
-
+                // A ROW, NOT THE DOCUMENT'S OWN BRACE. WriteHarvest opens the file with a
+                // bare "{" on its own line, and that line starts with "{" -- so every read
+                // took it for a cart, and every write put it back inside the array with a
+                // comma after it. One junk row per session, for ever: the deployed file had
+                // four of them and had stopped being JSON.
+                //
+                // The coordinates are the test now. A line that cannot say where it is was
+                // never a cart, whatever it starts with, and it is neither remembered nor
+                // written back out.
                 float x, y, z;
-                if (Coord(text, "\"x\":", out x) && Coord(text, "\"y\":", out y) && Coord(text, "\"z\":", out z))
-                {
-                    _harvestAt.Add(new Vector3(x, y, z));
-                }
+                if (!Coord(text, "\"x\":", out x) ||
+                    !Coord(text, "\"y\":", out y) ||
+                    !Coord(text, "\"z\":", out z)) continue;
+
+                _harvest.Add("    " + text.TrimEnd(','));
+                _harvestAt.Add(new Vector3(x, y, z));
             }
 
             Log.Info("Carts: " + _harvest.Count + " already written down in " + path + ".");
@@ -1799,7 +1808,14 @@ namespace BareMinimum.Venues
             {
                 var done = true;
 
-                if (v.Stand != null && v.Stand.Exists())
+                // AND NOT THE GAME'S OWN CART. Despawn is careful about this -- a discovered
+                // stand was standing in the street before the mod loaded and has to be
+                // standing there after -- and settling was not: it teleported the world's
+                // cart to whatever the ground query answered and left FREEZE_ENTITY_POSITION
+                // on it for the session. Settle exists because a coordinate typed into
+                // vendors.json is a z read off somebody's feet; a cart the game placed is
+                // already exactly where it belongs.
+                if (!v.Discovered && v.Stand != null && v.Stand.Exists())
                 {
                     done &= Ground(v.Stand, true);
                 }

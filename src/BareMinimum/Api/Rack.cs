@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace BareMinimum.Api
 {
@@ -98,6 +98,23 @@ namespace BareMinimum.Api
         /// that wants to face differently depending on the side has something to ask.
         /// </summary>
         public static bool RowOnLeft { get; private set; }
+
+        /// <summary>
+        /// THE ROW IS NOT ON SCREEN. Said on every way of not drawing it.
+        ///
+        /// Ready was only ever set by Publish, which runs when the row is laid OUT -- so the
+        /// HUD being switched off, a fade, a cutscene or the mod's own enable going off left
+        /// the last position it ever had standing as the truth with Ready still true, and the
+        /// fuel gauge next door went on lining itself up against a row that was not there.
+        ///
+        /// The numbers are left where they were on purpose: they are the last place the row
+        /// stood and are worth having when it comes back. Ready is the answer to "is it on
+        /// screen", and that is what turns false.
+        /// </summary>
+        internal static void Gone()
+        {
+            Ready = false;
+        }
 
         /// <summary>Published by the gauge every time it lays the row out. Nothing else calls this.</summary>
         internal static void Publish(bool ready, float left, float bottom, float barWidth,

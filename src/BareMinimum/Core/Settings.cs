@@ -1820,7 +1820,12 @@ namespace BareMinimum.Core
 
         public float FoodSpinX = 0f;
         public float FoodSpinY = 0f;
-        public float FoodSpinZ = 90f;
+        // NOUGHT, AND IT USED TO BE NINETY. The turn a thing takes in his hand lives in
+        // foods.json now -- hold.turnFood, per kind and per item -- and this is the old
+        // food-only setting kept because somebody may have tuned it. The shipped ini says 0;
+        // a default of 90 meant an install whose ini predated that line held every piece of
+        // food a quarter turn round from the one the numbers were tuned against.
+        public float FoodSpinZ = 0f;
 
         /// <summary>
         /// Opens the settings menu. F11 and F12 are where these two live on this install.

@@ -755,10 +755,10 @@ namespace BareMinimum.Food
         /// <summary>
         /// HOW EACH KIND IS TURNED IN HIS HAND, in degrees.
         ///
-        /// The food's ninety is the one number here that is not nought, and it is old: a
-        /// burger comes out of the model on its side and has to be laid flat. It used to live
-        /// in the ini as FoodSpinZ, which still works and is still added on top -- this is
-        /// where a permanent answer belongs now.
+        /// These are what foods.json says, and what it says is what was dialled in game with
+        /// the thing in his hand -- see the hold block there. [Eating] FoodSpin is the old
+        /// food-only turn, still read and still added on top for anyone who tuned it, and it
+        /// ships at nought now that the real answer lives in the file.
         /// </summary>
         public float[] TurnFood = { 0f, 0f, 0f };
         public float[] TurnDrink = { 0f, 0f, 0f };

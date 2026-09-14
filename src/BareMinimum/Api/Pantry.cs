@@ -1,4 +1,5 @@
 ﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace BareMinimum.Api
@@ -87,6 +88,14 @@ namespace BareMinimum.Api
             _shop = shop;
         }
 
+        /// <summary>Whether ANY of this mod's screens is up. Set by Main. See MenuOpen.</summary>
+        private static Func<bool> _anyOpen;
+
+        internal static void Screens(Func<bool> anyOpen)
+        {
+            _anyOpen = anyOpen;
+        }
+
         /// <summary>
         /// Whether there is anything behind this yet.
         ///
@@ -165,6 +174,15 @@ namespace BareMinimum.Api
             {
                 try
                 {
+                    // ONE QUESTION, ASKED OF THE ONE PLACE THAT KNOWS. This used to name
+                    // three screens and there are six -- the till and the settings panel were
+                    // never in the list, and the bag screen could not have been, because it
+                    // did not exist when this was written. Main already works the answer out
+                    // for itself every tick to decide who owns the interact key; it hands the
+                    // same expression over now, so a screen added later cannot be forgotten
+                    // here twice.
+                    if (_anyOpen != null) return _anyOpen();
+
                     return (_pocket != null && _pocket.IsOpen) ||
                            (_fridge != null && _fridge.IsOpen) ||
                            (_shop != null && _shop.MenuOpen);

@@ -187,6 +187,13 @@ namespace BareMinimum
             // buttons. See Api.Pantry.MenuOpen.
             Api.Pantry.Screens(_bag, _fridge, _vendors);
 
+            // AND THE WHOLE ANSWER, worked out in one place. Six screens read arrows and a
+            // confirm key and the phone next door must stay shut over any of them; naming
+            // three of them in the API meant the till, the settings panel and the bag screen
+            // were invisible to it. See Api.Pantry.MenuOpen.
+            Api.Pantry.Screens(() => _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen ||
+                                     _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen);
+
             _settings = new SettingsPanel(_cfg, _needs, _catalogue);
 
             // THE MENU ASKS RATHER THAN HOLDS. See SettingsPanel.ForgetMachines -- a menu that

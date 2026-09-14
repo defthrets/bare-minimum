@@ -363,11 +363,20 @@ namespace BareMinimum.UI
 
         public void Draw(Needs.Needs needs, bool suspended)
         {
-            if (!_cfg.ShowHud || needs == null) return;
+            // A ROW THAT IS NOT BEING DRAWN IS NOT A ROW ANYBODY CAN LINE UP WITH.
+            //
+            // Api.Rack is published from ONE place: the moment the row is laid out. So every
+            // way of not drawing it -- the HUD switched off, a fade, a cutscene, the mod's
+            // own enable turned off -- left the last position it ever had standing as the
+            // truth, with Ready still true. The fuel gauge next door goes on drawing itself
+            // against a row that is not there, for the rest of the session.
+            //
+            // Said here instead, on the way out, so the answer is as current as the frame.
+            if (!_cfg.ShowHud || needs == null) { Api.Rack.Gone(); return; }
 
             // Nothing over a fade, a cutscene or the pause menu. The HUD is drawn per frame
             // and would otherwise sit on top of a black screen during a sleep.
-            if (suspended || !Visible()) return;
+            if (suspended || !Visible()) { Api.Rack.Gone(); return; }
 
             try
             {

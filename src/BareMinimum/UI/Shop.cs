@@ -262,6 +262,16 @@ namespace BareMinimum.UI
 
         private void Begin()
         {
+            // THE MACHINE'S ANIMATION IS ASKED FOR AS THE MENU OPENS, not on the frame the
+            // purchase is made -- streaming cannot finish inside the frame the request was
+            // issued, so asking there meant the first machine of every session was mimed.
+            // See Vend, where this is used a few seconds later.
+            if (_at == Counter.Machine)
+            {
+                try { Function.Call(Hash.REQUEST_ANIM_DICT, "mini@sprunk"); }
+                catch { /* then Vend falls through the way it always could */ }
+            }
+
             _ui.Title = _at == Counter.Machine ? (_counters.DrinksOnly ? "DRINKS MACHINE" : "VENDING MACHINE")
                       : _at == Counter.Stall ? "FRUIT STALL"
                       : "COUNTER";
@@ -389,8 +399,12 @@ namespace BareMinimum.UI
 
                 if (!Function.Call<bool>(Hash.HAS_ANIM_DICT_LOADED, dict))
                 {
-                    // The dictionary is on its way. Without the animation there is nothing to
-                    // wait for, so whatever he was going to use he uses now.
+                    // ASKED FOR ON THE FRAME IT IS NEEDED IS ASKED FOR TOO LATE, and this is
+                    // the only place in the mod that asks for it at all -- so the first
+                    // machine of every session was mimed and there was nothing to bring the
+                    // animation back once the dictionary landed. It is requested when the
+                    // machine's menu OPENS now, seconds before anybody presses buy, and this
+                    // is the fallback rather than the usual case.
                     if (using_ != null) _eating.Begin(using_, true);
                     return;
                 }
@@ -399,6 +413,11 @@ namespace BareMinimum.UI
                 // bends down for the can and drinks it -- and they are deliberately not
                 // played: the drinking here is Eating's, with the item's real prop in his
                 // hand, and miming a second invisible can before it would look like two.
+                // AND THE SIP WATCHER IS TOLD IT WAS US. It counts this clip as the game
+                // selling him a drink and credits a mouthful for it -- which, on our own
+                // purchase, is a mouthful on top of the whole item. See Venues.Sipping.Ours.
+                Venues.Sipping.Ours(1500);
+
                 Function.Call(Hash.TASK_PLAY_ANIM, me.Handle, dict, "plyr_buy_drink_pt1",
                               8f, -8f, 900, 48, 0f, false, false, false);
 

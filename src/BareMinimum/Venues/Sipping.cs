@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using GTA;
 using GTA.Native;
 
@@ -30,6 +30,28 @@ namespace BareMinimum.Venues
     {
         private const string Dict = "mini@sprunk";
         private const string Clip = "plyr_buy_drink_pt1";
+
+        /// <summary>
+        /// While this stands, the clip playing is OURS and is not a sale.
+        ///
+        /// THE WATCHER'S ONE ASSUMPTION WAS UNTRUE BY THE TIME IT WAS WRITTEN. "The game
+        /// plays mini@sprunk when and only when it has sold you a drink" -- except the shop
+        /// plays that exact clip on the player for the mod's own vending purchase, on
+        /// purpose, and says so. So buying a drink from a machine through this mod credited
+        /// the hunger and thirst of a sip that the item's own numbers were about to credit
+        /// again.
+        ///
+        /// Set by UI.Shop when it plays the clip itself. Static because there is one player
+        /// and one machine in front of him, and passing a reference between a menu and a
+        /// watcher that never otherwise meet is more wiring than the fact is worth.
+        /// </summary>
+        private static int _ours;
+
+        /// <summary>Says the next second of this clip is the mod's own doing. See _ours.</summary>
+        public static void Ours(int ms)
+        {
+            _ours = Game.GameTime + ms;
+        }
 
         /// <summary>
         /// How long after one sip before another can count.
@@ -66,6 +88,10 @@ namespace BareMinimum.Venues
 
                 var now = Function.Call<bool>(Hash.IS_ENTITY_PLAYING_ANIM,
                                               me.Handle, Dict, Clip, 3);
+
+                // OURS DOES NOT COUNT. The edge is still tracked through it, or the clip
+                // would be seen starting again the moment the window closed.
+                if (Game.GameTime < _ours) { _was = now; return; }
 
                 // THE EDGE, not the level. The clip is true for its whole run.
                 var started = now && !_was;

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -92,9 +92,18 @@ namespace BareMinimum.Core
             return _sections.TryGetValue(section, out var s) && s.TryGetValue(key, out value);
         }
 
+        /// <summary>
+        /// A string setting, or the built-in one when the file does not mention it.
+        ///
+        /// A KEY THAT IS THERE AND EMPTY IS AN ANSWER. This used to hand back the default
+        /// whenever the value was blank, which made every "leave it blank to turn it off" in
+        /// the shipped ini a lie -- typing "SuppressScripts =" restored the built-in list
+        /// rather than clearing it, and the file says in as many words that it does the
+        /// opposite. Absent and empty are different facts and are told apart here.
+        /// </summary>
         public string GetString(string section, string key, string fallback)
         {
-            return TryGet(section, key, out var v) && v.Length > 0 ? v : fallback;
+            return TryGet(section, key, out var v) ? v : fallback;
         }
 
         public bool GetBool(string section, string key, bool fallback)
