@@ -1,3 +1,4 @@
+﻿using System;
 using BareMinimum.Core;
 
 namespace BareMinimum.Food
@@ -31,17 +32,38 @@ namespace BareMinimum.Food
         }
 
         /// <summary>
-        /// Whether there is a bag on his back at all.
+        /// The channel the other mod writes the bag down on: worn, used, slots.
         ///
-        /// The other mod writes the number and nothing here can see a strap. Nought means no
-        /// bag, no screen, and no way in or out of what is in it.
+        /// NOT ExtraSlots, WHICH WAS ALREADY DEAD WHEN THIS WAS WRITTEN. That number was how
+        /// the bag used to lend room to the pocket, and Hoodrich stopped writing it the day
+        /// before this class landed -- it pins it to nought now, because the bag has a shelf
+        /// of its own and lending as well would be the same twenty slots counted twice. So
+        /// this was gated on a number that is always nought: the screen could never open.
+        ///
+        /// spitmux.bag is what it publishes today, every pass, as three ints. The same
+        /// AppDomain channel the draw ledger uses, and plain types for the same reason.
         /// </summary>
+        private const string Channel = "spitmux.bag";
+
+        private const int SWorn = 0;
+        private const int SSlots = 2;
+
+        private static int[] Row
+        {
+            get
+            {
+                try { return AppDomain.CurrentDomain.GetData(Channel) as int[]; }
+                catch { return null; }
+            }
+        }
+
+        /// <summary>Whether there is a bag on his back at all.</summary>
         public static bool Worn
         {
             get
             {
-                try { return Api.Pantry.ExtraSlots > 0; }
-                catch { return false; }
+                var row = Row;
+                return row != null && row.Length > SWorn && row[SWorn] == 1;
             }
         }
 
@@ -56,12 +78,10 @@ namespace BareMinimum.Food
         {
             get
             {
-                int lent;
+                var row = Row;
+                var slots = row != null && row.Length > SSlots ? row[SSlots] : 0;
 
-                try { lent = Api.Pantry.ExtraSlots; }
-                catch { lent = 0; }
-
-                return lent < 1 ? 1 : lent;
+                return slots < 1 ? 1 : slots;
             }
         }
 

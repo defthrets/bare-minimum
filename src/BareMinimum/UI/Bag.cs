@@ -212,6 +212,14 @@ namespace BareMinimum.UI
                 if (suspended)
                 {
                     if (IsOpen) Close();
+
+                    // THE KEY'S EDGE IS KEPT TRUE WHILE SUSPENDED, the same as the settings
+                    // panel does it. Frozen at whatever it was when the suspension started, a
+                    // press made while the mod was ignoring the key fires the moment the
+                    // suspension lifts -- and with a bag on, the pocket is suspended for the
+                    // whole time it is worn, so the very first tap after taking it off opened
+                    // the pocket on a press from minutes earlier.
+                    Toggled();
                     return;
                 }
 
@@ -236,6 +244,11 @@ namespace BareMinimum.UI
             }
             catch (Exception ex)
             {
+                // THE THING IN HIS HAND GOES WITH IT. Peek attaches a real prop, and a pocket
+                // that threw on a draw left the burger under the cursor welded to him for the
+                // session. See Shutdown.
+                try { _peek.Clear(); } catch { }
+
                 Log.Once("bag", "The pocket failed: " + ex.Message);
                 IsOpen = false;
             }
@@ -568,6 +581,23 @@ namespace BareMinimum.UI
             var id = _ids[Clamp(_index, 0, _ids.Count - 1)];
 
             _eating.Preload(_menu.Find(id));
+        }
+
+        /// <summary>
+        /// On the way out, the same as everything else holding something of the world's.
+        ///
+        /// A RELOAD IS NOT A CLOSE. Peek attaches a real prop to his hand and only Close ever
+        /// took it off him -- and pressing Insert with the pocket open never calls Close, so
+        /// the burger under the cursor stayed attached for the rest of the session. Peek's
+        /// list of what it made is per instance, so the new one after the reload could not
+        /// sweep it either. Eating.Shutdown exists for exactly this and says so.
+        /// </summary>
+        public void Shutdown()
+        {
+            IsOpen = false;
+
+            try { _peek.Clear(); }
+            catch { /* teardown */ }
         }
 
         private void Eat()

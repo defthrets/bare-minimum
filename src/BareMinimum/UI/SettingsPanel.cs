@@ -1667,6 +1667,12 @@ namespace BareMinimum.UI
         public void Shutdown()
         {
             _ui.Close();
+
+            // AND THE SAMPLE IN HIS HAND. This panel holds a cup or a burger while the six
+            // hold rows are selected, and a reload with one of them up left it attached to him
+            // for the session. See Bag.Shutdown, which is the same fix.
+            try { _hand.Clear(); }
+            catch { /* teardown */ }
         }
     }
 }

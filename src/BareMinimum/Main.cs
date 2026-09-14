@@ -170,6 +170,9 @@ namespace BareMinimum
                 {
                     Store = _knapsack,
                     Name = "BAG",
+                    Title = "THE BAG",
+                    Blurb = "what you are carrying, and what is in the bag",
+                    Noun = "The bag",
                     On = () => Knapsack.Worn,
                     InReach = () => Knapsack.Worn
                 },
@@ -337,7 +340,7 @@ namespace BareMinimum
                 // -- without this, pressing F11 at a till draws both menus on top of each other
                 // and every arrow press drives both of them at once.
                 _settings.Update(_sleeping.Busy || _shop.IsOpen || _vendors.MenuOpen ||
-                                 _bag.IsOpen || _fridge.IsOpen);
+                                 _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen);
 
                 // THE VITALS RUN BEFORE THE ENABLED GATE, because the game's own bars are
                 // hidden by them and have to be put back when the mod is switched off -- a
@@ -362,7 +365,7 @@ namespace BareMinimum
                 // Without this, pressing E to buy a sandwich at a counter next to a bed would
                 // also be pressing E to go to sleep.
                 var menuOpen = _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen ||
-                               _bag.IsOpen || _fridge.IsOpen;
+                               _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen;
 
                 // The pocket stands down for every other menu for the same reason the settings
                 // panel does: its key is RAW, so control suppression cannot keep it out of a
@@ -386,7 +389,8 @@ namespace BareMinimum
                 // It reads the same interact key a stall does, so a fridge somehow within
                 // reach of one would otherwise have both of them answering the same press.
                 _fridge.Update(_sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
-                               _vendors.Offering || _inside.Offering || _bag.IsOpen);
+                               _vendors.Offering || _inside.Offering || _bag.IsOpen ||
+                               _bagScreen.IsOpen);
 
                 if (!menuOpen && !_vendors.Offering && !_inside.Offering) _sleeping.Update();
 
@@ -400,13 +404,13 @@ namespace BareMinimum
                 // Street vendors BEFORE the shop, so a stand standing next to a vending
                 // machine wins the interact key rather than both reading it on one frame.
                 _vendors.Update(dt, _sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
-                                    _bag.IsOpen || _fridge.IsOpen);
+                                    _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen);
 
                 // The room after the vendors, and never while the bar's own shelf is up -- the
                 // shelf owns the key then, and a hold that leaves with it open is two things
                 // reading one press.
                 _inside.Update(_sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
-                               _bag.IsOpen || _fridge.IsOpen || _vendors.MenuOpen);
+                               _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen || _vendors.MenuOpen);
 
                 // NOT GATED ON A MENU. It is watching for the GAME's animation, which the
                 // player triggers with nothing of ours open, and a suspended tick would miss
@@ -419,7 +423,8 @@ namespace BareMinimum
                 _mapCard.Update();
 
                 _shop.Update(_sleeping.Busy || _settings.IsOpen || _bag.IsOpen ||
-                             _fridge.IsOpen || _vendors.Offering || _inside.Offering);
+                             _fridge.IsOpen || _bagScreen.IsOpen ||
+                             _vendors.Offering || _inside.Offering);
                 _eating.Update();
                 _whereabouts.Update();
 
@@ -451,7 +456,8 @@ namespace BareMinimum
                 // also drops a lapse already in progress the moment one of these becomes true.
                 _trip.Update(suspended);
                 _blackout.Update(suspended || _shop.IsOpen || _settings.IsOpen || _bag.IsOpen ||
-                                 _fridge.IsOpen || _vendors.MenuOpen || _inside.IsInside);
+                                 _fridge.IsOpen || _bagScreen.IsOpen ||
+                                 _vendors.MenuOpen || _inside.IsInside);
 
                 // ON THE SAME dt EVERYTHING ELSE USES, so the distance flown is real seconds
                 // rather than frames -- a survey that moved per frame would cover twice the
@@ -573,6 +579,7 @@ namespace BareMinimum
             try { _vitals.Shutdown(); } catch (Exception ex) { Log.Error("Vitals shutdown", ex); }
             try { _vendors.Shutdown(); } catch (Exception ex) { Log.Error("Vendor shutdown", ex); }
             try { _eating.Shutdown(); } catch (Exception ex) { Log.Error("Eating shutdown", ex); }
+            try { _bag.Shutdown(); } catch (Exception ex) { Log.Error("Pocket shutdown", ex); }
             try { UI.Toast.Clear(); } catch { /* a card is not worth a failed shutdown */ }
             try { UI.Hint.Clear(); } catch { /* nor is a hint */ }
             // WRITTEN BEFORE THE BLIPS GO. Clear only takes the markers off the map; what

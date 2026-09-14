@@ -111,6 +111,22 @@ namespace BareMinimum.UI
             /// <summary>What the caption over it says.</summary>
             public string Name = "FRIDGE";
 
+            /// <summary>
+            /// What the whole panel is called, and the line under it.
+            ///
+            /// NAME ALONE WAS NOT ENOUGH AND THE BAG SPENT A DAY CALLING ITSELF THE FRIDGE.
+            /// This class names the far side in four places -- the panel head, its subtitle,
+            /// the empty pane and the full-store refusal -- and only the pane caption was
+            /// ever routed through Far. So a second screen came out with the right caption
+            /// over the right store under a title that said THE FRIDGE.
+            /// </summary>
+            public string Title = "THE FRIDGE";
+
+            public string Blurb = "what you are carrying, and what is keeping cold";
+
+            /// <summary>The far side in a sentence: "The fridge is empty", "The bag is full".</summary>
+            public string Noun = "The fridge";
+
             /// <summary>Whether this screen exists at all -- a setting, usually.</summary>
             public Func<bool> On = () => true;
 
@@ -177,12 +193,14 @@ namespace BareMinimum.UI
                 if (suspended)
                 {
                     if (IsOpen) Close();
+                    Forget();
                     return;
                 }
 
                 if (!_far.On())
                 {
                     if (IsOpen) Close();
+                    Forget();
                     return;
                 }
 
@@ -219,6 +237,13 @@ namespace BareMinimum.UI
         private void Forget()
         {
             _keyWasDown = Game.IsKeyPressed(_cfg.InteractKey);
+
+            // AND THE OTHER KEY, for the screen that opens on one. Keyed() is the only thing
+            // that writes _bagWas and it is reached on almost no frames -- so the edge froze
+            // at whatever the key was doing when the bag last came off, and the next press
+            // fired on a release that had already happened. See Keyed.
+            try { _bagWas = Game.IsKeyPressed(_cfg.BagKey); }
+            catch { _bagWas = false; }
         }
 
         /// <summary>The prompt, when you are stood at one on foot with your hands free.</summary>
@@ -513,7 +538,7 @@ namespace BareMinimum.UI
             if (to.Full)
             {
                 Notify(_side == 0
-                    ? "~y~The fridge is full."
+                    ? "~y~" + _far.Noun + " is full."
                     : "~y~Your pockets are full.");
 
                 Sound("ERROR");
@@ -655,8 +680,8 @@ namespace BareMinimum.UI
 
             Theme.Panel(left, top, panelW, height, arrive);
 
-            var y = Kit.Head(left, top, panelW, Pad, IconCache.Get("s_layout.png"), "THE FRIDGE",
-                             "what you are carrying, and what is keeping cold", null, null, arrive, 0f);
+            var y = Kit.Head(left, top, panelW, Pad, IconCache.Get("s_layout.png"), _far.Title,
+                             _far.Blurb, null, null, arrive, 0f);
 
             _frame.Begin();
 
@@ -714,7 +739,7 @@ namespace BareMinimum.UI
 
             if (list.Count == 0)
             {
-                Hud.Text(side == 0 ? "Nothing on you." : "The fridge is empty.",
+                Hud.Text(side == 0 ? "Nothing on you." : _far.Noun + " is empty.",
                          x + w / 2f, y + rows * tileH / 2f - 0.012f, 0.30f,
                          Palette.Alpha(Palette.TextDim, (int)(180f * arrive)), Hud.FontBody, true);
                 return;

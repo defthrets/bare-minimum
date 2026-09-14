@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using GTA;
 using GTA.Math;
@@ -88,8 +88,18 @@ namespace BareMinimum.Venues
                 {
                     var model = new Model(name);
 
-                    if (Function.Call<bool>(Hash.IS_MODEL_VALID, model.Hash)) good.Add(model.Hash);
-                    else missing.Add(name);
+                    // SEARCHED FOR, NOT SPAWNED, so IS_MODEL_VALID is the wrong question --
+                    // see Fridges.Hashes, where this cost the one fridge Franklin owns. It
+                    // asks whether a model can be streamed in and created; these are found by
+                    // hash in the world with GET_CLOSEST_OBJECT_OF_TYPE, which does not care.
+                    // Map-only interior fixtures answer no while standing in front of you,
+                    // and its answer is not even stable between launches: this mod's own log
+                    // has "1 of 19" on one start and "4 of 19" on the next, same build.
+                    good.Add(model.Hash);
+
+                    // Kept for the log only. A name typed into the ini that answers no is far
+                    // more likely to be a typo than a fixture, and that is worth reading.
+                    if (!Function.Call<bool>(Hash.IS_MODEL_VALID, model.Hash)) missing.Add(name);
                 }
                 catch
                 {
