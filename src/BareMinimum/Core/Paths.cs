@@ -239,6 +239,9 @@ namespace BareMinimum.Core
         /// <summary>What each character is carrying. Beside needs.json, and saved like it.</summary>
         public static string PantryFile => Path.Combine(Writable, "pantry.json");
 
+        /// <summary>Another mod's containers, kept by this one. See Food.Vault.</summary>
+        public static string VaultFile => Path.Combine(Writable, "vault.json");
+
         /// <summary>What is in the fridge, per character. Written by the mod, never shipped.</summary>
         public static string FridgeFile => Path.Combine(Writable, "fridge.json");
 

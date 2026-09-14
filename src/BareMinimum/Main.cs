@@ -71,6 +71,9 @@ namespace BareMinimum
         private readonly VitalsHud _vitals;
         private readonly Pantry _pantry;
 
+        /// <summary>Hoodrich's pocket, bag, boot and stash house. See Food.Vault.</summary>
+        private readonly Vault _vault;
+
         /// <summary>What is in the bag on his back, when there is one. See Food.Knapsack.</summary>
         private readonly Knapsack _knapsack;
 
@@ -118,6 +121,13 @@ namespace BareMinimum
             // AFTER the catalogue, because the pantry drops anything it is carrying that
             // foods.json no longer defines, and it cannot know that until the list is read.
             _pantry = new Pantry(_cfg, _catalogue);
+
+            // ONE INVENTORY ON THE MACHINE. Made early and unconditionally: the other mod can
+            // reach the bridge before this constructor has finished, and a vault that is not
+            // there yet answers "nothing", which that side reads as "keep your own copy" and
+            // then never asks again in that session.
+            _vault = new Vault();
+            Api.Vault.Held = _vault;
 
             // Same rule as the pantry: AFTER the catalogue, because the load drops anything
             // foods.json no longer defines and it cannot know that until the list is read.
@@ -443,6 +453,7 @@ namespace BareMinimum
                 var suspended = _sleeping.Busy;
 
                 _pantry.Update(dt);
+                _vault.Tick(dt);
                 _larder.Update(dt);
                 _knapsack.Update(dt);
 
@@ -612,6 +623,7 @@ namespace BareMinimum
             // seconds of shopping. The needs were written down on the way out and the food
             // was not.
             try { _pantry.SaveNow(); } catch (Exception ex) { Log.Error("Pantry save", ex); }
+            try { _vault.Save(); } catch (Exception ex) { Log.Error("Vault save", ex); }
             try { _knapsack.SaveNow(); } catch (Exception ex) { Log.Error("Bag save", ex); }
             try { _larder.SaveNow(); } catch (Exception ex) { Log.Error("Fridge save", ex); }
             try { _needs.SaveNow(); } catch (Exception ex) { Log.Error("Final save", ex); }
