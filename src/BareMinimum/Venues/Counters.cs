@@ -35,7 +35,23 @@ namespace BareMinimum.Venues
         /// coordinate would mean finding every one by hand and still missing the rest, which
         /// is the mistake the fridges and the tills already avoid.
         /// </summary>
-        Stall
+        Stall,
+
+        /// <summary>
+        /// A FRIDGE OR A SHELF INSIDE A SHOP. The cold section and the aisles.
+        ///
+        /// The reason this did not exist until now is written up in Venues/Fridges: a retail
+        /// chiller stands in the same room as a till, and two prompts fighting over one key
+        /// is worse than not being able to open the chiller. What makes it work is that they
+        /// are not in the same PLACE -- a 24/7's drinks wall is right across the room from
+        /// the counter -- so the aisle is looked for LAST, on its own short reach, and a till
+        /// anywhere near you wins outright. Stand at the fridge and you get the fridge.
+        ///
+        /// AND EACH ONE SELLS WHAT IS IN IT. The beer wall sells drinks, the dairy wall sells
+        /// food, the grocery shelving sells the ambient stuff. That is the whole point: a
+        /// chiller that offered the full menu would just be a second till with a longer walk.
+        /// </summary>
+        Aisle
     }
 
     /// <summary>
@@ -70,6 +86,75 @@ namespace BareMinimum.Venues
         {
             _cfg = cfg;
         }
+
+        /// <summary>
+        /// THE COLD DRINKS: beer walls, bar chillers, the liquor shelving.
+        ///
+        /// prop_vend_fridge01 is deliberately absent -- it is already in DrinkMachineModels,
+        /// where the game sells out of it and Sipping watches it. Two owners for one prop is
+        /// the bug this whole file keeps avoiding.
+        ///
+        /// Every name checked against menyooStuff/PropList.txt on a stock install.
+        /// </summary>
+        internal static readonly string[] ColdDrinkModels =
+        {
+            "prop_bar_beerfridge_01",
+            "ba_prop_battle_bar_beerfridge_01",
+            "h4_prop_battle_bar_beerfridge_01",
+            "prop_bar_fridge_01",
+            "prop_bar_fridge_02",
+            "prop_bar_fridge_03",
+            "prop_bar_fridge_04",
+            "prop_bar_cooler_01",
+            "prop_bar_cooler_03",
+            "v_11_cooler_drs",
+            "v_11_coolerrack001",
+            "v_med_cooler",
+            "v_ret_ml_liqshelfa",
+            "v_ret_ml_liqshelfb",
+            "v_ret_ml_liqshelfc",
+            "v_ret_ml_liqshelfd",
+            "v_ret_ml_liqshelfe"
+        };
+
+        /// <summary>
+        /// THE COLD FOOD: the dairy and frozen walls in the 24/7s and mini-marts.
+        ///
+        /// WHICH OF THESE IS THE MILK WALL AND WHICH IS THE BEER WALL IS NOT KNOWABLE FROM A
+        /// NAME. v_ret_ml_fridge and v_ret_ml_fridge02 are both glass-fronted retail chillers
+        /// and the game dresses them by where they stand, not by which model they are. Rather
+        /// than guess, both start here and the log names the one you actually opened -- and
+        /// [Counters] AisleDrinks moves a model to the drinks group without a rebuild, so one
+        /// walk up to each wall settles it for good.
+        /// </summary>
+        internal static readonly string[] ColdFoodModels =
+        {
+            "v_ret_ml_fridge",
+            "v_ret_ml_fridge02",
+            "xm3_int1_fridges_01",
+            "prop_cont_chiller_01"
+        };
+
+        /// <summary>
+        /// THE AISLES: grocery shelving. Ambient food, tins, snacks -- not hot food.
+        /// </summary>
+        internal static readonly string[] ShelfModels =
+        {
+            "v_ret_247shelves01",
+            "v_ret_247shelves02",
+            "v_ret_247shelves03",
+            "v_ret_247shelves04",
+            "v_ret_247shelves05",
+            "v_ret_ml_shelfrk",
+            "v_ret_fh_shelf_01",
+            "v_ret_fh_shelf_02",
+            "v_ret_fh_shelf_03",
+            "v_ret_fh_shelf_04"
+        };
+
+        private static readonly string[] JustDrinks = { "Drinks" };
+        private static readonly string[] JustFood = { "Food" };
+        private static readonly string[] ShelfStock = { "Food", "Snacks" };
 
         private static readonly string[] TillModels =
         {
@@ -229,6 +314,9 @@ namespace BareMinimum.Venues
         private int[] _machines;
         private int[] _drinks;
         private int[] _stalls;
+        private int[] _coldDrinks;
+        private int[] _coldFood;
+        private int[] _shelves;
 
         private int _nextScan;
         private Counter _kind = Counter.None;
@@ -259,6 +347,28 @@ namespace BareMinimum.Venues
         /// Whether the machine in reach is a drinks machine rather than a snack one.
         /// </summary>
         public bool DrinksOnly { get; private set; }
+
+        /// <summary>
+        /// How close you stand to a fridge door or a shelf.
+        ///
+        /// TIGHTER THAN A TILL, and that is what stops the two fighting. A chiller and a
+        /// counter are in the same room; the counter is looked for first and at a longer
+        /// reach, so the only way to get the chiller is to be stood at the chiller.
+        /// </summary>
+        public float AisleReach = 1.4f;
+
+        /// <summary>
+        /// Which categories the thing in reach sells, or null for all of them.
+        ///
+        /// A FRIDGE SELLS WHAT IS IN THE FRIDGE. The tabs across the top of the shop screen
+        /// are the catalogue's categories, and the rows under a tab are already filtered by
+        /// it -- so narrowing the TABS is the whole of the work, and it is done in one place
+        /// rather than as another special case per kind. See UI/Shop.
+        /// </summary>
+        public string[] Only { get; private set; }
+
+        /// <summary>What the screen calls the thing you are stood at.</summary>
+        public string AisleWhat { get; private set; }
 
         // ======================================================================
 
@@ -360,6 +470,99 @@ namespace BareMinimum.Venues
         }
 
         /// <summary>
+        /// The three aisle groups, with the ini's corrections applied.
+        ///
+        /// THE INI MOVES A MODEL RATHER THAN ONLY ADDING ONE, and that is the point of it.
+        /// v_ret_ml_fridge and v_ret_ml_fridge02 are both retail chillers and only the game
+        /// knows which wall it dressed as beer and which as milk -- so naming one of them in
+        /// [Counters] AisleDrinks puts it in the drinks group AND takes it out of the other
+        /// two. One line, no rebuild, and the log has already told you which model you were
+        /// stood at.
+        /// </summary>
+        private string[] _dNames, _fNames, _sNames;
+
+        private readonly HashSet<int> _namedAisles = new HashSet<int>();
+
+        private void Groups()
+        {
+            if (_dNames != null) return;
+
+            var d = new List<string>(ColdDrinkModels);
+            var f = new List<string>(ColdFoodModels);
+            var s = new List<string>(ShelfModels);
+
+            Move(_cfg.AisleDrinks, d, f, s);
+            Move(_cfg.AisleFood, f, d, s);
+            Move(_cfg.AisleShelf, s, d, f);
+
+            _dNames = d.ToArray();
+            _fNames = f.ToArray();
+            _sNames = s.ToArray();
+        }
+
+        /// <summary>Puts every name in <paramref name="csv"/> into `into` and out of the rest.</summary>
+        private static void Move(string csv, List<string> into, params List<string>[] outOf)
+        {
+            foreach (var raw in (csv ?? "").Split(',', ';'))
+            {
+                var name = raw.Trim();
+                if (name.Length == 0) continue;
+
+                foreach (var other in outOf) other.RemoveAll(n => string.Equals(n, name, StringComparison.OrdinalIgnoreCase));
+
+                if (!into.Contains(name)) into.Add(name);
+            }
+        }
+
+        private string[] DrinkShelf() { Groups(); return _dNames; }
+        private string[] FoodShelf() { Groups(); return _fNames; }
+        private string[] DryShelf() { Groups(); return _sNames; }
+
+        /// <summary>
+        /// Writes the model of an aisle to the log, once each.
+        ///
+        /// BECAUSE THE NAME IS THE ONLY THING THAT CAN SETTLE THE BEER WALL FROM THE MILK
+        /// WALL. Stand at one, read the line, and [Counters] AisleDrinks or AisleFood puts it
+        /// where it belongs. Without this line there is nothing to type into either.
+        /// </summary>
+        private void Named(Prop what, string group)
+        {
+            if (what == null || !what.Exists()) return;
+
+            int hash;
+            try { hash = what.Model.Hash; }
+            catch { return; }
+
+            // ITS OWN SET, NOT THE TILLS'. Name() stops writing once twelve hashes have gone
+            // through it, and sharing one set would have the aisles quietly use that budget
+            // up and take the till log -- the one that finds a food counter in a barber's --
+            // down with them.
+            if (!_namedAisles.Add(hash)) return;
+            if (_namedAisles.Count > 24) return;
+
+            var name = "unrecognised";
+
+            foreach (var candidate in Concat(DrinkShelf(), FoodShelf(), DryShelf()))
+            {
+                if (Game.GenerateHash(candidate) != hash) continue;
+
+                name = candidate;
+                break;
+            }
+
+            Log.Info("Aisle: " + name + " is being sold as \"" + group + "\". Move it with " +
+                     "[Counters] AisleDrinks / AisleFood / AisleShelf in the ini if that is wrong.");
+        }
+
+        private static IEnumerable<string> Concat(params string[][] lists)
+        {
+            foreach (var list in lists)
+            {
+                foreach (var name in list) yield return name;
+            }
+        }
+
+        /// <summary>
         /// How far away a find of this kind is still a find.
         ///
         /// THE SCAN KNOWS WHICH LIST IT IS WALKING AND THE CACHE DOES NOT -- between scans
@@ -373,6 +576,7 @@ namespace BareMinimum.Venues
             {
                 case Counter.Machine: return MachineReach;
                 case Counter.Stall: return StallReach;
+                case Counter.Aisle: return AisleReach;
                 default: return TillReach;
             }
         }
@@ -415,6 +619,8 @@ namespace BareMinimum.Venues
             _nextScan = now + 200;
             _found = null;
             _kind = Counter.None;
+            Only = null;
+            AisleWhat = null;
 
             // NOT IN A GUN SHOP, A CLOTHES SHOP OR A BARBER'S. Checked before the prop scan
             // rather than after, because the answer does not depend on which register is
@@ -430,7 +636,7 @@ namespace BareMinimum.Venues
                     _found = till;
                     _kind = Counter.Till;
                     Name(till);
-                    return _kind;
+                    return _kind;   // a till sells everything, so Only stays null
                 }
 
                 // AFTER THE TILL, ALWAYS. A 24/7 has a candy machine by the door and a till
@@ -459,6 +665,7 @@ namespace BareMinimum.Venues
                         _found = drinks;
                         _kind = Counter.Machine;
                         DrinksOnly = true;
+                        Only = JustDrinks;
                         return _kind;
                     }
                 }
@@ -471,6 +678,58 @@ namespace BareMinimum.Venues
                     {
                         _found = stall;
                         _kind = Counter.Stall;
+                        return _kind;
+                    }
+                }
+
+                // THE COLD SECTION AND THE AISLES, LAST OF ALL AND ON THE SHORTEST REACH.
+                //
+                // Last because everything above sells at least as much and often more: a
+                // player stood between the counter and the drinks wall should be handed the
+                // counter, which has the drinks on it as well. Shortest because that is what
+                // makes "stand at the fridge" mean the fridge and nothing else.
+                //
+                // The order within is drinks, then cold food, then shelving -- three
+                // different walls that are never in arm's reach of each other, so the order
+                // only decides which is checked first, never which is offered.
+                if (_cfg.Aisles)
+                {
+                    var cold = Closest(from, AisleReach,
+                                       Resolve(DrinkShelf(),
+                                               "Drinks chillers", ref _coldDrinks));
+                    if (cold != null)
+                    {
+                        _found = cold;
+                        _kind = Counter.Aisle;
+                        Only = JustDrinks;
+                        AisleWhat = "CHILLER";
+                        Named(cold, "drinks chiller");
+                        return _kind;
+                    }
+
+                    var dairy = Closest(from, AisleReach,
+                                        Resolve(FoodShelf(),
+                                                "Cold food", ref _coldFood));
+                    if (dairy != null)
+                    {
+                        _found = dairy;
+                        _kind = Counter.Aisle;
+                        Only = JustFood;
+                        AisleWhat = "COLD FOOD";
+                        Named(dairy, "cold food");
+                        return _kind;
+                    }
+
+                    var shelf = Closest(from, AisleReach,
+                                        Resolve(DryShelf(),
+                                                "Shop shelves", ref _shelves));
+                    if (shelf != null)
+                    {
+                        _found = shelf;
+                        _kind = Counter.Aisle;
+                        Only = ShelfStock;
+                        AisleWhat = "AISLE";
+                        Named(shelf, "shelf");
                         return _kind;
                     }
                 }

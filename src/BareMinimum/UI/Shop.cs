@@ -274,6 +274,7 @@ namespace BareMinimum.UI
 
             _ui.Title = _at == Counter.Machine ? (_counters.DrinksOnly ? "DRINKS MACHINE" : "VENDING MACHINE")
                       : _at == Counter.Stall ? "FRUIT STALL"
+                      : _at == Counter.Aisle ? (_counters.AisleWhat ?? "AISLE")
                       : "COUNTER";
 
             // A machine and a stall are not a chain, so they never wear a shop's logo -- the
@@ -293,6 +294,12 @@ namespace BareMinimum.UI
                 // out of it is the detail that says nobody thought about it. See
                 // Counters.DrinkMachineModels.
                 if (_at == Counter.Machine && _counters.DrinksOnly && !IsDrink(c)) continue;
+
+                // AND A FRIDGE SELLS WHAT IS IN THE FRIDGE. One test rather than a branch per
+                // kind: Counters says which categories the thing in reach stocks, and a tab
+                // that is not one of them never appears. The rows under a tab are already
+                // filtered by that tab, so dropping the tab is the whole of the work.
+                if (!Sells(c)) continue;
 
                 // A STALL HAS ONE TAB, because the stock is a named list rather than a
                 // category -- an apple is a Snack and a fresh fruit is Food, so filtering by
@@ -353,6 +360,23 @@ namespace BareMinimum.UI
         }
 
         /// <summary>Whether a fruit stall has this on the trestle. Counters/StallItems.</summary>
+        /// <summary>
+        /// Whether the place in reach stocks this category. True for anything that sells the
+        /// lot, which is a till, a stall and a snack machine.
+        /// </summary>
+        private bool Sells(string category)
+        {
+            var only = _counters.Only;
+            if (only == null || only.Length == 0) return true;
+
+            foreach (var name in only)
+            {
+                if (string.Equals(name, category, StringComparison.OrdinalIgnoreCase)) return true;
+            }
+
+            return false;
+        }
+
         private bool Stocked(string id)
         {
             if (string.IsNullOrEmpty(id)) return false;

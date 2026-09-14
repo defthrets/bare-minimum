@@ -1759,6 +1759,30 @@ namespace BareMinimum.Core
         public bool RightHand;
 
         /// <summary>
+        /// THE COLD SECTION AND THE AISLES SELL WHAT IS IN THEM.
+        ///
+        /// A 24/7 is a room with a counter in it and four walls of stock you cannot touch.
+        /// This makes the stock the shop: stand at the beer wall and buy a beer, stand at the
+        /// dairy wall and buy the milk, stand at the shelving and buy the tins. The counter
+        /// still sells everything and still wins whenever it is in reach -- see
+        /// Counters.Nearest, where the aisles are looked for last and on the shortest reach.
+        /// </summary>
+        public bool Aisles = true;
+
+        /// <summary>
+        /// Models to force into one aisle group, comma separated, taking them out of the
+        /// other two.
+        ///
+        /// WHICH RETAIL CHILLER IS BEER AND WHICH IS MILK CANNOT BE READ OFF A MODEL NAME --
+        /// the game dresses the same glass-fronted fridge either way depending on where it
+        /// stands. So the mod ships its best guess, names the model in the log the first time
+        /// you open one, and these three lines let you correct it without a rebuild.
+        /// </summary>
+        public string AisleDrinks = "";
+        public string AisleFood = "";
+        public string AisleShelf = "";
+
+        /// <summary>
         /// Where the fitting bench stands, across the screen. 0.5 is the middle, 1 the edge.
         ///
         /// OFF TO ONE SIDE BECAUSE YOU HAVE TO SEE PAST IT. The whole point of that screen is
@@ -2434,6 +2458,10 @@ namespace BareMinimum.Core
                 cfg.Longer = ini.GetFloat("Eating", "Longer", cfg.Longer, 0f, 30f);
                 cfg.Puffs = ini.GetBool("Eating", "Puffs", cfg.Puffs);
                 cfg.RightHand = ini.GetBool("Eating", "RightHand", cfg.RightHand);
+                cfg.Aisles = ini.GetBool("Counters", "Aisles", cfg.Aisles);
+                cfg.AisleDrinks = ini.GetString("Counters", "AisleDrinks", cfg.AisleDrinks);
+                cfg.AisleFood = ini.GetString("Counters", "AisleFood", cfg.AisleFood);
+                cfg.AisleShelf = ini.GetString("Counters", "AisleShelf", cfg.AisleShelf);
                 cfg.FitPanelX = ini.GetFloat("Eating", "FitPanelX", cfg.FitPanelX, 0.15f, 0.85f);
                 cfg.HoldX = ini.GetFloat("Eating", "HoldX", cfg.HoldX, -0.5f, 0.5f);
                 cfg.HoldY = ini.GetFloat("Eating", "HoldY", cfg.HoldY, -0.5f, 0.5f);
