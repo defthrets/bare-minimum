@@ -1,7 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using GTA;
 using GTA.Math;
+using GTA.Native;
 
 using BareMinimum.Core;
 
@@ -56,6 +57,9 @@ namespace BareMinimum.Venues
             public Vector3 At;
             public bool Stall;
             public Blip Mark;
+
+            /// <summary>What SET_BLIP_DISPLAY was last given, so a change can be spotted.</summary>
+            public int Display;
         }
 
         private const float Same = 1.5f;
@@ -78,6 +82,49 @@ namespace BareMinimum.Venues
             _cfg = cfg;
         }
 
+        /// <summary>
+        /// 2 both maps, 5 minimap only. See Settings.ShopBlipsOnMainMap.
+        ///
+        /// The two the shops use for a marker in range. A machine is never put on the pause
+        /// map alone the way a distant shop is -- a shop is a destination you steer towards
+        /// and a Sprunk machine is something you notice when you are next to it.
+        /// </summary>
+        private int Wanted => _cfg.ShopBlipsOnMainMap ? 2 : 5;
+
+        private static void Show(Blip blip, int display)
+        {
+            if (blip == null) return;
+
+            // FULLY QUALIFIED, because this class has a Function(Blip, string) of its own
+            // that names a blip, and an unqualified Function here binds to that instead.
+            try { GTA.Native.Function.Call(GTA.Native.Hash.SET_BLIP_DISPLAY, blip.Handle, display); }
+            catch (Exception ex) { Log.Once("machine-blip-display", "Could not restyle a machine blip: " + ex.Message); }
+        }
+
+        /// <summary>
+        /// Puts every marker already out there on the maps the setting now names.
+        ///
+        /// NEEDED BECAUSE THESE ARE BUILT ONCE PER MACHINE EVER. Everywhere else in this file
+        /// a note says a change lands "the next time they are rebuilt" -- these are not
+        /// rebuilt, so a display set only at creation would leave a hundred remembered
+        /// machines on whatever they were made with until the next reload.
+        /// </summary>
+        private void Redisplay()
+        {
+            var want = Wanted;
+
+            foreach (var known in _known)
+            {
+                if (known == null || known.Mark == null || known.Display == want) continue;
+
+                try { if (!known.Mark.Exists()) continue; }
+                catch { continue; }
+
+                Show(known.Mark, want);
+                known.Display = want;
+            }
+        }
+
         public void Update()
         {
             int now;
@@ -90,6 +137,10 @@ namespace BareMinimum.Venues
 
             if (now < _nextScan) return;
             _nextScan = now + ScanMs;
+
+            // On the scan's clock rather than every frame: it walks a list of remembered
+            // machines and does nothing at all unless the switch has actually moved.
+            Redisplay();
 
             // One switch for the markers, and the two that decide whether the machines and
             // the stalls sell at all. A machine you cannot buy from should not be on the map
@@ -202,6 +253,10 @@ namespace BareMinimum.Venues
             if (known.Mark != null && known.Mark.Exists()) return;
 
             known.Mark = Make(known.At, known.Stall);
+
+            // Made with the display the setting asks for, so Redisplay has nothing to do for
+            // this one until somebody actually moves the switch.
+            known.Display = known.Mark == null ? 0 : Wanted;
         }
 
         /// <summary>Whether this blip handle is one of the machine markers, and where it stands.</summary>
@@ -283,12 +338,17 @@ namespace BareMinimum.Venues
                 blip.Color = (BlipColor)colour;
                 blip.Scale = 0.7f;
 
-                // SHORT RANGE, ALWAYS, AND MORE SO NOW THAT THEY ARE KEPT. A short-range blip
-                // is drawn on the minimap when you are near it and on the pause map always,
-                // which is exactly the arrangement wanted here: the machine you are walking
-                // past is on the minimap, and the several hundred you have walked past over a
-                // playthrough are on the pause map without being on the minimap all at once.
+                // SHORT RANGE, ALWAYS. A short-range blip is drawn on the minimap when you
+                // are near it: the machine you are walking past is on the minimap, and the
+                // several hundred you have walked past over a playthrough are not.
                 blip.IsShortRange = true;
+
+                // AND THE PAUSE MAP IS A SETTING, WHICH IT WAS NOT. "and on the pause map
+                // always" used to be the end of the note above, and it was the bug: turning
+                // "Markers on pause map" off cleared the shops off the pause map and left
+                // every vending machine and fruit stall on it. The switch is one switch and
+                // it should mean one thing. See Vendors, which has always done this.
+                Show(blip, Wanted);
 
                 Function(blip, label);
 

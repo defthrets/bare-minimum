@@ -2329,9 +2329,6 @@ namespace BareMinimum.Core
                 cfg.HudDrawBudget = ini.GetInt("HUD", "DrawBudget", cfg.HudDrawBudget, 40, 350);
                 cfg.HudNotifyLift = ini.GetFloat("HUD", "NotifyLift", cfg.HudNotifyLift, -0.5f, 0.5f);
                 UI.Draw.Budget = cfg.HudDrawBudget;
-
-                // Where the map really is, for everything that reads it. See Layout.NudgeX.
-                Vitals.Layout.Renudge(cfg.MinimapNudgeX, cfg.MinimapNudgeY);
                 cfg.HudBarWidth = ini.GetFloat("HUD", "BarWidth", cfg.HudBarWidth, 0.001f, 0.2f);
                 cfg.HudBarIconScale = ini.GetFloat("HUD", "BarIconScale",
                                                    cfg.HudBarIconScale, 0.2f, 2f);
@@ -2407,6 +2404,22 @@ namespace BareMinimum.Core
                 cfg.MinimapFrameGap = ini.GetFloat("Minimap", "FrameGap", cfg.MinimapFrameGap, 0f, 0.03f);
                 cfg.MinimapNudgeX = ini.GetFloat("Minimap", "X", cfg.MinimapNudgeX, -0.5f, 0.5f);
                 cfg.MinimapNudgeY = ini.GetFloat("Minimap", "Y", cfg.MinimapNudgeY, -0.5f, 0.5f);
+
+                // WHERE THE MAP REALLY IS, for everything that reads it. See Layout.NudgeX.
+                //
+                // ON THE LINE AFTER THE TWO IT USES, AND THAT IS THE WHOLE FIX. This call used
+                // to sit seventy-four lines further up, among the [HUD] keys -- so it ran
+                // against the field defaults of nought and the player's numbers, read here,
+                // never reached Layout at all.
+                //
+                // IT LOOKED LIKE THE SETTING WAS NOT BEING SAVED, and it was being saved
+                // perfectly: the ini kept the value, the F11 menu showed the value, and the
+                // frame sat in the wrong place. Moving the row in the menu fixed it until the
+                // next load, because that setter calls Renudge itself. Two people on an
+                // ultrawide lost hours to it, one of them trying to make the file read-only.
+                //
+                // Anything reading the map position must therefore stay BELOW this line.
+                Vitals.Layout.Renudge(cfg.MinimapNudgeX, cfg.MinimapNudgeY);
                 cfg.MinimapTopCover = ini.GetFloat("Minimap", "TopCover", cfg.MinimapTopCover, 0f, 0.5f);
                 cfg.MinimapBandHeight = ini.GetFloat("Minimap", "BandHeight", cfg.MinimapBandHeight, 0.004f, 0.15f);
                 cfg.MinimapPlateDrop = ini.GetFloat("Minimap", "PlateDrop", cfg.MinimapPlateDrop, 0f, 0.05f);
