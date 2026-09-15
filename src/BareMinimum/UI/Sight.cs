@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using GTA;
 using GTA.Native;
 using BareMinimum.Core;
@@ -188,6 +188,21 @@ namespace BareMinimum.UI
             }
         }
 
+        /// <summary>
+        /// Whether the game is actually drawing its minimap this frame.
+        ///
+        /// ASKED, NOT ASSUMED, AND FAILING TOWARDS DRAWING. A question this class cannot ask
+        /// has never been a reason to take the row away -- see the catch in Soft -- and this
+        /// keeps that rule: if the native will not answer, the map counts as up and the row
+        /// stays, which is the state somebody can see and complain about rather than the one
+        /// where their HUD silently is not there.
+        /// </summary>
+        private static bool Mapped()
+        {
+            try { return Function.Call<bool>(Hash.IS_MINIMAP_RENDERING); }
+            catch { return true; }
+        }
+
         /// <summary>The this-frame ones. TRUE means hidden, but only counts if it holds.</summary>
         private static bool Soft(out string why)
         {
@@ -195,8 +210,33 @@ namespace BareMinimum.UI
 
             try
             {
-                if (Function.Call<bool>(Hash.IS_HUD_HIDDEN)) { why = "the game's HUD is hidden"; return true; }
-                if (Function.Call<bool>(Hash.IS_RADAR_HIDDEN)) { why = "the radar is hidden"; return true; }
+                // THE RADAR IS THE TIE-BREAK, AND IT IS WHY THE BARS VANISHED IN THE STREET.
+                //
+                // Two people reported the row going away in particular places -- one of them
+                // beside the mission trigger at Simeon's -- and both said the MINIMAP STAYED
+                // UP while it happened. That is the whole clue: IS_HUD_HIDDEN goes true when
+                // anything asks for the game's HUD to be off, and the trigger scripts around
+                // a mission do exactly that while leaving the radar drawing. This row lives
+                // beside the radar, so it followed a flag that had nothing to do with it.
+                //
+                // Every deliberate blackout is already covered by Hard() above -- cutscene,
+                // fade, pause, switch, dead, arrested -- and in every one of those the map
+                // stops rendering too. So a hidden HUD over a LIVE map is somebody turning
+                // off the game's own furniture, not the screen being cleared, and this row
+                // is not the game's furniture.
+                var map = Mapped();
+
+                if (Function.Call<bool>(Hash.IS_HUD_HIDDEN) && !map)
+                {
+                    why = "the game's HUD is hidden and the map is not drawing";
+                    return true;
+                }
+
+                if (Function.Call<bool>(Hash.IS_RADAR_HIDDEN) && !map)
+                {
+                    why = "the radar is hidden";
+                    return true;
+                }
 
                 if (!Function.Call<bool>(Hash.IS_RADAR_PREFERENCE_SWITCHED_ON))
                 {

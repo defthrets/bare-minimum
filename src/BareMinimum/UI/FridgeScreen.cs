@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using GTA;
+using GTA.Native;
 using BareMinimum.Core;
 using BareMinimum.Food;
 using BareMinimum.Venues;
@@ -287,6 +288,30 @@ namespace BareMinimum.UI
 
             Hud.Help(_far.Prompt);
 
+            // AND THE BUTTON IS OURS WHILE THE PROMPT IS UP.
+            //
+            // FRANKLIN'S KITCHEN HAS A BEER IN IT. The game keeps its own interaction against
+            // the fridge at Forum Drive -- walk up and it offers you a beer -- and it reads
+            // the same button this prompt advertises. Whoever reads it first wins, the game
+            // usually did, and the fridge looked like it had not been found at all. Michael's
+            // worked, because nothing is standing next to that one. Reported twice and
+            // diagnosed by D_Cypher003 in the comments, who spotted that it is only the
+            // kitchen with the beer.
+            //
+            // The shop counter has done this since it shipped -- see Shop, which disables the
+            // same two controls next to a till -- and the fridge simply never got it. Only
+            // while the prompt is actually on screen, so the beer is still there the moment
+            // you step away.
+            try
+            {
+                Game.DisableControlThisFrame(GTA.Control.Context);
+                Game.DisableControlThisFrame(GTA.Control.ContextSecondary);
+            }
+            catch
+            {
+                // Then it is a race again, which is where it was before.
+            }
+
             if (!Pressed()) return;
 
             Hud.ClearHelp();
@@ -425,7 +450,19 @@ namespace BareMinimum.UI
         {
             var down = false;
 
-            try { down = Game.IsControlJustPressed(GTA.Control.Context); }
+            // DISABLED, NOT UNDISABLED. Offer turns Context off every frame the prompt is up
+            // so the game's own beer interaction cannot take it -- and a disabled control
+            // reads as never pressed through IsControlJustPressed, which would have made this
+            // method deaf to the very button the prompt names. The disabled reader sees it.
+            //
+            // THROUGH THE NATIVE, because Game.IsDisabledControlJustPressed is not in the
+            // vendored 3.6.0 -- checked against the DLL rather than remembered. UI/Menu reads
+            // its own keys exactly this way and for exactly this reason.
+            try
+            {
+                down = Function.Call<bool>(Hash.IS_DISABLED_CONTROL_JUST_PRESSED,
+                                           0, (int)GTA.Control.Context);
+            }
             catch { /* fall through to the raw key */ }
 
             if (!down)
