@@ -3,6 +3,39 @@
 ===============================================================================
 
 
+0.8.2  --  THE HUD SAYS WHY IT IS NOT THERE, AND A CRASH THAT WAS WAITING
+-------------------------------------------------------------------------------
+
+  THE HUD NOW WRITES DOWN WHY IT IS HIDDEN. It always knew -- it works the
+  reason out every frame -- and it only ever said so when the row FLAPPED four
+  times in ten seconds. A HUD that goes once and stays gone tripped no counter
+  and printed nothing at all, which is the state anybody actually reports. So a
+  session that loses the bars now has two lines in the log with timestamps on
+  them:
+
+      The HUD is not being drawn because <reason>.
+      The HUD is back: <reason> is no longer true.
+
+  Diagnostic only. It reads the answer and writes it down; it decides nothing,
+  changes no condition and cannot itself take the row away.
+
+  A NULL KEY THAT WOULD HAVE THROWN. The packet counter added in 0.8.0 keyed its
+  table on which character you are playing WITHOUT the guard its two neighbours
+  in that file both have -- so a session where the pocket screen drew before
+  anything else had touched the store would have handed a null to a Dictionary
+  and taken the tick down with it. Found by reading the file against the methods
+  either side of it. All three guard it now.
+
+  THE 0.8.0 CHANGE TO WHEN THE ROW HIDES IS OUT. It made a hidden game HUD only
+  count while the map had also stopped drawing, which is sound reasoning and was
+  shipped on reasoning alone rather than on a test. It is back to what 0.7.1 did
+  until the log above proves what the right rule is.
+
+  So the bars vanishing in particular places -- reported by NordCyborg and
+  Blackheart117 -- is NOT fixed in this build. It is the next thing, and the two
+  lines above are how it gets found properly instead of guessed at.
+
+
 0.8.1  --  THE CHANGELOG IN THE ZIP CATCHES UP
 -------------------------------------------------------------------------------
 

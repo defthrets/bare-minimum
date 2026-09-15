@@ -55,6 +55,17 @@ namespace BareMinimum.UI
         private static int _hidden;
         private static string _why = "";
 
+        /// <summary>
+        /// The reason last written to the log, so each distinct one is said once.
+        ///
+        /// DIAGNOSTIC ONLY. Nothing in this class reads it and nothing decides anything on
+        /// it: Flip already counts the case where the HUD FLAPS, and says so, but a HUD that
+        /// goes once and stays gone trips no counter and prints nothing at all. That is the
+        /// state somebody actually reports, and until now the mod knew exactly why and never
+        /// said it out loud.
+        /// </summary>
+        private static string _saidWhy;
+
         private static int _flips;
         private static int _windowAt;
         private static int _saidAt;
@@ -89,6 +100,7 @@ namespace BareMinimum.UI
             {
                 _hidden = Steady;
                 Flip(false, why);
+                Say();
                 return;
             }
 
@@ -97,11 +109,39 @@ namespace BareMinimum.UI
             {
                 _hidden = 0;
                 Flip(true, "");
+                Say();
                 return;
             }
 
             if (_hidden < Steady) _hidden++;
             if (_hidden >= Steady) Flip(false, why);
+
+            Say();
+        }
+
+        /// <summary>
+        /// Writes the current state to the log when it changes, and nothing else.
+        ///
+        /// Called at the END of Sync, after everything is decided, and it reads _clear and
+        /// _why without touching either. Every path through Sync reaches it -- the two early
+        /// returns above call it on their way out -- so a HUD that is hidden for a reason is
+        /// a HUD that has said the reason once.
+        /// </summary>
+        private static void Say()
+        {
+            if (_clear)
+            {
+                if (_saidWhy == null) return;
+
+                Log.Info("The HUD is back: " + _saidWhy + " is no longer true.");
+                _saidWhy = null;
+                return;
+            }
+
+            if (_saidWhy == _why) return;
+
+            _saidWhy = _why;
+            Log.Info("The HUD is not being drawn because " + _why + ".");
         }
 
         /// <summary>Records the change and counts how often it is happening. See the class note.</summary>
@@ -188,21 +228,6 @@ namespace BareMinimum.UI
             }
         }
 
-        /// <summary>
-        /// Whether the game is actually drawing its minimap this frame.
-        ///
-        /// ASKED, NOT ASSUMED, AND FAILING TOWARDS DRAWING. A question this class cannot ask
-        /// has never been a reason to take the row away -- see the catch in Soft -- and this
-        /// keeps that rule: if the native will not answer, the map counts as up and the row
-        /// stays, which is the state somebody can see and complain about rather than the one
-        /// where their HUD silently is not there.
-        /// </summary>
-        private static bool Mapped()
-        {
-            try { return Function.Call<bool>(Hash.IS_MINIMAP_RENDERING); }
-            catch { return true; }
-        }
-
         /// <summary>The this-frame ones. TRUE means hidden, but only counts if it holds.</summary>
         private static bool Soft(out string why)
         {
@@ -210,33 +235,8 @@ namespace BareMinimum.UI
 
             try
             {
-                // THE RADAR IS THE TIE-BREAK, AND IT IS WHY THE BARS VANISHED IN THE STREET.
-                //
-                // Two people reported the row going away in particular places -- one of them
-                // beside the mission trigger at Simeon's -- and both said the MINIMAP STAYED
-                // UP while it happened. That is the whole clue: IS_HUD_HIDDEN goes true when
-                // anything asks for the game's HUD to be off, and the trigger scripts around
-                // a mission do exactly that while leaving the radar drawing. This row lives
-                // beside the radar, so it followed a flag that had nothing to do with it.
-                //
-                // Every deliberate blackout is already covered by Hard() above -- cutscene,
-                // fade, pause, switch, dead, arrested -- and in every one of those the map
-                // stops rendering too. So a hidden HUD over a LIVE map is somebody turning
-                // off the game's own furniture, not the screen being cleared, and this row
-                // is not the game's furniture.
-                var map = Mapped();
-
-                if (Function.Call<bool>(Hash.IS_HUD_HIDDEN) && !map)
-                {
-                    why = "the game's HUD is hidden and the map is not drawing";
-                    return true;
-                }
-
-                if (Function.Call<bool>(Hash.IS_RADAR_HIDDEN) && !map)
-                {
-                    why = "the radar is hidden";
-                    return true;
-                }
+                if (Function.Call<bool>(Hash.IS_HUD_HIDDEN)) { why = "the game's HUD is hidden"; return true; }
+                if (Function.Call<bool>(Hash.IS_RADAR_HIDDEN)) { why = "the radar is hidden"; return true; }
 
                 if (!Function.Call<bool>(Hash.IS_RADAR_PREFERENCE_SWITCHED_ON))
                 {

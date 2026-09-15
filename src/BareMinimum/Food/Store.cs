@@ -213,6 +213,15 @@ namespace BareMinimum.Food
 
         private Dictionary<string, int> Left()
         {
+            // THE SAME GUARD Bag() AND Order() BOTH HAVE, and it was missing here.
+            //
+            // _who is filled in lazily, by whichever of these is asked first. Every other
+            // one of them checks; this one took it on trust, so a session where the pocket
+            // screen drew before anything had touched Bag() would have handed a null key to
+            // a Dictionary and thrown. Found by reading this file against the two methods
+            // beside it rather than by hitting it.
+            if (string.IsNullOrEmpty(_who)) _who = Needs.Needs.Who();
+
             Dictionary<string, int> left;
             if (_lefts.TryGetValue(_who, out left)) return left;
 
