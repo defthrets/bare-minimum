@@ -1,6 +1,166 @@
-===============================================================================
+﻿===============================================================================
   BARE MINIMUM  --  changes
 ===============================================================================
+
+
+0.8.1  --  THE CHANGELOG IN THE ZIP CATCHES UP
+-------------------------------------------------------------------------------
+
+  THIS FILE STOPPED AT 0.5.0 AND FOUR RELEASES WENT OUT PAST IT. Everything
+  below under 0.6.0, 0.7.0, 0.7.1 and 0.8.0 shipped without an entry -- the code
+  was right in every one of those downloads and the file beside it said nothing
+  about what had changed.
+
+  No code changed here. If you have 0.8.0, the only thing in this download you
+  have not already got is the reading.
+
+
+0.8.0  --  FIVE FROM THE COMMENTS, AND THE SHOPS GET THEIR SHELVES
+-------------------------------------------------------------------------------
+
+  THE ULTRAWIDE MAP OFFSET SURVIVES A RESTART. It was never being lost -- the
+  ini kept the number the whole time. It was never being APPLIED: the call that
+  moves the frame ran seventy-four lines before the setting was read, so it
+  moved by nought, and nudging the row in the menu was the only thing that ever
+  told it. Which is why it worked until you reloaded, and why making the file
+  read-only could not help. Reported by BoBo-Acilia and Blackheart117.
+
+  THE BARS STOP VANISHING IN THE STREET. Both reporters said the same thing --
+  the minimap stayed up while the row went -- and that was the whole clue.
+  Anything can ask the game to hide its own HUD and the scripts around a mission
+  trigger do exactly that, but this row lives beside the radar rather than
+  inside the game's HUD, so it was obeying a flag that had nothing to do with
+  it. A hidden HUD over a LIVE map is somebody switching off the game's own
+  furniture; a cutscene, a fade and the pause menu stop the map drawing too, so
+  every deliberate blackout still hides it. Reported by NordCyborg and
+  Blackheart117.
+
+  FRANKLIN'S FRIDGE WORKS. The game keeps its own beer interaction against that
+  one fridge at Forum Drive and it reads the same button the prompt advertises,
+  so whoever got there first won and usually it was the game -- which is exactly
+  why Michael's always worked and Franklin's never did. The prompt holds the
+  button while it is on screen, the way the shop counter has since it shipped.
+  Diagnosed in the comments by D_Cypher003, who spotted it is only the kitchen
+  with the beer in it.
+
+  MARKERS ON PAUSE MAP NOW MEANS ONE THING. It only ever applied to the shops,
+  so turning it off cleared those off the pause map and left every vending
+  machine and fruit stall on it. Reported by D_Cypher003.
+
+  A PACKET OF CIGARETTES IS TWENTY CIGARETTES. The tile said Redwood, the icon
+  was a packet, and twelve dollars bought one smoke. It cannot be done by
+  selling twenty, because the pocket counts units against slots and a
+  twenty-pack would be the whole pocket -- so an item says how many uses are in
+  one, and a packet is ONE thing in the pocket with a count on it. The tile
+  counts smokes rather than packets. Reported by User20192910291.
+
+  THE COLD SECTION AND THE AISLES SELL WHAT IS IN THEM. A 24/7 was a room with a
+  counter in it and four walls of stock you could not touch. Stand at the beer
+  wall and buy a beer, at the dairy wall and buy the milk, at the shelving and
+  buy the tins. The counter still sells everything and still wins whenever it is
+  in reach -- the aisles are looked for last and only at arm's length, so the
+  only way to get the fridge is to be stood at the fridge.
+
+  Which retail chiller is beer and which is milk cannot be read off a model
+  name; the game dresses the same fridge either way depending on where it
+  stands. So the log names the model the first time you open one, and
+  [Counters] AisleDrinks and AisleFood move it between groups without a rebuild.
+
+
+0.7.1  --  A DRUG IN YOUR POCKET TAKES A PLACE IN YOUR POCKET
+-------------------------------------------------------------------------------
+
+  If you run Hoodrich, the drugs were drawn in the pocket grid and counted for
+  nothing -- five tiles sat over a header reading 2 of 5, and you could fill all
+  five food slots on top of them. A pocket with eight things in it is not a
+  pocket.
+
+  One place per KIND, which is what the grid draws: one tile for the weed
+  however many grams, the same as one tile for the crisps however many packets.
+  The grams stay Hoodrich's rule and are still reported beside the count.
+
+  It does not shrink your slot count -- that is your setting, and a pocket that
+  quietly reports a smaller cap than the one you typed is one nobody can reason
+  about. And it does not affect putting something back: returning an item the
+  mod took out of your hand has always ignored the cap and still does, or a
+  pocket that filled with drugs mid-meal would eat the sandwich.
+
+
+0.7.0  --  ANIMATION, BREAK, ANIMATION
+-------------------------------------------------------------------------------
+
+  EATING AND DRINKING GET A BEAT IN THE MIDDLE. The same clip was rolled back to
+  back for the length of the meal, which reads as a man winding a handle -- the
+  same motion three or four times with no pause between them. Two passes now
+  with a rest in the middle, holding the thing, which is the shape of taking a
+  bite and then taking another. [Eating] Bites and BreakSeconds.
+
+  AND THE MEAL ENDS WITH THE LAST PASS, so what you watch and how long it takes
+  are one thing instead of two numbers that have to be kept in step. Nothing
+  loops any more: every clip runs its own length and ends, which also kills the
+  old drink jank for good -- loop_bottle is already a loop, and looping a loop
+  restarts it against a blend every pass.
+
+  Smoking is untouched. It is three different clips in a deliberate order rather
+  than one clip played twice, and a rest inside that would be a man stopping
+  halfway through raising a cigarette.
+
+  DROPPED LITTER FALLS. A prop made by the game arrives with its rigid body
+  asleep -- the physics engine parks bodies that are not moving, and one that
+  has never moved has never been woken -- so it hung in the air where it
+  appeared, and the little push it was given went to a body nothing was
+  simulating. Which is why it read as frozen rather than slow.
+
+  A BAG OF CRISPS IS A BAG OF CRISPS. Its model list led with the Burger Shot
+  fries carton, which is still right for French Fries and was never right here.
+
+
+0.6.0  --  A FITTING BENCH, AND THE HAND IS A SWITCH
+-------------------------------------------------------------------------------
+
+  WHERE A THING SITS IN HIS HAND IS SOMETHING YOU SET YOURSELF NOW, in the game,
+  and it sticks. A screen that holds the model in his hand in the pose he eats
+  it in, and lets you walk it into place: three axes of position, three of
+  rotation, a finer step on CTRL. Written to the ini the moment you lock it in,
+  per MODEL rather than per item, so everything holding a burger moves when you
+  move the burger.
+
+  IT PICKS THE MODEL TOO, out of the game's own object list -- 1,578 holdable
+  models -- rather than the sixty the shops already use. The Pizza Slice was
+  holding a closed pizza box because the six pizza models this game has were
+  never on the list to choose from.
+
+  AND IT CAN FILL IN THE REST. Every unfitted model takes the numbers off the
+  fitted one whose name is most like it: a cup from a cup, a tin from a tin. A
+  guess, and a far better start than nought.
+
+  WHICH HAND HE EATS WITH IS A SWITCH. It moves the ANIMATION and the prop
+  together, because they cannot be split -- otherwise he raises an empty fist
+  while the food rides on the other hip. Nothing in the game's own name lists
+  records which arm a clip raises, so this is the only honest way to settle it:
+  press it, look at him, and it is saved.
+
+  THE PANEL STANDS OFF TO THE SIDE, so it is not on top of the man you are
+  looking at.
+
+  BONGS AT THE SMOKE SHOPS, and weed smoked with one plays Franklin's own bong
+  animation. He breathes out real cigarette smoke rather than the fire
+  extinguisher plume that shipped by mistake, and any animation stops if he
+  draws a weapon, shoots or throws a punch.
+
+  VENDING MACHINES PUT THE DRINK IN YOUR POCKET instead of him drinking it where
+  he stands. One seller per cart, where two were spawning on the same stand.
+
+  FRANKLIN'S FRIDGE AT AUNT DENISE'S IS FOUND, and so are beds and counters that
+  were being filtered out by a check that asks whether a model can be SPAWNED --
+  the wrong question entirely for a fixture that is already part of the map.
+
+  TWO GRIDS WHEN A BAG IS WORN, so things move between the bag and your five
+  pocket slots, and F12 closes it the way it opens it.
+
+  ALL 201 ITEM PICTURES AUDITED, the wrong ones redrawn, and nothing in the
+  shops draws a blank white shape any more. The icon set costs a quarter of the
+  video memory it did and looks better for it.
 
 
 0.5.0  --  HE FINISHES WHAT HE BUYS, AND LEAVES IT ON THE PAVEMENT
