@@ -849,6 +849,7 @@
     },
     {
       "id": "cig_redwood",
+      "uses": 20,
       "litter": "ng_proc_cigarette01a",
       "name": "Redwood",
       "category": "Snacks",
@@ -870,6 +871,7 @@
     },
     {
       "id": "cig_debonaire",
+      "uses": 20,
       "litter": "ng_proc_cigarette01a",
       "name": "Debonaire",
       "category": "Snacks",

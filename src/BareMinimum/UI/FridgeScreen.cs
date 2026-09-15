@@ -639,11 +639,14 @@ namespace BareMinimum.UI
             // Taken first and put back on refusal, exactly as the pocket does it. Eating a
             // thing that stayed in the fridge is a duplication bug and losing one to a refused
             // animation is a theft bug; this has neither.
-            if (!from.Take(id)) { Sound("ERROR"); return; }
+            // USE, NOT TAKE -- see Store.Use. The row above this one, which MOVES a thing
+            // from one side to the other, still takes: carrying a packet to the fridge must
+            // not cost a cigarette.
+            if (!from.Use(id)) { Sound("ERROR"); return; }
 
             if (!_eating.Begin(item))
             {
-                from.Add(id);
+                from.Unuse(id);
                 Sound("ERROR");
                 return;
             }

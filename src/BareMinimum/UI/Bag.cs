@@ -115,6 +115,23 @@ namespace BareMinimum.UI
         private List<string> _dope = new List<string>();
 
         /// <summary>Tiles in the grid: the food, and then the product after it.</summary>
+
+        /// <summary>
+        /// What the chip on a tile says: uses for something with more than one in it, and
+        /// the plain stack count for everything else.
+        /// </summary>
+        private string Counted(string id)
+        {
+            var held = _pantry.CountOf(id);
+            if (held < 1) return "0";
+
+            var item = _menu.Find(id);
+            if (item == null || item.Uses <= 1) return held.ToString();
+
+            // The open one, plus a full one for every unopened packet behind it.
+            return (_pantry.LeftOf(id) + (held - 1) * item.Uses).ToString();
+        }
+
         private int Places { get { return _ids.Count + _dope.Count; } }
 
         /// <summary>Whether that tile is a bag rather than a sandwich.</summary>
@@ -634,13 +651,17 @@ namespace BareMinimum.UI
             // a vehicle the animation cannot play in -- and eating a thing that stayed in your
             // pocket is a duplication bug, while losing one to a refused animation is a theft
             // bug. Neither, this way.
-            if (!_pantry.Take(id)) { Sound("ERROR"); return; }
+            // USE, NOT TAKE. One cigarette out of the packet rather than the packet out of
+            // the pocket. Identical to Take for everything whose Uses is 1, which is
+            // everything but the packets. See Store.Use.
+            if (!_pantry.Use(id)) { Sound("ERROR"); return; }
 
             if (!_eating.Begin(item))
             {
                 // BACK, not added -- see Store.Return: the cap can refuse an ordinary Add
-                // and the item would be gone.
-                _pantry.Return(id);
+                // and the item would be gone. Unuse puts back exactly what Use took, which
+                // for a part-smoked packet is the cigarette and not the packet.
+                _pantry.Unuse(id);
                 Sound("ERROR");
                 return;
             }
@@ -932,7 +953,13 @@ namespace BareMinimum.UI
             // A drug counts itself: whole pills for the things that come as pills, and grams
             // to one place for everything else. Asked rather than worked out here, because
             // which is which lives in the other mod's drugs.json.
-            var n = dope ? Food.Dope.Chip(id) : _pantry.CountOf(id).ToString();
+            //
+            // A PACKET COUNTS WHAT IS IN IT, not how many packets. One packet of twenty
+            // reading "1" is the same lie the item itself used to tell -- the chip says how
+            // many smokes are left, which is the number anybody looking at it wants. A second
+            // unopened packet adds its full twenty to that, because that is also true.
+            // See Store.LeftOf.
+            var n = dope ? Food.Dope.Chip(id) : Counted(id);
 
             // SIZED TO THE NUMBER. It was a fixed box, which is too wide round a 1 and too
             // tight round a 32 -- and a drug counts itself in grams, so three characters and

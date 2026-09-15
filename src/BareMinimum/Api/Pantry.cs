@@ -354,13 +354,13 @@ namespace BareMinimum.Api
                 var item = _menu.Find(id);
                 if (item == null) return false;
 
-                if (!_bag.Take(id)) return false;
+                if (!_bag.Use(id)) return false;
 
                 if (_eating.Begin(item)) return true;
 
                 // BACK, not added: the cap can have been lowered under what he is carrying
                 // since the take, and a refused put-back destroys the item. See Store.Return.
-                _bag.Return(id);
+                _bag.Unuse(id);
                 return false;
             }
             catch { return false; }

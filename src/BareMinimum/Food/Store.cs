@@ -33,6 +33,17 @@ namespace BareMinimum.Food
         private readonly Dictionary<string, Dictionary<string, int>> _bags =
             new Dictionary<string, Dictionary<string, int>>(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// How many uses are left in the OPEN one, per character, per item. See Use.
+        ///
+        /// ONLY THE ONE BEING USED IS IN HERE. An unopened pack is not listed at all and is
+        /// worth its item's full Uses -- so this file stays empty for everybody who never
+        /// smokes, and an item whose Uses changes in foods.json does not strand a saved
+        /// number that no longer means anything.
+        /// </summary>
+        private readonly Dictionary<string, Dictionary<string, int>> _lefts =
+            new Dictionary<string, Dictionary<string, int>>(StringComparer.OrdinalIgnoreCase);
+
         private readonly Dictionary<string, List<string>> _order =
             new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
 
@@ -172,6 +183,144 @@ namespace BareMinimum.Food
 
             _dirty = true;
             return true;
+        }
+
+        /// <summary>How many uses are left in the one he would use next. 0 if he has none.</summary>
+        public int LeftOf(string id)
+        {
+            if (CountOf(id) < 1) return 0;
+
+            var uses = UsesOf(id);
+            if (uses <= 1) return CountOf(id);
+
+            int left;
+            return Left().TryGetValue(id, out left) ? left : uses;
+        }
+
+        /// <summary>What the catalogue says one of these is good for. 1 when it says nothing.</summary>
+        private int UsesOf(string id)
+        {
+            try
+            {
+                var item = Menu == null ? null : Menu.Find(id);
+                return item == null || item.Uses < 1 ? 1 : item.Uses;
+            }
+            catch
+            {
+                return 1;
+            }
+        }
+
+        private Dictionary<string, int> Left()
+        {
+            Dictionary<string, int> left;
+            if (_lefts.TryGetValue(_who, out left)) return left;
+
+            left = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            _lefts[_who] = left;
+            return left;
+        }
+
+        /// <summary>
+        /// CONSUMES ONE USE. The one call for eating, drinking or smoking something.
+        ///
+        /// NOT Take, AND THAT IS THE WHOLE POINT OF IT BEING A SEPARATE METHOD. Take is a
+        /// MOVE -- it is what carrying a packet from the pocket to the fridge calls, and
+        /// what putting it back calls -- and charging a cigarette for walking one to the
+        /// kitchen would be absurd. Every eat path calls this; every move path still calls
+        /// Take, and neither has to know about the other.
+        ///
+        /// For anything whose Uses is 1, which is everything but the packets, this IS Take.
+        /// </summary>
+        public bool Use(string id)
+        {
+            var uses = UsesOf(id);
+
+            if (uses <= 1) return Take(id);
+
+            if (CountOf(id) < 1) return false;
+
+            var left = Left();
+
+            int have;
+            if (!left.TryGetValue(id, out have) || have < 1 || have > uses) have = uses;
+
+            have--;
+
+            if (have > 0)
+            {
+                left[id] = have;
+                _dirty = true;
+
+                _undoId = id;
+                _undoTook = false;
+                return true;
+            }
+
+            // The last one out of the packet: the packet goes with it.
+            left.Remove(id);
+
+            var went = Take(id);
+
+            // WHICH OF THE TWO THINGS THIS DID, for Unuse. Without it, undoing cannot tell a
+            // cigarette coming off the count from a packet leaving the pocket -- and it
+            // guesses wrong in both directions: a refused light on the last cigarette of a
+            // spare packet hands back a FULL one, and on the only packet hands back twenty.
+            // Set beside the call that did it rather than worked out afterwards.
+            _undoId = went ? id : null;
+            _undoTook = went;
+
+            return went;
+        }
+
+        private string _undoId;
+        private bool _undoTook;
+
+        /// <summary>
+        /// Puts back exactly what Use took, for when the thing it was taken for refused.
+        ///
+        /// THE MIRROR OF Use AND NOT OF Take. If the packet is still in the pocket then a use
+        /// came off the count and the count is what goes back; if the last one emptied it,
+        /// the packet itself comes back -- through Return, which ignores the cap, because a
+        /// refused put-back destroys what the player was holding. See Return.
+        /// </summary>
+        public void Unuse(string id)
+        {
+            var uses = UsesOf(id);
+
+            if (uses <= 1) { Return(id); return; }
+
+            var left = Left();
+
+            // THE PACKET ITSELF WENT, so the packet comes back -- with ONE use in it, which
+            // is the one that emptied it. Not a full packet: that is the bug this flag
+            // exists to stop, and it is worth a whole cigarette every time an animation
+            // refuses. Read from the matching Use rather than inferred from the count, which
+            // cannot tell "the last one of my only packet" from "the last one of two".
+            var tookThePacket = _undoTook &&
+                                string.Equals(_undoId, id, StringComparison.OrdinalIgnoreCase);
+
+            _undoId = null;
+            _undoTook = false;
+
+            if (tookThePacket)
+            {
+                // Return, not Add: the cap can refuse an Add and the packet would be gone.
+                Return(id);
+                left[id] = 1;
+                _dirty = true;
+                return;
+            }
+
+            int have;
+            if (!left.TryGetValue(id, out have)) have = 0;
+
+            have++;
+
+            if (have >= uses) left.Remove(id);
+            else left[id] = have;
+
+            _dirty = true;
         }
 
         public bool Take(string id)
@@ -319,6 +468,44 @@ namespace BareMinimum.Food
                     _order[key] = order;
                 }
 
+                // AND WHAT IS LEFT IN THE OPEN PACKETS. Read after the pockets and through
+                // the same rename plan, so a saved packet and the pocket holding it cannot
+                // end up filed under two different spellings of the same man.
+                //
+                // ABSENT IS NORMAL, not a fault: this node is only written once somebody has
+                // part-smoked something, and every save made before packets existed has no
+                // node at all. A missing count means a full one.
+                var opened = doc["opened"];
+
+                if (opened != null && !opened.IsNull)
+                {
+                    foreach (var who in opened.Keys)
+                    {
+                        var node = opened[who];
+                        if (node == null || node.IsNull) continue;
+
+                        var key = who;
+
+                        if (plan != null)
+                        {
+                            string renamed;
+                            if (!plan.TryGetValue(who, out renamed)) continue;
+
+                            key = renamed;
+                        }
+
+                        var left = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+
+                        foreach (var id in node.Keys)
+                        {
+                            var n = node[id].AsInt(0);
+                            if (n > 0) left[id] = n;
+                        }
+
+                        if (left.Count > 0) _lefts[key] = left;
+                    }
+                }
+
                 // So the corrected names reach the file rather than only this session.
                 if (plan != null) _dirty = true;
             }
@@ -366,9 +553,34 @@ namespace BareMinimum.Food
                     people.Set(pair.Key, node);
                 }
 
+                // WHAT IS LEFT IN THE OPEN PACKETS, beside the pockets rather than inside
+                // them: the pocket node is a plain id -> count and half a dozen things read
+                // it, so a second number per row would be a format change for the sake of a
+                // feature only the packets use. Absent for anybody who has not opened one.
+                var opened = Json.Object();
+
+                foreach (var pair in _lefts)
+                {
+                    if (pair.Value == null || pair.Value.Count == 0) continue;
+
+                    var node = Json.Object();
+                    var any = false;
+
+                    foreach (var one in pair.Value)
+                    {
+                        if (one.Value < 1) continue;
+
+                        node.Set(one.Key, one.Value);
+                        any = true;
+                    }
+
+                    if (any) opened.Set(pair.Key, node);
+                }
+
                 var doc = Json.Object()
                     .Set("version", Needs.Needs.StateVersion)
-                    .Set("characters", people);
+                    .Set("characters", people)
+                    .Set("opened", opened);
 
                 if (!JsonFile.Write(File, doc))
                 {

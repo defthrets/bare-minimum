@@ -112,6 +112,20 @@ namespace BareMinimum.Food
         public bool Keep;
 
         /// <summary>
+        /// HOW MANY TIMES ONE OF THESE CAN BE USED. 1 for everything you finish in one go.
+        ///
+        /// A PACKET OF CIGARETTES IS NOT A CIGARETTE, which is what somebody said in the
+        /// comments and they were right: the tile said Redwood, the icon was a packet, and it
+        /// bought you exactly one smoke for twelve dollars.
+        ///
+        /// IT CANNOT BE DONE BY BUYING TWENTY, because the pocket counts units against slots
+        /// -- see Store.Total -- so a twenty-pack would be the whole pocket and nineteen
+        /// tiles. It is ONE thing in the pocket with a count on it, and smoking takes one off
+        /// the count rather than out of the pocket. See Store.Use.
+        /// </summary>
+        public int Uses = 1;
+
+        /// <summary>
         /// The model held while consuming it: the one that was found to exist.
         ///
         /// Chosen from Props by CheckProps once the game is running. Empty means this build
@@ -517,6 +531,7 @@ namespace BareMinimum.Food
                         Desc = node["desc"].AsString(""),
                         Smoke = node["smoke"].AsBool(false),
                         Keep = node["keep"].AsBool(false),
+                        Uses = Math.Max(1, node["uses"].AsInt(1)),
                         Hold = Three(node["hold"]),
                         Turn = Three(node["turn"]),
                         Props = PropNames(node["prop"]),
