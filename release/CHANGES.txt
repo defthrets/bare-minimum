@@ -3,6 +3,36 @@
 ===============================================================================
 
 
+0.8.3  --  BUYING FALLS THROUGH TO THE BAG, LIKE LOOTING ALWAYS DID
+-------------------------------------------------------------------------------
+
+  "NO ROOM IN YOUR POCKETS, SO YOU ATE IT" -- WITH A BAG OF EMPTY SLOTS ON HIS
+  BACK. Reported as the mod saying he had no room when he plainly did, and that
+  is exactly what it was doing.
+
+  There were two rules and they disagreed. Looting a body -- what the mod next
+  door hands over -- has always tried the pocket and then the bag. The shop
+  counter and the street vendors only ever tried the pocket: they asked whether
+  it was full, got yes, and handed him the burger to eat standing there. Once
+  drugs started taking places in 0.7.1, one packet and three bags of product
+  fill a pocket, and every purchase after that was a meal at the counter.
+
+  ONE RULE NOW: the pocket, then the bag on his back. The counter, the vendors
+  and the loot all ask the same thing. The shop checks there is room ANYWHERE
+  before it takes your money, so a full pocket with no bag is still a meal on
+  the spot rather than a refund. The message says which it went in -- "in your
+  pocket" or "in your bag" -- and counts the same number the F12 header counts.
+
+  Kit is the exception on purpose. A bong is carried in the POCKET or it does
+  not count as carried, so it never goes in the bag.
+
+  AND TWO MORE FROM READING THE DAY'S CHANGES BACK. Turning off "Drugs in
+  pocket" hid the drug tiles but went on charging for them, so invisible drugs
+  were eating slots nobody could see; the count now obeys the same switch the
+  screen does. And one call to the game clock was sitting outside the guard it
+  belonged in.
+
+
 0.8.2  --  THE HUD SAYS WHY IT IS NOT THERE, AND A CRASH THAT WAS WAITING
 -------------------------------------------------------------------------------
 
