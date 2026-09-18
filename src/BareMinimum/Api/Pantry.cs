@@ -441,9 +441,8 @@ namespace BareMinimum.Api
                 if (_bag == null || _menu == null) return false;
                 if (_menu.Find(id) == null) return false;
 
-                if (_bag.Add(id, howMany)) return true;
-
-                return _knapsack != null && Food.Knapsack.Worn && _knapsack.Add(id, howMany);
+                // The one rule for pocket-then-bag, shared with the counter and the vendors.
+                return Food.Stow.Put(_bag, _knapsack, id, howMany) != Food.Stow.Where.Nowhere;
             }
             catch { return false; }
         }

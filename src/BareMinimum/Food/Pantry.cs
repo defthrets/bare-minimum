@@ -60,22 +60,30 @@ namespace BareMinimum.Food
         {
             get
             {
-                var now = Game.GameTime;
+                // THE SAME SWITCH THE POCKET SCREEN OBEYS. Bag.Refill only draws the drug
+                // tiles while DrugsInPocket is on; this counted them regardless, so turning
+                // the switch off left invisible drugs taking up places nobody could see.
+                // A thing that is not shown is not in the way.
+                if (_cfg == null || !_cfg.DrugsInPocket) return 0;
 
-                if (now >= _dopeAt)
+                try
                 {
-                    _dopeAt = now + 200;
+                    var now = Game.GameTime;
 
-                    try
+                    if (now >= _dopeAt)
                     {
+                        _dopeAt = now + 200;
+
                         var ids = Dope.Ids();
                         _dope = ids == null ? 0 : ids.Length;
                     }
-                    catch
-                    {
-                        // The other mod is not there, or is mid-reload. Nothing is in the way.
-                        _dope = 0;
-                    }
+                }
+                catch
+                {
+                    // The other mod is not there, is mid-reload, or the game is not up yet.
+                    // Nothing is in the way, and a question we cannot ask is not a reason to
+                    // refuse him a slot.
+                    _dope = 0;
                 }
 
                 return _dope;

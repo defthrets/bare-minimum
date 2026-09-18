@@ -29,6 +29,14 @@ namespace BareMinimum.UI
         private readonly Pantry _pantry;
         private readonly Needs.Needs _needs;
 
+        /// <summary>
+        /// The bag on his back, when there is one. Set from Main after it is built, the way
+        /// Vendors.Doors is -- the bag is constructed after this screen, so it cannot come in
+        /// through the constructor without reordering Main. Null means no overflow, which is
+        /// exactly what this screen did for its whole life. See Food.Stow.
+        /// </summary>
+        public Knapsack Bag { get; set; }
+
         private readonly Menu _ui = new Menu
         {
             // The same two marks as the settings panel, so both menus read as this mod's.
@@ -634,7 +642,7 @@ namespace BareMinimum.UI
                 }
 
                 Notify("~g~" + item.Name + "~s~ - in your pocket. " +
-                       _pantry.Total + " of " + _pantry.Slots + ".");
+                       _pantry.Taken + " of " + _pantry.Slots + ".");
 
                 Refill();
                 return;
@@ -659,11 +667,17 @@ namespace BareMinimum.UI
                 // shop answering a question nobody asked: the pocket is for taking food away,
                 // and a man with nowhere to put it is a man who eats it standing there. So the
                 // last one goes in his hand instead of being turned down.
-                if (_pantry.Full) { Spot(item); return; }
+                //
+                // AND THE BAG COUNTS AS SOMEWHERE TO PUT IT. This asked the pocket alone, so a
+                // full pocket with a bag on his back went straight to eating it -- "no room in
+                // your pockets" over thirteen empty slots. Stow asks both. See Food.Stow.
+                if (!Stow.Room(_pantry, Bag)) { Spot(item); return; }
 
                 if (!Charge(item.Price)) return;
 
-                if (!_pantry.Add(item.Id))
+                var went = Stow.Put(_pantry, Bag, item.Id);
+
+                if (went == Stow.Where.Nowhere)
                 {
                     // Paid for, and the pocket took it as far as the shelf and no further.
                     // Eaten rather than refunded, for the reason above.
@@ -685,8 +699,10 @@ namespace BareMinimum.UI
                 // the machine you just used.
                 if (_at == Counter.Machine) Vend();
 
-                Notify("~g~" + item.Name + "~s~ - in your pocket. " +
-                       _pantry.Total + " of " + _pantry.Slots + ".");
+                // Says which it went in, and counts what the pocket screen counts -- Taken,
+                // not Total, so "3 of 5" here and "3 of 5" on the F12 header are the same
+                // number when drugs are taking places.
+                Notify("~g~" + item.Name + "~s~" + Stow.Said(went, _pantry, Bag));
 
                 Refill();
                 return;

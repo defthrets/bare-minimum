@@ -209,6 +209,13 @@ namespace BareMinimum
             // when the pocket is full and there is a bag on him. See Api.Pantry.Give.
             Api.Pantry.Bag(_knapsack);
 
+            // AND THE SAME BAG TO THE TWO PLACES THAT SELL. Set here, after the bag exists,
+            // the way Vendors.Doors is -- the shop and the vendors are built above it. Until
+            // this line they overflowed nowhere: a full pocket at a counter was a meal on the
+            // spot with a bag of empty slots on his back. See Food.Stow.
+            _shop.Bag = _knapsack;
+            _vendors.Bag = _knapsack;
+
             // AND HOW THE PHONE NEXT DOOR OPENS IT. The bag screen when there is a bag on
             // him, the plain pocket when there is not -- the same choice the pocket key
             // makes, so the two ways in land in the same place. Refused while anything else

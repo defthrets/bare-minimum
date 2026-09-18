@@ -398,6 +398,9 @@ namespace BareMinimum.Venues
         /// </summary>
         public Inside Doors { get; set; }
 
+        /// <summary>The bag on his back, when there is one. Set from Main like Doors. See Food.Stow.</summary>
+        public Knapsack Bag { get; set; }
+
         /// <summary>
         /// One shared Random for the whole class.
         ///
@@ -2447,10 +2450,14 @@ namespace BareMinimum.Venues
             // or unless it is being eaten where it was bought.
             if (_cfg.BuyToPantry && !onTheSpot)
             {
-                if (_pantry.Add(item.Id))
+                // POCKET, THEN THE BAG ON HIS BACK. This tried the pocket alone and fell
+                // straight through to eating it, so a full pocket and an empty bag was "no
+                // room in your pockets". One rule with the counter and the API: Food.Stow.
+                var went = Stow.Put(_pantry, Bag, item.Id);
+
+                if (went != Stow.Where.Nowhere)
                 {
-                    Notify("~g~" + item.Name + "~s~ - in your pocket. " +
-                           _pantry.Total + " of " + _pantry.Slots + ".");
+                    Notify("~g~" + item.Name + "~s~" + Stow.Said(went, _pantry, Bag));
                     return;
                 }
 
