@@ -57,6 +57,14 @@ namespace BareMinimum.Food
         private static PropertyInfo _ready, _unit, _carried, _capacity;
         private static MethodInfo _ids, _gramsOf, _nameOf, _iconOf, _countedOf, _amountOf, _use;
 
+        /// <summary>
+        /// The bag's side of the same surface, bound when the other mod is new enough to
+        /// have one. All or none: a screen that could list what is in the bag but not move
+        /// it is a screen with a button that does nothing. See BagShelf.
+        /// </summary>
+        private static PropertyInfo _bagWorn, _bagCarried;
+        private static MethodInfo _bagIds, _bagGramsOf, _toBag, _toPocket, _useFromBag;
+
         // ======================================================================
         // The kit he is carrying
         // ======================================================================
@@ -179,12 +187,30 @@ namespace BareMinimum.Food
                     _amountOf = type.GetMethod("AmountOf", BindingFlags.Public | BindingFlags.Static);
                     _use = type.GetMethod("Use", BindingFlags.Public | BindingFlags.Static);
 
+                    // ADDED AFTER v1 WITHOUT A BUMP, the same way the bag's food shelf was
+                    // added on this side: a Posted Up older than these answers null here and
+                    // the bag's pane simply has no product on it, which is what it showed
+                    // before. Nothing else about the contract moved.
+                    _bagWorn = type.GetProperty("BagWorn", BindingFlags.Public | BindingFlags.Static);
+                    _bagCarried = type.GetProperty("BagCarried", BindingFlags.Public | BindingFlags.Static);
+                    _bagIds = type.GetMethod("BagIds", BindingFlags.Public | BindingFlags.Static);
+                    _bagGramsOf = type.GetMethod("BagGramsOf", BindingFlags.Public | BindingFlags.Static);
+                    _toBag = type.GetMethod("ToBag", BindingFlags.Public | BindingFlags.Static);
+                    _toPocket = type.GetMethod("ToPocket", BindingFlags.Public | BindingFlags.Static);
+                    _useFromBag = type.GetMethod("UseFromBag", BindingFlags.Public | BindingFlags.Static);
+
                     _type = type;
+
+                    var bagged = _bagWorn != null && _bagCarried != null && _bagIds != null &&
+                                 _bagGramsOf != null && _toBag != null && _toPocket != null &&
+                                 _useFromBag != null;
 
                     var version = type.GetProperty("Version", BindingFlags.Public | BindingFlags.Static);
                     Log.Info("Posted Up " +
                              (version == null ? "?" : version.GetValue(null, null) as string) +
-                             " found. What you are holding will show in the pocket.");
+                             " found. What you are holding will show in the pocket" +
+                             (bagged ? ", and what is in the bag on the bag's side of it."
+                                     : ". It is too old to show the bag's side."));
 
                     return _type;
                 }
@@ -283,8 +309,12 @@ namespace BareMinimum.Food
         /// </summary>
         public static string Label(string id)
         {
-            var grams = GramsOf(id);
+            return Label(id, GramsOf(id));
+        }
 
+        /// <summary>That much of it, written the way that drug counts itself. For either side of the bag screen.</summary>
+        public static string Label(string id, float grams)
+        {
             try
             {
                 if (Present && _amountOf != null)
@@ -301,8 +331,11 @@ namespace BareMinimum.Food
         /// <summary>The number for the corner of a tile: whole pills, or grams to one place.</summary>
         public static string Chip(string id)
         {
-            var grams = GramsOf(id);
+            return Chip(id, GramsOf(id));
+        }
 
+        public static string Chip(string id, float grams)
+        {
             try
             {
                 if (Present && _countedOf != null &&
@@ -352,6 +385,125 @@ namespace BareMinimum.Food
         }
 
         // ======================================================================
+        // What is in the bag
+        // ======================================================================
+
+        /// <summary>
+        /// Whether the other mod is here, started, and new enough to show the bag's side.
+        ///
+        /// THE BAG SCREEN STANDS IN FOR THE POCKET the whole time a bag is on his back, and
+        /// it listed the food in the bag and not the product -- the other mod kept its own
+        /// bag's product behind a surface that only ever answered for his pockets. So a man
+        /// wearing a bag had two ways into his inventory, this screen and the phone next
+        /// door that opens this screen, and neither showed a gram of what he had looted
+        /// into it. These are the bag's side, and they answer nothing on a Posted Up older
+        /// than them, which is exactly what the pane showed before.
+        /// </summary>
+        public static bool BagShelf
+        {
+            get
+            {
+                return Present && _bagWorn != null && _bagCarried != null && _bagIds != null &&
+                       _bagGramsOf != null && _toBag != null && _toPocket != null && _useFromBag != null;
+            }
+        }
+
+        /// <summary>Whether the bag is on his back, as far as the other mod is concerned.</summary>
+        public static bool BagWorn
+        {
+            get
+            {
+                try { return BagShelf && (bool)_bagWorn.GetValue(null, null); }
+                catch { return false; }
+            }
+        }
+
+        /// <summary>Everything street-ready in the bag. Never null, empty without the other mod.</summary>
+        public static string[] BagIds()
+        {
+            try
+            {
+                if (!BagShelf) return new string[0];
+                return _bagIds.Invoke(null, null) as string[] ?? new string[0];
+            }
+            catch { return new string[0]; }
+        }
+
+        public static float BagGramsOf(string id)
+        {
+            try
+            {
+                if (!BagShelf) return 0f;
+                return (float)_bagGramsOf.Invoke(null, new object[] { id });
+            }
+            catch { return 0f; }
+        }
+
+        /// <summary>Grams of product in the bag altogether, for the pane's caption.</summary>
+        public static float BagCarried
+        {
+            get
+            {
+                try { return !BagShelf ? 0f : (float)_bagCarried.GetValue(null, null); }
+                catch { return 0f; }
+            }
+        }
+
+        public static string BagLabel(string id)
+        {
+            return Label(id, BagGramsOf(id));
+        }
+
+        public static string BagChip(string id)
+        {
+            return Chip(id, BagGramsOf(id));
+        }
+
+        /// <summary>Whether there is enough of it in the bag to take one.</summary>
+        public static bool BagEnough(string id)
+        {
+            return BagGramsOf(id) >= Unit - 0.001f;
+        }
+
+        /// <summary>
+        /// Puts the lot of it in the bag, as much as fits. Grams that went; nought when
+        /// none did, or the bag is not on him.
+        ///
+        /// THE OTHER MOD DOES THE CARRYING. Both containers are its, the rule for how much
+        /// fits is its -- a slot per hundred grams, and the food on the shelf counted first
+        /// -- and a gram that goes missing between two of its containers would be this mod's
+        /// fault and its bug report. It says how much crossed, and this believes it.
+        /// </summary>
+        public static float ToBag(string id)
+        {
+            try
+            {
+                if (!BagShelf) return 0f;
+                return (float)_toBag.Invoke(null, new object[] { id, 0f });
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("Posted Up would not bag " + id + ": " + ex.Message);
+                return 0f;
+            }
+        }
+
+        /// <summary>Takes the lot of it out of the bag into his pockets, as much as fits. Grams that went.</summary>
+        public static float ToPocket(string id)
+        {
+            try
+            {
+                if (!BagShelf) return 0f;
+                return (float)_toPocket.Invoke(null, new object[] { id, 0f });
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("Posted Up would not unbag " + id + ": " + ex.Message);
+                return 0f;
+            }
+        }
+
+        // ======================================================================
         // Taking one
         // ======================================================================
 
@@ -375,7 +527,24 @@ namespace BareMinimum.Food
         /// </remarks>
         public static string Take(Needs.Needs needs, string id)
         {
-            if (!Present || _use == null) return "Not carrying that";
+            return Land(needs, id, _use, "his pockets");
+        }
+
+        /// <summary>
+        /// The same act out of the bag. The other mod moves one into his pockets and takes it
+        /// from there -- see Api.Drugs.UseFromBag on its side -- so the refusals are the same
+        /// sentences and the ritual is the same ritual. What lands on the meters is ours,
+        /// exactly as it is from the pocket.
+        /// </summary>
+        public static string TakeFromBag(Needs.Needs needs, string id)
+        {
+            return Land(needs, id, _useFromBag, "the bag");
+        }
+
+        /// <summary>Take, from whichever container the call reaches into. See Take.</summary>
+        private static string Land(Needs.Needs needs, string id, MethodInfo use, string from)
+        {
+            if (!Present || use == null) return "Not carrying that";
             if (needs == null) return "Not ready";
 
             var effect = Effect(id);
@@ -385,10 +554,10 @@ namespace BareMinimum.Food
 
             string no;
 
-            try { no = _use.Invoke(null, new object[] { id }) as string; }
+            try { no = use.Invoke(null, new object[] { id }) as string; }
             catch (Exception ex)
             {
-                Log.Debug("Posted Up would not take " + id + ": " + ex.Message);
+                Log.Debug("Posted Up would not take " + id + " out of " + from + ": " + ex.Message);
                 return "Could not";
             }
 

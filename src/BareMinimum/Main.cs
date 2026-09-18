@@ -171,11 +171,16 @@ namespace BareMinimum
                     InReach = NearAFridge,
                     Prompt = "Press ~INPUT_CONTEXT~ to open the fridge."
                 },
-                _eating, _fridges);
+                _eating, _fridges, _needs);
 
             // THE BAG IS THE SAME SCREEN WITH A DIFFERENT FAR SIDE. Two grids, a transfer
             // between them, and no door to stand at -- the pocket key opens it wherever he
             // is, and only while there is a bag on his back. See Food.Knapsack.
+            //
+            // IT LISTS THE OTHER MOD'S PRODUCT TOO, on both sides, since 2026-09-19. It
+            // did not, and the plain pocket did -- so with a bag on, which is when this
+            // screen is the pocket, nothing he looted was on any screen. See
+            // FridgeScreen._mineDope.
             _knapsack = new Knapsack(_catalogue);
 
             _bagScreen = new FridgeScreen(_cfg, _catalogue, _pantry,
@@ -187,9 +192,16 @@ namespace BareMinimum
                     Blurb = "what you are carrying, and what is in the bag",
                     Noun = "The bag",
                     On = () => Knapsack.Worn,
-                    InReach = () => Knapsack.Worn
+                    InReach = () => Knapsack.Worn,
+
+                    // AND THE OTHER MOD'S PRODUCT ON BOTH SIDES OF IT. The bag is the one
+                    // store its product can go in as well as food, and this is the screen
+                    // that stands in for the pocket the whole time a bag is on -- so a bag
+                    // of meth has to be as visible here as it is on the plain pocket. See
+                    // FridgeScreen.Far.Product.
+                    Product = true
                 },
-                _eating, _fridges);
+                _eating, _fridges, _needs);
 
             // The bridge other mods reach by reflection. Wired LAST, so anything that finds
             // the type finds a working one behind it -- Api.Pantry.Ready is false until this
