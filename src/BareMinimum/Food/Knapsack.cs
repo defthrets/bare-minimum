@@ -48,6 +48,13 @@ namespace BareMinimum.Food
         private const int SWorn = 0;
         private const int SSlots = 2;
 
+        /// <summary>
+        /// The fourth int, when the other side is new enough to write one: how many of the
+        /// bag's slots its product is sat in. A row with three ints reserves nothing, which
+        /// is what happened before this existed.
+        /// </summary>
+        private const int SProduct = 3;
+
         private static int[] Row
         {
             get
@@ -82,6 +89,28 @@ namespace BareMinimum.Food
                 var slots = row != null && row.Length > SSlots ? row[SSlots] : 0;
 
                 return slots < 1 ? 1 : slots;
+            }
+        }
+
+        /// <summary>
+        /// The slots the other mod's product is using, so a bag with a kilo in it is not
+        /// also a bag with twenty empty shelves.
+        ///
+        /// A BAG IS TWENTY SLOTS BETWEEN TWO MODS. Product takes one per hundred grams over
+        /// there and food takes one each over here, and until this was read the two counts
+        /// never met: this shelf offered all twenty whatever was in the bag, and the other
+        /// side's screen said "13 of 20" beside a bag this one called "0 of 20". The number
+        /// is theirs to work out -- it is their product -- and it comes down the same channel
+        /// as worn and slots.
+        /// </summary>
+        protected override int Reserved
+        {
+            get
+            {
+                var row = Row;
+                var product = row != null && row.Length > SProduct ? row[SProduct] : 0;
+
+                return product < 0 ? 0 : product;
             }
         }
 

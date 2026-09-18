@@ -141,6 +141,13 @@ namespace BareMinimum.UI
             /// does not -- there is nowhere to stand and nothing to prompt.
             /// </summary>
             public string Prompt;
+
+            /// <summary>
+            /// The same offer as words for the mod's own prompt line, with no button tag in
+            /// it: the key is drawn on a cap in front. See Update, on why the game's help
+            /// box is not used for this.
+            /// </summary>
+            public string Hint = "Open the fridge";
         }
 
         private readonly Far _far;
@@ -286,10 +293,6 @@ namespace BareMinimum.UI
                 return;
             }
 
-            Hud.Help(_far.Prompt);
-
-            // AND THE BUTTON IS OURS WHILE THE PROMPT IS UP.
-            //
             // FRANKLIN'S KITCHEN HAS A BEER IN IT. The game keeps its own interaction against
             // the fridge at Forum Drive -- walk up and it offers you a beer -- and it reads
             // the same button this prompt advertises. Whoever reads it first wins, the game
@@ -298,14 +301,35 @@ namespace BareMinimum.UI
             // diagnosed by D_Cypher003 in the comments, who spotted that it is only the
             // kitchen with the beer.
             //
-            // The shop counter has done this since it shipped -- see Shop, which disables the
-            // same two controls next to a till -- and the fridge simply never got it. Only
-            // while the prompt is actually on screen, so the beer is still there the moment
-            // you step away.
+            // TWO THINGS WERE STILL WRONG AFTER THE BUTTON WAS TAKEN, and both are fixed here.
+            //
+            // THE GAME'S PROMPT WAS STILL ON SCREEN. Its beer offer is a help message, and so
+            // was ours: two scripts writing the same box in the same frame, taking turns,
+            // which is the "popup" that would not go away at a fridge this mod had claimed.
+            // Ours is drawn by this mod now, through Hint, at the foot of the screen where
+            // its other offers live -- and the game's help box is hidden for every frame the
+            // fridge is in reach, which is the only way to take the game's line down without
+            // it coming straight back on the next one.
+            //
+            // AND THE BEER STILL POURED. DisableControlThisFrame is control group nought, and
+            // the game's own scripts read INPUT_CONTEXT through group two as often as not --
+            // so the button was ours in the group we were reading and the game's in the group
+            // it was. All three groups now, and this screen still reads its own press through
+            // the disabled reader, which sees a disabled group nought. See Pressed.
+            //
+            // Only while the fridge is in reach, so nothing else is deaf and nothing else is
+            // hidden a step away from it.
+            UI.Hint.Show(Core.Lingo.Say(_far.Hint), Core.Pad.Cap(_cfg.InteractKey));
+
             try
             {
-                Game.DisableControlThisFrame(GTA.Control.Context);
-                Game.DisableControlThisFrame(GTA.Control.ContextSecondary);
+                Function.Call(Hash.HIDE_HELP_TEXT_THIS_FRAME);
+
+                for (var group = 0; group < 3; group++)
+                {
+                    Function.Call(Hash.DISABLE_CONTROL_ACTION, group, (int)GTA.Control.Context, true);
+                    Function.Call(Hash.DISABLE_CONTROL_ACTION, group, (int)GTA.Control.ContextSecondary, true);
+                }
             }
             catch
             {

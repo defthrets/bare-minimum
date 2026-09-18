@@ -488,6 +488,90 @@ namespace BareMinimum.Api
             _knapsack = knapsack;
         }
 
+        // ---- the bag's shelf ---------------------------------------------------
+
+        /// <summary>
+        /// What is on the bag's shelf, for the mod that owns the bag.
+        ///
+        /// THERE WERE TWO SHELVES FOR ONE BAG. Posted Up sells the bag and kept a food shelf
+        /// of its own in it; this mod keeps the food and, since 0.8.2, keeps a shelf of its
+        /// own in the same bag. Food moved across on their screen went onto their shelf and
+        /// food looted or bought went onto this one, so the bag said "twelve things" on one
+        /// screen and "empty" on the other, and which was true depended on which screen you
+        /// had opened last. THIS IS THE SHELF NOW. The other side reads it and moves through
+        /// it, and its own is a fallback for a build of theirs older than this.
+        ///
+        /// ADDED WITHOUT BUMPING ApiVersion, the same way Take was: a caller that asks for
+        /// these is newer than the surface, and an older caller never asks.
+        /// </summary>
+        public static string[] BagIds()
+        {
+            try
+            {
+                if (_knapsack == null) return new string[0];
+
+                var ids = _knapsack.Ids();
+                return ids == null ? new string[0] : ids.ToArray();
+            }
+            catch { return new string[0]; }
+        }
+
+        /// <summary>How many of one thing are in the bag. 0 for anything not in it.</summary>
+        public static int BagCountOf(string id)
+        {
+            try { return _knapsack == null ? 0 : _knapsack.CountOf(id); }
+            catch { return 0; }
+        }
+
+        /// <summary>Things in the bag in total, all kinds together.</summary>
+        public static int BagTotal
+        {
+            get { try { return _knapsack == null ? 0 : _knapsack.Total; } catch { return 0; } }
+        }
+
+        /// <summary>
+        /// Puts some on the bag's shelf. False, and nothing moved, when they will not fit.
+        ///
+        /// WHETHER OR NOT THE BAG IS ON HIM. Give goes through Stow and only reaches the bag
+        /// when it is worn, which is right for a sandwich handed over in the street; this is
+        /// the other side moving things it already decided belong in the bag, and once, on
+        /// the day it hands its old shelf across, the bag may well be on the floor.
+        /// </summary>
+        public static bool BagGive(string id, int howMany = 1)
+        {
+            try
+            {
+                if (_knapsack == null || _menu == null || howMany < 1) return false;
+                if (_menu.Find(id) == null) return false;
+
+                return _knapsack.Add(id, howMany);
+            }
+            catch { return false; }
+        }
+
+        /// <summary>Takes some off the bag's shelf without eating them. False, and nothing moved, when there are not that many.</summary>
+        public static bool BagTake(string id, int howMany = 1)
+        {
+            try
+            {
+                if (_knapsack == null || howMany < 1) return false;
+                if (_knapsack.CountOf(id) < howMany) return false;
+
+                var taken = 0;
+                for (; taken < howMany; taken++)
+                {
+                    if (!_knapsack.Take(id)) break;
+                }
+
+                if (taken == howMany) return true;
+
+                // Short. Back on the shelf, so the count is what it was before the ask.
+                if (taken > 0) _knapsack.Return(id, taken);
+                return false;
+            }
+            catch { return false; }
+        }
+
         /// <summary>
         /// Takes some out WITHOUT eating them. For a mod that gives you somewhere to put food
         /// down -- Posted Up's car boot is the one that asked. False, and nothing moved, when
