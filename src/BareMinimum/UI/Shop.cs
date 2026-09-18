@@ -149,9 +149,6 @@ namespace BareMinimum.UI
         /// </summary>
         private void NameTheScripts()
         {
-            if (_listedScripts) return;
-            _listedScripts = true;
-
             try
             {
                 Function.Call(Hash.SCRIPT_THREAD_ITERATOR_RESET);
@@ -171,8 +168,44 @@ namespace BareMinimum.UI
 
                 names.Sort();
 
-                Log.Info("Scripts running at this counter (" + names.Count + "): " +
-                         string.Join(", ", names.ToArray()));
+                // THE FULL LIST ONCE, and then ONLY THE SHOP SCRIPTS, once per distinct
+                // shop. The full list was written on the first counter of the session and
+                // never again, so a whole day of play produced five lines and only one of
+                // them happened to be in a barber's -- which is how "barber_shop" sat in
+                // Counters.NotFood unchallenged while the real script is hairdo_shop_sp. The
+                // shop scripts are the handful the game starts when you walk into a shop and
+                // stops when you leave; a new combination of them is a shop this mod has not
+                // seen, and that is the line that lets the NotFood list be corrected from
+                // evidence rather than from memory.
+                if (!_listedScripts)
+                {
+                    _listedScripts = true;
+                    Log.Info("Scripts running at this counter (" + names.Count + "): " +
+                             string.Join(", ", names.ToArray()));
+                }
+
+                var shops = new System.Collections.Generic.List<string>();
+
+                foreach (var n in names)
+                {
+                    var low = n.ToLowerInvariant();
+
+                    if (low == "shop_controller") continue;   // runs everywhere; says nothing
+
+                    if (low.Contains("shop") || low.Contains("hairdo") || low.Contains("tattoo") ||
+                        low.Contains("carmod") || low.Contains("gunclub") || low.Contains("clothes"))
+                    {
+                        shops.Add(n);
+                    }
+                }
+
+                var key = shops.Count == 0 ? "(none)" : string.Join(",", shops.ToArray());
+
+                if (_shopsSeen.Add(key))
+                {
+                    Log.Info("Shop scripts at this counter: " + key +
+                             (Venues.Counters.IsNotFood(shops) ? "  (a shop this mod does not sell in)" : ""));
+                }
             }
             catch (Exception ex)
             {
@@ -181,6 +214,10 @@ namespace BareMinimum.UI
         }
 
         private bool _listedScripts;
+
+        /// <summary>Each distinct set of shop scripts seen at a counter, so each is logged once.</summary>
+        private readonly System.Collections.Generic.HashSet<string> _shopsSeen =
+            new System.Collections.Generic.HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Keeps the game's own counter menu off the screen.

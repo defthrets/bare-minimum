@@ -243,18 +243,44 @@ namespace BareMinimum.Venues
         /// Taken from a log rather than guessed. The counter that opened over the pistol case
         /// had gunclub_shop, clothes_shop_sp and launcher_Range in its script list; the three
         /// legitimate shop counters in the same log had none of them.
+        ///
+        /// EVERY NAME HERE HAS TO COME OUT OF A LOG, NOT OUT OF MEMORY. "barber_shop" sat in
+        /// this list for the mod's whole life and the barber's script is called
+        /// hairdo_shop_sp -- so the counter opened over the till at Herr Kutz and sold him
+        /// a club sandwich, and this check was doing nothing about it the whole time. The
+        /// game's own list at 09:29:59 on the day it was caught names the real one.
+        ///
+        /// The two marked UNSEEN have never appeared in any script list this mod has written.
+        /// They cannot break anything by being wrong -- a name that matches nothing just
+        /// never fires -- but they are not to be trusted either. Shop.NameTheScripts writes
+        /// the shop scripts it finds once per distinct shop, so the next visit to a tattooist
+        /// or Los Santos Customs will put the real name in the log; correct them from that.
         /// </summary>
         private static readonly string[] NotFood =
         {
-            "gunclub_shop",       // Ammu-Nation
-            "clothes_shop_sp",    // Binco, Suburban, Ponsonbys, Discount
-            "barber_shop",        // Bob Mulet, Herr Kutz
-            "tattoo_shop",        // the tattooists
-            "carmod_shop"         // Los Santos Customs, Benny's
+            "gunclub_shop",       // Ammu-Nation                              -- from an earlier log
+            "clothes_shop_sp",    // Binco, Suburban, Ponsonbys, Discount     -- from an earlier log
+            "hairdo_shop_sp",     // Bob Mulet, Herr Kutz                     -- log, 09:29:59
+            "tattoo_shop",        // the tattooists                           -- UNSEEN
+            "carmod_shop"         // Los Santos Customs, Benny's              -- UNSEEN
         };
 
         private int _nextShopCheck;
         private bool _inNotFood;
+
+        /// <summary>Whether any of these script names is one the mod does not sell in. For the log.</summary>
+        internal static bool IsNotFood(System.Collections.Generic.IEnumerable<string> scripts)
+        {
+            foreach (var name in scripts)
+            {
+                foreach (var shop in NotFood)
+                {
+                    if (string.Equals(name, shop, StringComparison.OrdinalIgnoreCase)) return true;
+                }
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// Whether a non-food shop's script is running, cached for a fifth of a second.
