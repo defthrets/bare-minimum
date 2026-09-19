@@ -3,6 +3,37 @@
 ===============================================================================
 
 
+0.8.4  --  THE MARKERS COME BACK, AND THE BARBER STOPS SELLING SANDWICHES
+-------------------------------------------------------------------------------
+
+  THE VENDING MACHINE AND FRUIT STALL MARKERS COME BACK WHEN THE SWITCH DOES.
+  Turning "Shop map markers" off and on again took every remembered machine off
+  the map -- a hundred-odd of them -- until the next script reload. Clear's own
+  note promised they would come straight back, and nothing did it: the markers
+  were nulled, the load ran once, and the sweep skipped a machine it already
+  knew before it got anywhere near making one. They are put back on the next
+  sweep now. Reported as "all the normal blips aren't showing" -- the game's own
+  blips were untouched; it was ours.
+
+  THE BARBER IS NOT A FOOD SHOP. The counter opened over the till at Herr Kutz
+  and sold him a club sandwich. The list of shop scripts the mod refuses to sell
+  under said "barber_shop"; the game's script is hairdo_shop_sp. A name written
+  from memory rather than read out of a log, and it never matched once. The two
+  names on that list that have never been seen in a log are marked as such
+  rather than trusted.
+
+  AND THE LOG SAYS MORE, so the next one of these is found from evidence.
+  Loading the remembered machines now names the file, the rows, what was
+  dropped and how many markers were actually made. A marker the game refuses to
+  create is said once instead of swallowed. Saving a setting names the setting.
+  A counter in a shop the mod has not seen before writes that shop's scripts,
+  once per shop.
+
+  One thing this download does NOT settle: since a reload this morning the
+  machine list has loaded 87 from a file with 102 rows in it, and none of the
+  87 reached the map. The new load line is how that gets found.
+
+
 0.8.3  --  BUYING FALLS THROUGH TO THE BAG, LIKE LOOTING ALWAYS DID
 -------------------------------------------------------------------------------
 
