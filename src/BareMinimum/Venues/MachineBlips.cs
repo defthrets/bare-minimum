@@ -155,12 +155,63 @@ namespace BareMinimum.Venues
             try
             {
                 Load();
+                Remark();
                 Scan();
             }
             catch (Exception ex)
             {
                 Log.Once("machine-blips", "Could not mark the machines: " + ex.Message);
             }
+        }
+
+        /// <summary>
+        /// Gives back the marker to every remembered machine that has lost one.
+        ///
+        /// THIS IS WHAT CLEAR'S OWN COMMENT PROMISED AND NOTHING DID. "Switching the markers
+        /// off and on again puts them all straight back without another lap of the map" --
+        /// but Clear nulls every Mark, Load runs once and never again, and Scan skips a
+        /// machine it already knows with a `continue` before it gets anywhere near making a
+        /// marker. So turning "Shop map markers" off and on took a hundred remembered
+        /// machines off the map until the next script reload. Hoodrich's world census caught
+        /// it: 396 blips at 10:21, 295 at 10:23, the moment the setting was saved.
+        ///
+        /// Mark() already returns at once for a marker that exists, so walking the list every
+        /// scan costs a hundred Exists() calls every two seconds and creates nothing unless
+        /// something is actually missing.
+        /// </summary>
+        private void Remark()
+        {
+            var before = Missing();
+            if (before == 0) return;
+
+            foreach (var known in _known) Mark(known);
+
+            var after = Missing();
+
+            if (before != after)
+            {
+                Log.Info("Machine blips: " + (before - after) + " marker(s) put back on the map" +
+                         (after > 0 ? "; " + after + " could not be made -- see above." : "."));
+            }
+        }
+
+        /// <summary>How many remembered machines have no marker on the map right now.</summary>
+        private int Missing()
+        {
+            var n = 0;
+
+            foreach (var known in _known)
+            {
+                if (known == null) continue;
+
+                var alive = false;
+                try { alive = known.Mark != null && known.Mark.Exists(); }
+                catch { alive = false; }
+
+                if (!alive) n++;
+            }
+
+            return n;
         }
 
         private void Scan()
@@ -332,6 +383,22 @@ namespace BareMinimum.Venues
 
             var blip = World.CreateBlip(at);
 
+            // SAID, NOT SWALLOWED. A CreateBlip that hands back nothing -- the game's blip
+            // pool has a ceiling -- used to fall straight into blip.Sprite below, throw, be
+            // caught by the styling catch and come out of here as a null that nobody logged.
+            // Remembered machines then sat in the list with no marker and no explanation.
+            var born = false;
+            try { born = blip != null && blip.Exists(); }
+            catch { born = false; }
+
+            if (!born)
+            {
+                Log.Once("machine-blip-make",
+                         "Machine blips: the game would not create a blip at " + at +
+                         ". The map may be at its blip limit; this is said once.");
+                return null;
+            }
+
             try
             {
                 blip.Sprite = (BlipSprite)sprite;
@@ -478,22 +545,40 @@ namespace BareMinimum.Venues
 
                 var list = doc["machines"];
 
+                // COUNTED, EVERY WAY A ROW CAN GO. The log said "87 remembered" from a file
+                // that has 102 rows in it and had not been written for an hour, and nothing
+                // in here said which fifteen went where or which file was even opened. So the
+                // path, the rows, the two ways a row is dropped and the markers actually made
+                // are all in the one line, and a number that does not add up is visible.
+                var rows = 0;
+                var atOrigin = 0;
+                var doubled = 0;
+                var made = 0;
+
                 foreach (var node in list.Items)
                 {
+                    rows++;
+
                     var at = new Vector3(node["x"].AsFloat(), node["y"].AsFloat(), node["z"].AsFloat());
 
                     // A row with no position is a row from a half-written file, and a marker at
                     // the origin of the map is worse than a missing one.
-                    if (at.X == 0f && at.Y == 0f) continue;
-                    if (Find(at) != null) continue;
+                    if (at.X == 0f && at.Y == 0f) { atOrigin++; continue; }
+                    if (Find(at) != null) { doubled++; continue; }
 
                     var known = new Known { At = at, Stall = node["stall"].AsBool(false) };
                     _known.Add(known);
 
                     Mark(known);
+
+                    if (known.Mark != null) made++;
                 }
 
-                Log.Info("Machine blips: " + _known.Count + " remembered from a previous session.");
+                Log.Info("Machine blips: " + _known.Count + " remembered from a previous session -- " +
+                         rows + " row(s) in " + Paths.MachinesFile +
+                         (atOrigin > 0 ? ", " + atOrigin + " at the origin dropped" : "") +
+                         (doubled > 0 ? ", " + doubled + " within " + Same + "m of another dropped" : "") +
+                         "; " + made + " marker(s) made.");
             }
             catch (Exception ex)
             {

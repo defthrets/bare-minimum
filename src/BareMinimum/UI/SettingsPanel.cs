@@ -1660,6 +1660,11 @@ namespace BareMinimum.UI
             var written = 0;
             var failed = 0;
 
+            // NAMED, so a "saved 1 change(s)" in the log is not a mystery. Four of those in
+            // twenty seconds sat beside a hundred markers leaving the map, and the log could
+            // not say which switch had moved. Now it does.
+            var saved = new System.Collections.Generic.List<string>();
+
             foreach (var option in _options)
             {
                 if (!option.Dirty) continue;
@@ -1671,6 +1676,7 @@ namespace BareMinimum.UI
                     {
                         option.Dirty = false;
                         written++;
+                        saved.Add(option.Section + "." + option.Key + "=" + option.Persist());
                     }
                     else
                     {
@@ -1688,7 +1694,11 @@ namespace BareMinimum.UI
             if (failed == 0)
             {
                 _dirty = false;
-                if (written > 0) Log.Info("Settings: saved " + written + " change(s) to " + Paths.Ini + ".");
+                if (written > 0)
+                {
+                    Log.Info("Settings: saved " + written + " change(s) to " + Paths.Ini + ": " +
+                             string.Join(", ", saved.ToArray()) + ".");
+                }
                 return;
             }
 
