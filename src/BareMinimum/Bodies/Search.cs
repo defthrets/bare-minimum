@@ -431,20 +431,20 @@ namespace BareMinimum.Bodies
         /// AND IT ONLY HAPPENS WHEN THE GUNS ARE ON THE CARD, which by default they are not.
         /// Suppressing every weapon drop in the city is the price of being able to take a gun
         /// off a body, and it is not a price worth paying for a feature that is switched off:
-        /// see Settings.LootGuns.
+        /// see Settings.LootGuns. Off, this goes near nobody at all.
         ///
-        /// THE SWITCH GOING OFF PUTS THE WORLD BACK, and that is the part that is easy to get
-        /// wrong. The flag lives on the PED, not on this mod, and it survives a script reload
-        /// -- so everybody already told not to drop would go on not dropping until the game
-        /// culled them, which is minutes of weapons quietly not appearing with the setting
-        /// plainly off. That is exactly the shape of the machine markers that did not come
-        /// back when their own switch did, reported as "all the blips are missing". So the
-        /// sweep runs for a while longer after the switch moves, saying the opposite, and
-        /// then stops touching anybody at all.
+        /// THE RESTORE IS TARGETED, AND THAT IS NOT FUSSINESS. Posted Up sets this same flag
+        /// false on the gang members it arms -- see its Entourage and GangLeaders -- and Five0
+        /// Patrol sets it on anybody it has disarmed, see its Restraint. Both do it on purpose
+        /// and both would be quietly undone by a sweep that asserted the game's default on
+        /// everybody standing nearby. So this remembers exactly who IT told, and puts back
+        /// exactly those.
         ///
-        /// NOT ASSERTED FOREVER. Once the world is put back this goes near nobody, because a
-        /// mod that keeps setting a flag to its default value is a mod arguing with whoever
-        /// else on the machine has an opinion about it.
+        /// WHAT IT CANNOT PUT BACK IS ANYBODY TOLD BEFORE A SCRIPT RELOAD. The flag lives on
+        /// the PED and survives the reload; the list of who was told does not. Those peds keep
+        /// it until the game replaces them, which it does as you move, and a fresh launch
+        /// clears it outright. Said once in the log rather than left as a mystery, because it
+        /// is exactly the shape of "the weapons still are not dropping".
         /// </summary>
         private void Nobody(Ped player, int now)
         {
@@ -452,16 +452,20 @@ namespace BareMinimum.Bodies
 
             var hold = _cfg != null && _cfg.LootBodies && _cfg.LootGuns;
 
-            // The switch has just moved. Say the opposite for a while, then stop.
-            if (!hold && _dropsHeld)
+            if (!hold)
             {
-                _dropsHeld = false;
-                _undoUntil = now + UndoMs;
+                // THE SWITCH HAS GONE OFF. Put back exactly the people this told, once, and
+                // then never touch anybody again.
+                if (_told.Count > 0) Restore();
 
-                Log.Info("Bodies: guns are the game's again; putting the weapon drops back.");
+                Log.Once("drops-vanilla",
+                         "Bodies: guns are the game's own, so nothing is being told to hold " +
+                         "on to its weapon. Anybody told so before a script reload cannot be " +
+                         "found again and keeps it until the game replaces them; a fresh " +
+                         "launch clears it.");
+
+                return;
             }
-
-            if (!hold && now >= _undoUntil) return;
 
             if (now - _sweptAt < SweepEveryMs) return;
 
@@ -474,30 +478,97 @@ namespace BareMinimum.Bodies
                     if (ped == null || !ped.Exists() || !ped.IsAlive) continue;
                     if (ped.Handle == player.Handle) continue;
 
-                    Function.Call(Hash.SET_PED_DROPS_WEAPONS_WHEN_DEAD, ped.Handle, hold ? false : true);
+                    Function.Call(Hash.SET_PED_DROPS_WEAPONS_WHEN_DEAD, ped.Handle, false);
+
+                    _told.Add(ped.Handle);
                 }
+
+                Log.Once("drops-held",
+                         "Bodies: guns are on the card, so nobody near you drops one when " +
+                         "they die. Turning [Bodies] Guns off puts back everybody this told.");
+
+                Prune();
             }
             catch (Exception ex)
             {
-                Log.Debug("Search: could not " + (hold ? "stop" : "restore") +
-                          " the weapon drops: " + ex.Message);
+                Log.Debug("Search: could not stop the weapon drops: " + ex.Message);
             }
-
-            if (hold) _dropsHeld = true;
         }
 
-        /// <summary>Whether anybody has been told not to drop, and how long the undo runs for.</summary>
-        private bool _dropsHeld;
-        private int _undoUntil;
+        /// <summary>
+        /// Everybody this half told not to drop, so the switch going off can put back exactly
+        /// them and nobody else. See Nobody.
+        /// </summary>
+        private readonly System.Collections.Generic.HashSet<int> _told =
+            new System.Collections.Generic.HashSet<int>();
+
+        /// <summary>Gives the weapon drop back to everybody this told, and forgets them.</summary>
+        private void Restore()
+        {
+            var back = 0;
+            var gone = 0;
+
+            foreach (var handle in _told)
+            {
+                try
+                {
+                    var ped = Entity.FromHandle(handle) as Ped;
+
+                    if (ped == null || !ped.Exists()) { gone++; continue; }
+
+                    Function.Call(Hash.SET_PED_DROPS_WEAPONS_WHEN_DEAD, ped.Handle, true);
+                    back++;
+                }
+                catch
+                {
+                    gone++;
+                }
+            }
+
+            _told.Clear();
+
+            Log.Info("Bodies: guns are the game's again -- " + back + " ped(s) drop theirs " +
+                     "once more" + (gone > 0 ? ", " + gone + " had already gone" : "") + ".");
+        }
 
         /// <summary>
-        /// How long the sweep keeps putting the drops back after the switch goes off.
+        /// Drops the ones who are no longer there, so the list cannot grow all session.
         ///
-        /// Ten sweeps at two seconds each, which is long enough to cover everybody in
-        /// ninety metres including the ones who walked in during it. The population turns
-        /// over faster than this on its own; the undo is for the ones standing still.
+        /// A DRIVE ACROSS THE MAP IS THOUSANDS OF PEOPLE. The list only exists to be undone,
+        /// and a handle whose ped is gone can never be undone, so it is dead weight the
+        /// moment the game culls them. Only when it has actually got big, because walking it
+        /// is the expensive part and the usual case is a few dozen standing around you.
         /// </summary>
-        private const int UndoMs = 20000;
+        private void Prune()
+        {
+            if (_told.Count < PruneAt) return;
+
+            var alive = new System.Collections.Generic.List<int>(_told.Count);
+
+            foreach (var handle in _told)
+            {
+                try
+                {
+                    var ped = Entity.FromHandle(handle) as Ped;
+                    if (ped != null && ped.Exists()) alive.Add(handle);
+                }
+                catch
+                {
+                    // Not there, then.
+                }
+            }
+
+            var was = _told.Count;
+
+            _told.Clear();
+            foreach (var handle in alive) _told.Add(handle);
+
+            Log.Debug("Search: forgot " + (was - _told.Count) + " ped(s) who are no longer " +
+                      "there; " + _told.Count + " still told not to drop.");
+        }
+
+        /// <summary>How big the list gets before the dead are swept out of it.</summary>
+        private const int PruneAt = 1200;
 
         /// <summary>
         /// The interact key held down, as a level.
