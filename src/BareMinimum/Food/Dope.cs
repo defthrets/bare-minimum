@@ -58,6 +58,16 @@ namespace BareMinimum.Food
         private static MethodInfo _ids, _gramsOf, _nameOf, _iconOf, _countedOf, _amountOf, _use;
 
         /// <summary>
+        /// The two the body loot needs, and nothing else on this bridge does.
+        ///
+        /// Ids says what is IN his pockets; the loot has to know what EXISTS, because it is
+        /// deciding what a dead man was carrying. And Loot is the only rung on the whole
+        /// surface that hands product the other way -- everything else takes it away or moves
+        /// it between two containers that mod already owns.
+        /// </summary>
+        private static MethodInfo _catalogue, _loot;
+
+        /// <summary>
         /// The bag's side of the same surface, bound when the other mod is new enough to
         /// have one. All or none: a screen that could list what is in the bag but not move
         /// it is a screen with a button that does nothing. See BagShelf.
@@ -199,6 +209,12 @@ namespace BareMinimum.Food
                     _toPocket = type.GetMethod("ToPocket", BindingFlags.Public | BindingFlags.Static);
                     _useFromBag = type.GetMethod("UseFromBag", BindingFlags.Public | BindingFlags.Static);
 
+                    // AND THE TWO THE BODY LOOT WANTS, added the same way and just as
+                    // optional: an older Posted Up answers null and a searched body simply
+                    // has no product on him, which is what every body had before today.
+                    _catalogue = type.GetMethod("Catalogue", BindingFlags.Public | BindingFlags.Static);
+                    _loot = type.GetMethod("Loot", BindingFlags.Public | BindingFlags.Static);
+
                     _type = type;
 
                     var bagged = _bagWorn != null && _bagCarried != null && _bagIds != null &&
@@ -298,6 +314,62 @@ namespace BareMinimum.Food
                 return _iconOf.Invoke(null, new object[] { id }) as string ?? "";
             }
             catch { return ""; }
+        }
+
+        /// <summary>
+        /// Every drug that EXISTS, whether or not he is carrying any.
+        ///
+        /// NOT Ids, WHICH IS WHAT HE HAS ON HIM. The body loot is deciding what a dead man
+        /// was carrying and has no business reading the player's own pockets to do it -- a
+        /// man with nothing on him would have handed every corpse in the city nothing, and a
+        /// man holding four grams of meth would have made every corpse in the city a meth
+        /// dealer.
+        ///
+        /// Empty when Posted Up is absent or too old, which is the honest answer: nothing on
+        /// this machine knows what a drug is, so nobody is carrying one.
+        /// </summary>
+        public static string[] Catalogue()
+        {
+            try
+            {
+                if (!Present || _catalogue == null) return new string[0];
+
+                return _catalogue.Invoke(null, null) as string[] ?? new string[0];
+            }
+            catch
+            {
+                return new string[0];
+            }
+        }
+
+        /// <summary>
+        /// Puts product found somewhere into his pockets. The grams that actually fit.
+        ///
+        /// THE ONLY RUNG THAT GOES THIS WAY. Take removes, the bag moves; this is the one for
+        /// product that came from outside the other mod entirely -- out of a dead man's
+        /// jacket. It respects that mod's capacity rather than overfilling it, so less than
+        /// was offered can come back, and the caller is expected to notice and leave the rest
+        /// where it found it.
+        ///
+        /// AT THE PURITY IT WAS FOUND AT. Product off a body is whatever that person was
+        /// carrying; minting pure product from a corpse would make looting strictly better
+        /// than buying.
+        /// </summary>
+        public static float Loot(string id, float grams, float purity)
+        {
+            try
+            {
+                if (!Present || _loot == null) return 0f;
+                if (string.IsNullOrEmpty(id) || grams <= 0.005f) return 0f;
+
+                return (float)_loot.Invoke(null, new object[] { id, grams, purity });
+            }
+            catch (Exception ex)
+            {
+                Log.Debug("Could not hand " + grams.ToString("0.#") + "g of " + id +
+                          " to Posted Up: " + ex.Message);
+                return 0f;
+            }
         }
 
         /// <summary>

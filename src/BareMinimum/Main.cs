@@ -85,6 +85,15 @@ namespace BareMinimum
         private readonly Bag _bag;
 
         /// <summary>
+        /// Who the bodies on the pavement were, and what was in their pockets.
+        /// See Bodies.Corpses.
+        /// </summary>
+        private readonly Bodies.Corpses _corpses;
+
+        /// <summary>Kneeling over one and going through it. See Bodies.Search.</summary>
+        private readonly Bodies.Search _search;
+
+        /// <summary>
         /// Picking a body up and walking it somewhere. See Bodies.Drag.
         ///
         /// IT CAME FROM FIVE0 PATROL ON 2026-09-22, with the loot that came from Posted Up,
@@ -245,7 +254,8 @@ namespace BareMinimum
             {
                 if (_eating.Busy) return false;
                 if (_bag.IsOpen || _bagScreen.IsOpen || _fridge.IsOpen ||
-                    _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen) return false;
+                    _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen ||
+                    _search.IsOpen) return false;
 
                 // EXACTLY WHAT THE POCKET KEY OPENS, and for the same reason: there is one
                 // inventory and two ways into it, and they had better be the same place. A
@@ -258,7 +268,8 @@ namespace BareMinimum
             });
 
             Api.Pantry.Screens(() => _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen ||
-                                     _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen);
+                                     _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen ||
+                                     (_search != null && _search.IsOpen));
 
             _settings = new SettingsPanel(_cfg, _needs, _catalogue);
 
@@ -356,10 +367,49 @@ namespace BareMinimum
             // the same goes for the stall prompt, the room door and the fridge.
             _carry = new Bodies.Drag(_cfg)
             {
-                Busy = () => _sleeping.Busy || _eating.Busy ||
+                Busy = () => _sleeping.Busy || _eating.Busy || _search.IsOpen ||
                              _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen ||
                              _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen ||
                              _vendors.Offering || _inside.Offering,
+            };
+
+            // AND THE OTHER HALF OF THE CORPSE: who he was, and what was in his pockets.
+            //
+            // THE POCKET AND THE BAG ARE HANDED IN rather than the loot having its own idea
+            // of where a thing goes. A sandwich off a body lands exactly where a sandwich off
+            // a shelf lands, because both go through Food.Stow.
+            _corpses = new Bodies.Corpses(_cfg, _catalogue, _pantry, _knapsack);
+
+            _search = new Bodies.Search(_cfg, _corpses)
+            {
+                // The card is a full-screen panel, so it stands down for everything that owns
+                // the screen -- and for the carry, because a man with a body in his arms is
+                // not kneeling over another one.
+                Busy = () => _sleeping.Busy || _eating.Busy || _carry.Holding ||
+                             _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen ||
+                             _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen ||
+                             _vendors.Offering || _inside.Offering,
+
+                // AND THE CARD CAN HAND HIM STRAIGHT TO THE CARRY. This is the seam that
+                // used to be a reflection call through three classes in two mods.
+                Carry = _carry,
+            };
+
+            // THE ORDER IS SEARCH, THEN CARRY, and this is the pair of lines that enforce it.
+            // You go through him and then you move him, because moving him first means
+            // walking back to wherever you put him -- so while the loot still has something
+            // to offer on this body there is one prompt on screen and it is the search's.
+            _carry.Looting = () => _cfg.LootBodies;
+            _carry.Searched = handle => _corpses.Opened(handle);
+
+            // AND THE BOOKS DO NOT FORGET A MAN WHO IS BRIEFLY ALIVE. The carry resurrects a
+            // corpse to put a clip on it, so a sweep that dropped anybody breathing would hand
+            // the same man a fresh set of full pockets the moment he was set down. See
+            // Corpses.Carried.
+            _corpses.Carried = () =>
+            {
+                var who = _carry.Carrying;
+                return who == null ? 0 : who.Handle;
             };
 
             // And the bridge the mods next door reach by reflection. Five0 Patrol asks it
@@ -446,7 +496,8 @@ namespace BareMinimum
                 // -- without this, pressing F11 at a till draws both menus on top of each other
                 // and every arrow press drives both of them at once.
                 _settings.Update(_sleeping.Busy || _shop.IsOpen || _vendors.MenuOpen ||
-                                 _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen);
+                                 _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen ||
+                                 _search.IsOpen);
 
                 // THE VITALS RUN BEFORE THE ENABLED GATE, because the game's own bars are
                 // hidden by them and have to be put back when the mod is switched off -- a
@@ -471,7 +522,8 @@ namespace BareMinimum
                 // Without this, pressing E to buy a sandwich at a counter next to a bed would
                 // also be pressing E to go to sleep.
                 var menuOpen = _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen ||
-                               _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen;
+                               _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen ||
+                               _search.IsOpen;
 
                 // The pocket stands down for every other menu for the same reason the settings
                 // panel does: its key is RAW, so control suppression cannot keep it out of a
@@ -485,21 +537,22 @@ namespace BareMinimum
 
                 _bag.Update(_sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
                             _vendors.MenuOpen || _fridge.IsOpen || _bagScreen.IsOpen ||
-                            carrying);
+                            _search.IsOpen || carrying);
 
                 _fit.Update(_sleeping.Busy || _shop.IsOpen || _vendors.MenuOpen ||
-                            _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen);
+                            _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen ||
+                            _search.IsOpen);
 
                 _bagScreen.Update(_sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
                                   _vendors.MenuOpen || _fridge.IsOpen || _bag.IsOpen ||
-                                  !carrying);
+                                  _search.IsOpen || !carrying);
 
                 // THE FRIDGE STANDS DOWN FOR EVERY OTHER MENU AND FOR THE VENDORS' PROMPT.
                 // It reads the same interact key a stall does, so a fridge somehow within
                 // reach of one would otherwise have both of them answering the same press.
                 _fridge.Update(_sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
                                _vendors.Offering || _inside.Offering || _bag.IsOpen ||
-                               _bagScreen.IsOpen);
+                               _bagScreen.IsOpen || _search.IsOpen);
 
                 if (!menuOpen && !_vendors.Offering && !_inside.Offering) _sleeping.Update();
 
@@ -513,13 +566,15 @@ namespace BareMinimum
                 // Street vendors BEFORE the shop, so a stand standing next to a vending
                 // machine wins the interact key rather than both reading it on one frame.
                 _vendors.Update(dt, _sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
-                                    _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen);
+                                    _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen ||
+                                    _search.IsOpen);
 
                 // The room after the vendors, and never while the bar's own shelf is up -- the
                 // shelf owns the key then, and a hold that leaves with it open is two things
                 // reading one press.
                 _inside.Update(_sleeping.Busy || _shop.IsOpen || _settings.IsOpen ||
-                               _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen || _vendors.MenuOpen);
+                               _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen ||
+                               _vendors.MenuOpen || _search.IsOpen);
 
                 // NOT GATED ON A MENU. It is watching for the GAME's animation, which the
                 // player triggers with nothing of ours open, and a suspended tick would miss
@@ -532,8 +587,13 @@ namespace BareMinimum
                 _mapCard.Update();
 
                 _shop.Update(_sleeping.Busy || _settings.IsOpen || _bag.IsOpen ||
-                             _fridge.IsOpen || _bagScreen.IsOpen ||
+                             _fridge.IsOpen || _bagScreen.IsOpen || _search.IsOpen ||
                              _vendors.Offering || _inside.Offering);
+                // THE SEARCH BEFORE THE CARRY, which is the order they are offered in as
+                // well. Both read the interact key and both stand down for each other and for
+                // every screen through their own Busy hooks -- see where they are built.
+                _search.Update();
+
                 // AFTER EVERYTHING THAT READS THE INTERACT KEY, and standing down for all of
                 // it through its own Busy hook -- see where it is built. It has to run outside
                 // the menu gate rather than inside one, because a body already in his arms
@@ -572,7 +632,7 @@ namespace BareMinimum
                 // also drops a lapse already in progress the moment one of these becomes true.
                 _trip.Update(suspended);
                 _blackout.Update(suspended || _shop.IsOpen || _settings.IsOpen || _bag.IsOpen ||
-                                 _fridge.IsOpen || _bagScreen.IsOpen ||
+                                 _fridge.IsOpen || _bagScreen.IsOpen || _search.IsOpen ||
                                  _vendors.MenuOpen || _inside.IsInside);
 
                 // ON THE SAME dt EVERYTHING ELSE USES, so the distance flown is real seconds
@@ -702,6 +762,10 @@ namespace BareMinimum
             // let go of it. Put also kills him again, so what is left behind is a corpse
             // rather than an invincible mute who stands up a minute later.
             try { if (_carry != null) _carry.Release(); } catch (Exception ex) { Log.Error("Carry shutdown", ex); }
+            // AND HE IS NOT LEFT ON ONE KNEE. The kneel is a looping task with no duration,
+            // so a reload part way through a search leaves him down there with nothing
+            // running that knows how to stand him up.
+            try { if (_search != null) _search.RestoreWorld(); } catch (Exception ex) { Log.Error("Search shutdown", ex); }
             try { _bag.Shutdown(); } catch (Exception ex) { Log.Error("Pocket shutdown", ex); }
             try { UI.Toast.Clear(); } catch { /* a card is not worth a failed shutdown */ }
             try { UI.Hint.Clear(); } catch { /* nor is a hint */ }
