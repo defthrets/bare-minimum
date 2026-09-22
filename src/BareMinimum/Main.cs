@@ -84,6 +84,15 @@ namespace BareMinimum
         private readonly FitScreen _fit;
         private readonly Bag _bag;
 
+        /// <summary>
+        /// Picking a body up and walking it somewhere. See Bodies.Drag.
+        ///
+        /// IT CAME FROM FIVE0 PATROL ON 2026-09-22, with the loot that came from Posted Up,
+        /// because the corpse now belongs to one mod rather than to two that had to ask each
+        /// other by reflection whose prompt it was.
+        /// </summary>
+        private readonly Bodies.Drag _carry;
+
         /// <summary>The fridge: where it is, what is in it, and the screen over it.</summary>
         private readonly Fridges _fridges;
         private readonly Larder _larder;
@@ -334,6 +343,30 @@ namespace BareMinimum
                 _speech.Say("downer");
             };
 
+            // THE BODY CARRY, AND WHO IS ALLOWED TO INTERRUPT IT.
+            //
+            // BUILT LAST BECAUSE THE HOOK READS EVERYTHING ELSE. The lambda is not called
+            // until the first tick, so the order would not actually bite -- but a field read
+            // in a constructor thirty lines above where it is built is exactly the shape that
+            // HAS bitten this file before (see the fitting bench), and there is no reason to
+            // leave the pattern lying around.
+            //
+            // A SCREEN OWNS THE INTERACT KEY WHILE IT IS UP. Pressing E to buy a sandwich at a
+            // counter must not also be pressing E to pick up whoever is lying behind you, and
+            // the same goes for the stall prompt, the room door and the fridge.
+            _carry = new Bodies.Drag(_cfg)
+            {
+                Busy = () => _sleeping.Busy || _eating.Busy ||
+                             _shop.IsOpen || _settings.IsOpen || _vendors.MenuOpen ||
+                             _bag.IsOpen || _fridge.IsOpen || _bagScreen.IsOpen ||
+                             _vendors.Offering || _inside.Offering,
+            };
+
+            // And the bridge the mods next door reach by reflection. Five0 Patrol asks it
+            // which body is in his arms so that a carried man is neither discovered by a
+            // witness nor swept off its books for being briefly alive. See Api.Bodies.
+            Api.Bodies.Hands = _carry;
+
             Interval = 0;
             Tick += OnTick;
             Aborted += OnAborted;
@@ -501,6 +534,12 @@ namespace BareMinimum
                 _shop.Update(_sleeping.Busy || _settings.IsOpen || _bag.IsOpen ||
                              _fridge.IsOpen || _bagScreen.IsOpen ||
                              _vendors.Offering || _inside.Offering);
+                // AFTER EVERYTHING THAT READS THE INTERACT KEY, and standing down for all of
+                // it through its own Busy hook -- see where it is built. It has to run outside
+                // the menu gate rather than inside one, because a body already in his arms
+                // has to be put down whatever is on screen.
+                _carry.Update();
+
                 _eating.Update();
                 _whereabouts.Update();
 
@@ -656,6 +695,13 @@ namespace BareMinimum
             try { _vitals.Shutdown(); } catch (Exception ex) { Log.Error("Vitals shutdown", ex); }
             try { _vendors.Shutdown(); } catch (Exception ex) { Log.Error("Vendor shutdown", ex); }
             try { _eating.Shutdown(); } catch (Exception ex) { Log.Error("Eating shutdown", ex); }
+            // WHOEVER IS IN HIS ARMS GOES BACK ON THE FLOOR, AND THIS IS NOT OPTIONAL. An
+            // attachment outlives the script that made it: a reload -- which SHVDN does on a
+            // keypress -- with a body welded to his chest leaves that body welded to his
+            // chest, through walls and into cars, with nothing left running that knows how to
+            // let go of it. Put also kills him again, so what is left behind is a corpse
+            // rather than an invincible mute who stands up a minute later.
+            try { if (_carry != null) _carry.Release(); } catch (Exception ex) { Log.Error("Carry shutdown", ex); }
             try { _bag.Shutdown(); } catch (Exception ex) { Log.Error("Pocket shutdown", ex); }
             try { UI.Toast.Clear(); } catch { /* a card is not worth a failed shutdown */ }
             try { UI.Hint.Clear(); } catch { /* nor is a hint */ }

@@ -2136,6 +2136,70 @@ namespace BareMinimum.Core
         /// </summary>
         public float BlackoutEverySeconds = 22f;
 
+        // ---- Bodies ----------------------------------------------------------
+        //
+        // THE DEAD MAN ON THE PAVEMENT, AND THIS MOD OWNS HIM AS OF 2026-09-22. The carry came
+        // from Five0 Patrol and the loot came from Posted Up, because two mods offering two
+        // things on one body over one key had to ask each other by reflection whose turn it
+        // was -- and the answer to "which mod owns the corpse" should be one mod.
+
+        /// <summary>
+        /// Whether you can pick a body up and walk it somewhere.
+        ///
+        /// ONLY WORTH HAVING BECAUSE OF WHAT IT IS FOR. A body is found when somebody's line
+        /// of sight falls across it, which is the rule the police mod next door plays by, so
+        /// where it ends up is the whole game -- and without this, where it ends up is
+        /// wherever the man happened to fall.
+        /// </summary>
+        public bool CarryBodies = true;
+
+        /// <summary>
+        /// Whether a body can be gone through: his name, his card, and what was in his
+        /// pockets.
+        ///
+        /// SEPARATE FROM THE CARRY, because they are two features that happen to meet on one
+        /// corpse. Somebody who wants to move bodies and not loot them is not doing anything
+        /// strange, and neither is the reverse.
+        /// </summary>
+        public bool LootBodies = true;
+
+        /// <summary>
+        /// The workshop tool for where a carried body hangs and what shape it is in.
+        ///
+        /// OFF, AND IT IS MEANT TO BE. It binds a dozen numpad keys and paints a readout over
+        /// the corner of the screen, which is exactly right while somebody is finding a
+        /// position and exactly wrong for anybody else. The same argument the fitting bench
+        /// makes about a can in a hand. See Bodies.DragPose.
+        /// </summary>
+        public bool DragTuner = false;
+
+        /// <summary>
+        /// Where a picked-up body sits in his arms, and how.
+        ///
+        /// SET BY LOOKING AT IT. Three distances from the bone it is welded to, in his own
+        /// axes -- across, forward, up -- three turns in degrees, the pose it is held in and
+        /// the bone that holds it. None of them can be reasoned out in a source file.
+        ///
+        /// WHAT SHIPS IS WHAT WAS SET THAT WAY. Michael sat a body on these numbers on
+        /// 2026-09-19 and said this is the one: out to his right and well forward of his
+        /// chest, a touch below it, tipped three quarters of the way head-down, rolled onto
+        /// his right and turned a little clockwise, in the game's fifth death pose. They came
+        /// over from the other mod to the digit when the carry moved here -- the point of
+        /// moving the code was not to make him dial them again.
+        /// </summary>
+        public float DragAcross = 0.78f;
+        public float DragForward = 0.88f;
+        public float DragUp = -0.04f;
+        public float DragPitch = -75f;
+        public float DragRoll = 40f;
+        public float DragYaw = -15f;
+
+        /// <summary>Which of the game's own dead poses he is held in. See Bodies.DragPose.</summary>
+        public int DragShape = 9;
+
+        /// <summary>Which bone of the player's he hangs off. 3 is the chest. See Bodies.DragPose.</summary>
+        public int DragBone = 3;
+
         // ======================================================================
 
         /// <summary>
@@ -2457,6 +2521,22 @@ namespace BareMinimum.Core
                 cfg.BlackoutsEnabled = ini.GetBool("Effects", "Blackouts", cfg.BlackoutsEnabled);
                 cfg.BlackoutEverySeconds = ini.GetFloat("Effects", "BlackoutEverySeconds",
                                                         cfg.BlackoutEverySeconds, 3f, 600f);
+
+                cfg.CarryBodies = ini.GetBool("Bodies", "Carry", cfg.CarryBodies);
+                cfg.LootBodies = ini.GetBool("Bodies", "Loot", cfg.LootBodies);
+                cfg.DragTuner = ini.GetBool("Bodies", "Tuner", cfg.DragTuner);
+
+                // CLAMPED THE WAY THE OTHER MOD CLAMPED THEM. Two metres is further than an
+                // arm and a hundred and eighty degrees is all the way round; past either the
+                // numbers stop meaning anything and the body is somewhere nobody can see.
+                cfg.DragAcross = ini.GetFloat("Bodies", "Across", cfg.DragAcross, -2f, 2f);
+                cfg.DragForward = ini.GetFloat("Bodies", "Forward", cfg.DragForward, -2f, 2f);
+                cfg.DragUp = ini.GetFloat("Bodies", "Up", cfg.DragUp, -2f, 2f);
+                cfg.DragPitch = ini.GetFloat("Bodies", "Pitch", cfg.DragPitch, -180f, 180f);
+                cfg.DragRoll = ini.GetFloat("Bodies", "Roll", cfg.DragRoll, -180f, 180f);
+                cfg.DragYaw = ini.GetFloat("Bodies", "Yaw", cfg.DragYaw, -180f, 180f);
+                cfg.DragShape = ini.GetInt("Bodies", "Pose", cfg.DragShape, 0, 12);
+                cfg.DragBone = ini.GetInt("Bodies", "Bone", cfg.DragBone, 0, 3);
 
                 cfg.BuyToPantry = ini.GetBool("Money", "BuyToPantry", cfg.BuyToPantry);
                 cfg.PantrySlots = (int)ini.GetFloat("Money", "PantrySlots", cfg.PantrySlots, 1f, 200f);
