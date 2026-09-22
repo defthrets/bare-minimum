@@ -1013,6 +1013,24 @@ namespace BareMinimum.Food
                             // would also cancel whatever else the player happened to be doing
                             // -- which at a shop counter is usually nothing, and while walking
                             // is not.
+                            // WHICH CLIP WAS ACTUALLY RUNNING, once a session.
+                            //
+                            // This is the line that would have found the smoke bug in a
+                            // minute rather than in a report. A cycled animation plays a
+                            // different clip every pass and the stop below has to name the
+                            // live one; nothing was written when a smoke ended except the
+                            // "Had a" line, so an animation going on after the cigarette had
+                            // been deleted left no trace anywhere. See Stop.
+                            if (_playing != null && _playing.Cycle != null &&
+                                _playing.Cycle.Length >= 2)
+                            {
+                                Log.Once("anim-cycle-stop",
+                                         "Ending a cycled animation: " + _playing.Dict +
+                                         " was on " + Live(me, _playing) + ". All " +
+                                         _playing.Cycle.Length + " of its clips are stopped, " +
+                                         "not just the one the option is named after.");
+                            }
+
                             // The one that was started first, because an item with its own
                             // dictionary is not any of the three below and would be left running.
                             if (_playing != null) Stop(me, _playing);
@@ -1036,12 +1054,76 @@ namespace BareMinimum.Food
             DropProp();
         }
 
-        /// <summary>Ends one animation, if it was ever given a real dictionary to play.</summary>
+        /// <summary>
+        /// Which clip of a cycle the game says is running, for the log. "nothing" when none
+        /// of them is, which is itself worth reading: it means the clip had already ended on
+        /// its own and the stop below had nothing left to do.
+        /// </summary>
+        private static string Live(Ped me, AnimRef anim)
+        {
+            try
+            {
+                foreach (var clip in anim.Cycle)
+                {
+                    if (string.IsNullOrEmpty(clip)) continue;
+
+                    if (Function.Call<bool>(Hash.IS_ENTITY_PLAYING_ANIM,
+                                            me.Handle, anim.Dict, clip, 3))
+                    {
+                        return clip;
+                    }
+                }
+            }
+            catch
+            {
+                return "a clip it could not ask about";
+            }
+
+            return "nothing";
+        }
+
+        /// <summary>
+        /// Ends one animation, if it was ever given a real dictionary to play.
+        ///
+        /// EVERY CLIP IN THE CYCLE, NOT THE ONE THE OPTION IS NAMED AFTER -- and that is the
+        /// whole of why the smoking animation outlasted the cigarette.
+        ///
+        /// STOP_ANIM_TASK TAKES A CLIP NAME AND DOES NOTHING AT ALL WHEN THAT CLIP IS NOT THE
+        /// ONE RUNNING. This passed anim.Clip, which is the clip the winning option is named
+        /// after -- idle_a for the smoke -- while what is actually playing at any moment is
+        /// Cycle[_clip % Cycle.Length], because the smoke is three clips in a deliberate
+        /// order. So two times in three the stop was handed the name of a clip that was not
+        /// running, did nothing, and the man carried on raising an empty hand to his mouth
+        /// after the cigarette in it had been deleted. Reported as exactly that: the animation
+        /// going on longer than the cigarette is there.
+        ///
+        /// It only ever showed on the smoke because the smoke is the only thing in the
+        /// catalogue with a cycle longer than one -- see AnimRef.Resolve, where an option
+        /// that names no cycle gets a cycle of one containing the clip itself, so the name
+        /// always matched. It would have shown on the first food item that grew a cycle.
+        ///
+        /// THREE NATIVE CALLS ON A MEAL THAT HAS ALREADY ENDED. Stopping a clip that is not
+        /// playing is free and silent, which is the property that made this bug invisible and
+        /// is also what makes covering the whole cycle the cheap fix rather than tracking
+        /// which one is current in another field that has to be kept in step.
+        ///
+        /// The 3f is the blend out: it eases the arm down rather than snapping it, which is
+        /// what it did before and the part that was right.
+        /// </summary>
         private static void Stop(Ped me, AnimRef anim)
         {
-            if (!anim.Valid) return;
+            if (anim == null || !anim.Valid) return;
 
             Function.Call(Hash.STOP_ANIM_TASK, me.Handle, anim.Dict, anim.Clip, 3f);
+
+            if (anim.Cycle == null) return;
+
+            foreach (var clip in anim.Cycle)
+            {
+                if (string.IsNullOrEmpty(clip) || clip == anim.Clip) continue;
+
+                Function.Call(Hash.STOP_ANIM_TASK, me.Handle, anim.Dict, clip, 3f);
+            }
         }
 
         /// <summary>Removes whatever is in the hand. Used mid-meal by Swap as well as at the end.</summary>
