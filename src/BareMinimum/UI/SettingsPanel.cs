@@ -1006,6 +1006,77 @@ namespace BareMinimum.UI
                  () => _cfg.ShowShopBlips,
                  "~y~Turn shop map markers ON first.");
 
+            Group("BAG");
+
+            // THE BAG ON HIS BACK, AND WHERE EACH MODEL SITS ON IT.
+            //
+            // EVERY ROW BELOW THE PICKER BELONGS TO THE BAG THE PICKER IS ON. Change the bag
+            // and the six numbers change with it, because a number that stands a backpack up
+            // lays a duffel on its side -- see Settings.BagFit. They all write the same one
+            // ini key, which is the whole table as a line.
+
+            Bool("Bag on his back", "Bag", "Show",
+                 () => _cfg.BagShow, v => _cfg.BagShow = v,
+                 "Draws a real bag model on your back while you are carrying one. Off, the " +
+                 "mod that owns the bag puts its strap across your chest instead, which " +
+                 "cannot be moved or swapped and is missing on a lot of tops.");
+
+            Choice("Which bag", "Bag", "Model", Food.Strap.Names,
+                   () => _cfg.BagModel, v => _cfg.BagModel = v,
+                   "Fifteen of the game's own bags. A name this build has not got falls " +
+                   "through to the next one rather than leaving you with nothing.",
+                   Numbers(Food.Strap.Count));
+
+            Choice("Bag: held from", "Bag", "Bone", Food.Strap.BoneLabels,
+                   () => _cfg.BagBone, v => _cfg.BagBone = v,
+                   "Which bone it hangs off. Between the shoulder blades is where a bag " +
+                   "hangs and is the one that does not swing as he walks.",
+                   Numbers(Food.Strap.BoneLabels.Length));
+
+            Float("Bag: left  /  right", "Bag", "Fit",
+                  () => Food.Strap.Where(_cfg)[0], v => Food.Strap.Move(_cfg, 0, v),
+                  0.01f, -1f, 1f, "0.00",
+                  "His left is minus and his right is plus, in metres from the bone.",
+                  () => _cfg.BagShow, "~y~The bag on his back is OFF.");
+
+            Float("Bag: back  /  forward", "Bag", "Fit",
+                  () => Food.Strap.Where(_cfg)[1], v => Food.Strap.Move(_cfg, 1, v),
+                  0.01f, -1f, 1f, "0.00",
+                  "Behind him is minus, out in front of him is plus. A bag wants minus.",
+                  () => _cfg.BagShow, "~y~The bag on his back is OFF.");
+
+            Float("Bag: down  /  up", "Bag", "Fit",
+                  () => Food.Strap.Where(_cfg)[2], v => Food.Strap.Move(_cfg, 2, v),
+                  0.01f, -1f, 1f, "0.00",
+                  "Below the bone is minus, above it is plus. Metres.",
+                  () => _cfg.BagShow, "~y~The bag on his back is OFF.");
+
+            Float("Bag: tip", "Bag", "Fit",
+                  () => Food.Strap.Where(_cfg)[3], v => Food.Strap.Move(_cfg, 3, v),
+                  5f, -180f, 180f, "0",
+                  "Tips it end over end. Degrees.",
+                  () => _cfg.BagShow, "~y~The bag on his back is OFF.");
+
+            Float("Bag: roll", "Bag", "Fit",
+                  () => Food.Strap.Where(_cfg)[4], v => Food.Strap.Move(_cfg, 4, v),
+                  5f, -180f, 180f, "0",
+                  "Rolls it onto its side. Degrees.",
+                  () => _cfg.BagShow, "~y~The bag on his back is OFF.");
+
+            Float("Bag: turn", "Bag", "Fit",
+                  () => Food.Strap.Where(_cfg)[5], v => Food.Strap.Move(_cfg, 5, v),
+                  5f, -180f, 180f, "0",
+                  "Spins it on the spot as seen from above. Degrees.",
+                  () => _cfg.BagShow, "~y~The bag on his back is OFF.");
+
+            Bool("Bag: position tool", "Bag", "Tuner",
+                 () => _cfg.BagTuner, v => _cfg.BagTuner = v,
+                 "A readout in the top left and the numpad bound, but only while a bag is " +
+                 "actually on his back. 4/6 across, 8/2 out, 7/9 up, / and * tip, - and + " +
+                 "roll, 1/3 turn, 5 next bag, End next bone, 0 writes it to the log and . " +
+                 "puts this bag back to the start. The same keys the body carry uses.",
+                 () => _cfg.BagShow, "~y~The bag on his back is OFF.");
+
             Group("BODIES");
 
             // THE DEAD MAN ON THE PAVEMENT, and both halves of what you can do with one.
@@ -1795,7 +1866,12 @@ namespace BareMinimum.UI
                     {
                         option.Dirty = false;
                         written++;
-                        saved.Add(option.Section + "." + option.Key + "=" + option.Persist());
+                        // THE WHOLE TABLE IS ONE KEY, so six rows saying "Bag.Fit" is six
+                        // rows writing the same line and not six different values fighting.
+                        // Named once in the log for the same reason.
+                        var said = option.Section + "." + option.Key + "=" + option.Persist();
+
+                        if (!saved.Contains(said)) saved.Add(said);
                     }
                     else
                     {

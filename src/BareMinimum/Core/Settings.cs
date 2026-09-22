@@ -2213,6 +2213,107 @@ namespace BareMinimum.Core
         public float DragRoll = 40f;
         public float DragYaw = -15f;
 
+        // ---- Bag -------------------------------------------------------------
+
+        /// <summary>
+        /// Whether a real bag model is drawn on his back.
+        ///
+        /// ON. The mod that owns the bag wears it as a vest DRAWABLE -- the strap across
+        /// Franklin's chest -- and that cannot be moved, cannot be changed for another, and
+        /// silently does not exist on half the torsos in the game. A prop can be all three.
+        /// Off, the strap next door is left to it and nothing here draws anything.
+        /// See Food.Strap.
+        /// </summary>
+        public bool BagShow = true;
+
+        /// <summary>Which bag, as an index into Food.Strap's own list.</summary>
+        public int BagModel;
+
+        /// <summary>Which bone it hangs off. 0 is between the shoulder blades.</summary>
+        public int BagBone;
+
+        /// <summary>
+        /// The workshop tool for where the bag sits, on the same numpad as the body carry.
+        ///
+        /// OFF, AND IT IS MEANT TO BE. It binds a dozen keys and paints a readout in the
+        /// corner, which is right while somebody is dialling a bag in and wrong for anybody
+        /// else. It reads nothing at all unless this is true AND there is a bag on his back.
+        /// </summary>
+        public bool BagTuner = false;
+
+        /// <summary>
+        /// Where each bag MODEL sits, six numbers apiece: across, forward, up, then three
+        /// turns in degrees.
+        ///
+        /// A TABLE AND NOT SIX SETTINGS, for exactly the reason the food in his hand needs
+        /// one -- see Fit. A number that stands a backpack up lays a duffel on its side, and
+        /// fifteen models cannot share one answer. A model with no line here starts from the
+        /// one starting point in Food.Strap, which is not claimed to be right for any of
+        /// them; it is where you begin moving it from.
+        /// </summary>
+        public readonly System.Collections.Generic.Dictionary<string, float[]> BagFit =
+            new System.Collections.Generic.Dictionary<string, float[]>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>The bag table as one line, for the ini. Same shape as FitLine.</summary>
+        public string BagFitLine
+        {
+            get
+            {
+                var sb = new System.Text.StringBuilder();
+
+                foreach (var kv in BagFit)
+                {
+                    // A PIPE, NOT A SEMICOLON. A semicolon after a space starts a COMMENT in
+                    // this ini, which cost a day the first time -- see FitLine.
+                    if (sb.Length > 0) sb.Append(" | ");
+
+                    sb.Append(kv.Key).Append(':');
+
+                    for (var i = 0; i < 6; i++)
+                    {
+                        if (i > 0) sb.Append(',');
+                        sb.Append(kv.Value[i].ToString("0.####",
+                            System.Globalization.CultureInfo.InvariantCulture));
+                    }
+                }
+
+                return sb.ToString();
+            }
+        }
+
+        /// <summary>Reads that line back. A row that will not parse is skipped.</summary>
+        public void ReadBagFit(string line)
+        {
+            BagFit.Clear();
+
+            foreach (var entry in (line ?? "").Split('|', ';'))
+            {
+                var text = entry.Trim();
+                if (text.Length == 0) continue;
+
+                var colon = text.IndexOf(':');
+                if (colon <= 0) continue;
+
+                var name = text.Substring(0, colon).Trim();
+                var bits = text.Substring(colon + 1).Split(',');
+
+                if (name.Length == 0 || bits.Length < 6) continue;
+
+                var six = new float[6];
+                var ok = true;
+
+                for (var i = 0; i < 6; i++)
+                {
+                    if (!float.TryParse(bits[i].Trim(),
+                                        System.Globalization.NumberStyles.Float,
+                                        System.Globalization.CultureInfo.InvariantCulture,
+                                        out six[i])) { ok = false; break; }
+                }
+
+                if (ok) BagFit[name] = six;
+            }
+        }
+
         /// <summary>Which of the game's own dead poses he is held in. See Bodies.DragPose.</summary>
         public int DragShape = 9;
 
@@ -2557,6 +2658,19 @@ namespace BareMinimum.Core
                 cfg.DragYaw = ini.GetFloat("Bodies", "Yaw", cfg.DragYaw, -180f, 180f);
                 cfg.DragShape = ini.GetInt("Bodies", "Pose", cfg.DragShape, 0, 12);
                 cfg.DragBone = ini.GetInt("Bodies", "Bone", cfg.DragBone, 0, 3);
+
+                cfg.BagShow = ini.GetBool("Bag", "Show", cfg.BagShow);
+                cfg.BagTuner = ini.GetBool("Bag", "Tuner", cfg.BagTuner);
+                cfg.BagBone = ini.GetInt("Bag", "Bone", cfg.BagBone, 0, 3);
+
+                // CLAMPED TO THE LIST ITSELF rather than to a number written twice. A model
+                // added to Food.Strap moves this ceiling with it, and an ini from an older
+                // build naming an index that no longer exists falls back to the first bag
+                // instead of throwing on the first frame it is drawn.
+                cfg.BagModel = ini.GetInt("Bag", "Model", cfg.BagModel,
+                                          0, Math.Max(0, Food.Strap.Count - 1));
+
+                cfg.ReadBagFit(ini.GetString("Bag", "Fit", ""));
 
                 cfg.BuyToPantry = ini.GetBool("Money", "BuyToPantry", cfg.BuyToPantry);
                 cfg.PantrySlots = (int)ini.GetFloat("Money", "PantrySlots", cfg.PantrySlots, 1f, 200f);

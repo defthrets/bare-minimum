@@ -102,6 +102,9 @@ namespace BareMinimum
         /// </summary>
         private readonly Bodies.Drag _carry;
 
+        /// <summary>The bag as a thing you can see on his back. See Food.Strap.</summary>
+        private readonly Strap _strap;
+
         /// <summary>The fridge: where it is, what is in it, and the screen over it.</summary>
         private readonly Fridges _fridges;
         private readonly Larder _larder;
@@ -200,6 +203,11 @@ namespace BareMinimum
             // screen is the pocket, nothing he looted was on any screen. See
             // FridgeScreen._mineDope.
             _knapsack = new Knapsack(_catalogue);
+
+            // AND WHAT THAT BAG LOOKS LIKE. The knapsack is what is IN it; this is the thing
+            // on his back. It draws nothing until something says a bag is worn, which is
+            // still the other mod's call -- see Food.Strap.
+            _strap = new Strap(_cfg);
 
             _bagScreen = new FridgeScreen(_cfg, _catalogue, _pantry,
                 new FridgeScreen.Far
@@ -623,6 +631,12 @@ namespace BareMinimum
                 _larder.Update(dt);
                 _knapsack.Update(dt);
 
+                // NOT GATED ON A MENU. A bag is worn or it is not, and a panel being open is
+                // no reason for it to vanish off his back. The tuner inside it reads nothing
+                // unless it is switched on AND there is a bag to move.
+                _strap.Update();
+                _strap.Tune();
+
                 // AND WHAT IS IN IT, FOR THE OTHER MOD. A bong is kit rather than food: the
                 // whole of its effect is elsewhere, so the fact of carrying one is published
                 // and nothing here acts on it. Written only when it changes. See Dope.Kit.
@@ -769,6 +783,11 @@ namespace BareMinimum
             // chest, through walls and into cars, with nothing left running that knows how to
             // let go of it. Put also kills him again, so what is left behind is a corpse
             // rather than an invincible mute who stands up a minute later.
+            // OFF HIS BACK AND DELETED. An attached prop outlives the script that made it:
+            // a reload with a bag welded to his spine leaves it welded there, through walls
+            // and into cars, with nothing left running that knows how to take it off. The
+            // same rule as the food in his hand and the body in his arms.
+            try { if (_strap != null) _strap.Off(); } catch (Exception ex) { Log.Error("Bag shutdown", ex); }
             try { if (_carry != null) _carry.Release(); } catch (Exception ex) { Log.Error("Carry shutdown", ex); }
             // AND HE IS NOT LEFT ON ONE KNEE. The kneel is a looping task with no duration,
             // so a reload part way through a search leaves him down there with nothing
