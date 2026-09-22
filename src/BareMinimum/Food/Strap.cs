@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Windows.Forms;
 using GTA;
 using GTA.Math;
@@ -113,15 +113,59 @@ namespace BareMinimum.Food
         public static int Count => Bags.Length;
 
         /// <summary>
-        /// WHERE A BAG SITS, AND THERE IS NO DEFAULT THAT IS RIGHT.
+        /// WHERE EACH BAG SITS, AND THESE ARE DIALLED RATHER THAN GUESSED.
         ///
-        /// This is the starting point and it is nothing more than that: behind him, level with
-        /// the middle of his back, facing the way he faces. A backpack and a tennis bag are
-        /// different shapes with different origins and no one set of six numbers is right for
-        /// both -- which is exactly why every model gets its own line in the ini and there is
-        /// a tuner for filling them in. Nothing here is claimed to be dialled.
+        /// SEVEN OF THEM ARE MICHAEL'S, off the numpad on 2026-09-22, in the order he did
+        /// them. They were nearly lost: the tuner's write key printed them to the log and
+        /// saved nothing, and the settings page had overwritten the ini's table with a bare
+        /// "-50" -- see the note on Save below and SettingsPanel's axis rows. They were read
+        /// back out of the log line at 19:11:07 and they are the defaults now, so a fresh
+        /// install has them and no ini is needed to get them.
+        ///
+        /// THE OTHER EIGHT ARE THE MEDIAN OF THOSE SEVEN, at his word: any he had not set,
+        /// put in the same place as the ones he had. Nought across, seventeen centimetres
+        /// behind, level, rolled ninety. It is a far better start than the one it replaced
+        /// and it is still only a start -- a duffel is not a backpack, and the tuner is how
+        /// each one stops being a median and becomes its own line.
         /// </summary>
-        private static readonly float[] Start = { 0f, -0.17f, 0f, 0f, 0f, 0f };
+        private static readonly float[] Start = { 0f, -0.17f, 0f, 0f, 90f, 0f };
+
+        /// <summary>
+        /// The ones that have actually been looked at. Model name, then the six.
+        ///
+        /// READ BEFORE THE INI, NOT INSTEAD OF IT. A line in [Bag] Fit still wins -- these
+        /// are what a model falls back to when nobody has moved it, which for seven of them
+        /// is somebody having already moved it here. See Where.
+        /// </summary>
+        private static readonly object[][] Dialled =
+        {
+            new object[] { "p_michael_backpack_s",      new[] {  0.05f, -0.15f,  0.12f,  -10f, 100f,  -5f } },
+            new object[] { "p_ld_heist_bag_s",          new[] {  0.00f, -0.18f,  0.00f,    0f,   0f,   0f } },
+            new object[] { "sf_prop_sf_backpack_01a",   new[] { -0.19f, -0.20f,  0.00f,    0f,  90f,   5f } },
+            new object[] { "sf_prop_sf_backpack_02a",   new[] { -0.02f, -0.13f,  0.01f, -170f,  90f,   5f } },
+            new object[] { "sf_prop_sf_backpack_03a",   new[] {  0.00f, -0.17f,  0.00f,  175f, 105f,   0f } },
+            new object[] { "vw_prop_vw_backpack_01a",   new[] { -0.26f, -0.08f,  0.00f, -175f,  90f,  10f } },
+            new object[] { "xm3_prop_xm3_backpack_01a", new[] {  0.01f, -0.19f,  0.02f,   -5f,  95f, -80f } },
+        };
+
+        /// <summary>The dialled six for a model, or null when nobody has done that one.</summary>
+        private static float[] Known(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return null;
+
+            foreach (var row in Dialled)
+            {
+                if (!string.Equals((string)row[0], name, StringComparison.OrdinalIgnoreCase)) continue;
+
+                var six = (float[])row[1];
+
+                // A COPY, NEVER THE ARRAY ITSELF, or the first nudge on the settings page
+                // edits the baked default and there is nothing left to go back to.
+                return new[] { six[0], six[1], six[2], six[3], six[4], six[5] };
+            }
+
+            return null;
+        }
 
         /// <summary>
         /// SKEL_Spine3, between the shoulder blades, which is where a bag hangs from.
@@ -178,6 +222,10 @@ namespace BareMinimum.Food
                 return six;
             }
 
+            // THEN THE ONES THAT HAVE BEEN LOOKED AT, and only then the median. See Dialled.
+            var known = Known(name);
+            if (known != null) return known;
+
             // A COPY, NEVER THE ARRAY ITSELF. Handing back Start would let the first nudge on
             // the settings page edit the default for every model that has not been dialled.
             return new[] { Start[0], Start[1], Start[2], Start[3], Start[4], Start[5] };
@@ -212,6 +260,38 @@ namespace BareMinimum.Food
         /// <summary>Set by every write, cleared by the pass that re-seats the bag on it.</summary>
         public static bool Dirty;
 
+        /// <summary>A change is owed to the ini, and when the last one was made. See Update.</summary>
+        private static bool _owed;
+        private static int _owedAt;
+
+        /// <summary>How long after the last nudge the table is written down.</summary>
+        private const int SettleMs = 2000;
+
+        /// <summary>
+        /// Writes the table, the model and the bone to the ini.
+        ///
+        /// ALL THREE, because the tuner moves all three: 5 walks the models and End walks the
+        /// bones, and a session that ends with a different bag picked and only the positions
+        /// saved comes back wearing the old one.
+        /// </summary>
+        private void Save()
+        {
+            _owed = false;
+
+            if (_cfg == null) return;
+
+            try
+            {
+                IniFile.SetValue(Paths.Ini, "Bag", "Fit", _cfg.BagFitLine);
+                IniFile.SetValue(Paths.Ini, "Bag", "Model", _cfg.BagModel.ToString());
+                IniFile.SetValue(Paths.Ini, "Bag", "Bone", _cfg.BagBone.ToString());
+            }
+            catch (Exception ex)
+            {
+                Log.Once("bag-save", "Could not write the bag position: " + ex.Message);
+            }
+        }
+
         // ======================================================================
 
         public void Update()
@@ -242,7 +322,25 @@ namespace BareMinimum.Food
                 // than refusing, which is the same fact the food in his hand leans on.
                 Seat(me);
 
-                Dirty = false;
+                // ANY CHANGE IS ON DISK TWO SECONDS LATER, FROM WHEREVER IT CAME.
+                //
+                // THE TUNER USED TO SAVE NOTHING AT ALL. Numpad 0 said "write it to the log"
+                // and did exactly that -- an hour of dialling seven bags lived in memory
+                // until Insert re-read the ini and threw the lot away. The numbers were only
+                // recoverable because that key had printed them.
+                //
+                // A SETTLE TIMER RATHER THAN A WRITE PER KEYPRESS. A nudge is a centimetre
+                // and a session is hundreds of them; rewriting the ini on each would be
+                // hundreds of file writes to record one decision. Two seconds after the last
+                // one, which is well inside the time it takes to reach for Insert.
+                if (Dirty)
+                {
+                    Dirty = false;
+                    _owed = true;
+                    _owedAt = Game.GameTime;
+                }
+
+                if (_owed && Game.GameTime - _owedAt >= SettleMs) Save();
 
                 Say(true);
             }
@@ -511,7 +609,7 @@ namespace BareMinimum.Food
             Line(0.012f, 0.195f, "-/+ roll      " + six[4].ToString("0") + " deg", 0.30f);
             Line(0.012f, 0.215f, "1/3 turn      " + six[5].ToString("0") + " deg", 0.30f);
             Line(0.012f, 0.240f, "~b~5~s~ next bag   ~b~END~s~ " + BoneNames[_cfg.BagBone % Bones.Length], 0.28f);
-            Line(0.012f, 0.262f, "~g~0~s~ write it to the log    ~r~.~s~ back to the start", 0.28f);
+            Line(0.012f, 0.262f, "~g~0~s~ save it now    ~r~.~s~ back to the start", 0.28f);
         }
 
         private static void Line(float x, float y, string text, float scale)
@@ -539,7 +637,12 @@ namespace BareMinimum.Food
         /// </summary>
         private void Write()
         {
-            Log.Info("BAG POSITION -- this is [Bag] Fit in BareMinimum.ini:");
+            // SAVED, NOT JUST SAID. This key printed the line and wrote nothing, which read
+            // as "written down" and was not -- see the note on Save. It still prints, because
+            // a line in the log is how these were recovered the one time it mattered.
+            Save();
+
+            Log.Info("BAG POSITION -- saved to [Bag] Fit in BareMinimum.ini:");
             Log.Info("    Fit = " + _cfg.BagFitLine);
             Log.Info("    Bone = " + _cfg.BagBone + "     ; " +
                      BoneNames[_cfg.BagBone % Bones.Length]);

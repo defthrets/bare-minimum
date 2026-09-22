@@ -1037,37 +1037,43 @@ namespace BareMinimum.UI
                   () => Food.Strap.Where(_cfg)[0], v => Food.Strap.Move(_cfg, 0, v),
                   0.01f, -1f, 1f, "0.00",
                   "His left is minus and his right is plus, in metres from the bone.",
-                  () => _cfg.BagShow, "~y~The bag on his back is OFF.");
+                  () => _cfg.BagShow, "~y~The bag on his back is OFF.",
+                  () => _cfg.BagFitLine);
 
             Float("Bag: back  /  forward", "Bag", "Fit",
                   () => Food.Strap.Where(_cfg)[1], v => Food.Strap.Move(_cfg, 1, v),
                   0.01f, -1f, 1f, "0.00",
                   "Behind him is minus, out in front of him is plus. A bag wants minus.",
-                  () => _cfg.BagShow, "~y~The bag on his back is OFF.");
+                  () => _cfg.BagShow, "~y~The bag on his back is OFF.",
+                  () => _cfg.BagFitLine);
 
             Float("Bag: down  /  up", "Bag", "Fit",
                   () => Food.Strap.Where(_cfg)[2], v => Food.Strap.Move(_cfg, 2, v),
                   0.01f, -1f, 1f, "0.00",
                   "Below the bone is minus, above it is plus. Metres.",
-                  () => _cfg.BagShow, "~y~The bag on his back is OFF.");
+                  () => _cfg.BagShow, "~y~The bag on his back is OFF.",
+                  () => _cfg.BagFitLine);
 
             Float("Bag: tip", "Bag", "Fit",
                   () => Food.Strap.Where(_cfg)[3], v => Food.Strap.Move(_cfg, 3, v),
                   5f, -180f, 180f, "0",
                   "Tips it end over end. Degrees.",
-                  () => _cfg.BagShow, "~y~The bag on his back is OFF.");
+                  () => _cfg.BagShow, "~y~The bag on his back is OFF.",
+                  () => _cfg.BagFitLine);
 
             Float("Bag: roll", "Bag", "Fit",
                   () => Food.Strap.Where(_cfg)[4], v => Food.Strap.Move(_cfg, 4, v),
                   5f, -180f, 180f, "0",
                   "Rolls it onto its side. Degrees.",
-                  () => _cfg.BagShow, "~y~The bag on his back is OFF.");
+                  () => _cfg.BagShow, "~y~The bag on his back is OFF.",
+                  () => _cfg.BagFitLine);
 
             Float("Bag: turn", "Bag", "Fit",
                   () => Food.Strap.Where(_cfg)[5], v => Food.Strap.Move(_cfg, 5, v),
                   5f, -180f, 180f, "0",
                   "Spins it on the spot as seen from above. Degrees.",
-                  () => _cfg.BagShow, "~y~The bag on his back is OFF.");
+                  () => _cfg.BagShow, "~y~The bag on his back is OFF.",
+                  () => _cfg.BagFitLine);
 
             Bool("Bag: position tool", "Bag", "Tuner",
                  () => _cfg.BagTuner, v => _cfg.BagTuner = v,
@@ -1770,10 +1776,21 @@ namespace BareMinimum.UI
         /// rather than 0.257. The fine step is a clean decimal, so it kills the drift just as
         /// well without deciding the value has to sit on a grid.
         /// </summary>
+        /// <summary>
+        /// A row that nudges a number.
+        ///
+        /// <paramref name="persist"/> IS FOR A ROW THAT EDITS PART OF SOMETHING BIGGER, and
+        /// it exists because leaving it out destroyed an hour of work. A Float row writes ITS
+        /// OWN VALUE to its key; the six bag axes edit six slots of a TABLE that lives under
+        /// one key, so the last one nudged wrote a bare "-50" over the whole table and every
+        /// bag went back to the default on the next reload. A row that edits a slice of
+        /// something has to say how the whole thing is written down.
+        /// </summary>
         private void Float(string name, string section, string key,
                            Func<float> get, Action<float> set,
                            float step, float min, float max, string format, string note,
-                           Func<bool> available = null, string unavailable = "")
+                           Func<bool> available = null, string unavailable = "",
+                           Func<string> persist = null)
         {
             Add(new Option
             {
@@ -1797,7 +1814,7 @@ namespace BareMinimum.UI
 
                     set(v);
                 },
-                Persist = () => get().ToString("0.####", CultureInfo.InvariantCulture)
+                Persist = persist ?? (() => get().ToString("0.####", CultureInfo.InvariantCulture))
             });
         }
 
