@@ -176,6 +176,7 @@ namespace BareMinimum.Bodies
 
         private int _sweptAt;
 
+        private readonly Core.Settings _cfg;
         private readonly Catalogue _menu;
         private readonly Pantry _pantry;
         private readonly Knapsack _knapsack;
@@ -195,8 +196,9 @@ namespace BareMinimum.Bodies
         /// <summary>How many bodies are on the books, for the log.</summary>
         public int Count => _known.Count;
 
-        public Corpses(Catalogue menu, Pantry pantry, Knapsack knapsack)
+        public Corpses(Core.Settings cfg, Catalogue menu, Pantry pantry, Knapsack knapsack)
         {
+            _cfg = cfg;
             _menu = menu;
             _pantry = pantry;
             _knapsack = knapsack;
@@ -731,7 +733,11 @@ namespace BareMinimum.Bodies
         {
             var gang = !string.Equals(body.Affiliation, "None", StringComparison.OrdinalIgnoreCase);
 
-            Iron(who, body);
+            // HIS GUNS, ONLY IF THE SETTING SAYS SO -- and it says no by default, because
+            // the game's own answer to a dead man with a rifle is a rifle on the pavement.
+            // See Settings.LootGuns, and Search.Nobody, which is the other half of it: there
+            // is no point taking a gun off a body that has already dropped it at your feet.
+            if (_cfg != null && _cfg.LootGuns) Iron(who, body);
             Notes(body, gang, model, ref seed);
             Bite(body, ref seed);
             Powder(body, gang, ref seed);

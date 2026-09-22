@@ -1024,6 +1024,15 @@ namespace BareMinimum.UI
                  "man was and a grid of what was in his pockets. It also stops everybody " +
                  "near you dropping their gun on the pavement when they die.");
 
+            Bool("Search bodies: guns", "Bodies", "Guns",
+                 () => _cfg.LootGuns, v => _cfg.LootGuns = v,
+                 "Whether his guns are on the card. OFF is the game's own behaviour: a dead " +
+                 "man drops his gun on the pavement and you walk over it. ON puts it in his " +
+                 "pocket instead -- which only works by stopping everybody near you dropping " +
+                 "anything when they die, so it is a change to the whole street and not just " +
+                 "to a screen.",
+                 () => _cfg.LootBodies, "~y~Searching bodies is OFF.");
+
             // WATCH THE BODY WHILE YOU MOVE THESE. Every one is applied to whoever is in his
             // arms on the frame it changes -- see Drag.Hauling, which re-welds on a dirty
             // flag -- so the way to set them is to pick somebody up, open this, and slide

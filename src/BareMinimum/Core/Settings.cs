@@ -2164,6 +2164,25 @@ namespace BareMinimum.Core
         public bool LootBodies = true;
 
         /// <summary>
+        /// Whether a dead man's GUNS are among the things on the card.
+        ///
+        /// OFF, AND THAT IS THE GAME'S OWN BEHAVIOUR. A dead man with a rifle drops a rifle
+        /// on the pavement and you collect it by walking over it, which is how this game has
+        /// always worked and what most people want back.
+        ///
+        /// IT IS A SETTING RATHER THAN A DELETION BECAUSE OF WHAT IT COSTS. Taking a gun off
+        /// a body only means anything if the gun is not already lying on the floor beside
+        /// him -- so with this on, everybody within ninety metres is told not to drop what
+        /// they are carrying when they die, every couple of seconds. That is a change to the
+        /// whole world rather than to a screen, and the two halves have to move together.
+        ///
+        /// Turning it off puts the world back rather than merely stopping: see
+        /// Bodies.Search.Nobody, and the machine markers that did not come back when their
+        /// own switch did.
+        /// </summary>
+        public bool LootGuns = false;
+
+        /// <summary>
         /// The workshop tool for where a carried body hangs and what shape it is in.
         ///
         /// OFF, AND IT IS MEANT TO BE. It binds a dozen numpad keys and paints a readout over
@@ -2524,6 +2543,7 @@ namespace BareMinimum.Core
 
                 cfg.CarryBodies = ini.GetBool("Bodies", "Carry", cfg.CarryBodies);
                 cfg.LootBodies = ini.GetBool("Bodies", "Loot", cfg.LootBodies);
+                cfg.LootGuns = ini.GetBool("Bodies", "Guns", cfg.LootGuns);
                 cfg.DragTuner = ini.GetBool("Bodies", "Tuner", cfg.DragTuner);
 
                 // CLAMPED THE WAY THE OTHER MOD CLAMPED THEM. Two metres is further than an

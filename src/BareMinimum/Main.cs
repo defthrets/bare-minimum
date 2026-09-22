@@ -378,7 +378,7 @@ namespace BareMinimum
             // THE POCKET AND THE BAG ARE HANDED IN rather than the loot having its own idea
             // of where a thing goes. A sandwich off a body lands exactly where a sandwich off
             // a shelf lands, because both go through Food.Stow.
-            _corpses = new Bodies.Corpses(_catalogue, _pantry, _knapsack);
+            _corpses = new Bodies.Corpses(_cfg, _catalogue, _pantry, _knapsack);
 
             _search = new Bodies.Search(_cfg, _corpses)
             {

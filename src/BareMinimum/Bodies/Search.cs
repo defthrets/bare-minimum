@@ -151,6 +151,14 @@ namespace BareMinimum.Bodies
             // frame -- Main ticks this one before that one.
             Offering = false;
 
+            // BEFORE THE SWITCH, AND THAT IS THE POINT OF IT BEING HERE. Nobody is what
+            // tells the world not to drop weapons, and switching the loot off has to PUT
+            // THAT BACK rather than merely stop asking -- which it cannot do from below a
+            // return that fires the moment the box is unticked. See Nobody.
+            var player = Game.Player.Character;
+
+            Nobody(player, now);
+
             if (_cfg == null || !_cfg.LootBodies)
             {
                 // SWITCHED OFF MID-SESSION IS STILL AN ENDING. He does not stay on one knee
@@ -159,11 +167,7 @@ namespace BareMinimum.Bodies
                 return;
             }
 
-            var player = Game.Player.Character;
-
             if (_bodies != null) _bodies.Sweep(now);
-
-            Nobody(player, now);
 
             if (_screen.IsOpen)
             {
@@ -417,16 +421,48 @@ namespace BareMinimum.Bodies
         }
 
         /// <summary>
-        /// Nobody drops anything any more.
+        /// Nobody drops anything any more -- while guns are worth taking off a body.
         ///
         /// SET BEFORE THEY DIE, WHICH IS WHY IT IS A SWEEP. The flag decides what happens at
         /// the moment of death, so setting it on a corpse is too late -- the gun is already on
         /// the pavement. Everybody within ninety metres is told, every couple of seconds,
         /// which is one native call each on a few dozen people and is not worth optimising.
+        ///
+        /// AND IT ONLY HAPPENS WHEN THE GUNS ARE ON THE CARD, which by default they are not.
+        /// Suppressing every weapon drop in the city is the price of being able to take a gun
+        /// off a body, and it is not a price worth paying for a feature that is switched off:
+        /// see Settings.LootGuns.
+        ///
+        /// THE SWITCH GOING OFF PUTS THE WORLD BACK, and that is the part that is easy to get
+        /// wrong. The flag lives on the PED, not on this mod, and it survives a script reload
+        /// -- so everybody already told not to drop would go on not dropping until the game
+        /// culled them, which is minutes of weapons quietly not appearing with the setting
+        /// plainly off. That is exactly the shape of the machine markers that did not come
+        /// back when their own switch did, reported as "all the blips are missing". So the
+        /// sweep runs for a while longer after the switch moves, saying the opposite, and
+        /// then stops touching anybody at all.
+        ///
+        /// NOT ASSERTED FOREVER. Once the world is put back this goes near nobody, because a
+        /// mod that keeps setting a flag to its default value is a mod arguing with whoever
+        /// else on the machine has an opinion about it.
         /// </summary>
         private void Nobody(Ped player, int now)
         {
             if (player == null || !player.Exists()) return;
+
+            var hold = _cfg != null && _cfg.LootBodies && _cfg.LootGuns;
+
+            // The switch has just moved. Say the opposite for a while, then stop.
+            if (!hold && _dropsHeld)
+            {
+                _dropsHeld = false;
+                _undoUntil = now + UndoMs;
+
+                Log.Info("Bodies: guns are the game's again; putting the weapon drops back.");
+            }
+
+            if (!hold && now >= _undoUntil) return;
+
             if (now - _sweptAt < SweepEveryMs) return;
 
             _sweptAt = now;
@@ -438,14 +474,30 @@ namespace BareMinimum.Bodies
                     if (ped == null || !ped.Exists() || !ped.IsAlive) continue;
                     if (ped.Handle == player.Handle) continue;
 
-                    Function.Call(Hash.SET_PED_DROPS_WEAPONS_WHEN_DEAD, ped.Handle, false);
+                    Function.Call(Hash.SET_PED_DROPS_WEAPONS_WHEN_DEAD, ped.Handle, hold ? false : true);
                 }
             }
             catch (Exception ex)
             {
-                Log.Debug("Search: could not stop the drops: " + ex.Message);
+                Log.Debug("Search: could not " + (hold ? "stop" : "restore") +
+                          " the weapon drops: " + ex.Message);
             }
+
+            if (hold) _dropsHeld = true;
         }
+
+        /// <summary>Whether anybody has been told not to drop, and how long the undo runs for.</summary>
+        private bool _dropsHeld;
+        private int _undoUntil;
+
+        /// <summary>
+        /// How long the sweep keeps putting the drops back after the switch goes off.
+        ///
+        /// Ten sweeps at two seconds each, which is long enough to cover everybody in
+        /// ninety metres including the ones who walked in during it. The population turns
+        /// over faster than this on its own; the undo is for the ones standing still.
+        /// </summary>
+        private const int UndoMs = 20000;
 
         /// <summary>
         /// The interact key held down, as a level.
