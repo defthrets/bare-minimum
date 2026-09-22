@@ -2324,8 +2324,15 @@ namespace BareMinimum.Core
         /// </summary>
         public bool BagShow = true;
 
-        /// <summary>Which bag, as an index into Food.Strap's own list.</summary>
-        public int BagModel;
+        /// <summary>
+        /// Which bag, as an index into Food.Strap's own list.
+        ///
+        /// THE TACTICAL PACK, and asked for by name rather than written as a number here --
+        /// see Food.Strap.Default, which is the one place that knows what order the list is
+        /// in. A default written as 8 would quietly become a different bag the day anybody
+        /// adds one above it.
+        /// </summary>
+        public int BagModel = Food.Strap.Default;
 
         /// <summary>Which bone it hangs off. 0 is between the shoulder blades.</summary>
         public int BagBone;

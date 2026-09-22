@@ -113,6 +113,32 @@ namespace BareMinimum.Food
         public static int Count => Bags.Length;
 
         /// <summary>
+        /// The bag a fresh install starts on: the tactical pack, at Michael's word.
+        ///
+        /// BY NAME RATHER THAN BY NUMBER. Its index is 8 today and would be 9 the moment
+        /// anybody puts another bag above it in the list, and a default that silently becomes
+        /// a different object because a list grew is the kind of thing nobody thinks to check.
+        /// The name cannot drift.
+        /// </summary>
+        private const string Favourite = "xm3_prop_xm3_backpack_01a";
+
+        public static int Default
+        {
+            get
+            {
+                for (var i = 0; i < Bags.Length; i++)
+                {
+                    if (string.Equals(Bags[i][0], Favourite, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return i;
+                    }
+                }
+
+                return 0;
+            }
+        }
+
+        /// <summary>
         /// WHERE EACH BAG SITS, AND THESE ARE DIALLED RATHER THAN GUESSED.
         ///
         /// SEVEN OF THEM ARE MICHAEL'S, off the numpad on 2026-09-22, in the order he did
@@ -260,9 +286,35 @@ namespace BareMinimum.Food
         /// <summary>Set by every write, cleared by the pass that re-seats the bag on it.</summary>
         public static bool Dirty;
 
-        /// <summary>A change is owed to the ini, and when the last one was made. See Update.</summary>
+        /// <summary>A change is owed to the ini, and when the last one was made. See Owed.</summary>
         private static bool _owed;
         private static int _owedAt;
+
+        /// <summary>
+        /// Notices a change and writes it down once it has settled.
+        ///
+        /// A SETTLE TIMER RATHER THAN A WRITE PER KEYPRESS. A nudge is a centimetre and a
+        /// session is hundreds of them; rewriting the ini on each would be hundreds of file
+        /// writes to record one decision. Two seconds after the LAST one, which is well
+        /// inside the time it takes to reach for Insert -- and Off forces it early anyway,
+        /// so taking the bag off, dying or shutting down all land it immediately.
+        /// </summary>
+        private void Owed()
+        {
+            int now;
+
+            try { now = Game.GameTime; }
+            catch { return; }
+
+            if (Dirty)
+            {
+                Dirty = false;
+                _owed = true;
+                _owedAt = now;
+            }
+
+            if (_owed && now - _owedAt >= SettleMs) Save();
+        }
 
         /// <summary>How long after the last nudge the table is written down.</summary>
         private const int SettleMs = 2000;
@@ -300,6 +352,15 @@ namespace BareMinimum.Food
             {
                 var me = Game.Player.Character;
 
+                // ANY OWED WRITE FIRST, BEFORE A SINGLE GATE BELOW IT.
+                //
+                // THIS USED TO SIT AFTER Seat, WHICH IS INSIDE ALL OF THEM. A nudge followed
+                // within the settle window by taking the bag off, dying, unticking the
+                // switch or reloading left the write owed and never made -- which is the
+                // same "it did not save" as the tuner that only printed to the log, one
+                // layer further in and just as quiet.
+                Owed();
+
                 var want = _cfg != null && _cfg.BagShow && Knapsack.Worn &&
                            me != null && me.Exists() && !me.IsDead;
 
@@ -321,26 +382,6 @@ namespace BareMinimum.Food
                 // already on him. Re-attaching something already attached MOVES it rather
                 // than refusing, which is the same fact the food in his hand leans on.
                 Seat(me);
-
-                // ANY CHANGE IS ON DISK TWO SECONDS LATER, FROM WHEREVER IT CAME.
-                //
-                // THE TUNER USED TO SAVE NOTHING AT ALL. Numpad 0 said "write it to the log"
-                // and did exactly that -- an hour of dialling seven bags lived in memory
-                // until Insert re-read the ini and threw the lot away. The numbers were only
-                // recoverable because that key had printed them.
-                //
-                // A SETTLE TIMER RATHER THAN A WRITE PER KEYPRESS. A nudge is a centimetre
-                // and a session is hundreds of them; rewriting the ini on each would be
-                // hundreds of file writes to record one decision. Two seconds after the last
-                // one, which is well inside the time it takes to reach for Insert.
-                if (Dirty)
-                {
-                    Dirty = false;
-                    _owed = true;
-                    _owedAt = Game.GameTime;
-                }
-
-                if (_owed && Game.GameTime - _owedAt >= SettleMs) Save();
 
                 Say(true);
             }
@@ -457,9 +498,19 @@ namespace BareMinimum.Food
             return Bones[at];
         }
 
-        /// <summary>Takes it off and deletes it. Safe when there is nothing on him.</summary>
+        /// <summary>
+        /// Takes it off and deletes it. Safe when there is nothing on him.
+        ///
+        /// AND LANDS ANYTHING OWED, rather than leaving it to a timer that is about to stop
+        /// being called. Main calls this on the way out, so a reload with a nudge two seconds
+        /// old writes it down instead of losing it -- and the same goes for dying, for the
+        /// bag coming off, and for the switch being unticked. Save does nothing when nothing
+        /// is owed, which is every frame he is not carrying one.
+        /// </summary>
         public void Off()
         {
+            if (_owed) Save();
+
             Say(false);
 
             if (_thing == null) { _wearing = ""; return; }
