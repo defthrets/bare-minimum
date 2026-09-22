@@ -1956,6 +1956,104 @@ namespace BareMinimum.Core
             }
         }
 
+        /// <summary>
+        /// WHERE A MODEL SITS WHEN NOTHING IS PLAYING: his arm down, the thing on the bone.
+        ///
+        /// HIS HAND IS IN TWO PLACES AND Fit ONLY KNOWS ONE OF THEM. That table is dialled
+        /// against the clip the thing is eaten with, which is the pose it is mostly seen in
+        /// and the right thing to fit first. But a meal is animation, BREAK, animation -- see
+        /// Bites -- and in the break there is no clip at all: his arm is at his side and the
+        /// model is sitting on a hand bone in his idle pose. A cup that sits perfectly at his
+        /// mouth can be through his thigh at his hip, and one set of six cannot be right for
+        /// both any more than one set can serve twelve different drink models.
+        ///
+        /// EMPTY IS NOT A PROBLEM. A model with no line here uses its eating numbers, which
+        /// is exactly what every model did before this table existed -- so nothing moves for
+        /// anybody until they dial one in. The bench fits either; see UI.FitScreen's pose row.
+        /// </summary>
+        public readonly System.Collections.Generic.Dictionary<string, float[]> Rest =
+            new System.Collections.Generic.Dictionary<string, float[]>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>The resting table as one line, for the ini. Same shape as FitLine.</summary>
+        public string RestLine
+        {
+            get { return Table(Rest); }
+        }
+
+        /// <summary>Reads that line back. Same shape as ReadFit.</summary>
+        public void ReadRest(string line)
+        {
+            Read(Rest, line);
+        }
+
+        /// <summary>
+        /// One table as one line, and one line back into one table.
+        ///
+        /// SHARED BECAUSE THERE ARE TWO OF THEM NOW. Fit and Rest are the same six numbers
+        /// keyed the same way and written to the same kind of line, and the pipe-not-semicolon
+        /// lesson below should only have to be learnt in one place.
+        /// </summary>
+        private static string Table(System.Collections.Generic.Dictionary<string, float[]> from)
+        {
+            var sb = new System.Text.StringBuilder();
+
+            foreach (var kv in from)
+            {
+                // A PIPE, NOT A SEMICOLON, AND THIS COST A DAY. A semicolon after a space is
+                // how this ini starts a COMMENT -- see IniFile.StripInlineComment -- so a
+                // line of entries separated by "; " was read as its first entry and nothing
+                // else. Every model but the first fell back to nought, which is the middle of
+                // his hand, which is exactly what it looked like.
+                if (sb.Length > 0) sb.Append(" | ");
+
+                sb.Append(kv.Key).Append(':');
+
+                for (var i = 0; i < 6; i++)
+                {
+                    if (i > 0) sb.Append(',');
+                    sb.Append(kv.Value[i].ToString("0.####",
+                        System.Globalization.CultureInfo.InvariantCulture));
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        private static void Read(System.Collections.Generic.Dictionary<string, float[]> into,
+                                 string line)
+        {
+            into.Clear();
+
+            // BOTH SEPARATORS. The pipe is what is written now; the semicolon is what older
+            // files have, and half of one of those is better than none of it.
+            foreach (var entry in (line ?? "").Split('|', ';'))
+            {
+                var text = entry.Trim();
+                if (text.Length == 0) continue;
+
+                var colon = text.IndexOf(':');
+                if (colon <= 0) continue;
+
+                var name = text.Substring(0, colon).Trim();
+                var bits = text.Substring(colon + 1).Split(',');
+
+                if (name.Length == 0 || bits.Length < 6) continue;
+
+                var six = new float[6];
+                var ok = true;
+
+                for (var i = 0; i < 6; i++)
+                {
+                    if (!float.TryParse(bits[i].Trim(),
+                                        System.Globalization.NumberStyles.Float,
+                                        System.Globalization.CultureInfo.InvariantCulture,
+                                        out six[i])) { ok = false; break; }
+                }
+
+                if (ok) into[name] = six;
+            }
+        }
+
         /// <summary>The fit table as one line, for the ini. See Fit.</summary>
         public string FitLine
         {
@@ -2723,6 +2821,7 @@ namespace BareMinimum.Core
                 // Words in the file, a number in here. Anything else is a drink, which is the
                 // safe way round: the nudge then cannot touch the food that is already right.
                 cfg.ReadFit(ini.GetString("Eating", "Fit", ""));
+                cfg.ReadRest(ini.GetString("Eating", "Rest", ""));
                 cfg.ReadProps(ini.GetString("Eating", "Props", ""));
 
                 cfg.HoldWhat = string.Equals(ini.GetString("Eating", "HoldWhat", "Drink"),

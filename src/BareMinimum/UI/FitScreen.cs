@@ -87,6 +87,35 @@ namespace BareMinimum.UI
         private bool _loaded;
         private int _animAt;
 
+        /// <summary>
+        /// Which of the two poses is on the bench: 0 as he eats it, 1 with his arm down.
+        ///
+        /// HIS HAND IS IN TWO PLACES AND THIS SCREEN ONLY EVER KNEW ONE OF THEM. Point 2 at
+        /// the top of this file is the whole argument for playing the clip -- a thing held by
+        /// a man standing still is not the thing you are fitting -- and it is just as true the
+        /// other way round. A meal is animation, BREAK, animation, and in that break there is
+        /// no clip at all: his arm is at his side and the model is on a hand bone in his idle
+        /// pose. A cup dialled at his mouth can be through his thigh at his hip.
+        ///
+        /// So the clip STOPS while this is 1, because fitting the resting pose against a
+        /// running animation is the same mistake as fitting the eating pose without one.
+        /// </summary>
+        private int _pose;
+
+        /// <summary>The table the pose is fitted into. See Settings.Rest.</summary>
+        private System.Collections.Generic.Dictionary<string, float[]> Table
+        {
+            get { return _pose == 1 ? _cfg.Rest : _cfg.Fit; }
+        }
+
+        /// <summary>Which ini key that table is written to.</summary>
+        private string Key
+        {
+            get { return _pose == 1 ? "Rest" : "Fit"; }
+        }
+
+        private static readonly string[] Poses = { "AS HE EATS IT", "ARM DOWN, RESTING" };
+
         public bool IsOpen => _ui.IsOpen;
 
         public FitScreen(Core.Settings cfg, Catalogue menu)
@@ -342,6 +371,14 @@ namespace BareMinimum.UI
             _hand.Show(prop);
             _hand.Tick();
 
+            // ARM DOWN MEANS ARM DOWN, and nothing is asked for while it is. The clip is
+            // stopped by the toggle itself rather than from in here -- see Do("pose") --
+            // because CLEAR_PED_TASKS every pass is a man who cannot be turned round to look
+            // at the other side of the cup, and a guard that only clears it sometimes is how
+            // the first version of this left a looping clip running with the screen saying
+            // his arm was down.
+            if (_pose == 1) return;
+
             var now = Game.GameTime;
             if (now < _animAt) return;
 
@@ -403,10 +440,22 @@ namespace BareMinimum.UI
             var prop = Prop;
 
             float[] fit;
-            if (prop.Length > 0 && _cfg.Fit.TryGetValue(prop, out fit))
+            if (prop.Length > 0 && Table.TryGetValue(prop, out fit))
             {
                 _now = new[] { fit[0], fit[1], fit[2], fit[3], fit[4], fit[5] };
                 _loaded = true;
+                return;
+            }
+
+            // A RESTING POSE STARTS FROM THE EATING ONE, not from the kind's default. The two
+            // are usually close -- it is the same model in the same hand -- so the eating six
+            // is much the better place to begin nudging from, and it is what the game is
+            // using for the rest right now anyway. See Eating.Fitted, which falls through the
+            // same way.
+            if (_pose == 1 && prop.Length > 0 && _cfg.Fit.TryGetValue(prop, out fit))
+            {
+                _now = new[] { fit[0], fit[1], fit[2], fit[3], fit[4], fit[5] };
+                _loaded = false;
                 return;
             }
 
@@ -472,20 +521,32 @@ namespace BareMinimum.UI
             switch (tag)
             {
                 case "lock":
-                    _cfg.Fit[prop] = new[] { _now[0], _now[1], _now[2], _now[3], _now[4], _now[5] };
+                    Table[prop] = new[] { _now[0], _now[1], _now[2], _now[3], _now[4], _now[5] };
                     _loaded = true;
 
                     Save();
-                    Toast("fitted");
+                    Toast(_pose == 1 ? "fitted, arm down" : "fitted");
                     break;
 
                 case "clear":
-                    _cfg.Fit.Remove(prop);
+                    Table.Remove(prop);
                     _loaded = false;
 
                     Save();
                     Load();
-                    Toast("back to the default");
+                    Toast(_pose == 1 ? "back to its eating numbers" : "back to the default");
+                    break;
+
+                case "pose":
+                    _pose = _pose == 1 ? 0 : 1;
+
+                    // THE CLIP GOES OR COMES BACK ON THIS FRAME. Show only looks once every
+                    // two seconds, and a pose you asked for two seconds ago is a pose you
+                    // have already started nudging against the wrong one.
+                    if (_pose == 1) Release();
+                    else _animAt = 0;
+
+                    Load();
                     break;
 
                 case "zero":
@@ -537,7 +598,7 @@ namespace BareMinimum.UI
 
             foreach (var name in _models ?? new string[0])
             {
-                if (!_cfg.Fit.ContainsKey(name)) n++;
+                if (!Table.ContainsKey(name)) n++;
             }
 
             return n;
@@ -558,14 +619,14 @@ namespace BareMinimum.UI
         /// </summary>
         private void Guess()
         {
-            var fitted = new List<string>(_cfg.Fit.Keys);
+            var fitted = new List<string>(Table.Keys);
             if (fitted.Count == 0) { Notify("~y~Fit one first."); return; }
 
             var done = 0;
 
             foreach (var name in _models ?? new string[0])
             {
-                if (_cfg.Fit.ContainsKey(name)) continue;
+                if (Table.ContainsKey(name)) continue;
 
                 var best = "";
                 var score = 0;
@@ -581,8 +642,8 @@ namespace BareMinimum.UI
 
                 if (score <= 0 || best.Length == 0) continue;
 
-                var six = _cfg.Fit[best];
-                _cfg.Fit[name] = new[] { six[0], six[1], six[2], six[3], six[4], six[5] };
+                var six = Table[best];
+                Table[name] = new[] { six[0], six[1], six[2], six[3], six[4], six[5] };
                 done++;
             }
 
@@ -592,7 +653,7 @@ namespace BareMinimum.UI
             Load();
 
             Notify("~g~" + done + "~s~ model(s) filled in from the " + fitted.Count +
-                   " you fitted. " + _cfg.Fit.Count + " have numbers now.");
+                   " you fitted. " + Table.Count + " have numbers now.");
         }
 
         /// <summary>
@@ -672,7 +733,8 @@ namespace BareMinimum.UI
         {
             try
             {
-                IniFile.SetValue(Paths.Ini, "Eating", "Fit", _cfg.FitLine);
+                IniFile.SetValue(Paths.Ini, "Eating", Key,
+                                 _pose == 1 ? _cfg.RestLine : _cfg.FitLine);
             }
             catch (Exception ex)
             {
@@ -685,7 +747,7 @@ namespace BareMinimum.UI
             var item = Item_;
 
             Notify("~g~" + (item != null ? item.Name : Prop) + "~s~ - " + what + ". " +
-                   _cfg.Fit.Count + " model(s) fitted.");
+                   Table.Count + " model(s) fitted" + (_pose == 1 ? " resting." : "."));
         }
 
         private static void Notify(string text)
@@ -731,6 +793,19 @@ namespace BareMinimum.UI
 
             _ui.Rows.Add(new Row
             {
+                Left = "Pose",
+                Right = Poses[_pose],
+                Note = _pose == 1
+                    ? "His arm is DOWN and nothing is playing -- the pose it sits in during " +
+                      "the break between two bites, and before the first one. The clip is " +
+                      "stopped so you are fitting what you are actually looking at."
+                    : "The clip it is eaten with, on a loop, which is the pose it is mostly " +
+                      "seen in. Left or right for the resting pose instead.",
+                Tag = "pose"
+            });
+
+            _ui.Rows.Add(new Row
+            {
                 Left = "Search",
                 Right = _words.Length > 0 ? _words[_word < _words.Length ? _word : 0] : "-",
                 Note = _matches.Length + " model(s) match. The words come from this item's own " +
@@ -746,7 +821,11 @@ namespace BareMinimum.UI
                 Note = prop.Length == 0
                     ? "This one has no model."
                     : uses + " item(s) hold this one" +
-                      (_loaded ? ", and it has been fitted. " : ", not fitted yet. ") +
+                      (_loaded
+                          ? ", fitted for this pose. "
+                          : _pose == 1
+                              ? ", no resting numbers yet -- it is using its eating ones. "
+                              : ", not fitted yet. ") +
                       (_cfg.Props.ContainsKey(item.Id) ? "Chosen here." : "From foods.json.") +
                       "  Left and right change it.",
                 Tag = "model"
@@ -779,9 +858,10 @@ namespace BareMinimum.UI
             _ui.Rows.Add(new Row
             {
                 Left = "LOCK IT IN",
-                Right = _cfg.Fit.Count + " done",
-                Note = "Writes these six against this model, in the ini, now. Everything that " +
-                       "holds this model moves with it and nothing else moves at all.",
+                Right = Table.Count + " done",
+                Note = "Writes these six against this model, in the ini, now, under " +
+                       (_pose == 1 ? "Rest" : "Fit") + ". Everything that holds this model " +
+                       "moves with it and nothing else moves at all.",
                 Tag = "lock"
             });
 
@@ -790,8 +870,12 @@ namespace BareMinimum.UI
                 Left = "Forget this one",
                 Right = _loaded ? "fitted" : "-",
                 Enabled = _loaded,
-                Note = "Takes this model back out of the table, so it falls back to the kind's " +
-                       "own numbers again.",
+                Note = _pose == 1
+                    ? "Takes this model out of the resting table, so it goes back to using " +
+                      "its eating numbers while his arm is down -- which is what every model " +
+                      "does until somebody fits one."
+                    : "Takes this model back out of the table, so it falls back to the " +
+                      "kind's own numbers again.",
                 Tag = "clear"
             });
 

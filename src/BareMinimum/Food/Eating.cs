@@ -74,6 +74,22 @@ namespace BareMinimum.Food
         private int _passes;
         private int _restUntil;
 
+        /// <summary>
+        /// Whether there is NO clip on him right now, so the thing is sitting on a hand bone
+        /// in his idle pose rather than being held up to his mouth.
+        ///
+        /// WHICH OF THE TWO FITS APPLIES. See Settings.Rest: a model fitted against the
+        /// eating clip can be through his thigh once his arm is down, and the break between
+        /// two bites is a second and a bit of exactly that.
+        ///
+        /// NOT SIMPLY !_animStarted, WHICH IS TRUE FOR A FRAME BETWEEN THE SMOKE'S CLIPS. The
+        /// smoke is three clips in a deliberate order with no rest in it -- see Puff, which
+        /// returns before it sets _restUntil -- and one frame of the cigarette jumping to its
+        /// resting place and back is a flicker with no cause anybody could see. This is set
+        /// where the REST actually begins.
+        /// </summary>
+        private bool _resting;
+
         /// <summary>The weapon he had when this started. See Interrupted.</summary>
         private WeaponHash _armed = WeaponHash.Unarmed;
 
@@ -249,6 +265,11 @@ namespace BareMinimum.Food
             _clipAt = 0;
             _passes = 0;
             _restUntil = 0;
+
+            // NOTHING IS PLAYING YET. Animate runs a line or two below and usually clears
+            // this in the same tick; on a dictionary that has not streamed it stands, which
+            // is correct -- he is holding the thing with his arm down.
+            _resting = true;
 
             // What he was holding at the first bite. See Interrupted: a change is the signal,
             // not the weapon itself.
@@ -635,6 +656,10 @@ namespace BareMinimum.Food
                 _held = World.CreateProp(model, me.Position, false, false);
                 if (_held == null || !_held.Exists()) { _held = null; return; }
 
+                // A NEW OBJECT STARTS WHERE IT BELONGS. Without this the cup half of a combo
+                // flies across from wherever the burger was being held. See Eased.
+                _satSet = false;
+
                 Seat(me, item, drinking);
 
                 // The model is released as soon as the object exists; holding the request open
@@ -680,9 +705,75 @@ namespace BareMinimum.Food
             var spin = SpinFor(item, drinking);
             var sits = SitsFor(item, drinking);
 
+            Eased(ref sits, ref spin);
+
             Function.Call(Hash.ATTACH_ENTITY_TO_ENTITY, _held.Handle, me.Handle, bone,
                           sits.X, sits.Y, sits.Z,
                           spin.X, spin.Y, spin.Z, false, false, false, false, 2, true);
+        }
+
+        /// <summary>The six actually used this frame, easing toward the six that are wanted.</summary>
+        private readonly float[] _sat = new float[6];
+        private bool _satSet;
+
+        /// <summary>
+        /// How fast the hold catches up when the answer changes. Per second.
+        ///
+        /// ABOUT A TENTH OF A SECOND, which is under the time it takes his arm to come down
+        /// and over the time it takes to read as a jump.
+        /// </summary>
+        private const float Catch = 14f;
+
+        /// <summary>
+        /// Moves the hold toward where it should be instead of putting it there.
+        ///
+        /// BECAUSE THERE ARE TWO ANSWERS NOW AND IT SWAPS BETWEEN THEM MID-MEAL. The eating
+        /// six and the resting six are two different places, and a prop that teleports from
+        /// one to the other twice a sandwich is the kind of thing that gets reported as the
+        /// food glitching in his hand. Eased, the change happens while his arm is already
+        /// moving out of the clip and nobody can see it happen at all.
+        ///
+        /// THE ANGLES TAKE THE SHORT WAY ROUND. Lerping 355 to 5 the straight way spins the
+        /// thing all the way through 180 -- a whole revolution to travel ten degrees -- which
+        /// is far worse than the pop this is here to remove.
+        ///
+        /// SNAPPED FOR A NEW PROP, not eased: Give clears the flag when it makes one, so a
+        /// cup handed over after a burger starts where the cup belongs rather than flying
+        /// across from where the burger was.
+        /// </summary>
+        private void Eased(ref Vector3 sits, ref Vector3 spin)
+        {
+            var want = new[] { sits.X, sits.Y, sits.Z, spin.X, spin.Y, spin.Z };
+
+            if (!_satSet)
+            {
+                for (var i = 0; i < 6; i++) _sat[i] = want[i];
+                _satSet = true;
+            }
+            else
+            {
+                var dt = 0f;
+
+                try { dt = Game.LastFrameTime; }
+                catch { dt = 0f; }
+
+                if (dt < 0f || dt > 0.5f) dt = 0f;
+
+                var k = dt * Catch;
+                if (k > 1f) k = 1f;
+
+                for (var i = 0; i < 3; i++) _sat[i] += (want[i] - _sat[i]) * k;
+
+                for (var i = 3; i < 6; i++)
+                {
+                    // Shortest arc: the difference wrapped into -180..180 before it is taken.
+                    var d = ((want[i] - _sat[i]) % 360f + 540f) % 360f - 180f;
+                    _sat[i] += d * k;
+                }
+            }
+
+            sits = new Vector3(_sat[0], _sat[1], _sat[2]);
+            spin = new Vector3(_sat[3], _sat[4], _sat[5]);
         }
 
         /// <summary>
@@ -701,12 +792,8 @@ namespace BareMinimum.Food
             // THE MODEL'S OWN ANSWER FIRST, if anybody has fitted this one. See Settings.Fit:
             // a kind default is a guess that has to serve twelve different models, and this
             // is the number somebody dialled with THIS model in his hand.
-            float[] fit;
-            if (item != null && !string.IsNullOrEmpty(item.Prop) &&
-                _cfg.Fit.TryGetValue(item.Prop, out fit))
-            {
-                return new Vector3(fit[0], fit[1], fit[2]);
-            }
+            var fit = Fitted(item);
+            if (fit != null) return new Vector3(fit[0], fit[1], fit[2]);
 
             var it = _menu.HoldFor(item, drinking);
 
@@ -722,6 +809,24 @@ namespace BareMinimum.Food
             if (!Tuning(item, drinking)) return new Vector3(it[0], it[1], it[2]);
 
             return new Vector3(it[0] + _cfg.HoldX, it[1] + _cfg.HoldY, it[2] + _cfg.HoldZ);
+        }
+
+        /// <summary>
+        /// The six this model is fitted with right now, or null if nobody has fitted it.
+        ///
+        /// THE RESTING TABLE ONLY WHILE HE IS RESTING, and it falls through to the eating one
+        /// when a model has no resting line -- which is every model until somebody dials one,
+        /// so this changes nothing for anybody who has not asked for it.
+        /// </summary>
+        private float[] Fitted(Item item)
+        {
+            if (item == null || string.IsNullOrEmpty(item.Prop)) return null;
+
+            float[] six;
+
+            if (_resting && _cfg.Rest.TryGetValue(item.Prop, out six)) return six;
+
+            return _cfg.Fit.TryGetValue(item.Prop, out six) ? six : null;
         }
 
         /// <summary>Whether the six nudges are pointed at this item's kind. See Settings.HoldWhat.</summary>
@@ -745,12 +850,9 @@ namespace BareMinimum.Food
         /// </summary>
         private Vector3 SpinFor(Item item, bool drinking)
         {
-            float[] fit;
-            if (item != null && !string.IsNullOrEmpty(item.Prop) &&
-                _cfg.Fit.TryGetValue(item.Prop, out fit))
-            {
-                return new Vector3(fit[3], fit[4], fit[5]);
-            }
+            var fit = Fitted(item);
+            if (fit != null) return new Vector3(fit[3], fit[4], fit[5]);
+
 
             var it = _menu.TurnFor(item, drinking);
 
@@ -848,6 +950,7 @@ namespace BareMinimum.Food
 
                 _clipAt = Game.GameTime;
                 _animStarted = true;
+                _resting = false;
             }
             catch (Exception ex)
             {
@@ -935,6 +1038,7 @@ namespace BareMinimum.Food
             if (_passes < Math.Max(1, _cfg.Bites))
             {
                 _restUntil = now + (int)(Math.Max(0f, _cfg.BreakSeconds) * 1000f);
+                _resting = true;
                 return;
             }
 
@@ -972,6 +1076,7 @@ namespace BareMinimum.Food
 
                 _animStarted = true;
                 _scenarioStarted = true;
+                _resting = false;
 
                 Log.Once("anim-scenario-" + anim.Scenario,
                          "Using the " + anim.Scenario + " scenario instead of an animation.");
