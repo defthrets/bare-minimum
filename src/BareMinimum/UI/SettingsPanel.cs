@@ -1006,6 +1006,97 @@ namespace BareMinimum.UI
                  () => _cfg.ShowShopBlips,
                  "~y~Turn shop map markers ON first.");
 
+            Group("BODIES");
+
+            // THE DEAD MAN ON THE PAVEMENT, and both halves of what you can do with one.
+            // The loot came from Posted Up and the carry from Five0 Patrol on 2026-09-22;
+            // these rows are Five0's, carried over so the eight numbers can still be moved
+            // by looking at them rather than by editing a file.
+
+            Bool("Carry bodies", "Bodies", "Carry",
+                 () => _cfg.CarryBodies, v => _cfg.CarryBodies = v,
+                 "Hold the interact key over a corpse to pick him up, tap it to put him " +
+                 "down. No running, no jumping and no weapon while he is in your arms.");
+
+            Bool("Search bodies", "Bodies", "Loot",
+                 () => _cfg.LootBodies, v => _cfg.LootBodies = v,
+                 "Hold the interact key over a corpse and he kneels: a card with who the " +
+                 "man was and a grid of what was in his pockets. It also stops everybody " +
+                 "near you dropping their gun on the pavement when they die.");
+
+            // WATCH THE BODY WHILE YOU MOVE THESE. Every one is applied to whoever is in his
+            // arms on the frame it changes -- see Drag.Hauling, which re-welds on a dirty
+            // flag -- so the way to set them is to pick somebody up, open this, and slide
+            // until he sits right.
+            //
+            // EACH ROW SAYS WHICH WAY IS WHICH. A signed number on a row called "Across" is
+            // a number you press left on to find out what left means. The label names both
+            // ends, and it is HIS left and HIS front, because the body sits in the player's
+            // own axes and not the camera's.
+
+            Float("Body: left  /  right", "Bodies", "Across",
+                  () => Bodies.DragPose.X, v => Bodies.DragPose.X = v,
+                  0.02f, -1.5f, 1.5f, "0.00",
+                  "Where he hangs, across the player. His left is minus and his right is " +
+                  "plus, in metres from the bone he is held from.",
+                  () => _cfg.CarryBodies, "~y~Carrying bodies is OFF.");
+
+            Float("Body: back  /  forward", "Bodies", "Forward",
+                  () => Bodies.DragPose.Y, v => Bodies.DragPose.Y = v,
+                  0.02f, -1.5f, 1.5f, "0.00",
+                  "Behind him is minus, out in front of him is plus. Metres.",
+                  () => _cfg.CarryBodies, "~y~Carrying bodies is OFF.");
+
+            Float("Body: down  /  up", "Bodies", "Up",
+                  () => Bodies.DragPose.Z, v => Bodies.DragPose.Z = v,
+                  0.02f, -1.5f, 1.5f, "0.00",
+                  "Below the bone is minus, above it is plus. Metres.",
+                  () => _cfg.CarryBodies, "~y~Carrying bodies is OFF.");
+
+            Float("Body: tip head down  /  up", "Bodies", "Pitch",
+                  () => Bodies.DragPose.Pitch, v => Bodies.DragPose.Pitch = v,
+                  5f, -180f, 180f, "0",
+                  "Tips him end over end: minus puts his head down, plus lifts it. Degrees.",
+                  () => _cfg.CarryBodies, "~y~Carrying bodies is OFF.");
+
+            Float("Body: roll left  /  right", "Bodies", "Roll",
+                  () => Bodies.DragPose.Roll, v => Bodies.DragPose.Roll = v,
+                  5f, -180f, 180f, "0",
+                  "Rolls him over sideways: minus onto his left, plus onto his right. Degrees.",
+                  () => _cfg.CarryBodies, "~y~Carrying bodies is OFF.");
+
+            Float("Body: turn", "Bodies", "Yaw",
+                  () => Bodies.DragPose.Yaw, v => Bodies.DragPose.Yaw = v,
+                  5f, -180f, 180f, "0",
+                  "Spins him on the spot as seen from above: minus clockwise, plus " +
+                  "anticlockwise. Degrees.",
+                  () => _cfg.CarryBodies, "~y~Carrying bodies is OFF.");
+
+            // THE NUMBERS ARE WRITTEN, NOT THE WORDS. Choice persists whatever it shows
+            // unless it is handed a second list, and "dead E" in the ini is a line nothing
+            // can read back. See Choice.
+            Choice("Body: pose", "Bodies", "Pose", Bodies.DragPose.PoseNames,
+                   () => Bodies.DragPose.Shape, v => Bodies.DragPose.Shape = v,
+                   "The shape he is held in. A corpse takes no animation at all, so he is " +
+                   "brought back for as long as he is held, put in one of the game's own " +
+                   "dead poses, and killed again when you set him down.",
+                   Numbers(Bodies.DragPose.PoseNames.Length));
+
+            Choice("Body: held from", "Bodies", "Bone", Bodies.DragPose.BoneLabels,
+                   () => Bodies.DragPose.Bone, v => Bodies.DragPose.Bone = v,
+                   "Which bone of the player's he is welded to. Not a hand: a wrist swings " +
+                   "through a full arc every stride, so a position lined up while stood " +
+                   "still came apart the moment he walked. The chest leans when he leans.",
+                   Numbers(Bodies.DragPose.BoneLabels.Length));
+
+            Bool("Body: position tool", "Bodies", "Tuner",
+                 () => _cfg.DragTuner, v => _cfg.DragTuner = v,
+                 "A readout in the top left and the numpad bound, but only while a body is " +
+                 "actually in his arms. 4/6 across, 8/2 forward, 7/9 up, 1/3 turn, / and * " +
+                 "tip, - and + roll, 5 next pose, End next bone, 0 writes it to the log and " +
+                 ". puts it all back.",
+                 () => _cfg.CarryBodies, "~y~Carrying bodies is OFF.");
+
             Group("Vitals");
 
             Bool("Vitals", "Vitals", "Enabled",
@@ -1493,6 +1584,25 @@ namespace BareMinimum.UI
         /// Language = ru is one anybody can read and type, where the same line written in
         /// Cyrillic is at the mercy of whatever encoding their editor guesses at.
         /// </summary>
+        /// <summary>
+        /// "0", "1", "2" ... for a picker whose ini value is the INDEX rather than the word.
+        ///
+        /// Choice writes what it shows unless it is handed a second list, and the two body
+        /// pickers show "dead E" and "his chest", neither of which is a line Settings.Load
+        /// can read back into an int.
+        /// </summary>
+        private static string[] Numbers(int count)
+        {
+            var made = new string[count < 0 ? 0 : count];
+
+            for (var i = 0; i < made.Length; i++)
+            {
+                made[i] = i.ToString(CultureInfo.InvariantCulture);
+            }
+
+            return made;
+        }
+
         private void Choice(string name, string section, string key, string[] names,
                             Func<int> get, Action<int> set, string note, string[] values = null)
         {
