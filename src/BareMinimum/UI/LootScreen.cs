@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using GTA;
 using GTA.Native;
@@ -43,6 +43,27 @@ namespace BareMinimum.UI
         /// which is the difference between a card and a picture with some writing next to it.
         /// </summary>
         private const float CardH = 0.104f;
+
+        /// <summary>
+        /// How tall the card is for THIS body: the base two rows, plus a row each for
+        /// anything another mod told us.
+        ///
+        /// IT HAS TO BE MEASURED, NOT ASSUMED. The item grid starts at the bottom of the
+        /// card and the panel is measured from the same number, so a card that drew an extra
+        /// row without growing would print it straight through the icons - which is exactly
+        /// the overlapping mess this integration exists to clear up. Both uses read this, so
+        /// they cannot disagree.
+        /// </summary>
+        private float CardHeight
+        {
+            get
+            {
+                var h = CardH;
+                if (_body != null && !string.IsNullOrEmpty(_body.Occupation)) h += FieldLine;
+                if (_body != null && !string.IsNullOrEmpty(_body.Note)) h += FieldLine;
+                return h;
+            }
+        }
         private const float PhotoH = 0.096f;
 
         /// <summary>One square of the grid, and how many across.</summary>
@@ -486,7 +507,7 @@ namespace BareMinimum.UI
             // least to show got the biggest hole in the middle of it.
             var shelf = count == 0 ? EmptyH : rows * tileH;
 
-            var height = Kit.HeadH + CardH + GridPad + shelf + GridPad + NoteH + Kit.FootH;
+            var height = Kit.HeadH + CardHeight + GridPad + shelf + GridPad + NoteH + Kit.FootH;
 
             var left = 0.5f - panelWidth * 0.5f;
             var top = 0.5f - height * 0.5f + Theme.EnterRise * (1f - arrive);
@@ -508,7 +529,7 @@ namespace BareMinimum.UI
 
             Identity(x, y, wide, arrive);
 
-            y += CardH + GridPad;
+            y += CardHeight + GridPad;
 
             _frame.Begin();
 
@@ -587,6 +608,31 @@ namespace BareMinimum.UI
 
             Field(tx, line, "ETHNICITY", _body.Ethnicity, quiet, dim);
             Field(tx + half, line, "AFFILIATION", _body.Affiliation, quiet, dim);
+
+            // ---- what another mod knows and this one cannot --------------------------
+            // TWO ROWS THAT ONLY EXIST WHEN SOMEBODY FILLED THEM. Everything above is
+            // invented here from the handle and the model - consistent, so the same man is
+            // the same man, but never actually true. A mod that has SPOKEN to him knows what
+            // he did for a living and how many times the two of you talked, and those are
+            // the two facts that turn this from a receipt into an accusation. Empty means
+            // nobody told us and the row is left out rather than padded with a guess.
+            // CardHeight counts these, so they cannot print through the icons. See
+            // Api.Bodies.WireIdentity.
+            if (!string.IsNullOrEmpty(_body.Occupation))
+            {
+                line += FieldLine;
+                Field(tx, line, "OCCUPATION", _body.Occupation, quiet, dim);
+            }
+
+            if (!string.IsNullOrEmpty(_body.Note))
+            {
+                line += FieldLine;
+                // HIS OR HERS, from the body's own pronoun. The note is the one label on
+                // this card that has to agree with the person lying on the pavement, and
+                // this mod already had a bug where every line of copy said "him" over a
+                // woman. Not repeating it two lines below the comment about it.
+                Field(tx, line, "YOU AND " + _body.Him.ToUpperInvariant(), _body.Note, quiet, dim);
+            }
         }
 
         /// <summary>

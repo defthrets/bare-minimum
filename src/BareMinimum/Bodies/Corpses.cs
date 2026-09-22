@@ -72,6 +72,25 @@ namespace BareMinimum.Bodies
         public string Affiliation = "";
 
         /// <summary>
+        /// What he did, when another mod knows. Empty when nobody told us, and the card
+        /// leaves the row out rather than inventing a job.
+        /// </summary>
+        public string Occupation = "";
+
+        /// <summary>
+        /// One line about your history with him, when another mod has one: "You spoke three
+        /// times." Empty otherwise.
+        ///
+        /// THE ONLY THING ON THE CARD THIS MOD COULD NEVER KNOW. Everything else here is a
+        /// fact about a body; this is a fact about the pair of you, and it is what turns the
+        /// card from a receipt into an accusation.
+        /// </summary>
+        public string Note = "";
+
+        /// <summary>Another mod supplied the identity, so ours was not invented.</summary>
+        public bool Named;
+
+        /// <summary>
         /// The colour of whoever he ran with, or the mod's own amber where he ran with
         /// nobody.
         ///
@@ -315,9 +334,66 @@ namespace BareMinimum.Bodies
             body.Born = Birthday(ref seed);
             body.Height = Tall(male, ref seed);
 
+            // ---- somebody else may already know who this was -------------------------
+            // OURS IS INVENTED AND THEIRS IS REMEMBERED, so theirs wins. A mod that holds
+            // conversations knows this man's name because the player was told it to his face,
+            // and a card that then calls him something else makes a liar of one of us. The
+            // invention above still runs first, so every field has a sensible value if the
+            // other mod knows only some of them.
+            //
+            // It is asked AFTER the seed work and BEFORE the pockets, because the pockets do
+            // not depend on the name and this way a provider that throws cannot cost the
+            // player the loot.
+            Identify(body);
+
             Pockets(who, body, model, ref seed);
 
             return body;
+        }
+
+        /// <summary>
+        /// Ask whoever is wired in whether they know this man, and take their word for it.
+        ///
+        /// FLAT KEY-VALUE PAIRS, because the provider reaches us by reflection and can name no
+        /// type declared in this assembly. A string array is the widest thing that crosses
+        /// safely, and pairs mean a provider written today still works when a field is added
+        /// tomorrow - it simply does not send the key it has never heard of.
+        ///
+        /// Unknown keys are ignored rather than being an error, for the same reason.
+        /// </summary>
+        private static void Identify(Body body)
+        {
+            var provider = Api.Bodies.Identity;
+            if (provider == null || body == null) return;
+
+            string[] pairs;
+            try { pairs = provider(body.Handle); }
+            catch { return; }          // their bug must not cost us the card
+            if (pairs == null || pairs.Length < 2) return;
+
+            for (var i = 0; i + 1 < pairs.Length; i += 2)
+            {
+                var key = pairs[i];
+                var value = pairs[i + 1];
+                if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value)) continue;
+
+                switch (key.ToLowerInvariant())
+                {
+                    case "name": body.Name = value; body.Named = true; break;
+                    case "born": body.Born = value; break;
+                    case "height": body.Height = value; break;
+                    case "ethnicity": body.Ethnicity = value; break;
+                    case "occupation": body.Occupation = value; break;
+                    case "note": body.Note = value; break;
+                    case "affiliation":
+                        body.Affiliation = value;
+                        body.Colour = Tint(value);
+                        break;
+                    case "female":
+                        body.Female = value == "1" || value.ToLowerInvariant() == "true";
+                        break;
+                }
+            }
         }
 
         /// <summary>

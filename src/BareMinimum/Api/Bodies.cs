@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace BareMinimum.Api
 {
@@ -32,10 +32,26 @@ namespace BareMinimum.Api
     public static class Bodies
     {
         /// <summary>Bumped when the shape of this class changes in a way a caller would notice.</summary>
-        public const int ApiVersion = 1;
+        /// <summary>
+        /// A PROPERTY, LIKE EVERY OTHER SURFACE IN THIS FOLDER. Api.Pantry publishes this as
+        /// "public static int ApiVersion => 1" and so does the drugs mod next door; this one
+        /// was written as a const, which is a FIELD, and a caller reading the surface with
+        /// GetProperty got null and concluded the version was 0. It then refused to use a
+        /// surface that was working perfectly. Consistency here is not tidiness, it is the
+        /// difference between an integration existing and not.
+        /// </summary>
+        public static int ApiVersion => 1;
 
         /// <summary>Set by Main once the carry exists. Null until then, and that is ordinary.</summary>
         internal static BareMinimum.Bodies.Drag Hands;
+
+        /// <summary>
+        /// Whoever knows who these people were, or null. Set by WireIdentity.
+        ///
+        /// Func and int and string[] are all BCL types, so a mod that holds no reference to
+        /// this assembly can still name the delegate it is handing over.
+        /// </summary>
+        internal static Func<int, string[]> Identity;
 
         /// <summary>Whether there is anything here to ask yet.</summary>
         public static bool Ready
@@ -115,6 +131,53 @@ namespace BareMinimum.Api
         {
             try { if (Hands != null) Hands.Put(); }
             catch { /* it is let go of at teardown either way */ }
+        }
+
+        /// <summary>
+        /// Lets another mod name the dead.
+        /// </summary>
+        ///
+        /// <remarks>
+        /// THIS MOD MAKES UP AN IDENTITY AND ANOTHER MOD REMEMBERS ONE. Everything on the
+        /// loot card except the pockets is invented here from the handle and the model - the
+        /// name, the date of birth, the height - and it is invented well enough that the same
+        /// man is the same man every time you open him. What it cannot be is RIGHT, because
+        /// this mod has never spoken to him.
+        ///
+        /// NPC Mind has. It gives every pedestrian in the city a persona and a memory, so by
+        /// the time one of them is lying on the pavement it knows his name because the player
+        /// was told it to his face, along with what he did for a living, who he ran with and
+        /// how many times the two of them had spoken. A card that calls that man something
+        /// else makes a liar of one of the two mods, and the player has no way to tell which.
+        /// So the invented identity gives way to a remembered one.
+        ///
+        /// THE PROVIDER IS HANDED A PED HANDLE AND RETURNS FLAT PAIRS: name, born, height,
+        /// ethnicity, occupation, affiliation, note, female. Anything it leaves out keeps the
+        /// value this mod invented, so a provider that knows only a name is perfectly
+        /// welcome. Keys are matched without case and unknown keys are ignored, so this
+        /// surface can grow without breaking anybody already written against it.
+        ///
+        /// IT IS CALLED ONCE PER BODY, when the body is first built, and never again for that
+        /// body - see Corpses.For. So the provider may be slow, and must be consistent: a
+        /// name that changes between two calls is a name the player will never see change,
+        /// because the second call does not happen.
+        ///
+        /// Passing null unwires it. Nothing thrown by the provider escapes Corpses.
+        /// </remarks>
+        public static void WireIdentity(Func<int, string[]> provider)
+        {
+            try { Identity = provider; }
+            catch { }
+        }
+
+        /// <summary>Whether somebody is naming the dead for us.</summary>
+        public static bool IdentityWired
+        {
+            get
+            {
+                try { return Identity != null; }
+                catch { return false; }
+            }
         }
     }
 }
