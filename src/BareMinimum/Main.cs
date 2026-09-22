@@ -378,7 +378,7 @@ namespace BareMinimum
             // THE POCKET AND THE BAG ARE HANDED IN rather than the loot having its own idea
             // of where a thing goes. A sandwich off a body lands exactly where a sandwich off
             // a shelf lands, because both go through Food.Stow.
-            _corpses = new Bodies.Corpses(_cfg, _catalogue, _pantry, _knapsack);
+            _corpses = new Bodies.Corpses(_catalogue, _pantry, _knapsack);
 
             _search = new Bodies.Search(_cfg, _corpses)
             {
@@ -395,12 +395,20 @@ namespace BareMinimum
                 Carry = _carry,
             };
 
-            // THE ORDER IS SEARCH, THEN CARRY, and this is the pair of lines that enforce it.
-            // You go through him and then you move him, because moving him first means
-            // walking back to wherever you put him -- so while the loot still has something
-            // to offer on this body there is one prompt on screen and it is the search's.
-            _carry.Looting = () => _cfg.LootBodies;
-            _carry.Searched = handle => _corpses.Opened(handle);
+            // ---- ONE PROMPT ON SCREEN, WHATEVER IS ON THE FLOOR ----
+            //
+            // THE ORDER IS SEARCH, THEN CARRY, because moving him first means walking back
+            // to wherever you put him. Both halves are a hold of the interact key over a
+            // corpse, so the three lines below are what keep them off each other -- and they
+            // are three lines rather than a reflection bridge in each of two mods, which is
+            // the whole reason the corpse was brought here.
+            //
+            // The search keeps quiet on a body it has already opened; the carry keeps quiet
+            // while the search is offering anybody at all; and setting a body down hands him
+            // back to the search, so one you left a gun on can be gone through again.
+            _carry.Searching = () => _search.Offering;
+            _search.CarryReady = () => _carry.Allowed && !_carry.Holding;
+            _carry.Dropped = handle => _corpses.Shut(handle);
 
             // AND THE BOOKS DO NOT FORGET A MAN WHO IS BRIEFLY ALIVE. The carry resurrects a
             // corpse to put a clip on it, so a sweep that dropped anybody breathing would hand

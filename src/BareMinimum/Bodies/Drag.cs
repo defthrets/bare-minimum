@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using GTA;
 using GTA.Math;
 using GTA.Native;
@@ -34,7 +34,7 @@ namespace BareMinimum.Bodies
     /// IT WAITS FOR THE POCKETS. You search him and then you move him, in that order, because
     /// moving him first means walking back to wherever you put him -- so the prompt does not
     /// appear until it is the only prompt. That used to be a reflection call into another mod;
-    /// it is Searched now, wired by Main to this mod's own body store.
+    /// it is Searching now, wired by Main to this mod's own loot half.
     /// </summary>
     internal sealed class Drag
     {
@@ -84,16 +84,31 @@ namespace BareMinimum.Bodies
         public Func<bool> Busy;
 
         /// <summary>
-        /// Whether that body has already been gone through. Wired by Main to the body store.
+        /// Whether the loot half is offering a body to search right now. Wired by Main.
+        ///
+        /// HIS POCKETS FIRST, AND THAT IS THE ONLY RULE BETWEEN THE TWO HALVES. You go
+        /// through him and then you move him, because moving him first means walking back to
+        /// wherever you put him. Both are a hold of the same key over a corpse, so one of
+        /// them has to keep quiet, and it is this one.
+        ///
+        /// IT ASKS ABOUT THE FRAME, NOT ABOUT A BODY. The first version of this asked "has
+        /// THIS body been searched", by handle, which is right for one corpse and wrong for
+        /// two -- see Search.Offering for the pair of men that broke it.
         ///
         /// NULL MEANS NOTHING IS SEARCHING BODIES, which is the honest answer when looting is
-        /// switched off -- there is then nothing to wait for and the carry is offered straight
+        /// switched off: there is then nothing to wait for and the carry is offered straight
         /// away. A missing half must not be a feature that silently never appears.
         /// </summary>
-        public Func<int, bool> Searched;
+        public Func<bool> Searching;
 
-        /// <summary>Whether the loot half is running at all. Wired by Main. See Searched.</summary>
-        public Func<bool> Looting;
+        /// <summary>
+        /// Told when a body is put back on the floor. Wired by Main to the body store.
+        ///
+        /// HE STOPS BEING THE CARRY'S THE MOMENT HE IS SET DOWN. The two halves take it in
+        /// turns over one key and an opened body belongs to this one, so without this a body
+        /// you left something on could never be searched again. See Corpses.Shut.
+        /// </summary>
+        public Action<int> Dropped;
 
         public Drag(Core.Settings cfg)
         {
@@ -207,9 +222,9 @@ namespace BareMinimum.Bodies
 
             if (body == null) { _downSince = 0; return; }
 
-            // HIS POCKETS FIRST. While the loot half still has something to offer on this body
-            // there is one prompt on screen and it is not this one. See Searched.
-            if (Looting != null && Looting() && Searched != null && !Searched(body.Handle))
+            // HIS POCKETS FIRST. While the loot half has anything to offer within reach
+            // there is one prompt on screen and it is not this one. See Searching.
+            if (Searching != null && Searching())
             {
                 _downSince = 0;
                 return;
@@ -669,6 +684,18 @@ namespace BareMinimum.Bodies
         {
             var body = _body;
             _body = null;
+
+            // HE IS THE SEARCH'S AGAIN. Said before anything else, because every line below
+            // this can throw on a body the game has already cleaned up and whose prompt he
+            // is has to be settled either way. See Dropped.
+            try
+            {
+                if (Dropped != null && body != null) Dropped(body.Handle);
+            }
+            catch
+            {
+                // Whose prompt it is is not worth a failed put-down.
+            }
 
             // OR THE NEXT BODY INHERITS THIS ONE'S GUARD and Hold returns at its first
             // line without ever taking hold of him.

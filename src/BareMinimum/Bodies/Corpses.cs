@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using GTA;
@@ -157,7 +157,6 @@ namespace BareMinimum.Bodies
 
         private int _sweptAt;
 
-        private readonly Core.Settings _cfg;
         private readonly Catalogue _menu;
         private readonly Pantry _pantry;
         private readonly Knapsack _knapsack;
@@ -177,9 +176,8 @@ namespace BareMinimum.Bodies
         /// <summary>How many bodies are on the books, for the log.</summary>
         public int Count => _known.Count;
 
-        public Corpses(Core.Settings cfg, Catalogue menu, Pantry pantry, Knapsack knapsack)
+        public Corpses(Catalogue menu, Pantry pantry, Knapsack knapsack)
         {
-            _cfg = cfg;
             _menu = menu;
             _pantry = pantry;
             _knapsack = knapsack;
@@ -215,6 +213,29 @@ namespace BareMinimum.Bodies
         public bool Opened(int handle)
         {
             return handle != 0 && _opened.Contains(handle);
+        }
+
+        /// <summary>
+        /// Forgets that he was opened, WITHOUT forgetting what is on him.
+        ///
+        /// CALLED WHEN A CARRIED BODY IS PUT BACK DOWN. The two halves take it in turns over
+        /// one key: an unopened body is the search's and an opened one is the carry's, which
+        /// is the only arrangement where exactly one prompt is ever on screen. The cost of
+        /// that is a body you left a gun on, because once opened he would be the carry's
+        /// forever.
+        ///
+        /// Setting him down is the moment that gives him back. It is also the honest
+        /// reading: you have carried him somewhere and are now having another look.
+        ///
+        /// WHAT IS ON HIM IS UNTOUCHED. _known keeps his card and his pockets exactly as he
+        /// was left -- the same man, the same name, the same gun still on him -- so this is
+        /// only ever about whose prompt he is.
+        /// </summary>
+        public void Shut(int handle)
+        {
+            if (handle == 0) return;
+
+            _opened.Remove(handle);
         }
 
         /// <summary>Whether this one has already been gone through and emptied.</summary>

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using GTA;
 using GTA.Native;
 using BareMinimum.Core;
@@ -62,6 +62,29 @@ namespace BareMinimum.Bodies
         public Func<bool> Busy;
 
         /// <summary>
+        /// Whether the carry would take this body if it were offered. Set by Main.
+        ///
+        /// ONE PROMPT ON ONE BODY. Both halves are a hold of the interact key over a corpse,
+        /// and the order between them is search first and carry second -- so the moment a
+        /// body has been opened it stops being this half's and becomes the carry's.
+        ///
+        /// THE OLD GATE WAS NOT ENOUGH ON ITS OWN. Scan below skips a body that is EMPTY, so
+        /// an opened one with a gun still on it went on offering itself while the carry was
+        /// offering too: two hints written over each other on the same frame, and the carry's
+        /// shorter hold winning the key every time. That is the two-prompts-on-one-man this
+        /// whole move was meant to end, and it would have been rebuilt inside one mod.
+        ///
+        /// YOU GET HIM BACK BY PUTTING HIM DOWN. Drag.Put forgets that he was opened -- see
+        /// Corpses.Shut -- so a body you left something on can be gone through again once he
+        /// is back on the floor. Which is also the honest reading: you carried him somewhere
+        /// and are now having another look.
+        ///
+        /// Null, or a carry that is switched off, and this half keeps the body: there is
+        /// nothing to hand it to.
+        /// </summary>
+        public Func<bool> CarryReady;
+
+        /// <summary>
         /// Set by Main: the carry, so "and now move him" can be on the card's footer.
         ///
         /// THIS IS THE SEAM THAT USED TO BE A REFLECTION BRIDGE. The loot card is the last
@@ -90,6 +113,27 @@ namespace BareMinimum.Bodies
         /// <summary>Whether this owns the screen and the buttons right now.</summary>
         public bool IsOpen => _screen.IsOpen || _kneltAt != 0;
 
+        /// <summary>
+        /// Whether a body is being offered for searching on this frame. Read by the carry.
+        ///
+        /// THIS IS THE WHOLE OF "ONE PROMPT ON SCREEN". Both halves are a hold of the
+        /// interact key over a corpse, so the carry has to know when to keep quiet -- and
+        /// the question it used to ask was "has THIS body been searched", per handle. That
+        /// is right for one corpse and wrong for two: two men lying together, one gone
+        /// through and one not, and both halves offered at once on different bodies, with
+        /// the carry's shorter hold taking the key. Holding it over the man you were looking
+        /// at picked up the man behind you.
+        ///
+        /// So the carry asks this instead. False means there is nothing within reach left to
+        /// go through -- nothing near, or the only thing near has already been opened and
+        /// handed over -- and only then is the body the carry's.
+        ///
+        /// SET EVERY PASS, and false first, so a frame this class returns early from is a
+        /// frame it is not offering anything. Every early return below is one of the reasons
+        /// it would not be: no player, in a car, a menu up, already knelt.
+        /// </summary>
+        public bool Offering { get; private set; }
+
         public Search(Core.Settings cfg, Corpses bodies)
         {
             _cfg = cfg;
@@ -101,6 +145,11 @@ namespace BareMinimum.Bodies
         public void Update()
         {
             var now = Game.GameTime;
+
+            // FALSE FIRST, AND EVERY PASS. See Offering: every early return below is a
+            // reason this half is not offering anybody, and the carry reads it on the same
+            // frame -- Main ticks this one before that one.
+            Offering = false;
 
             if (_cfg == null || !_cfg.LootBodies)
             {
@@ -166,6 +215,16 @@ namespace BareMinimum.Bodies
                 _holdSince = 0;
                 return;
             }
+
+            // HIS POCKETS HAVE BEEN OPENED, SO HE IS THE CARRY'S NOW. See CarryReady.
+            if (_bodies != null && _bodies.Opened(_near.Handle) &&
+                CarryReady != null && CarryReady())
+            {
+                _holdSince = 0;
+                return;
+            }
+
+            Offering = true;
 
             Offer(now);
         }
