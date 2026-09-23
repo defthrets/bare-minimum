@@ -456,6 +456,17 @@ namespace BareMinimum
         }
 
         /// <summary>
+        /// How much further he may drift once the fridge is actually open.
+        ///
+        /// SMALLER THAN IT WAS, BECAUSE THE REACH IS. Six tenths of slack on a reach of 1.8
+        /// was a third of it; on a reach of 1.1 it would be more than half, which is no
+        /// longer slack, it is a second and much larger radius that only exists while the
+        /// screen is up. Four tenths is enough to shift your feet at an open door and not
+        /// enough to walk away from one.
+        /// </summary>
+        private const float OpenSlack = 0.4f;
+
+        /// <summary>
         /// Whether he is stood at a fridge, for the fridge screen's far side.
         ///
         /// A LITTLE MORE THAN THE REACH THAT OPENED IT once it is open, so shifting your feet
@@ -470,7 +481,7 @@ namespace BareMinimum
                 if (me == null || !me.Exists() || me.IsDead || me.IsInVehicle()) return false;
 
                 var reach = _fridge != null && _fridge.IsOpen
-                          ? _cfg.FridgeReach + 0.6f
+                          ? _cfg.FridgeReach + OpenSlack
                           : _cfg.FridgeReach;
 
                 return _fridges.Nearest(me.Position, reach) != null;

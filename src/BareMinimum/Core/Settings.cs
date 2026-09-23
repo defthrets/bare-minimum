@@ -1525,8 +1525,21 @@ namespace BareMinimum.Core
         /// </summary>
         public int FridgeSlots = 40;
 
-        /// <summary>How close you have to be standing, in metres.</summary>
-        public float FridgeReach = 1.8f;
+        /// <summary>
+        /// How close you have to be standing, in metres.
+        ///
+        /// RIGHT AT IT, AND 1.8 WAS NOT. A ped's position is at his FEET and a fridge's is at
+        /// its base, so this is very nearly a floor distance between the two -- and the fridge
+        /// is about a third of a metre deep from its centre to its door, with a man about
+        /// four tenths wide standing against it. Touching it is therefore already three
+        /// quarters of a metre; 1.8 is another whole metre past that, which is the far side of
+        /// a small kitchen. The prompt came up while walking past the doorway.
+        ///
+        /// 1.1 is an arm's length from the door and nothing further. See Main.NearAFridge for
+        /// the small amount of slack the screen gets once it is actually open, which is a
+        /// different question -- shuffling your feet at an open fridge should not slam it.
+        /// </summary>
+        public float FridgeReach = 1.1f;
 
         /// <summary>
         /// Whether the SNACK machines sell to you. Not the soda ones -- see VendingSipHunger.
