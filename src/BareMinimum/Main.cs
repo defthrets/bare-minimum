@@ -105,6 +105,9 @@ namespace BareMinimum
         /// <summary>The bag as a thing you can see on his back. See Food.Strap.</summary>
         private readonly Strap _strap;
 
+        /// <summary>What this mod stands in the world that the game did not. See Venues.Fixtures.</summary>
+        private readonly Fixtures _fixtures;
+
         /// <summary>The fridge: where it is, what is in it, and the screen over it.</summary>
         private readonly Fridges _fridges;
         private readonly Larder _larder;
@@ -157,6 +160,11 @@ namespace BareMinimum
             // foods.json no longer defines and it cannot know that until the list is read.
             _larder = new Larder(_cfg, _catalogue);
             _fridges = new Fridges(_cfg);
+
+            // BEFORE THE COUNTERS AND THE FRIDGES, which is not an ordering requirement so
+            // much as where it belongs: this is the half that PUTS things in the world and
+            // those are the halves that go looking for them.
+            _fixtures = new Fixtures(_cfg);
 
             _counters = new Counters(_cfg);
             _sipping = new Sipping(_cfg, _needs);
@@ -596,6 +604,11 @@ namespace BareMinimum
                 // player triggers with nothing of ours open, and a suspended tick would miss
                 // the one frame the clip starts on.
                 _sipping.Update();
+
+                // NOT GATED ON A MENU, and on its own two-second clock. A fridge standing in
+                // a kitchen is not something that should come and go with a panel.
+                _fixtures.Update();
+
                 _machineBlips.Update();
 
                 // Only ever does anything inside the pause menu, which is the one place the
@@ -809,6 +822,10 @@ namespace BareMinimum
 
             try { _survey.Stop("the script unloaded"); } catch (Exception ex) { Log.Error("Survey shutdown", ex); }
 
+            // OURS, GONE. They are marked as mission entities so the game will not clean
+            // them up on its own -- which is the whole reason they are marked -- so leaving
+            // them behind on a reload would stack a second set on top on the way back in.
+            try { if (_fixtures != null) _fixtures.Clear(); } catch (Exception ex) { Log.Error("Fixtures shutdown", ex); }
             try { _machineBlips.Shutdown(); } catch (Exception ex) { Log.Error("Machine shutdown", ex); }
             try { _machineBlips.Clear(); } catch { /* a stray blip is not worth a failed shutdown */ }
             try { _sleeping.Shutdown(); } catch (Exception ex) { Log.Error("Sleep shutdown", ex); }

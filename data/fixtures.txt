@@ -1,0 +1,36 @@
+; ============================================================================
+; THINGS THIS MOD PUTS IN THE WORLD BECAUSE THE GAME DID NOT
+; ============================================================================
+;
+; One per line:
+;
+;     model, x, y, z, heading     ; anything after a semicolon is a note
+;
+; The heading is the yaw in degrees, the way Menyoo's spooner reports it. Pitch
+; and roll are not read: these are things standing on a floor, and a fridge on
+; its side is not a fixture, it is a mess.
+;
+; MADE WHEN YOU ARE WITHIN A HUNDRED METRES and taken away again past a hundred
+; and thirty, so the world is not carrying props nobody is looking at.
+;
+; NOTHING IS DOUBLED UP. If something of the same model is already standing
+; within a metre and a half of the spot -- your own Menyoo copy of the same
+; placement, or this mod's from before a script reload -- nothing is made. Two
+; fridges inside each other is the classic way a mod that rebuilds a superseded
+; spooner draft ruins a room.
+;
+; WHERE THE NUMBERS COME FROM. Stand the thing where you want it in Menyoo's
+; spooner, save it, and open the xml: PositionRotation gives X, Y, Z and Yaw,
+; and HashName gives the model. That is exactly where the line below came from.
+;
+; Turn the whole file off with [Fixtures] Enabled in BareMinimum.ini.
+
+
+; DENISE'S KITCHEN, FORUM DRIVE. The map's own fridge there is v_res_tt_fridge,
+; a fixture bolted into the interior -- this mod finds it by hash and it works,
+; but a fixture is not something you can move, replace or rely on the way you
+; can rely on an object you placed. This is a real prop_fridge_03 standing in
+; the same space, inside it, so the kitchen Franklin actually lives in has a
+; fridge that belongs to us. Placed by Michael on 2026-09-23; the numbers are
+; his, off menyooStuff\Spooner\frankfridge.xml.
+prop_fridge_03, -9.34755, -1430.2749, 30.08402, -89.66556   ; inside the map's own fridge

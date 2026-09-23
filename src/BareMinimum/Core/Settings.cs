@@ -2311,6 +2311,20 @@ namespace BareMinimum.Core
         public float DragRoll = 40f;
         public float DragYaw = -15f;
 
+        // ---- Fixtures --------------------------------------------------------
+
+        /// <summary>
+        /// Whether the things in data/fixtures.txt are put in the world.
+        ///
+        /// ON, AND IT IS ONE FRIDGE TODAY. Franklin's aunt's kitchen has a fridge bolted into
+        /// the interior; this puts a real prop in the same space so the kitchen he actually
+        /// lives in has one that belongs to this mod rather than to the map. See
+        /// Venues.Fixtures, and the file itself, which says where the numbers came from.
+        ///
+        /// Off, nothing is placed and nothing already placed is left behind.
+        /// </summary>
+        public bool Fixtures = true;
+
         // ---- Bag -------------------------------------------------------------
 
         /// <summary>
@@ -2763,6 +2777,8 @@ namespace BareMinimum.Core
                 cfg.DragYaw = ini.GetFloat("Bodies", "Yaw", cfg.DragYaw, -180f, 180f);
                 cfg.DragShape = ini.GetInt("Bodies", "Pose", cfg.DragShape, 0, 12);
                 cfg.DragBone = ini.GetInt("Bodies", "Bone", cfg.DragBone, 0, 3);
+
+                cfg.Fixtures = ini.GetBool("Fixtures", "Enabled", cfg.Fixtures);
 
                 cfg.BagShow = ini.GetBool("Bag", "Show", cfg.BagShow);
                 cfg.BagTuner = ini.GetBool("Bag", "Tuner", cfg.BagTuner);
