@@ -1801,9 +1801,9 @@ namespace BareMinimum.Core
         /// beat between them, which is not how anybody eats. Two passes with a pause in the
         /// middle, holding the thing, is the shape of taking a bite and then taking another.
         ///
-        /// THE PAUSE IS THE CLIP HELD ON ITS LAST FRAME, not his arm dropped to his side. The
-        /// clip moves the bone the thing is fitted to, and dropping out of it for the pause put
-        /// every fitted model in the wrong spot on his hand for the length of it.
+        /// IN THE PAUSE HIS ARM IS DOWN AND THE THING IS HELD OFF HIS WRIST, at the place the
+        /// fit put it relative to his palm -- see Food.Eating.Palm. Holding the clip's last
+        /// frame instead was tried and left him with a bottle at his face between sips.
         ///
         /// THE MEAL ENDS WHEN THE LAST PASS DOES. That is what makes the animation and the
         /// duration the same thing rather than two numbers that have to be kept in step --
@@ -1999,11 +1999,10 @@ namespace BareMinimum.Core
         /// is exactly what every model did before this table existed -- so nothing moves for
         /// anybody until they dial one in. The bench fits either; see UI.FitScreen's pose row.
         ///
-        /// AND ALMOST NOTHING USES IT NOW. The break was the whole reason for this table, and
-        /// it holds the clip's last frame instead -- the clip moves the very bone the thing is
-        /// attached to, so standing in it keeps the eating numbers right without a second set.
-        /// The pocket holds the same frame. What is left is a clip that will not stream. See
-        /// Food.Eating._holds.
+        /// AND IT IS AN OVERRIDE NOW, NOT THE ANSWER. The arm-down position is worked out
+        /// from the eating fit and the measured Grip below -- see Food.Eating.Palm -- so no
+        /// model needs a line here. A model that has one is held on the prop bone with those
+        /// six instead, which is the one way to overrule the maths for a single model.
         /// </summary>
         public readonly System.Collections.Generic.Dictionary<string, float[]> Rest =
             new System.Collections.Generic.Dictionary<string, float[]>(StringComparer.OrdinalIgnoreCase);
@@ -2021,13 +2020,37 @@ namespace BareMinimum.Core
         }
 
         /// <summary>
+        /// HOW THE PROP HELPER BONE SITS IN THE WRIST'S FRAME WHILE A CLIP PLAYS, per clip:
+        /// three of position and four of a quaternion, keyed dictionary/clip.
+        ///
+        /// MEASURED, NEVER TYPED. Food.Eating.Grip reads it off his hand while he eats and
+        /// writes it here so the pocket has it from the first frame of the next session. It
+        /// is what lets the eating fit be right with his arm down -- see Food.Eating.Palm --
+        /// and it is a fact about the clip and the skeleton, the same for every model. A hand
+        /// edit here is a burger held at the wrong angle, and nothing else.
+        /// </summary>
+        public readonly System.Collections.Generic.Dictionary<string, float[]> Grip =
+            new System.Collections.Generic.Dictionary<string, float[]>(StringComparer.OrdinalIgnoreCase);
+
+        public string GripLine
+        {
+            get { return Table(Grip, 7); }
+        }
+
+        public void ReadGrip(string line)
+        {
+            Read(Grip, line, 7);
+        }
+
+        /// <summary>
         /// One table as one line, and one line back into one table.
         ///
         /// SHARED BECAUSE THERE ARE TWO OF THEM NOW. Fit and Rest are the same six numbers
         /// keyed the same way and written to the same kind of line, and the pipe-not-semicolon
         /// lesson below should only have to be learnt in one place.
         /// </summary>
-        private static string Table(System.Collections.Generic.Dictionary<string, float[]> from)
+        private static string Table(System.Collections.Generic.Dictionary<string, float[]> from,
+                                    int width = 6)
         {
             var sb = new System.Text.StringBuilder();
 
@@ -2042,10 +2065,10 @@ namespace BareMinimum.Core
 
                 sb.Append(kv.Key).Append(':');
 
-                for (var i = 0; i < 6; i++)
+                for (var i = 0; i < width && i < kv.Value.Length; i++)
                 {
                     if (i > 0) sb.Append(',');
-                    sb.Append(kv.Value[i].ToString("0.####",
+                    sb.Append(kv.Value[i].ToString("0.#####",
                         System.Globalization.CultureInfo.InvariantCulture));
                 }
             }
@@ -2054,7 +2077,7 @@ namespace BareMinimum.Core
         }
 
         private static void Read(System.Collections.Generic.Dictionary<string, float[]> into,
-                                 string line)
+                                 string line, int width = 6)
         {
             into.Clear();
 
@@ -2071,12 +2094,12 @@ namespace BareMinimum.Core
                 var name = text.Substring(0, colon).Trim();
                 var bits = text.Substring(colon + 1).Split(',');
 
-                if (name.Length == 0 || bits.Length < 6) continue;
+                if (name.Length == 0 || bits.Length < width) continue;
 
-                var six = new float[6];
+                var six = new float[width];
                 var ok = true;
 
-                for (var i = 0; i < 6; i++)
+                for (var i = 0; i < width; i++)
                 {
                     if (!float.TryParse(bits[i].Trim(),
                                         System.Globalization.NumberStyles.Float,
@@ -2880,6 +2903,7 @@ namespace BareMinimum.Core
                 // safe way round: the nudge then cannot touch the food that is already right.
                 cfg.ReadFit(ini.GetString("Eating", "Fit", ""));
                 cfg.ReadRest(ini.GetString("Eating", "Rest", ""));
+                cfg.ReadGrip(ini.GetString("Eating", "Grip", ""));
                 cfg.ReadProps(ini.GetString("Eating", "Props", ""));
 
                 cfg.HoldWhat = string.Equals(ini.GetString("Eating", "HoldWhat", "Drink"),

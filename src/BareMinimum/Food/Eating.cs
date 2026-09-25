@@ -46,9 +46,6 @@ namespace BareMinimum.Food
         /// <summary>How long one eat or drink stretch of a combo lasts, in milliseconds.</summary>
         private const int PhaseMs = 7000;
 
-        /// <summary>How long a new pass is left alone before anybody asks whether it has ended. See Puff.</summary>
-        private const int FreshMs = 500;
-
         private Item _item;
         private Prop _held;
         private int _finishAt;
@@ -81,14 +78,11 @@ namespace BareMinimum.Food
         /// Whether there is NO clip on him right now, so the thing is sitting on a hand bone
         /// in his idle pose rather than being held up to his mouth.
         ///
-        /// WHICH OF THE TWO FITS APPLIES. See Settings.Rest: a model fitted against the
-        /// eating clip is in the wrong spot on his hand once no clip is on him, because the
-        /// clip moves the very bone the thing is attached to.
-        ///
-        /// ALMOST NEVER TRUE ANY MORE. The break between two bites used to be the whole of
-        /// it, and the break now holds the clip's last frame instead -- see _holds. What is
-        /// left is the frame before the first clip lands, and a scenario, which holds
-        /// nothing.
+        /// WHICH HOLD APPLIES. A model fitted against the eating clip is in the wrong spot
+        /// on his hand once no clip is on him, because the clip poses the very bone the thing
+        /// is attached to. So at rest the thing is held OFF THE WRIST instead, at the place
+        /// the fit put it relative to his palm -- see Palm -- or, for a model somebody has
+        /// dialled an arm-down fit for by hand, on the prop bone with those numbers.
         ///
         /// NOT SIMPLY !_animStarted, WHICH IS TRUE FOR A FRAME BETWEEN THE SMOKE'S CLIPS. The
         /// smoke is three clips in a deliberate order with no rest in it -- see Puff, which
@@ -98,25 +92,8 @@ namespace BareMinimum.Food
         /// </summary>
         private bool _resting;
 
-        /// <summary>
-        /// Whether the clip on him was told to HOLD ITS LAST FRAME rather than end.
-        ///
-        /// THE BREAK BETWEEN BITES IS THE CLIP, STOOD STILL. Every model was fitted with the
-        /// clip playing, and the clip does not only move his arm: it moves the prop bone in
-        /// his hand that the thing is attached to. So when a pass ended and his arm fell to
-        /// his side, that bone went back to where it sits in his idle pose and the burger was
-        /// left in the wrong spot on his hand for the whole of the break -- reported as the
-        /// animation being perfect and the small break not. Holding the last frame keeps the
-        /// bone where the clip put it, which is the pose the numbers were dialled in, so they
-        /// are right for the break without one of them changing or a second set being dialled.
-        ///
-        /// AND A HELD CLIP HAS TO BE LET GO OF. One that ends on its own needs no stop; a held
-        /// one stays on him until somebody stops it, which is why Cleanup reads this as well
-        /// as _animStarted -- a meal that ends or is put down in the middle of a break has
-        /// _animStarted false and a frozen arm to release. The LAST pass is not held, so a
-        /// meal still finishes the way it always has: the clip plays out and lets go by itself.
-        /// </summary>
-        private bool _holds;
+        /// <summary>Whether the thing is on his wrist bone right now rather than the prop bone. See Seat.</summary>
+        private bool _onWrist;
 
         /// <summary>The weapon he had when this started. See Interrupted.</summary>
         private WeaponHash _armed = WeaponHash.Unarmed;
@@ -320,6 +297,9 @@ namespace BareMinimum.Food
 
         public void Update()
         {
+            // A GRIP THAT CHANGED IS WRITTEN DOWN, meal or no meal. See Owed.
+            Owed();
+
             if (_item == null) return;
 
             try
@@ -687,6 +667,7 @@ namespace BareMinimum.Food
                 // A NEW OBJECT STARTS WHERE IT BELONGS. Without this the cup half of a combo
                 // flies across from wherever the burger was being held. See Eased.
                 _satSet = false;
+                _onWrist = false;
 
                 Seat(me, item, drinking);
 
@@ -725,6 +706,35 @@ namespace BareMinimum.Food
 
             var anim = AnimFor(item, drinking);
 
+            // WHILE THE CLIP IS ON HIM, LEARN THE GRIP. See Grip: it is what makes the rest
+            // below possible, and it costs two bone reads a frame.
+            if (!_resting) Grip(me, anim);
+
+            // AT REST, OFF THE WRIST. See Palm. Nothing is eased between the two bones -- the
+            // six mean different things on each -- and nothing needs to be: the wrist hold is
+            // worked out from where the clip had it, so the switch itself does not move it.
+            if (_resting)
+            {
+                var palm = Palm(me, _held, item, drinking);
+
+                if (palm != null)
+                {
+                    var wrist = Function.Call<int>(Hash.GET_PED_BONE_INDEX, me.Handle, (int)palm.Six[0]);
+
+                    Function.Call(Hash.ATTACH_ENTITY_TO_ENTITY, _held.Handle, me.Handle, wrist,
+                                  palm.Six[1], palm.Six[2], palm.Six[3],
+                                  palm.Six[4], palm.Six[5], palm.Six[6], false, false, false, false, 2, true);
+
+                    if (!_onWrist) { _onWrist = true; _satSet = false; }
+                    else Check(me, _held, anim, palm);
+
+                    return;
+                }
+            }
+
+            // BACK ON THE PROP BONE. From the wrist that is a snap, for the reason above.
+            if (_onWrist) { _onWrist = false; _satSet = false; }
+
             var bone = Function.Call<int>(Hash.GET_PED_BONE_INDEX, me.Handle,
                                           anim.LeftHanded ? LeftHandBone : RightHandBone);
 
@@ -736,6 +746,280 @@ namespace BareMinimum.Food
             Function.Call(Hash.ATTACH_ENTITY_TO_ENTITY, _held.Handle, me.Handle, bone,
                           sits.X, sits.Y, sits.Z,
                           spin.X, spin.Y, spin.Z, false, false, false, false, 2, true);
+        }
+
+        // ======================================================================
+        // The grip, and the hold off the wrist
+        // ======================================================================
+
+        /// <summary>
+        /// Reads where the prop helper bone sits in the wrist bone's frame while a clip is on
+        /// him, and remembers it against the clip.
+        ///
+        /// THE CLIP POSES THE PROP BONE. Every model in Settings.Fit was dialled against that
+        /// posed bone, and with no clip on him the bone is somewhere else -- which is why the
+        /// same six put the burger in the wrong spot on his hand the moment his arm dropped.
+        /// This is the difference, measured rather than guessed: a fact about the clip and the
+        /// skeleton, the same for every model eaten with it. Palm uses it to hold the thing
+        /// off the WRIST at the place the fit put it relative to his palm, so it rides his
+        /// hand down and sits where he dialled it with his arm at his side.
+        ///
+        /// RELATIVE MATRICES, so the ped's own transform cancels: prop bone in the ped's frame
+        /// against wrist bone in the ped's frame is prop bone in the wrist's frame.
+        ///
+        /// TAKEN EVERY CLIP FRAME AND THE LAST ONE KEPT, which is the pose his arm drops out
+        /// of, so the switch to the wrist does not move the thing. Written to the ini once it
+        /// has settled -- see Owed -- so the pocket has it from the first frame of the next
+        /// session, before anything has been eaten.
+        /// </summary>
+        private void Grip(Ped me, AnimRef anim)
+        {
+            if (anim == null || !anim.Valid || _cfg == null) return;
+
+            try
+            {
+                var ph = me.Bones[anim.LeftHanded ? Bone.PHLeftHand : Bone.PHRightHand];
+                var wr = me.Bones[anim.LeftHanded ? Bone.SkelLeftHand : Bone.SkelRightHand];
+
+                if (ph == null || wr == null || ph.Index < 0 || wr.Index < 0) return;
+
+                var rel = ph.RelativeMatrix * Matrix.Invert(wr.RelativeMatrix);
+                var q = Quaternion.RotationMatrix(rel);
+
+                var key = GripKey(anim);
+                var seven = new[] { rel.M41, rel.M42, rel.M43, q.X, q.Y, q.Z, q.W };
+
+                float[] had;
+
+                if (_cfg.Grip.TryGetValue(key, out had) && !Moved(had, seven)) return;
+
+                _cfg.Grip[key] = seven;
+
+                // A CHANGE INVALIDATES EVERY HOLD WORKED OUT FROM THE OLD ONE.
+                _gripVersion++;
+                _palm.Clear();
+
+                _gripOwed = true;
+                _gripOwedAt = Game.GameTime;
+
+                if (_gripSaid.Add(key))
+                {
+                    Log.Info("Grip: measured " + key + " -- everything eaten with that clip is " +
+                             "held off his wrist with his arm down from now on.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Once("grip-read", "Could not read the grip off his hand: " + ex.Message);
+            }
+        }
+
+        private static string GripKey(AnimRef anim)
+        {
+            var clip = anim.Cycle != null && anim.Cycle.Length > 0 ? anim.Cycle[0] : anim.Clip;
+            return anim.Dict + "/" + clip;
+        }
+
+        /// <summary>Two millimetres or a degree, so a hand that trembles does not rewrite the ini.</summary>
+        private static bool Moved(float[] a, float[] b)
+        {
+            if (a == null || b == null || a.Length < 7 || b.Length < 7) return true;
+
+            var dx = a[0] - b[0]; var dy = a[1] - b[1]; var dz = a[2] - b[2];
+            if (dx * dx + dy * dy + dz * dz > 0.002f * 0.002f) return true;
+
+            var dot = Math.Abs(a[3] * b[3] + a[4] * b[4] + a[5] * b[5] + a[6] * b[6]);
+            return dot < 0.99996f;   // about a degree
+        }
+
+        /// <summary>Bumped whenever a grip changes, so a hold worked out before it is not reused.</summary>
+        private int _gripVersion;
+
+        private bool _gripOwed;
+        private int _gripOwedAt;
+        private readonly System.Collections.Generic.HashSet<string> _gripSaid =
+            new System.Collections.Generic.HashSet<string>();
+
+        /// <summary>Writes a changed grip down, two seconds after the last change. See Strap.Owed for the pattern.</summary>
+        private void Owed()
+        {
+            if (!_gripOwed) return;
+
+            int now;
+            try { now = Game.GameTime; }
+            catch { return; }
+
+            if (now - _gripOwedAt < 2000) return;
+
+            SaveGrip();
+        }
+
+        private void SaveGrip()
+        {
+            _gripOwed = false;
+
+            try { IniFile.SetValue(Paths.Ini, "Eating", "Grip", _cfg.GripLine); }
+            catch (Exception ex) { Log.Once("grip-save", "Could not write the grip: " + ex.Message); }
+        }
+
+        /// <summary>One hold off the wrist, worked out and kept. See Palm.</summary>
+        private sealed class Palmed
+        {
+            /// <summary>Bone tag, then the six for ATTACH_ENTITY_TO_ENTITY on that bone.</summary>
+            public float[] Six;
+
+            /// <summary>The same thing as a matrix in the wrist's frame, for Check.</summary>
+            public Matrix Rel;
+
+            /// <summary>Which model, for the log.</summary>
+            public string Model;
+
+            public bool Checked;
+        }
+
+        private readonly System.Collections.Generic.Dictionary<string, Palmed> _palm =
+            new System.Collections.Generic.Dictionary<string, Palmed>();
+
+        /// <summary>
+        /// Where the pocket holds this thing with his arm down: the bone and the six. Null
+        /// when the prop bone and the fit are the right answer -- see Palm.
+        /// </summary>
+        public float[] PalmFor(Ped me, Prop prop, Item item)
+        {
+            var palm = Palm(me, prop, item, false);
+            return palm == null ? null : palm.Six;
+        }
+
+        /// <summary>
+        /// The hold off the wrist for this model: fit times grip, as the six numbers the attach
+        /// native wants on the wrist bone.
+        ///
+        /// NULL MEANS THE PROP BONE. Three reasons: a resting fit somebody dialled by hand
+        /// for this model wins, because it was made for exactly this and is the one way to
+        /// overrule this per model; no grip has been measured for the clip yet, which is every
+        /// clip until something has been eaten with it once; or the maths could not be done.
+        ///
+        /// THE GAME DOES THE EULER WORK. The attach native takes degrees in an order this code
+        /// has no business guessing at, so the prop itself is the converter: detached for one
+        /// frame, turned to the fit's angles so its matrix gives the fit as a rotation, then
+        /// set to the product's quaternion so the game reads back the product's angles. It is
+        /// attached again on the line after and nobody sees the frame in between. Done once
+        /// per model and clip and kept; a change to the grip or the fit does it again.
+        /// </summary>
+        private Palmed Palm(Ped me, Prop prop, Item item, bool drinking)
+        {
+            if (me == null || prop == null || item == null || _cfg == null) return null;
+            if (string.IsNullOrEmpty(item.Prop) || !prop.Exists()) return null;
+
+            float[] rest;
+            if (_cfg.Rest.TryGetValue(item.Prop, out rest)) return null;
+
+            var anim = AnimFor(item, drinking);
+            if (anim == null || !anim.Valid) return null;
+
+            var key = GripKey(anim);
+
+            float[] grip;
+
+            if (!_cfg.Grip.TryGetValue(key, out grip))
+            {
+                Log.Once("grip-none-" + key, "No grip measured for " + key + " yet, so " + item.Prop +
+                         " sits on the prop bone with his arm down. It is measured the first " +
+                         "time anything is eaten with that clip.");
+                return null;
+            }
+
+            var sits = SitsFor(item, drinking, false);
+            var spin = SpinFor(item, drinking, false);
+
+            var cacheKey = item.Prop + "|" + key + "|" + _gripVersion + "|" +
+                           sits.X.ToString("0.####") + "," + sits.Y.ToString("0.####") + "," + sits.Z.ToString("0.####") + "," +
+                           spin.X.ToString("0.#") + "," + spin.Y.ToString("0.#") + "," + spin.Z.ToString("0.#");
+
+            Palmed had;
+            if (_palm.TryGetValue(cacheKey, out had)) return had;
+
+            try
+            {
+                Function.Call(Hash.DETACH_ENTITY, prop.Handle, true, true);
+
+                // The fit as a matrix: its angles as the game reads them, its offset as the row.
+                Function.Call(Hash.SET_ENTITY_ROTATION, prop.Handle, spin.X, spin.Y, spin.Z, 2, true);
+
+                var fit = prop.Matrix;
+                fit.M41 = sits.X; fit.M42 = sits.Y; fit.M43 = sits.Z; fit.M44 = 1f;
+
+                var g = Matrix.RotationQuaternion(new Quaternion(grip[3], grip[4], grip[5], grip[6]));
+                g.M41 = grip[0]; g.M42 = grip[1]; g.M43 = grip[2]; g.M44 = 1f;
+
+                // prop = fit * propBone, propBone = grip * wrist, so prop = (fit * grip) * wrist.
+                var rel = fit * g;
+
+                var q = Quaternion.RotationMatrix(rel);
+                Function.Call(Hash.SET_ENTITY_QUATERNION, prop.Handle, q.X, q.Y, q.Z, q.W);
+
+                var e = Function.Call<Vector3>(Hash.GET_ENTITY_ROTATION, prop.Handle, 2);
+
+                var made = new Palmed
+                {
+                    Six = new[]
+                    {
+                        (float)(int)(anim.LeftHanded ? Bone.SkelLeftHand : Bone.SkelRightHand),
+                        rel.M41, rel.M42, rel.M43, e.X, e.Y, e.Z
+                    },
+                    Rel = rel,
+                    Model = item.Prop
+                };
+
+                _palm[cacheKey] = made;
+                return made;
+            }
+            catch (Exception ex)
+            {
+                Log.Once("palm-" + item.Prop, "Could not work out the wrist hold for " + item.Prop +
+                         ": " + ex.Message + ". It sits on the prop bone instead.");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Says, once per hold, how far the thing actually is from where the maths put it.
+        ///
+        /// THE ONE LINE THAT SETTLES A WRONG-LOOKING HOLD. If the quaternion the game keeps
+        /// and the one this code builds ever disagree in handedness, the thing sits mirrored
+        /// and looks merely odd; this measures the real prop against the intended place and
+        /// writes the gap down in millimetres and degrees. A few of either is the frame's
+        /// blend. Tens of degrees is this code, and the line says so.
+        /// </summary>
+        private void Check(Ped me, Prop prop, AnimRef anim, Palmed palm)
+        {
+            if (palm == null || palm.Checked) return;
+            palm.Checked = true;
+
+            try
+            {
+                var wr = me.Bones[anim.LeftHanded ? Bone.SkelLeftHand : Bone.SkelRightHand];
+                if (wr == null || wr.Index < 0) return;
+
+                var want = palm.Rel * (wr.RelativeMatrix * me.Matrix);
+                var got = prop.Matrix;
+
+                var dx = got.M41 - want.M41; var dy = got.M42 - want.M42; var dz = got.M43 - want.M43;
+                var mm = Math.Sqrt(dx * dx + dy * dy + dz * dz) * 1000.0;
+
+                var qa = Quaternion.RotationMatrix(got);
+                var qb = Quaternion.RotationMatrix(want);
+                var dot = Math.Min(1.0, Math.Abs(qa.X * qb.X + qa.Y * qb.Y + qa.Z * qb.Z + qa.W * qb.W));
+                var deg = 2.0 * Math.Acos(dot) * 180.0 / Math.PI;
+
+                Log.Info("Palm: " + palm.Model + " off the wrist is " + mm.ToString("0") +
+                         " mm and " + deg.ToString("0.#") + " deg from where the clip had it" +
+                         (deg > 8.0 || mm > 40.0 ? " -- THAT IS WRONG. Paste this line." : "."));
+            }
+            catch
+            {
+                // Diagnostic only.
+            }
         }
 
         /// <summary>The six actually used this frame, easing toward the six that are wanted.</summary>
@@ -1025,21 +1309,16 @@ namespace BareMinimum.Food
                 // The smoke is three clips in a deliberate order and reaches the same code
                 // by the same route: each has to END before the next can start.
                 //
-                // AND A PASS WITH ANOTHER TO COME HOLDS ITS LAST FRAME: flag 50, which is 48
-                // plus HOLD_LAST_FRAME. See _holds -- the break is the clip stood still rather
-                // than his arm dropped, because the clip moves the bone the thing is fitted
-                // to. The last pass and the smoke stay on 48, so a meal still ends by the clip
-                // letting go on its own.
-                var hold = !item.Smoke && anim.Cycle.Length < 2 &&
-                           _passes + 1 < Math.Max(1, _cfg.Bites);
-
+                // NOT HELD ON ITS LAST FRAME. That was tried for the break between bites, so
+                // the fitted numbers would stay right, and it left him stood with a bottle at
+                // his face while he chose the next one. His arm comes down; the thing rides
+                // his wrist down with it. See Palm.
                 Function.Call(Hash.TASK_PLAY_ANIM, me.Handle, anim.Dict, clip,
-                              4f, -4f, -1, hold ? 50 : 48,
+                              4f, -4f, -1, 48,
                               0f, false, false, false);
 
                 _clipAt = Game.GameTime;
                 _animStarted = true;
-                _holds = hold;
                 _resting = false;
             }
             catch (Exception ex)
@@ -1071,15 +1350,6 @@ namespace BareMinimum.Food
             // and never ended. They are played one pass at a time instead, so this is what
             // spaces them: see Settings.Bites.
             if (_playing == null) return;
-
-            // NOT IN THE FIRST HALF SECOND OF A PASS. The pass before it is still on him, HELD
-            // ON ITS LAST FRAME, while the new one blends in over it -- and the phase is asked
-            // for by dictionary and clip name, which are the same for both. Asked too early it
-            // can read the old one, sat at the end, and call a pass that has only just begun
-            // finished. The pocket's held clip is the same clip again when a meal starts from
-            // it. No clip in the catalogue is anywhere near this short; the blend is a quarter
-            // of a second.
-            if (now - _clipAt < FreshMs) return;
 
             var me = Game.Player.Character;
             if (me == null || !me.Exists() || me.IsDead) return;
@@ -1138,11 +1408,9 @@ namespace BareMinimum.Food
             {
                 _restUntil = now + (int)(Math.Max(0f, _cfg.BreakSeconds) * 1000f);
 
-                // HOLDING IT, NOT RESTING. The pass that just ended was played to hold its last
-                // frame, so the clip is still on him and the eating numbers are still the right
-                // ones -- see _holds. Only a pass that could not hold, which is a scenario
-                // standing in for a missing clip, rests.
-                _resting = !_holds;
+                // AND HIS ARM COMES DOWN WITH THE THING IN HIS HAND. The clip has ended and
+                // lets go on its own; from here Seat holds it off the wrist. See Palm.
+                _resting = true;
                 return;
             }
 
@@ -1180,7 +1448,6 @@ namespace BareMinimum.Food
 
                 _animStarted = true;
                 _scenarioStarted = true;
-                _holds = false;
                 _resting = false;
 
                 Log.Once("anim-scenario-" + anim.Scenario,
@@ -1202,11 +1469,11 @@ namespace BareMinimum.Food
 
         private void Cleanup()
         {
-            // OR A CLIP IS BEING HELD. In the break between two passes _animStarted is false
-            // and the last pass's final frame is still on him -- a meal that ends on the clock
-            // there, or is put down because he drew, would leave his arm frozen in it for good
-            // if this only looked at _animStarted. See _holds.
-            if (_animStarted || _holds)
+            // A GRIP STILL OWED IS WRITTEN NOW rather than left to a timer that may not be
+            // called again -- this is also the shutdown path.
+            if (_gripOwed) SaveGrip();
+
+            if (_animStarted)
             {
                 try
                 {
@@ -1261,10 +1528,11 @@ namespace BareMinimum.Food
                 }
 
                 _animStarted = false;
-                _holds = false;
                 _playing = null;
                 _scenarioStarted = false;
             }
+
+            _onWrist = false;
 
             DropProp();
         }

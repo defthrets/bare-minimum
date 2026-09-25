@@ -87,6 +87,22 @@ namespace BareMinimum.UI
         public Func<Vector3> Sits;
 
         /// <summary>
+        /// The whole answer at once, for a hand with no clip on it: the bone tag and the six,
+        /// or null to use Lefty, Sits and Spin on the prop bone as before.
+        ///
+        /// FOR THE POCKET, which shows a thing with his arm at his side. The fits are made
+        /// against the prop bone with the eating clip posing it, and with the arm down that
+        /// bone is somewhere else -- so Eating works out the same place relative to his palm
+        /// off the WRIST instead, and hands the numbers over here. See Eating.Palm. The
+        /// fitting bench and the settings page leave this null: they fit with the clip
+        /// playing, where the prop bone is the right one.
+        ///
+        /// GIVEN THE PROP because the maths uses it as a converter for a frame while it is
+        /// detached; it is attached again on the line after.
+        /// </summary>
+        public Func<Ped, Prop, float[]> Palm;
+
+        /// <summary>
         /// Show this model, or nothing.
         ///
         /// The name is the one the catalogue already settled on -- Item.Prop is chosen from the
@@ -181,6 +197,25 @@ namespace BareMinimum.UI
         private void Seat(Ped me)
         {
             if (me == null || !me.Exists() || _held == null || !_held.Exists()) return;
+
+            // OFF THE WRIST WHEN THERE IS AN ANSWER FOR IT. See Palm.
+            if (Palm != null)
+            {
+                float[] palm = null;
+
+                try { palm = Palm(me, _held); }
+                catch { palm = null; }
+
+                if (palm != null && palm.Length >= 7)
+                {
+                    var wrist = Function.Call<int>(Hash.GET_PED_BONE_INDEX, me.Handle, (int)palm[0]);
+
+                    Function.Call(Hash.ATTACH_ENTITY_TO_ENTITY, _held.Handle, me.Handle, wrist,
+                                  palm[1], palm[2], palm[3],
+                                  palm[4], palm[5], palm[6], false, false, false, false, 2, true);
+                    return;
+                }
+            }
 
             var bone = Function.Call<int>(Hash.GET_PED_BONE_INDEX, me.Handle,
                                           Lefty ? LeftHandBone : RightHandBone);
