@@ -490,6 +490,17 @@ namespace BareMinimum.Core
         public float BedReach = 1.6f;
 
         /// <summary>
+        /// Extra bed model names to look for, comma-separated, on top of the built-in list.
+        ///
+        /// THE SAME HOLE FridgeExtraModels FILLED, two years of DLC later. A bed is found by
+        /// model name, and a house from an interior mod -- M8T's Home Ownership was the one
+        /// reported, by Vitalezzzz -- stands up a bed the built-in list may not know. Before
+        /// this the only fix was a build. A name that does not exist costs a line in the log
+        /// and nothing else; see Venues.Beds.
+        /// </summary>
+        public string BedExtraModels = "";
+
+        /// <summary>
         /// Credit sleep when SOMETHING ELSE puts the player to bed.
         ///
         /// Posted Up and Hoodrich both have their own sleep at Franklin's, and there is no
@@ -2575,6 +2586,7 @@ namespace BareMinimum.Core
                 cfg.CarRestoreFraction = ini.GetFloat("Sleeping", "CarRestoreFraction",
                                                       cfg.CarRestoreFraction, 0.05f, 1f);
                 cfg.BedReach = ini.GetFloat("Sleeping", "BedReach", cfg.BedReach, 0.5f, 6f);
+                cfg.BedExtraModels = ini.GetString("Sleeping", "ExtraModels", cfg.BedExtraModels);
 
                 cfg.PoliceWake = ini.GetBool("Sleeping", "PoliceWake", cfg.PoliceWake);
                 cfg.PoliceOnCollapse = ini.GetBool("Sleeping", "PoliceOnCollapse", cfg.PoliceOnCollapse);

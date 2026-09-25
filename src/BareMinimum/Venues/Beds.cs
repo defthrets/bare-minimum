@@ -21,46 +21,109 @@ namespace BareMinimum.Venues
     /// to be that one: it sees MAP objects. World.GetNearbyProps walks the object pool, which
     /// placed map props are not in, so it finds nothing in a bedroom.
     ///
-    /// THE MODEL LIST IS SELF-DIAGNOSING. Every name is checked with IS_MODEL_VALID at
-    /// start-up and the ones this build does not have are named in the log. A wrong guess
-    /// therefore costs one log line rather than a bed that silently never appears -- which
-    /// matters, because a bed model name is exactly the sort of thing that is easy to get
-    /// slightly wrong and impossible to notice.
+    /// THE NAMES ARE THE GAME'S OWN, NOT GUESSED. Fifteen of the nineteen on the first list
+    /// did not exist: written from memory, and the game's object lists -- Menyoo's PropList
+    /// and Rampage's ObjectList, twenty-three thousand names between them -- have never heard
+    /// of v_res_fa_bed, v_res_fh_bed01 or apa_mp_h_bed_double_01. The log said "19 of 19
+    /// exist" because every name is searched regardless, and the "not in this build" line
+    /// named the same fifteen every launch and read as fixtures answering no. So for three
+    /// weeks a bed was found by FOUR models -- Michael's, Jimmy's, Trevor's and Lester's --
+    /// and Franklin's two, v_res_tt_bed at his aunt's and v_res_mdbed in the hills, were never
+    /// on it. Reported by Vitalezzzz as sleeping not working in M8T's houses, which stand up
+    /// exactly the apartment and DLC beds that were missing. Every name below was checked
+    /// against those two files on 2026-09-25, and anything that is not is a line in the log.
     /// </summary>
     internal sealed class Beds
     {
         /// <summary>
-        /// Candidate bed models, base game and DLC.
+        /// Every bed-shaped object in the game's own lists, base game and DLC.
         ///
-        /// Deliberately broad. A name this build does not know never matches anything, so the
-        /// cost of listing one too many is a single line in the log; the cost of listing one
-        /// too few is a safehouse where sleeping does not work and no clue as to why.
+        /// BEDS, NOT BEDROOMS. The lists hold a hundred and seventy-two names with "bed" in
+        /// them and most are not a bed: bedside tables, bed lamps, the overlays and decals a
+        /// room's bed is dressed with, flatbed truck ramps, dog beds, the seabed. Those cost a
+        /// native call each on every scan and could never be slept on, so they are left out.
+        /// What is left is fifty-odd, and a name that is a bed somewhere else goes in the ini.
         /// </summary>
         private static readonly string[] Candidates =
         {
-            // Safehouses
-            "v_res_mbbed",              // Michael's master bedroom
-            "v_res_msonbed",            // Jimmy's
-            "v_res_msdaubed",           // Tracey's
-            "v_res_fh_bed01",           // Franklin's Vinewood Hills house
-            "v_res_fa_bed",             // Franklin's aunt's, Forum Drive
-            "v_res_tre_bed1",           // Trevor's trailer
-            "v_res_d_bed01",
-            "v_res_j_bed",
-            "v_res_r_bedtidy",
-            "v_res_r_bedmess",
-            "p_lestersbed_s",
+            // The three men's own, and the beds in the story's houses
+            "v_res_mbbed",                  // Michael's master bedroom
+            "v_res_mbbed_mess",             // ...unmade
+            "v_res_msonbed",                // Jimmy's
+            "v_res_msonbed_s",
+            "v_res_mdbed",                  // Franklin's Vinewood Hills house
+            "v_res_tt_bed",                 // Franklin's aunt's, Forum Drive
+            "v_res_tre_bed1",               // Trevor's trailer
+            "v_res_tre_bed1_messy",
+            "v_res_tre_bed2",
+            "v_res_d_bed",
+            "v_res_lestersbed",             // Lester's
+            "p_lestersbed_s",               // cutscene copies, stood up while one plays
+            "p_mbbed_s",
+            "p_v_res_tt_bed_s",
 
-            // Motels, apartments and DLC interiors
-            "apa_mp_h_bed_double_01",
-            "apa_mp_h_bed_single_01",
-            "bkr_prop_clubhouse_bed_01a",
-            "ex_prop_offbed_01a",
-            "hei_heist_bed_01",
-            "miss_rub_bed01",
-            "prop_rub_bed01",
-            "v_res_bed_01"
+            // Motels, the hospital, and the story's other interiors
+            "v_16_bdr_mesh_bed",            // the motel room
+            "v_16_mid_bed_bed",
+            "v_24_bdr_mesh_bed",
+            "v_61_bd2_mesh_bed",
+            "v_med_bed1",                   // hospital
+            "v_med_bed2",
+            "v_med_emptybed",
+
+            // Online apartments, yachts, offices, clubhouses and bunkers -- the interiors a
+            // housing mod stands up, which is where the missing names were felt
+            "apa_mp_h_bed_double_08",
+            "apa_mp_h_bed_double_09",
+            "apa_mp_h_bed_wide_05",
+            "apa_mp_h_bed_with_table_02",
+            "apa_mp_h_stn_sofa_daybed_01",
+            "apa_mp_h_stn_sofa_daybed_02",
+            "apa_mp_h_yacht_bed_01",
+            "apa_mp_h_yacht_bed_02",
+            "h4_mp_h_yacht_bed_01",
+            "h4_mp_h_yacht_bed_02",
+            "sf_mp_h_yacht_bed_01",
+            "sf_mp_h_yacht_bed_02",
+            "sum_mp_h_yacht_bed_01",
+            "sum_mp_h_yacht_bed_02",
+            "sum_mpapyacht_d2beds_bed",
+            "sum_bedathpl3",                // named like a bed; harmless if it is not
+            "hei_heist_bed_double_08",
+            "ex_prop_exec_bed_01",
+            "bkr_prop_biker_campbed_01",
+            "gr_prop_gr_campbed_01",
+            "gr_prop_bunker_bed_01",
+            "imp_prop_impexp_campbed_01",
+            "m24_2_prop_m42_bunkerbed_01a",
+            "m25_1_prop_m51_bunkerbed_01a",
+            "m25_1_prop_m51_bed_01a",
+            "m25_1_prop_m51_bed_02a",
+
+            // The newest DLC interiors, whose beds are pieces of the room rather than props
+            "m23_2_int4_m232_int_sub_bed",
+            "m24_1_int_01_m241_bed",
+            "m25_1_int_05_mid_bed_bed",
+            "m25_2_int_01_main_bed_01",
+            "m25_2_int_01_c_gr_bed",
+            "m25_2_int_01_l_gr_bed",
+            "m25_2_int_01_l_mb_bed",
+            "m25_2_int_01_r_gr_bed",
+            "m25_2_int_01_r_mb_bed"
         };
+
+        /// <summary>
+        /// The settings, for the one thing this class asks them: the player's own extra bed
+        /// model names. The same arrangement as Fridges, for the same reason -- a list in a
+        /// dll cannot be complete, and a bed from a mod this one has never heard of should
+        /// not have to wait for a build.
+        /// </summary>
+        private readonly Settings _cfg;
+
+        public Beds(Settings cfg)
+        {
+            _cfg = cfg;
+        }
 
         private int[] _hashes;
 
@@ -82,7 +145,22 @@ namespace BareMinimum.Venues
             var good = new List<int>();
             var missing = new List<string>();
 
-            foreach (var name in Candidates)
+            // THE PLAYER'S OWN NAMES ON TOP OF THE LIST. See Settings.BedExtraModels: a bed
+            // from an interior mod this build has never heard of is one line in the ini
+            // rather than a wait for the next release.
+            var wanted = new List<string>(Candidates);
+
+            foreach (var extra in (_cfg == null || _cfg.BedExtraModels == null ? "" : _cfg.BedExtraModels).Split(',', ';'))
+            {
+                var name = extra.Trim();
+
+                if (name.Length == 0) continue;
+                if (wanted.Contains(name)) continue;
+
+                wanted.Add(name);
+            }
+
+            foreach (var name in wanted)
             {
                 try
                 {
@@ -109,14 +187,22 @@ namespace BareMinimum.Venues
 
             _hashes = good.ToArray();
 
-            Log.Info("Beds: " + _hashes.Length + " of " + Candidates.Length +
-                     " model(s) exist in this build.");
+            // "LOOKING FOR", NOT "EXIST". The old line said "19 of 19 model(s) exist in this
+            // build" about a list of which fifteen did not exist anywhere, because every name
+            // goes in whether or not the game will spawn it. Fridges' wording is the honest
+            // one and this is it.
+            Log.Info("Beds: looking for " + _hashes.Length + " model(s)" +
+                     (wanted.Count > Candidates.Length
+                          ? ", " + (wanted.Count - Candidates.Length) + " of them from the ini"
+                          : "") + ".");
 
             if (missing.Count > 0)
             {
-                // Named rather than counted, so a bad guess in the list above can be corrected
-                // from somebody else's log without them having to reproduce anything.
-                Log.Info("Beds: not in this build, ignored - " + string.Join(", ", missing.ToArray()));
+                // NAMED, AND NOT WRITTEN OFF. Map-only fixtures answer no here and are found
+                // regardless; the line is worth reading when a name typed into ExtraModels
+                // never finds a bed, because then it is probably a typo.
+                Log.Info("Beds: these are map-only or unknown, and are searched for anyway - " +
+                         string.Join(", ", missing.ToArray()));
             }
 
             return _hashes;

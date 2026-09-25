@@ -123,7 +123,8 @@ namespace BareMinimum
 
             _needs = new Needs.Needs(_cfg);
             _effects = new Effects(_cfg);
-            _beds = new Beds();
+            // WITH THE SETTINGS, for [Sleeping] ExtraModels. See Venues.Beds.
+            _beds = new Beds(_cfg);
             _knock = new Knock(_cfg);
             _sleeping = new Sleeping(_cfg, _needs, _beds, _knock);
 
