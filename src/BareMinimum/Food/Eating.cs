@@ -1419,17 +1419,25 @@ namespace BareMinimum.Food
             _clip++;
             _animStarted = false;
 
-            // A CYCLE IS A SEQUENCE AND RUNS TO THE CLOCK. The smoke is three clips in a
-            // deliberate order -- idle_a, idle_b, idle_c -- and a rest inside that would be
-            // a man stopping halfway through raising a cigarette. It keeps going until
-            // SmokeSeconds is up, exactly as it always has.
-            if (_playing.Cycle.Length >= 2) return;
+            // A SMOKE RESTS BETWEEN DRAGS. The three clips are separate idles, each starting
+            // and ending at the base pose with a drag or a fidget in between -- so a gap
+            // between them is a man standing with the cigarette at his side, which is most of
+            // what smoking is. Played back to back he dragged as often as the clips allowed,
+            // and Michael asked for less on 2026-09-26. His arm comes down, the cigarette
+            // rides his wrist and keeps smouldering, and the next idle comes when
+            // SmokeBreakSeconds is up. A smoke is still TIMED by SmokeSeconds, not counted,
+            // and both the three-clip set and its one-clip fallback come through here --
+            // without this the fallback would have ended after two passes.
+            if (_item != null && _item.Smoke)
+            {
+                _restUntil = now + (int)(Math.Max(0f, _cfg.SmokeBreakSeconds) * 1000f);
+                _resting = true;
+                return;
+            }
 
-            // AND NEITHER DOES A SMOKE THAT FELL BACK TO ITS ONE-CLIP OPTION. The smoking
-            // set's second rung is a single base clip, and without this line a cigarette
-            // whose three-clip dictionary did not stream would quietly end after two passes
-            // instead of after SmokeSeconds. A smoke is timed, not counted.
-            if (_item != null && _item.Smoke) return;
+            // ANY OTHER CYCLE RUNS TO THE CLOCK, one clip straight after another. Nothing in
+            // the catalogue has one today.
+            if (_playing.Cycle.Length >= 2) return;
 
             // ONE CLIP IS A PASS, AND THERE ARE Bites OF THEM WITH A REST BETWEEN.
             _passes++;
