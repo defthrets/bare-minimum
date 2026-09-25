@@ -156,6 +156,16 @@ namespace BareMinimum.UI
 
                 var item = string.IsNullOrEmpty(id) || IsDope(_index) ? null : _menu.Find(id);
 
+                // HELD UP THE WAY IT IS EATEN, FIRST, so the numbers below know whether the
+                // clip is on him yet. See Pose.
+                Pose(item);
+
+                // THE HAND THE ANIMATION USES. Never set here before, so Peek's default of the
+                // right hand showed every item in the hand he does NOT eat with -- the fitting
+                // bench learned this the hard way and the pocket never did. See Peek.Lefty.
+                var anim = item == null ? null : _eating.AnimFor(item, false);
+                _peek.Lefty = anim != null && anim.LeftHanded;
+
                 _peek.Show(item == null ? "" : item.Prop);
                 _peek.Tick();
             }
@@ -264,6 +274,7 @@ namespace BareMinimum.UI
                 // that threw on a draw left the burger under the cursor welded to him for the
                 // session. See Shutdown.
                 try { _peek.Clear(); } catch { }
+                try { Unpose(); } catch { }
 
                 Log.Once("bag", "The pocket failed: " + ex.Message);
                 IsOpen = false;
@@ -301,6 +312,9 @@ namespace BareMinimum.UI
             // OUT OF HIS HAND WITH THE PANEL. It is attached, not given -- a burger left on
             // somebody after they shut their pocket is a burger they carry for the session.
             _peek.Clear();
+
+            // AND HIS ARM WITH IT. See Unpose.
+            Unpose();
 
             // The same 300ms hush the other menus use. A key held through a closing menu is a
             // human holding a key, and humans hold them for about that long.
@@ -524,52 +538,172 @@ namespace BareMinimum.UI
         /// on the first frame rather than the third, and that is the difference between right
         /// and nearly right.
         /// </summary>
-        /// <summary>How the thing under the cursor is turned. See Eating.SpinFor.</summary>
+        /// <summary>
+        /// How the thing under the cursor is turned, and where it sits: whatever a meal would
+        /// use, asked of the meal. See Eating.HeldAt.
+        ///
+        /// THIS USED TO BE A COPY, AND THE COPY HAD FALLEN BEHIND. It added up the kind's
+        /// default and the old nudges and had never heard of the fitting bench, so every model
+        /// Michael fitted sat right in his hand while he ate it and in the wrong spot while he
+        /// chose it. One set of rules now, in Eating, and this cannot drift from it again.
+        ///
+        /// RESTING UNLESS THE CLIP IS ON HIM. The fits were dialled with the clip playing and
+        /// are right while it holds him; for the frame or two before it lands, or if it will
+        /// not stream at all, his arm is down and the resting table is the one that applies --
+        /// which falls through to the same fits until somebody dials one.
+        /// </summary>
         private GTA.Math.Vector3 Turned()
         {
-            var item = Shown();
-            var it = _menu == null ? null : _menu.TurnFor(item, false);
-
-            if (it == null || _cfg == null) return GTA.Math.Vector3.Zero;
-
-            if (item != null && item.Smoke) return new GTA.Math.Vector3(it[0], it[1], it[2]);
-
-            var food = item != null && !item.Drink;
-            var mine = Mine(item);
-
-            return new GTA.Math.Vector3(
-                it[0] + (mine ? _cfg.TurnX : 0f) + (food ? _cfg.FoodSpinX : 0f),
-                it[1] + (mine ? _cfg.TurnY : 0f) + (food ? _cfg.FoodSpinY : 0f),
-                it[2] + (mine ? _cfg.TurnZ : 0f) + (food ? _cfg.FoodSpinZ : 0f));
+            return _eating.HeldTurn(Shown(), !_posed);
         }
 
-        /// <summary>Where the thing under the cursor sits in his hand. See Catalogue.HoldFor.</summary>
+        /// <summary>See Turned.</summary>
         private GTA.Math.Vector3 Where()
         {
-            var item = Shown();
-            var it = _menu == null ? null : _menu.HoldFor(item, false);
-
-            if (it == null || _cfg == null) return GTA.Math.Vector3.Zero;
-
-            // Locked, the same as Eating.SitsFor -- the nudge is for the things with a body
-            // to them, and a cigarette was right where it was.
-            if (item != null && item.Smoke) return new GTA.Math.Vector3(it[0], it[1], it[2]);
-
-            // AND ONLY THE KIND BEING TUNED, the same as Eating.SitsFor. Without this the
-            // preview was the one place the nudge still reached everything -- so tuning the
-            // food visibly moved the drinks in the pocket, which is exactly how it looks
-            // when something has gone wrong.
-            if (!Mine(item)) return new GTA.Math.Vector3(it[0], it[1], it[2]);
-
-            return new GTA.Math.Vector3(it[0] + _cfg.HoldX, it[1] + _cfg.HoldY, it[2] + _cfg.HoldZ);
+            return _eating.HeldAt(Shown(), !_posed);
         }
 
-        /// <summary>Whether the six nudges are pointed at this item's kind. See Settings.HoldWhat.</summary>
-        private bool Mine(Food.Item item)
-        {
-            if (item == null || item.Smoke) return false;
+        // ======================================================================
+        // Holding it up
+        // ======================================================================
 
-            return _cfg.HoldWhat == 1 ? !item.Drink : item.Drink;
+        /// <summary>The animation he is holding the thing up in, or null.</summary>
+        private AnimRef _pose;
+
+        /// <summary>Which clip of it: the first, which is the one the bench fits against.</summary>
+        private string _poseClip;
+
+        /// <summary>Whether that clip is actually on him this frame. See Turned.</summary>
+        private bool _posed;
+
+        /// <summary>When it may be asked for again, and how many times it has been.</summary>
+        private int _poseAt;
+        private int _poseTries;
+
+        /// <summary>
+        /// Holds the thing under the cursor up in the last frame of the clip it is eaten with.
+        ///
+        /// BECAUSE THE FITS ARE A FACT ABOUT THE CLIP. Every model was fitted with its clip
+        /// playing, and the clip does not only move his arm: it moves the prop bone in his
+        /// hand that the thing is attached to. With his arm at his side that bone is somewhere
+        /// else, and the same six numbers put the burger in the wrong spot on his hand.
+        ///
+        /// THE LAST FRAME, AND THE SAME ONE THE BREAK BETWEEN BITES HOLDS -- see
+        /// Eating._holds -- so choosing a thing and pausing over it look like one pose.
+        /// Played with HOLD_LAST_FRAME and put straight on the end, so he does not take a bite
+        /// of everything the cursor passes over.
+        ///
+        /// UPPER BODY AND SECONDARY, flag 50, the same as a meal: his legs stay his own and he
+        /// can walk with the pocket open exactly as before.
+        ///
+        /// NOT DURING A MEAL. The pocket can be opened while he is eating, and holding a clip
+        /// up then would take the meal's own animation off him.
+        /// </summary>
+        private void Pose(Item item)
+        {
+            AnimRef want = null;
+
+            if (item != null && !string.IsNullOrEmpty(item.Prop) && !_eating.Busy)
+            {
+                want = _eating.AnimFor(item, false);
+
+                // A scenario stands in when no dictionary exists, and it holds nothing up.
+                if (want != null && !want.Valid) want = null;
+            }
+
+            // A DIFFERENT CLIP LETS GO OF THE OLD ONE FIRST. Two things eaten with the same
+            // clip -- a burger, then a sandwich -- share it, and nothing is played again.
+            if (!ReferenceEquals(want, _pose)) Unpose();
+
+            _posed = false;
+
+            if (want == null) return;
+
+            var me = Game.Player.Character;
+            if (me == null || !me.Exists() || me.IsDead) return;
+
+            _pose = want;
+            _poseClip = want.Cycle.Length > 0 ? want.Cycle[0] : want.Clip;
+
+            // Asked for, never waited on: a spin here would stop the frame that loads it.
+            if (!GTA.Native.Function.Call<bool>(GTA.Native.Hash.HAS_ANIM_DICT_LOADED, want.Dict))
+            {
+                GTA.Native.Function.Call(GTA.Native.Hash.REQUEST_ANIM_DICT, want.Dict);
+                return;
+            }
+
+            _posed = GTA.Native.Function.Call<bool>(GTA.Native.Hash.IS_ENTITY_PLAYING_ANIM,
+                                                    me.Handle, want.Dict, _poseClip, 3);
+
+            if (!_posed)
+            {
+                // ONCE A SECOND AT MOST. The task takes a frame to land, and asking again on
+                // the frame in between would restart the blend it is in the middle of.
+                var now = Game.GameTime;
+                if (now < _poseAt) return;
+                _poseAt = now + 1000;
+
+                // SAID, IF THE GAME KEEPS TAKING IT OFF HIM. Once is the ordinary first ask;
+                // more than that is him being made to bite at nothing every second, and the
+                // log is the only place that will ever say why.
+                if (++_poseTries > 1)
+                {
+                    Log.Once("pocket-pose-again", "Pocket: " + want.Dict + " / " + _poseClip +
+                             " would not stay on him; asked for it again. If he bites at " +
+                             "nothing with the pocket open, this is why.");
+                }
+
+                GTA.Native.Function.Call(GTA.Native.Hash.TASK_PLAY_ANIM, me.Handle, want.Dict,
+                                         _poseClip, 4f, -4f, -1, 50, 0f, false, false, false);
+                return;
+            }
+
+            // ON THE END AND LEFT THERE, rather than played through from the start.
+            if (GTA.Native.Function.Call<float>(GTA.Native.Hash.GET_ENTITY_ANIM_CURRENT_TIME,
+                                                me.Handle, want.Dict, _poseClip) < 0.95f)
+            {
+                GTA.Native.Function.Call(GTA.Native.Hash.SET_ENTITY_ANIM_CURRENT_TIME,
+                                         me.Handle, want.Dict, _poseClip, 0.99f);
+            }
+        }
+
+        /// <summary>
+        /// Lets go of the clip the pocket was holding him in.
+        ///
+        /// NOT IF A MEAL HAS JUST TAKEN IT OVER. Eating from the pocket starts the meal and
+        /// then shuts the pocket, and the meal's clip is this same clip -- a stop by name here
+        /// would end his first bite before it began. The meal lets go of its own.
+        ///
+        /// A HELD CLIP IS NEVER LEFT ON HIM. It holds its last frame until somebody stops it,
+        /// so every way out of the pocket comes through here: shutting it, a meal, the panel
+        /// failing, and the mod being reloaded with it open.
+        /// </summary>
+        private void Unpose()
+        {
+            var had = _pose;
+            var clip = _poseClip;
+
+            _pose = null;
+            _poseClip = null;
+            _posed = false;
+            _poseAt = 0;
+            _poseTries = 0;
+
+            if (had == null || string.IsNullOrEmpty(clip) || _eating.Plays(had)) return;
+
+            try
+            {
+                var me = Game.Player.Character;
+
+                if (me != null && me.Exists())
+                {
+                    GTA.Native.Function.Call(GTA.Native.Hash.STOP_ANIM_TASK, me.Handle, had.Dict, clip, 3f);
+                }
+            }
+            catch
+            {
+                // Then it blends off the next time anything else plays.
+            }
         }
 
         /// <summary>The item under the cursor, or null for a drug -- which is not ours to place.</summary>
@@ -613,6 +747,9 @@ namespace BareMinimum.UI
             IsOpen = false;
 
             try { _peek.Clear(); }
+            catch { /* teardown */ }
+
+            try { Unpose(); }
             catch { /* teardown */ }
         }
 

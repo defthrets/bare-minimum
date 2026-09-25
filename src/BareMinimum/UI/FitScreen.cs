@@ -97,6 +97,10 @@ namespace BareMinimum.UI
         /// no clip at all: his arm is at his side and the model is on a hand bone in his idle
         /// pose. A cup dialled at his mouth can be through his thigh at his hip.
         ///
+        /// MOSTLY NOT NEEDED NOW. The break holds the clip's last frame, and so does the
+        /// pocket, so the eating numbers are what shows in both -- see Eating._holds. What is
+        /// left for this pose is a clip that will not stream, and the frame before one lands.
+        ///
         /// So the clip STOPS while this is 1, because fitting the resting pose against a
         /// running animation is the same mistake as fitting the eating pose without one.
         /// </summary>
@@ -796,9 +800,9 @@ namespace BareMinimum.UI
                 Left = "Pose",
                 Right = Poses[_pose],
                 Note = _pose == 1
-                    ? "His arm is DOWN and nothing is playing -- the pose it sits in during " +
-                      "the break between two bites, and before the first one. The clip is " +
-                      "stopped so you are fitting what you are actually looking at."
+                    ? "His arm is DOWN and nothing is playing. The break between bites and " +
+                      "the pocket both hold the eating clip now, so this is only for when no " +
+                      "clip can play at all. Most models never need it."
                     : "The clip it is eaten with, on a loop, which is the pose it is mostly " +
                       "seen in. Left or right for the resting pose instead.",
                 Tag = "pose"

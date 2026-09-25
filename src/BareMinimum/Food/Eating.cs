@@ -46,6 +46,9 @@ namespace BareMinimum.Food
         /// <summary>How long one eat or drink stretch of a combo lasts, in milliseconds.</summary>
         private const int PhaseMs = 7000;
 
+        /// <summary>How long a new pass is left alone before anybody asks whether it has ended. See Puff.</summary>
+        private const int FreshMs = 500;
+
         private Item _item;
         private Prop _held;
         private int _finishAt;
@@ -79,8 +82,13 @@ namespace BareMinimum.Food
         /// in his idle pose rather than being held up to his mouth.
         ///
         /// WHICH OF THE TWO FITS APPLIES. See Settings.Rest: a model fitted against the
-        /// eating clip can be through his thigh once his arm is down, and the break between
-        /// two bites is a second and a bit of exactly that.
+        /// eating clip is in the wrong spot on his hand once no clip is on him, because the
+        /// clip moves the very bone the thing is attached to.
+        ///
+        /// ALMOST NEVER TRUE ANY MORE. The break between two bites used to be the whole of
+        /// it, and the break now holds the clip's last frame instead -- see _holds. What is
+        /// left is the frame before the first clip lands, and a scenario, which holds
+        /// nothing.
         ///
         /// NOT SIMPLY !_animStarted, WHICH IS TRUE FOR A FRAME BETWEEN THE SMOKE'S CLIPS. The
         /// smoke is three clips in a deliberate order with no rest in it -- see Puff, which
@@ -89,6 +97,26 @@ namespace BareMinimum.Food
         /// where the REST actually begins.
         /// </summary>
         private bool _resting;
+
+        /// <summary>
+        /// Whether the clip on him was told to HOLD ITS LAST FRAME rather than end.
+        ///
+        /// THE BREAK BETWEEN BITES IS THE CLIP, STOOD STILL. Every model was fitted with the
+        /// clip playing, and the clip does not only move his arm: it moves the prop bone in
+        /// his hand that the thing is attached to. So when a pass ended and his arm fell to
+        /// his side, that bone went back to where it sits in his idle pose and the burger was
+        /// left in the wrong spot on his hand for the whole of the break -- reported as the
+        /// animation being perfect and the small break not. Holding the last frame keeps the
+        /// bone where the clip put it, which is the pose the numbers were dialled in, so they
+        /// are right for the break without one of them changing or a second set being dialled.
+        ///
+        /// AND A HELD CLIP HAS TO BE LET GO OF. One that ends on its own needs no stop; a held
+        /// one stays on him until somebody stops it, which is why Cleanup reads this as well
+        /// as _animStarted -- a meal that ends or is put down in the middle of a break has
+        /// _animStarted false and a frozen arm to release. The LAST pass is not held, so a
+        /// meal still finishes the way it always has: the clip plays out and lets go by itself.
+        /// </summary>
+        private bool _holds;
 
         /// <summary>The weapon he had when this started. See Interrupted.</summary>
         private WeaponHash _armed = WeaponHash.Unarmed;
@@ -695,15 +723,13 @@ namespace BareMinimum.Food
             if (me == null || !me.Exists() || item == null) return;
             if (_held == null || !_held.Exists()) return;
 
-            var anim = item.Smoke ? _menu.Smoke
-                     : (item.Drink || drinking) ? _menu.Sip
-                     : (item.Eat ?? _menu.Eat);
+            var anim = AnimFor(item, drinking);
 
             var bone = Function.Call<int>(Hash.GET_PED_BONE_INDEX, me.Handle,
                                           anim.LeftHanded ? LeftHandBone : RightHandBone);
 
-            var spin = SpinFor(item, drinking);
-            var sits = SitsFor(item, drinking);
+            var spin = SpinFor(item, drinking, _resting);
+            var sits = SitsFor(item, drinking, _resting);
 
             Eased(ref sits, ref spin);
 
@@ -787,12 +813,12 @@ namespace BareMinimum.Food
         /// into place on the menu rather than guessing at a json file. Those are ADDED, so
         /// nought on the menu leaves every item exactly where the catalogue put it.
         /// </summary>
-        private Vector3 SitsFor(Item item, bool drinking)
+        private Vector3 SitsFor(Item item, bool drinking, bool resting)
         {
             // THE MODEL'S OWN ANSWER FIRST, if anybody has fitted this one. See Settings.Fit:
             // a kind default is a guess that has to serve twelve different models, and this
             // is the number somebody dialled with THIS model in his hand.
-            var fit = Fitted(item);
+            var fit = Fitted(item, resting);
             if (fit != null) return new Vector3(fit[0], fit[1], fit[2]);
 
             var it = _menu.HoldFor(item, drinking);
@@ -814,19 +840,42 @@ namespace BareMinimum.Food
         /// <summary>
         /// The six this model is fitted with right now, or null if nobody has fitted it.
         ///
-        /// THE RESTING TABLE ONLY WHILE HE IS RESTING, and it falls through to the eating one
-        /// when a model has no resting line -- which is every model until somebody dials one,
-        /// so this changes nothing for anybody who has not asked for it.
+        /// THE RESTING TABLE ONLY WHILE NO CLIP IS ON HIM, and it falls through to the eating
+        /// one when a model has no resting line -- which is every model until somebody dials
+        /// one, so this changes nothing for anybody who has not asked for it.
+        ///
+        /// WHETHER HE IS RESTING IS THE CALLER'S TO SAY. For a meal it is _resting; for the
+        /// pocket it is whether the clip it holds him in has landed yet. See UI.Bag.Turned.
         /// </summary>
-        private float[] Fitted(Item item)
+        private float[] Fitted(Item item, bool resting)
         {
             if (item == null || string.IsNullOrEmpty(item.Prop)) return null;
 
             float[] six;
 
-            if (_resting && _cfg.Rest.TryGetValue(item.Prop, out six)) return six;
+            if (resting && _cfg.Rest.TryGetValue(item.Prop, out six)) return six;
 
             return _cfg.Fit.TryGetValue(item.Prop, out six) ? six : null;
+        }
+
+        /// <summary>
+        /// Where the pocket puts this thing in his hand, and how it is turned: the same six a
+        /// meal uses, worked out by the same code.
+        ///
+        /// THE POCKET HAD ITS OWN COPY OF THIS AND IT HAD FALLEN BEHIND. It still added up the
+        /// kind's default and the old nudges and had never heard of the fitting bench -- so
+        /// every model Michael fitted sat right while he ate it and wrong while he chose it.
+        /// One copy now, here.
+        /// </summary>
+        public Vector3 HeldAt(Item item, bool resting)
+        {
+            return SitsFor(item, false, resting);
+        }
+
+        /// <summary>See HeldAt.</summary>
+        public Vector3 HeldTurn(Item item, bool resting)
+        {
+            return SpinFor(item, false, resting);
         }
 
         /// <summary>Whether the six nudges are pointed at this item's kind. See Settings.HoldWhat.</summary>
@@ -848,9 +897,9 @@ namespace BareMinimum.Food
         /// live nudge is the one on the menu, for finding a number with the thing in his
         /// hand. A smoke takes the catalogue's and nothing else -- see SitsFor for why.
         /// </summary>
-        private Vector3 SpinFor(Item item, bool drinking)
+        private Vector3 SpinFor(Item item, bool drinking, bool resting)
         {
-            var fit = Fitted(item);
+            var fit = Fitted(item, resting);
             if (fit != null) return new Vector3(fit[3], fit[4], fit[5]);
 
 
@@ -872,6 +921,46 @@ namespace BareMinimum.Food
         // ======================================================================
 
         /// <summary>
+        /// The animation this item is had with, checked against this build.
+        ///
+        /// ONE ANSWER FOR EVERYBODY WHO ASKS. The meal plays it, Seat reads its hand off it,
+        /// and the pocket holds the thing up in its last frame. Each of them used to work it
+        /// out for itself, and the pocket never did at all -- which is how it came to show
+        /// everything in his right hand while he ate with his left.
+        ///
+        /// CHECKED BEFORE ANYTHING IS ASKED OF IT. A dictionary that is not here never loads,
+        /// so without this a caller requests it forever and plays nothing -- which is exactly
+        /// how the smoking animation shipped: one guessed name, and a single log line saying
+        /// it "was not loaded YET" for good. Resolve does the work once and is free after.
+        /// </summary>
+        public AnimRef AnimFor(Item item, bool drinking)
+        {
+            if (item == null) return _menu.Eat;
+
+            var anim = item.Smoke ? _menu.Smoke
+                     : (item.Drink || drinking) ? _menu.Sip
+                     : (item.Eat ?? _menu.Eat);
+
+            anim.Resolve(item.Smoke ? "Smoking animation"
+                                    : (item.Drink || drinking) ? "Drinking animation"
+                                    : "Eating animation");
+
+            return anim;
+        }
+
+        /// <summary>
+        /// Whether a meal is on and playing this animation.
+        ///
+        /// The pocket asks before it lets go of the clip it was holding him in: eating from
+        /// the pocket starts the meal and THEN shuts the pocket, and the meal's clip is that
+        /// same clip, so a stop by name there would stop his first bite before it began.
+        /// </summary>
+        public bool Plays(AnimRef anim)
+        {
+            return _item != null && anim != null && ReferenceEquals(_playing, anim);
+        }
+
+        /// <summary>
         /// Plays the eat or drink loop, if the dictionary will stream.
         ///
         /// FLAG 49 = LOOPING (1) + UPPERBODY (16) + SECONDARY (32).
@@ -889,19 +978,10 @@ namespace BareMinimum.Food
         private void Animate(Ped me, Item item, bool drinking)
         {
             // A combo drinks from a cup on its drink stretch; a plain drink always drinks.
-            var anim = item.Smoke ? _menu.Smoke
-                     : (item.Drink || drinking) ? _menu.Sip
-                     : (item.Eat ?? _menu.Eat);
+            // Checked against this build on the way through -- see AnimFor.
+            var anim = AnimFor(item, drinking);
 
             _playing = anim;
-
-            // Checked against this build before anything is asked of it. A dictionary that
-            // is not here never loads, so without this the code below requests it forever and
-            // plays nothing -- which is exactly how the smoking animation shipped: one
-            // guessed name, and a single log line saying it "was not loaded YET" for good.
-            anim.Resolve(item.Smoke ? "Smoking animation"
-                                    : (item.Drink || drinking) ? "Drinking animation"
-                                    : "Eating animation");
 
             if (!anim.Usable) return;
 
@@ -944,12 +1024,22 @@ namespace BareMinimum.Food
                 //
                 // The smoke is three clips in a deliberate order and reaches the same code
                 // by the same route: each has to END before the next can start.
+                //
+                // AND A PASS WITH ANOTHER TO COME HOLDS ITS LAST FRAME: flag 50, which is 48
+                // plus HOLD_LAST_FRAME. See _holds -- the break is the clip stood still rather
+                // than his arm dropped, because the clip moves the bone the thing is fitted
+                // to. The last pass and the smoke stay on 48, so a meal still ends by the clip
+                // letting go on its own.
+                var hold = !item.Smoke && anim.Cycle.Length < 2 &&
+                           _passes + 1 < Math.Max(1, _cfg.Bites);
+
                 Function.Call(Hash.TASK_PLAY_ANIM, me.Handle, anim.Dict, clip,
-                              4f, -4f, -1, 48,
+                              4f, -4f, -1, hold ? 50 : 48,
                               0f, false, false, false);
 
                 _clipAt = Game.GameTime;
                 _animStarted = true;
+                _holds = hold;
                 _resting = false;
             }
             catch (Exception ex)
@@ -981,6 +1071,15 @@ namespace BareMinimum.Food
             // and never ended. They are played one pass at a time instead, so this is what
             // spaces them: see Settings.Bites.
             if (_playing == null) return;
+
+            // NOT IN THE FIRST HALF SECOND OF A PASS. The pass before it is still on him, HELD
+            // ON ITS LAST FRAME, while the new one blends in over it -- and the phase is asked
+            // for by dictionary and clip name, which are the same for both. Asked too early it
+            // can read the old one, sat at the end, and call a pass that has only just begun
+            // finished. The pocket's held clip is the same clip again when a meal starts from
+            // it. No clip in the catalogue is anywhere near this short; the blend is a quarter
+            // of a second.
+            if (now - _clipAt < FreshMs) return;
 
             var me = Game.Player.Character;
             if (me == null || !me.Exists() || me.IsDead) return;
@@ -1038,7 +1137,12 @@ namespace BareMinimum.Food
             if (_passes < Math.Max(1, _cfg.Bites))
             {
                 _restUntil = now + (int)(Math.Max(0f, _cfg.BreakSeconds) * 1000f);
-                _resting = true;
+
+                // HOLDING IT, NOT RESTING. The pass that just ended was played to hold its last
+                // frame, so the clip is still on him and the eating numbers are still the right
+                // ones -- see _holds. Only a pass that could not hold, which is a scenario
+                // standing in for a missing clip, rests.
+                _resting = !_holds;
                 return;
             }
 
@@ -1076,6 +1180,7 @@ namespace BareMinimum.Food
 
                 _animStarted = true;
                 _scenarioStarted = true;
+                _holds = false;
                 _resting = false;
 
                 Log.Once("anim-scenario-" + anim.Scenario,
@@ -1097,7 +1202,11 @@ namespace BareMinimum.Food
 
         private void Cleanup()
         {
-            if (_animStarted)
+            // OR A CLIP IS BEING HELD. In the break between two passes _animStarted is false
+            // and the last pass's final frame is still on him -- a meal that ends on the clock
+            // there, or is put down because he drew, would leave his arm frozen in it for good
+            // if this only looked at _animStarted. See _holds.
+            if (_animStarted || _holds)
             {
                 try
                 {
@@ -1152,6 +1261,7 @@ namespace BareMinimum.Food
                 }
 
                 _animStarted = false;
+                _holds = false;
                 _playing = null;
                 _scenarioStarted = false;
             }

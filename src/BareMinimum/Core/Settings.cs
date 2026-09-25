@@ -1790,6 +1790,10 @@ namespace BareMinimum.Core
         /// beat between them, which is not how anybody eats. Two passes with a pause in the
         /// middle, holding the thing, is the shape of taking a bite and then taking another.
         ///
+        /// THE PAUSE IS THE CLIP HELD ON ITS LAST FRAME, not his arm dropped to his side. The
+        /// clip moves the bone the thing is fitted to, and dropping out of it for the pause put
+        /// every fitted model in the wrong spot on his hand for the length of it.
+        ///
         /// THE MEAL ENDS WHEN THE LAST PASS DOES. That is what makes the animation and the
         /// duration the same thing rather than two numbers that have to be kept in step --
         /// the bug where a two second clip sat inside a six second drink and left him stood
@@ -1983,6 +1987,12 @@ namespace BareMinimum.Core
         /// EMPTY IS NOT A PROBLEM. A model with no line here uses its eating numbers, which
         /// is exactly what every model did before this table existed -- so nothing moves for
         /// anybody until they dial one in. The bench fits either; see UI.FitScreen's pose row.
+        ///
+        /// AND ALMOST NOTHING USES IT NOW. The break was the whole reason for this table, and
+        /// it holds the clip's last frame instead -- the clip moves the very bone the thing is
+        /// attached to, so standing in it keeps the eating numbers right without a second set.
+        /// The pocket holds the same frame. What is left is a clip that will not stream. See
+        /// Food.Eating._holds.
         /// </summary>
         public readonly System.Collections.Generic.Dictionary<string, float[]> Rest =
             new System.Collections.Generic.Dictionary<string, float[]>(StringComparer.OrdinalIgnoreCase);
