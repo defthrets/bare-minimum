@@ -999,6 +999,11 @@ namespace BareMinimum.Food
         /// writes the gap down in millimetres and degrees. A few of either is the frame's
         /// blend. Tens of degrees is this code, and the line says so.
         /// </summary>
+        private static string Say(Vector3 v)
+        {
+            return "(" + v.X.ToString("0.###") + ", " + v.Y.ToString("0.###") + ", " + v.Z.ToString("0.###") + ")";
+        }
+
         private void Check(Ped me, Prop prop, AnimRef anim, Palmed palm)
         {
             if (palm == null || palm.Checked) return;
@@ -1023,6 +1028,23 @@ namespace BareMinimum.Food
                 Log.Info("Palm: " + palm.Model + " off the wrist is " + mm.ToString("0") +
                          " mm and " + deg.ToString("0.#") + " deg from where the clip had it" +
                          (deg > 8.0 || mm > 40.0 ? " -- THAT IS WRONG. Paste this line." : "."));
+
+                // THE RAW NUMBERS, ONCE, because the first run of the line above said
+                // kilometres with nought degrees -- the rotation composes and the translation
+                // does not, which is a question about where SHVDN keeps a bone matrix's
+                // translation. These settle it from the log without a debugger.
+                var rm = wr.RelativeMatrix;
+                var pm = me.Matrix;
+
+                Log.Info("Palm raw: prop " + Say(prop.Position) + " wrist " + Say(wr.Position) +
+                         " ped " + Say(me.Position) + " | prop-wrist " +
+                         (prop.Position.DistanceTo(wr.Position) * 1000f).ToString("0") + " mm" +
+                         " | wristRel row4 " + Say(new Vector3(rm.M41, rm.M42, rm.M43)) +
+                         " col4 " + Say(new Vector3(rm.M14, rm.M24, rm.M34)) +
+                         " | pedMatrix row4 " + Say(new Vector3(pm.M41, pm.M42, pm.M43)) +
+                         " col4 " + Say(new Vector3(pm.M14, pm.M24, pm.M34)) +
+                         " | Rel t " + Say(new Vector3(palm.Rel.M41, palm.Rel.M42, palm.Rel.M43)) +
+                         " | want row4 " + Say(new Vector3(want.M41, want.M42, want.M43)));
             }
             catch
             {
