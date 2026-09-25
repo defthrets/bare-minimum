@@ -791,7 +791,7 @@ namespace BareMinimum.Food
 
                 if (ph == null || wr == null || ph.Index < 0 || wr.Index < 0) return;
 
-                var rel = ph.RelativeMatrix * Matrix.Invert(wr.RelativeMatrix);
+                var rel = Clean(ph.RelativeMatrix) * Matrix.Invert(Clean(wr.RelativeMatrix));
                 var q = Quaternion.RotationMatrix(rel);
 
                 var key = GripKey(anim);
@@ -826,6 +826,23 @@ namespace BareMinimum.Food
         {
             var clip = anim.Cycle != null && anim.Cycle.Length > 0 ? anim.Cycle[0] : anim.Clip;
             return anim.Dict + "/" + clip;
+        }
+
+        /// <summary>
+        /// A matrix off the game with its unused column made honest.
+        ///
+        /// THE GAME KEEPS 3x4 MATRICES AND THE FOURTH COLUMN IS WHATEVER WAS IN MEMORY. SHVDN
+        /// hands them over as 4x4 and does not clear it: the first raw line this file wrote
+        /// showed a wrist matrix with (-3.6, -2.9, 1.9) where an affine matrix has (0, 0, 0),
+        /// and the ped's own with (0, 1, 1). Multiplied, that column spreads into every row of
+        /// the product -- the palm check came out in kilometres while the rotation, which
+        /// SHVDN happens to read cleanly, came out right. So every matrix read off an entity
+        /// or a bone comes through here before it meets another one.
+        /// </summary>
+        private static Matrix Clean(Matrix m)
+        {
+            m.M14 = 0f; m.M24 = 0f; m.M34 = 0f; m.M44 = 1f;
+            return m;
         }
 
         /// <summary>Two millimetres or a degree, so a hand that trembles does not rewrite the ini.</summary>
@@ -954,8 +971,8 @@ namespace BareMinimum.Food
                 // The fit as a matrix: its angles as the game reads them, its offset as the row.
                 Function.Call(Hash.SET_ENTITY_ROTATION, prop.Handle, spin.X, spin.Y, spin.Z, 2, true);
 
-                var fit = prop.Matrix;
-                fit.M41 = sits.X; fit.M42 = sits.Y; fit.M43 = sits.Z; fit.M44 = 1f;
+                var fit = Clean(prop.Matrix);
+                fit.M41 = sits.X; fit.M42 = sits.Y; fit.M43 = sits.Z;
 
                 var g = Matrix.RotationQuaternion(new Quaternion(grip[3], grip[4], grip[5], grip[6]));
                 g.M41 = grip[0]; g.M42 = grip[1]; g.M43 = grip[2]; g.M44 = 1f;
@@ -1014,8 +1031,8 @@ namespace BareMinimum.Food
                 var wr = me.Bones[anim.LeftHanded ? Bone.SkelLeftHand : Bone.SkelRightHand];
                 if (wr == null || wr.Index < 0) return;
 
-                var want = palm.Rel * (wr.RelativeMatrix * me.Matrix);
-                var got = prop.Matrix;
+                var want = palm.Rel * (Clean(wr.RelativeMatrix) * Clean(me.Matrix));
+                var got = Clean(prop.Matrix);
 
                 var dx = got.M41 - want.M41; var dy = got.M42 - want.M42; var dz = got.M43 - want.M43;
                 var mm = Math.Sqrt(dx * dx + dy * dy + dz * dz) * 1000.0;
