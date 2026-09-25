@@ -373,6 +373,14 @@ namespace BareMinimum.Food
                     // AND PUT BACK WHERE IT BELONGS EVERY FRAME, so the three rows on the
                     // menu move the thing that is already in his hand. See Seat.
                     Seat(Game.Player.Character, _item, _drinking);
+
+                    // AND A CIGARETTE SMOULDERS AT THE TIP the whole time it is there. Exhale
+                    // is the lungful on the beat; this is the wisp between them. See Smoulder.
+                    if (_cfg.Puffs && _item.Smoke)
+                    {
+                        Smoulder.Update(Game.Player.Character, _held,
+                                        AnimFor(_item, _drinking).LeftHanded, _item.Prop);
+                    }
                 }
 
                 // Halfway through a stretch, put down the sandwich and pick up the cup, or
@@ -1612,6 +1620,10 @@ namespace BareMinimum.Food
         /// <summary>Removes whatever is in the hand. Used mid-meal by Swap as well as at the end.</summary>
         private void DropProp()
         {
+            // PUT OUT FIRST. The wisp is looped on the prop, and a prop deleted under a
+            // looped effect can leave the effect hanging where the hand was.
+            Smoulder.Stop();
+
             if (_held == null) return;
 
             try

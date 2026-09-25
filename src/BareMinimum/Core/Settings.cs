@@ -1760,14 +1760,16 @@ namespace BareMinimum.Core
         public float Longer = 2f;
 
         /// <summary>
-        /// WHETHER HE BREATHES IT OUT. One small plume of smoke out of his face on the beat
-        /// the animation lowers his hand, once per drag. See Food.Exhale.
+        /// WHETHER A SMOKE SMOKES. Two effects, both the game's own: the thin wisp off the
+        /// lit end the whole time the cigarette is in his hand -- see Food.Smoulder -- and the
+        /// lungful out of his face on the beat the animation lowers it, once per drag -- see
+        /// Food.Exhale. The ambient smokers have both, and a man with neither is a man
+        /// holding a cigarette.
         ///
-        /// A switch because the particle it uses is the one thing in this mod that could not
-        /// be checked against a list before it was written down -- nothing on this machine
-        /// dumps the particle library the way Menyoo dumps the animations -- so it is asked
-        /// for, verified, and if somebody's install renders it as something ridiculous this
-        /// is how they turn it off without losing the animation with it.
+        /// One switch for the pair. It exists because a particle name the game does not have
+        /// is refused in silence, and a wrong one plays as something else -- the first exhale
+        /// shipped as a fire extinguisher -- so if somebody's install renders either as a
+        /// thing that is plainly not smoke, this turns them off without losing the animation.
         /// </summary>
         public bool Puffs = true;
 
