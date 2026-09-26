@@ -111,6 +111,12 @@ namespace BareMinimum.Food
         /// </summary>
         private const int HandoffMs = 900;
 
+        /// <summary>
+        /// The longest one pass is allowed before it is called finished anyway, for a clip
+        /// whose phase never moves. See Puff; and Animate, which makes room for it.
+        /// </summary>
+        private const int PassMaxMs = 5000;
+
         /// <summary>The weapon he had when this started. See Interrupted.</summary>
         private WeaponHash _armed = WeaponHash.Unarmed;
 
@@ -1492,6 +1498,20 @@ namespace BareMinimum.Food
 
                 // A NEW PASS STARTS ON THE WRIST and is handed over once it has hold. See Handed.
                 _handed = false;
+
+                // AND THE MEAL IS AS LONG AS ITS PASSES, not as its catalogue seconds. A drink's
+                // seconds are shorter than a meal's, and the clock was ending the Raine Water
+                // six seconds in, halfway through its second sip with the bottle at his mouth --
+                // so no third sip and no drop from his side, while a burger's longer seconds
+                // happened to fit all three. Each pass that really plays pushes the deadline past
+                // the longest it can take plus the rest after it, so the clock can no longer cut
+                // one short; the last pass sets the real end in Puff. The seconds still end a
+                // meal whose clip never plays at all, and a smoke is timed by SmokeSeconds.
+                if (!item.Smoke)
+                {
+                    var room = _clipAt + PassMaxMs + (int)(Math.Max(0f, _cfg.BreakSeconds) * 1000f) + 500;
+                    if (_finishAt < room) _finishAt = room;
+                }
             }
             catch (Exception ex)
             {
@@ -1526,7 +1546,7 @@ namespace BareMinimum.Food
             var me = Game.Player.Character;
             if (me == null || !me.Exists() || me.IsDead) return;
 
-            var done = now - _clipAt > 5000;
+            var done = now - _clipAt > PassMaxMs;
 
             if (!done)
             {

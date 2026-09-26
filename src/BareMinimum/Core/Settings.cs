@@ -1812,7 +1812,8 @@ namespace BareMinimum.Core
         /// dropped from his side, not from his mouth. That is what makes the animation and the
         /// duration the same thing rather than two numbers that have to be kept in step --
         /// the bug where a two second clip sat inside a six second drink and left him stood
-        /// there holding a can. Seconds is still read and is still the backstop.
+        /// there holding a can. An item's Seconds only ends a meal whose clip never plays; while
+        /// a clip does, every pass gets to finish, so a short drink sips as often as a burger bites.
         ///
         /// Smoking is timed rather than counted -- see SmokeSeconds -- and rests on its own
         /// number between drags, SmokeBreakSeconds.
