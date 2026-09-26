@@ -113,6 +113,88 @@ namespace BareMinimum.Venues
         };
 
         /// <summary>
+        /// Couches, sofas and loungers: a decent sleep, not a bed. See Settings.CouchHours.
+        ///
+        /// ALL THE GAME'S OWN, checked against the two lists like the beds -- the story's
+        /// houses, the Online apartments, yachts, offices and clubhouses, and the patio and
+        /// deck loungers. A couch dumped in the street is not on here; it is on Rough.
+        /// </summary>
+        private static readonly string[] Couches =
+        {
+            "v_res_tt_sofa", "v_res_fh_sofa", "v_res_m_h_sofa", "v_res_m_h_sofa_sml",
+            "v_res_mp_sofa", "v_res_d_sofa", "v_res_j_sofa", "v_res_r_sofa",
+            "v_res_tre_sofa", "v_res_tre_sofa_s", "v_res_tre_sofa_mess_a", "v_res_tre_sofa_mess_b",
+            "v_res_tre_sofa_mess_c", "v_tre_sofa_mess_a_s", "v_tre_sofa_mess_b_s", "v_tre_sofa_mess_c_s",
+            "v_ilev_m_sofa", "v_med_p_sofa", "p_v_med_p_sofa_s", "p_lev_sofa_s",
+            "p_res_sofa_l_s", "v_16_v_sofa", "v_16_study_sofa", "v_16_low_lng_mesh_sofa1",
+            "v_16_low_lng_mesh_sofa2", "v_24_lgb_mesh_sofa", "v_club_officesofa", "prop_couch_01",
+            "prop_couch_03", "prop_couch_04", "prop_couch_lg_02", "prop_couch_lg_05",
+            "prop_couch_lg_06", "prop_couch_lg_07", "prop_couch_lg_08", "prop_couch_sm1_07",
+            "prop_couch_sm2_07", "prop_couch_sm_02", "prop_couch_sm_05", "prop_couch_sm_06",
+            "prop_couch_sm_07", "prop_t_sofa", "prop_t_sofa_02", "prop_yaught_sofa_01",
+            "p_yacht_sofa_01_s", "apa_mp_h_stn_sofa2seat_02", "apa_mp_h_stn_sofacorn_01", "apa_mp_h_stn_sofacorn_05",
+            "apa_mp_h_stn_sofacorn_06", "apa_mp_h_stn_sofacorn_07", "apa_mp_h_stn_sofacorn_08", "apa_mp_h_stn_sofacorn_09",
+            "apa_mp_h_stn_sofacorn_10", "apa_mp_h_yacht_sofa_01", "apa_mp_h_yacht_sofa_02", "h4_mp_h_yacht_sofa_01",
+            "h4_mp_h_yacht_sofa_02", "sf_mp_h_yacht_sofa_01", "sf_mp_h_yacht_sofa_02", "sum_mp_h_yacht_sofa_01",
+            "sum_mp_h_yacht_sofa_02", "hei_heist_stn_sofa2seat_02", "hei_heist_stn_sofa2seat_03", "hei_heist_stn_sofa2seat_06",
+            "hei_heist_stn_sofa3seat_01", "hei_heist_stn_sofa3seat_02", "hei_heist_stn_sofa3seat_06", "hei_heist_stn_sofacorn_05",
+            "hei_heist_stn_sofacorn_06", "ex_mp_h_off_sofa_003", "ex_mp_h_off_sofa_01", "ex_mp_h_off_sofa_02",
+            "bkr_prop_clubhouse_sofa_01a", "imp_prop_impexp_sofabed_01a", "h4_prop_h4_couch_01a", "sf_prop_sf_sofa_chefield_01a",
+            "sf_prop_sf_sofa_chefield_02a", "sf_prop_sf_sofa_studio_01a", "xm_lab_sofa_01", "xm_lab_sofa_02",
+            "xm3_int3_carware_basic_sofa", "m23_2_int4_m232_sofa_01", "m24_1_prop_m41_sofa_01a", "m25_1_prop_m51_sofa_01a",
+            "m25_1_prop_m51_couchlarge_01a", "m25_1_prop_m51_couchlarge_02a", "m25_1_prop_m51_couchsmall_01a", "m25_1_prop_m51_couchsmall_02a",
+            "m25_1_int_02_03_heli_sofa", "m25_1_int_02_03_smoke_sofa", "m25_1_int_04_low_lng_mesh_sofa1", "m25_1_int_04_low_lng_mesh_sofa2",
+            "m25_2_int_01_cine_sofas", "m25_2_int_01_gr_sofa_01", "m25_2_prop_m52_c_sofa_01", "m25_2_prop_m52_l_sofa_01",
+            "m25_2_prop_m52_r_sofa_01", "m25_2_prop_m52_sofa_01a", "m25_2_prop_m52_sofa_corner_01a", "m25_2_prop_m52_sofa_round_01a",
+            "m25_2_prop_m52_sofa_small_01a", "m26_1_int_01_sofa_001", "prop_patio_lounger1", "prop_patio_lounger1b",
+            "prop_patio_lounger_2", "prop_patio_lounger_3", "p_patio_lounger1_s", "prop_yacht_lounger",
+            "hei_prop_yah_lounger", "gr_dlc_gr_yacht_props_lounger", "m24_1_prop_m24_1_carrier_yah_lounger", "m24_1_prop_m41_lounger_01a"
+        };
+
+        /// <summary>
+        /// Sleeping rough: park, bus-stop and hospital benches, tents, homeless shelters, the
+        /// mattresses and sleeping bags on the ground, and the couches dumped outside. See
+        /// Settings.RoughHours.
+        ///
+        /// BENCHES YOU WOULD LIE ON, NOT BENCHES YOU WORK AT. The game's lists hold sixty-odd
+        /// names with "bench" in them and a good share are workbenches, grinders, a gym bench
+        /// and a piano stool. Those are left out, as are the hobo stoves and seat that sit
+        /// beside the shelters, and the level-of-detail and collision copies of all of it.
+        /// </summary>
+        private static readonly string[] Rough =
+        {
+            "prop_bench_01a", "prop_bench_01b", "prop_bench_01c", "prop_bench_02",
+            "prop_bench_03", "prop_bench_04", "prop_bench_05", "prop_bench_06",
+            "prop_bench_07", "prop_bench_08", "prop_bench_09", "prop_bench_10",
+            "prop_bench_11", "prop_ld_bench01", "prop_wait_bench_01", "prop_air_bench_01",
+            "prop_air_bench_02", "prop_snow_bench_01", "prop_byard_bench01", "prop_byard_bench02",
+            "prop_byard_benchset", "prop_fib_3b_bench", "prop_pris_bench_01", "v_ilev_ph_bench",
+            "v_med_bench1", "v_med_bench2", "v_med_benchcentr", "v_med_benchset1",
+            "hei_prop_hei_med_benchset1", "v_med_cor_wheelbench", "v_res_fh_benchlong", "v_res_fh_benchshort",
+            "hei_heist_stn_benchshort", "v_16_shitbench", "reh_int3_officebench", "xm3_prop_xm3_bench_03b",
+            "xm3_prop_xm3_bench_04b", "m24_1_int_01_m241_ent_bench", "m24_2_int_01_bench_01b", "m25_2_prop_m52_c_bench_01",
+            "m25_2_prop_m52_c_bench_02", "m25_2_prop_m52_l_bench_01", "m25_2_prop_m52_l_bench_02", "m25_2_prop_m52_r_bench_01",
+            "m25_2_prop_m52_r_bench_02", "prop_skid_tent_01", "prop_skid_tent_01b", "prop_skid_tent_03",
+            "prop_skid_tent_cloth", "m23_2_prop_m32_tent_01a", "xm3_prop_xm3_tent_01a", "ba_prop_battle_tent_01",
+            "ba_prop_battle_tent_02", "prop_homeles_shelter_01", "prop_homeles_shelter_02", "prop_homeless_matress_01",
+            "prop_homeless_matress_02", "prop_rub_matress_01", "prop_rub_matress_02", "prop_rub_matress_03",
+            "prop_rub_matress_04", "xm3_prop_xm3_rub_matress_01a", "v_med_mattress", "prop_skid_sleepbag_1",
+            "m23_2_prop_m32_sleepbag_01a", "prop_rub_couch01", "prop_rub_couch02", "prop_rub_couch03",
+            "prop_rub_couch04", "miss_rub_couch_01", "prop_ld_farm_couch01", "prop_ld_farm_couch02"
+        };
+
+        /// <summary>What a found thing is, which decides how good a night it is.</summary>
+        public enum Kind
+        {
+            Bed,
+            Couch,
+            Rough
+        }
+
+        /// <summary>The kind of each entry in _hashes, in the same order.</summary>
+        private Kind[] _kinds;
+
+        /// <summary>
         /// The settings, for the one thing this class asks them: the player's own extra bed
         /// model names. The same arrangement as Fridges, for the same reason -- a list in a
         /// dll cannot be complete, and a bed from a mod this one has never heard of should
@@ -143,6 +225,7 @@ namespace BareMinimum.Venues
             if (_hashes != null) return _hashes;
 
             var good = new List<int>();
+            var kinds = new List<Kind>();
             var missing = new List<string>();
 
             // THE PLAYER'S OWN NAMES ON TOP OF THE LIST. See Settings.BedExtraModels: a bed
@@ -160,8 +243,18 @@ namespace BareMinimum.Venues
                 wanted.Add(name);
             }
 
-            foreach (var name in wanted)
+            // THE THREE LISTS IN ONE PASS, each name carrying its kind. Beds first, so the
+            // player's own ExtraModels are beds, which is what that key has always meant.
+            var all = new List<KeyValuePair<string, Kind>>();
+
+            foreach (var name in wanted) all.Add(new KeyValuePair<string, Kind>(name, Kind.Bed));
+            foreach (var name in Couches) all.Add(new KeyValuePair<string, Kind>(name, Kind.Couch));
+            foreach (var name in Rough) all.Add(new KeyValuePair<string, Kind>(name, Kind.Rough));
+
+            foreach (var pair in all)
             {
+                var name = pair.Key;
+
                 try
                 {
                     var model = new Model(name);
@@ -174,6 +267,7 @@ namespace BareMinimum.Venues
                     // and its answer is not even stable between launches: this mod's own log
                     // has "1 of 19" on one start and "4 of 19" on the next, same build.
                     good.Add(model.Hash);
+                    kinds.Add(pair.Value);
 
                     // Kept for the log only. A name typed into the ini that answers no is far
                     // more likely to be a typo than a fixture, and that is worth reading.
@@ -186,15 +280,19 @@ namespace BareMinimum.Venues
             }
 
             _hashes = good.ToArray();
+            _kinds = kinds.ToArray();
 
             // "LOOKING FOR", NOT "EXIST". The old line said "19 of 19 model(s) exist in this
             // build" about a list of which fifteen did not exist anywhere, because every name
             // goes in whether or not the game will spawn it. Fridges' wording is the honest
             // one and this is it.
-            Log.Info("Beds: looking for " + _hashes.Length + " model(s)" +
+            Log.Info("Beds: looking for " + _hashes.Length + " model(s) to sleep on -- " +
+                     wanted.Count + " bed(s)" +
                      (wanted.Count > Candidates.Length
-                          ? ", " + (wanted.Count - Candidates.Length) + " of them from the ini"
-                          : "") + ".");
+                          ? " (" + (wanted.Count - Candidates.Length) + " from the ini)"
+                          : "") +
+                     ", " + Couches.Length + " couch(es) and " + Rough.Length +
+                     " bench(es), tent(s), shelter(s) and mattress(es).");
 
             if (missing.Count > 0)
             {
@@ -208,63 +306,133 @@ namespace BareMinimum.Venues
             return _hashes;
         }
 
-        /// <summary>The bed within reach, or null. Re-scanned a few times a second.</summary>
-        public Prop Nearest(Vector3 from, float radius)
+        /// <summary>How many models a frame asks the game about. See Nearest.</summary>
+        private const int PerFrame = 24;
+
+        /// <summary>The rest between two whole sweeps.</summary>
+        private const int SweepEveryMs = 250;
+
+        /// <summary>Where the sweep in progress has got to, and the best it has found so far.</summary>
+        private int _cursor;
+        private Prop _sweepBest;
+        private float _sweepDist;
+        private Kind _sweepKind;
+
+        /// <summary>What the last whole sweep found.</summary>
+        private Kind _foundKind;
+
+        /// <summary>Script time one whole sweep costs, measured and said once. See Nearest.</summary>
+        private long _sweepTicks;
+        private int _sweepFrames;
+        private bool _costSaid;
+
+        /// <summary>
+        /// The nearest thing to sleep on within reach, and what kind it is, or null.
+        ///
+        /// A SWEEP SPREAD OVER FRAMES. The list is over two hundred models now, and every one is a
+        /// GET_CLOSEST_OBJECT_OF_TYPE -- which is the only native that sees MAP objects, and a
+        /// bench in a park is a map object. Asked all at once that is two hundred calls in one
+        /// frame, five times a second, on a mod people have praised for not costing frames. So
+        /// each frame asks PerFrame of them, the sweep takes a handful of frames, and the one
+        /// before it stands until it finishes. The first whole sweep says in the log what it
+        /// cost, so the number is known rather than hoped.
+        /// </summary>
+        public Prop Nearest(Vector3 from, float radius, out Kind kind)
         {
+            kind = _foundKind;
+
+            var hashes = Hashes();
+            if (hashes.Length == 0) return null;
+
             var now = Game.GameTime;
 
-            // A bed already held on to stays valid between scans, so the prompt does not
-            // flicker while you shuffle about at the edge of the radius.
-            //
-            // BUT IT IS STILL RANGE-CHECKED, or the cache hands back a bed the player has
-            // already walked away from for up to a fifth of a second.
-            //
-            // AND AN EMPTY WINDOW COUNTS AS AN ANSWER TOO. The clock used to be honoured only
-            // when there was a bed to hand back, and there is no bed to hand back nearly all
-            // the time -- a player is next to one for a few seconds of a session. So the
-            // throttle threw itself away in exactly the case that mattered and the full model
-            // sweep ran on every single tick, all session, to keep saying no. "Nothing here"
-            // is worth keeping for the rest of the window every bit as much as a bed is.
-            if (now < _nextScan)
+            // BETWEEN SWEEPS, the last answer while it is still in reach.
+            if (_cursor == 0 && now < _nextScan)
             {
                 if (_found == null) return null;
-
                 if (_found.Exists() && _found.Position.DistanceTo(from) <= radius) return _found;
+
+                // Walked away from it: start looking again now rather than at the next tick.
+                _found = null;
             }
 
-            _nextScan = now + 200;
-            _found = null;
+            if (_cursor == 0)
+            {
+                _sweepBest = null;
+                _sweepDist = float.MaxValue;
+                _sweepTicks = 0;
+                _sweepFrames = 0;
+            }
+
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            var end = Math.Min(hashes.Length, _cursor + PerFrame);
 
             try
             {
-                var best = float.MaxValue;
-
-                foreach (var hash in Hashes())
+                for (var i = _cursor; i < end; i++)
                 {
                     var handle = Function.Call<int>(Hash.GET_CLOSEST_OBJECT_OF_TYPE,
-                                                    from.X, from.Y, from.Z, radius, hash,
+                                                    from.X, from.Y, from.Z, radius, hashes[i],
                                                     false, false, false);
                     if (handle == 0) continue;
 
-                    // SHVDN 3.9 has no public pool-object constructors: new Prop(handle) does
-                    // not compile. Entity.FromHandle and a cast is the supported route.
                     var prop = Entity.FromHandle(handle) as Prop;
                     if (prop == null || !prop.Exists()) continue;
 
                     var d = prop.Position.DistanceTo(from);
-                    if (d >= best) continue;
+                    if (d >= _sweepDist) continue;
 
-                    best = d;
-                    _found = prop;
+                    _sweepDist = d;
+                    _sweepBest = prop;
+                    _sweepKind = _kinds[i];
                 }
             }
             catch (Exception ex)
             {
-                Log.Once("beds-scan", "Could not look for a bed: " + ex.Message);
-                _found = null;
+                Log.Once("beds-scan", "Could not look for somewhere to sleep: " + ex.Message);
+            }
+
+            _sweepTicks += watch.ElapsedTicks;
+            _sweepFrames++;
+            _cursor = end;
+
+            // MID-SWEEP, the last answer stands while it is still in reach, so the prompt
+            // does not blink off for the frames it takes to look again.
+            if (_cursor < hashes.Length)
+            {
+                if (_found != null && _found.Exists() && _found.Position.DistanceTo(from) <= radius)
+                {
+                    return _found;
+                }
+
+                return null;
+            }
+
+            _cursor = 0;
+            _nextScan = now + SweepEveryMs;
+            _found = _sweepBest;
+            _foundKind = _sweepKind;
+            kind = _foundKind;
+
+            if (!_costSaid)
+            {
+                _costSaid = true;
+
+                var ms = _sweepTicks * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+
+                Log.Info("Beds: one sweep of " + hashes.Length + " model(s) costs " +
+                         ms.ToString("0.00") + " ms of script time, spread over " + _sweepFrames +
+                         " frame(s), once every " + SweepEveryMs + " ms while he is on foot and not running.");
             }
 
             return _found;
+        }
+
+        /// <summary>The bed within reach, or null. For callers that do not care what kind.</summary>
+        public Prop Nearest(Vector3 from, float radius)
+        {
+            Kind kind;
+            return Nearest(from, radius, out kind);
         }
     }
 }

@@ -835,6 +835,14 @@ namespace BareMinimum.UI
                  () => _cfg.SleepInBeds, v => _cfg.SleepInBeds = v,
                  "Safehouse beds, and any other bed the game will admit to.");
 
+            Bool("Sleep on couches", "Sleeping", "OnCouches",
+                 () => _cfg.SleepOnCouches, v => _cfg.SleepOnCouches = v,
+                 "Sofas, couches and loungers. Offered once he has stopped at one.");
+
+            Bool("Sleep rough", "Sleeping", "Rough",
+                 () => _cfg.SleepRough, v => _cfg.SleepRough = v,
+                 "Park benches, tents, homeless shelters, mattresses on the ground. Offered once he has stopped at one.");
+
             Bool("Sleep in cars", "Sleeping", "InCars",
                  () => _cfg.SleepInCars, v => _cfg.SleepInCars = v,
                  "Stopped, engine off, no wanted level. The offer shows once a sit.");
@@ -898,6 +906,14 @@ namespace BareMinimum.UI
             Float("Bed hours", "Sleeping", "BedHours",
                   () => _cfg.BedHours, v => _cfg.BedHours = v,
                   1f, 1f, 24f, "0", "How long a proper night lasts.");
+
+            Float("Couch hours", "Sleeping", "CouchHours",
+                  () => _cfg.CouchHours, v => _cfg.CouchHours = v,
+                  1f, 1f, 24f, "0", "How long a night on a couch lasts.");
+
+            Float("Rough hours", "Sleeping", "RoughHours",
+                  () => _cfg.RoughHours, v => _cfg.RoughHours = v,
+                  1f, 1f, 24f, "0", "How long a night on a bench, in a tent or on a mattress lasts.");
 
             Float("Car hours", "Sleeping", "CarHours",
                   () => _cfg.CarHours, v => _cfg.CarHours = v,

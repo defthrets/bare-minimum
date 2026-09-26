@@ -15,6 +15,12 @@ namespace BareMinimum.Needs
         Bed,
         Car,
 
+        /// <summary>A couch, a sofa or a lounger. A decent night, not a bed's. See Settings.CouchHours.</summary>
+        Couch,
+
+        /// <summary>A bench, a tent, a shelter, a mattress on the ground. See Settings.RoughHours.</summary>
+        Rough,
+
         /// <summary>
         /// Not a bunk at all: wherever he was standing when he stopped being able to stay
         /// awake. Same sequence, worse rest, and nobody chose it.
@@ -236,11 +242,51 @@ namespace BareMinimum.Needs
                 return Bunk.Car;
             }
 
-            if (!_cfg.SleepInBeds) return Bunk.None;
+            if (!_cfg.SleepInBeds && !_cfg.SleepOnCouches && !_cfg.SleepRough) return Bunk.None;
             if (Core.Compat.Wanted > 0) return Bunk.None;
 
-            var bed = _beds.Nearest(me.Position, _cfg.BedReach);
-            return bed != null ? Bunk.Bed : Bunk.None;
+            // NOT WHILE HE IS RUNNING. Nobody sleeps on a bench they are sprinting past, and the
+            // search is not free -- it waits until he slows down.
+            float speed;
+            try { speed = me.Speed; }
+            catch { speed = 0f; }
+
+            if (speed > RunningSpeed) return Bunk.None;
+
+            Beds.Kind kind;
+            var bed = _beds.Nearest(me.Position, _cfg.BedReach, out kind);
+            if (bed == null) return Bunk.None;
+
+            if (kind == Beds.Kind.Bed) return _cfg.SleepInBeds ? Bunk.Bed : Bunk.None;
+
+            // A COUCH OR A BENCH ONLY OFFERS ONCE HE HAS STOPPED AT IT. There is a bench on
+            // every street and a sofa in every room; offering a night on each one he walks
+            // past would be the mod talking the whole way down the road. A bed is still offered
+            // as he comes to it, as it always has been.
+            if (speed > StoppedSpeed) return Bunk.None;
+
+            if (kind == Beds.Kind.Couch) return _cfg.SleepOnCouches ? Bunk.Couch : Bunk.None;
+
+            return _cfg.SleepRough ? Bunk.Rough : Bunk.None;
+        }
+
+        /// <summary>Metres a second over which he is running and nothing is looked for.</summary>
+        private const float RunningSpeed = 2.5f;
+
+        /// <summary>And under which he has stopped, for a couch or a bench to offer. A shuffle is still stopped.</summary>
+        private const float StoppedSpeed = 0.35f;
+
+        /// <summary>What a bunk is called in the log.</summary>
+        private static string Named(Bunk where)
+        {
+            switch (where)
+            {
+                case Bunk.Bed: return "bed";
+                case Bunk.Car: return "car";
+                case Bunk.Couch: return "couch";
+                case Bunk.Rough: return "rough, on a bench, a mattress or in a tent";
+                default: return "heap";
+            }
         }
 
         /// <summary>
@@ -354,7 +400,7 @@ namespace BareMinimum.Needs
             // and it is not every language's. Four phrases is four things to translate and each
             // of them is a sentence somebody can actually put into their own.
             UI.Hint.Show(
-                Core.Lingo.Say(where == Bunk.Bed
+                Core.Lingo.Say(where != Bunk.Car
                                    ? (hold ? "Hold to sleep" : "Press to sleep")
                                    : (hold ? "Hold to sleep in the car" : "Press to sleep in the car")),
                 Core.Pad.Cap(_cfg.InteractKey));
@@ -470,14 +516,16 @@ namespace BareMinimum.Needs
         private void Begin(Bunk where)
         {
             _bunk = where;
-            _hours = where == Bunk.Bed ? _cfg.BedHours : _cfg.CarHours;
+            _hours = where == Bunk.Bed ? _cfg.BedHours
+                   : where == Bunk.Couch ? _cfg.CouchHours
+                   : where == Bunk.Rough ? _cfg.RoughHours
+                   : _cfg.CarHours;
 
             Hud.ClearHelp();
 
             if (!FadeOutNow("sleep-begin")) return;
 
-            Log.Info("Sleeping " + _hours.ToString("0.#") + "h in a " +
-                     (where == Bunk.Bed ? "bed" : "car") + ".");
+            Log.Info("Sleeping " + _hours.ToString("0.#") + "h -- " + Named(where) + ".");
         }
 
         /// <summary>
@@ -719,6 +767,8 @@ namespace BareMinimum.Needs
 
             var quality = _bunk == Bunk.Bed ? 1f
                         : _bunk == Bunk.Collapse ? _cfg.SleepCollapseQuality
+                        : _bunk == Bunk.Couch ? _cfg.CouchRestoreFraction
+                        : _bunk == Bunk.Rough ? _cfg.RoughRestoreFraction
                         : _cfg.CarRestoreFraction;
 
             // WHERE THE METER WAS, KEPT FOR THE CARD. The wake-up card sweeps its bar from
