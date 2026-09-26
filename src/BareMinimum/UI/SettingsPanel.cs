@@ -1091,12 +1091,56 @@ namespace BareMinimum.UI
                   () => _cfg.BagShow, "~y~The bag on his back is OFF.",
                   () => _cfg.BagFitLine);
 
+            // AND WHERE EACH ONE LIES ON THE GROUND, which is a different six for the same bag
+            // -- see Settings.BagGround. The bag on the pavement is the one picked above.
+            Float("Bag on the ground: left  /  right", "Bag", "Ground",
+                  () => Food.Strap.GroundWhere(_cfg)[0], v => Food.Strap.MoveGround(_cfg, 0, v),
+                  0.01f, -1f, 1f, "0.00",
+                  "Across the bag as it lies, in metres. Nought is where it always lay.",
+                  () => _cfg.BagShow, "~y~The bag on his back is OFF.",
+                  () => _cfg.BagGroundLine);
+
+            Float("Bag on the ground: back  /  forward", "Bag", "Ground",
+                  () => Food.Strap.GroundWhere(_cfg)[1], v => Food.Strap.MoveGround(_cfg, 1, v),
+                  0.01f, -1f, 1f, "0.00",
+                  "Along the bag as it lies, in metres.",
+                  () => _cfg.BagShow, "~y~The bag on his back is OFF.",
+                  () => _cfg.BagGroundLine);
+
+            Float("Bag on the ground: down  /  up", "Bag", "Ground",
+                  () => Food.Strap.GroundWhere(_cfg)[2], v => Food.Strap.MoveGround(_cfg, 2, v),
+                  0.01f, -1f, 1f, "0.00",
+                  "Lifts it off the ground or sinks it into it. Metres.",
+                  () => _cfg.BagShow, "~y~The bag on his back is OFF.",
+                  () => _cfg.BagGroundLine);
+
+            Float("Bag on the ground: tip", "Bag", "Ground",
+                  () => Food.Strap.GroundWhere(_cfg)[3], v => Food.Strap.MoveGround(_cfg, 3, v),
+                  5f, -180f, 180f, "0",
+                  "Tips it end over end. Degrees.",
+                  () => _cfg.BagShow, "~y~The bag on his back is OFF.",
+                  () => _cfg.BagGroundLine);
+
+            Float("Bag on the ground: roll", "Bag", "Ground",
+                  () => Food.Strap.GroundWhere(_cfg)[4], v => Food.Strap.MoveGround(_cfg, 4, v),
+                  5f, -180f, 180f, "0",
+                  "Rolls it onto its side, or stands it up. Degrees.",
+                  () => _cfg.BagShow, "~y~The bag on his back is OFF.",
+                  () => _cfg.BagGroundLine);
+
+            Float("Bag on the ground: turn", "Bag", "Ground",
+                  () => Food.Strap.GroundWhere(_cfg)[5], v => Food.Strap.MoveGround(_cfg, 5, v),
+                  5f, -180f, 180f, "0",
+                  "Spins it on the spot as seen from above. Degrees.",
+                  () => _cfg.BagShow, "~y~The bag on his back is OFF.",
+                  () => _cfg.BagGroundLine);
+
             Bool("Bag: position tool", "Bag", "Tuner",
                  () => _cfg.BagTuner, v => _cfg.BagTuner = v,
-                 "A readout in the top left and the numpad bound, but only while a bag is " +
-                 "actually on his back. 4/6 across, 8/2 out, 7/9 up, / and * tip, - and + " +
-                 "roll, 1/3 turn, 5 next bag, End next bone, 0 writes it to the log and . " +
-                 "puts this bag back to the start. The same keys the body carry uses.",
+                 "A readout in the top left and the numpad bound, while a bag is on his back " +
+                 "OR lying on the ground -- it dials whichever. 4/6 across, 8/2 out, 7/9 up, " +
+                 "/ and * tip, - and + roll, 1/3 turn, 5 next bag, End next bone (on his back), " +
+                 "0 saves it now and . puts it back. The same keys the body carry uses.",
                  () => _cfg.BagShow, "~y~The bag on his back is OFF.");
 
             Group("BODIES");

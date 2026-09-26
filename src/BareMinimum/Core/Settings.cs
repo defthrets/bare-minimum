@@ -2498,6 +2498,29 @@ namespace BareMinimum.Core
         }
 
         /// <summary>Reads that line back. A row that will not parse is skipped.</summary>
+        /// <summary>
+        /// Where each bag MODEL lies when it is on the ground, six numbers apiece: across,
+        /// along, up, then tip, roll and turn in degrees -- on top of the ground-following the
+        /// mod next door already does, so nought is exactly where it always lay.
+        ///
+        /// A SECOND TABLE, NOT THE SAME ONE. How a bag hangs off a spine and how it lies on a
+        /// pavement have nothing to do with each other: a backpack that wants rolling ninety
+        /// to sit flat against his back wants standing upright on the floor. Dialled with the
+        /// same tuner as Fit, while the bag is on the ground. See Food.Strap.GroundWhere.
+        /// </summary>
+        public readonly System.Collections.Generic.Dictionary<string, float[]> BagGround =
+            new System.Collections.Generic.Dictionary<string, float[]>(StringComparer.OrdinalIgnoreCase);
+
+        public string BagGroundLine
+        {
+            get { return Table(BagGround); }
+        }
+
+        public void ReadBagGround(string line)
+        {
+            Read(BagGround, line);
+        }
+
         public void ReadBagFit(string line)
         {
             BagFit.Clear();
@@ -2900,6 +2923,7 @@ namespace BareMinimum.Core
                                           0, Math.Max(0, Food.Strap.Count - 1));
 
                 cfg.ReadBagFit(ini.GetString("Bag", "Fit", ""));
+                cfg.ReadBagGround(ini.GetString("Bag", "Ground", ""));
 
                 cfg.BuyToPantry = ini.GetBool("Money", "BuyToPantry", cfg.BuyToPantry);
                 cfg.PantrySlots = (int)ini.GetFloat("Money", "PantrySlots", cfg.PantrySlots, 1f, 200f);

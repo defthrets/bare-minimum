@@ -55,6 +55,20 @@ namespace BareMinimum.Food
         private const string Shown = "spitmux.bag.shown";
 
         /// <summary>
+        /// Which bag he chose, and where it lies on the ground, for the mod that puts it there.
+        ///
+        /// THE BAG ON THE PAVEMENT IS THAT MOD'S PROP, and it made its own duffel whatever was
+        /// on his back, because nothing told it otherwise -- Michael, 2026-09-26. A model name
+        /// and six numbers, plain types for the reasons on Shown. Empty and null while this is
+        /// not drawing bags at all, so the other side goes back to its own.
+        /// </summary>
+        private const string ModelOut = "spitmux.bag.model";
+        private const string GroundOut = "spitmux.bag.ground";
+
+        /// <summary>And whether a bag is actually lying on the ground, written by the other side.</summary>
+        private const string FloorIn = "spitmux.bag.floor";
+
+        /// <summary>
         /// The bags, best first, every name checked against this machine's own prop list.
         ///
         /// NOT GUESSED. Menyoo ships all twenty-two thousand object names as plain text and
@@ -173,6 +187,56 @@ namespace BareMinimum.Food
             new object[] { "vw_prop_vw_backpack_01a",   new[] { -0.26f, -0.08f,  0.00f, -175f,  90f,  10f } },
             new object[] { "xm3_prop_xm3_backpack_01a", new[] {  0.01f, -0.19f,  0.02f,   -5f,  95f, -80f } },
         };
+
+        /// <summary>
+        /// Where each bag lies on the ground, once somebody has looked. Empty until Michael
+        /// dials them -- he said he would -- and then his numbers go here the way the seven
+        /// on his back went into Dialled. A model with no line lies exactly as it always has.
+        /// </summary>
+        private static readonly object[][] DialledGround =
+        {
+        };
+
+        /// <summary>The ground six for the model now picked: the ini's, then the dialled, then nought.</summary>
+        public static float[] GroundWhere(Core.Settings cfg)
+        {
+            var name = Picked(cfg);
+
+            float[] six;
+            if (cfg != null && cfg.BagGround.TryGetValue(name, out six) && six != null && six.Length >= 6)
+            {
+                return six;
+            }
+
+            foreach (var row in DialledGround)
+            {
+                if (!string.Equals((string)row[0], name, StringComparison.OrdinalIgnoreCase)) continue;
+
+                var d = (float[])row[1];
+                return new[] { d[0], d[1], d[2], d[3], d[4], d[5] };
+            }
+
+            return new float[6];
+        }
+
+        /// <summary>Moves one of the ground six for the model now picked. See Move.</summary>
+        public static void MoveGround(Core.Settings cfg, int which, float to)
+        {
+            if (cfg == null || which < 0 || which > 5) return;
+
+            var name = Picked(cfg);
+
+            float[] six;
+            if (!cfg.BagGround.TryGetValue(name, out six) || six == null || six.Length < 6)
+            {
+                six = GroundWhere(cfg);
+                cfg.BagGround[name] = six;
+            }
+
+            six[which] = to;
+
+            Dirty = true;
+        }
 
         /// <summary>The dialled six for a model, or null when nobody has done that one.</summary>
         private static float[] Known(string name)
@@ -335,6 +399,7 @@ namespace BareMinimum.Food
             try
             {
                 IniFile.SetValue(Paths.Ini, "Bag", "Fit", _cfg.BagFitLine);
+                IniFile.SetValue(Paths.Ini, "Bag", "Ground", _cfg.BagGroundLine);
                 IniFile.SetValue(Paths.Ini, "Bag", "Model", _cfg.BagModel.ToString());
                 IniFile.SetValue(Paths.Ini, "Bag", "Bone", _cfg.BagBone.ToString());
             }
@@ -360,6 +425,10 @@ namespace BareMinimum.Food
                 // same "it did not save" as the tuner that only printed to the log, one
                 // layer further in and just as quiet.
                 Owed();
+
+                // AND WHICH BAG IT IS, BEFORE THE GATE, because the case that matters is the
+                // bag NOT being on him -- lying on a pavement, drawn next door. See ModelOut.
+                Publish();
 
                 var want = _cfg != null && _cfg.BagShow && Knapsack.Worn &&
                            me != null && me.Exists() && !me.IsDead;
@@ -532,6 +601,63 @@ namespace BareMinimum.Food
             _wearing = "";
         }
 
+        private string _saidModel;
+        private float[] _saidGround;
+
+        /// <summary>
+        /// Writes the chosen model and its ground six for the mod that lays the bag down. See
+        /// ModelOut. Only when something changed: a string and six floats, but every frame.
+        /// </summary>
+        private void Publish()
+        {
+            try
+            {
+                var on = _cfg != null && _cfg.BagShow;
+                var name = on ? Picked(_cfg) : "";
+                var six = on ? GroundWhere(_cfg) : null;
+
+                if (name != _saidModel)
+                {
+                    AppDomain.CurrentDomain.SetData(ModelOut, name);
+                    _saidModel = name;
+                }
+
+                if (!Same(six, _saidGround))
+                {
+                    AppDomain.CurrentDomain.SetData(GroundOut, six == null ? null : (float[])six.Clone());
+                    _saidGround = six == null ? null : (float[])six.Clone();
+                }
+            }
+            catch
+            {
+                // Then the pavement gets the other mod's own bag, which is what it had.
+            }
+        }
+
+        private static bool Same(float[] a, float[] b)
+        {
+            if (a == null || b == null) return a == b;
+            if (a.Length != b.Length) return false;
+
+            for (var i = 0; i < a.Length; i++) if (a[i] != b[i]) return false;
+
+            return true;
+        }
+
+        /// <summary>Whether the mod next door says a bag is lying on the ground right now.</summary>
+        private static bool FloorMade()
+        {
+            try
+            {
+                var row = AppDomain.CurrentDomain.GetData(FloorIn) as int[];
+                return row != null && row.Length > 0 && row[0] == 1;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         /// <summary>
         /// Tells the mod that owns the bag whether a real one is being drawn. See Shown.
         ///
@@ -578,25 +704,39 @@ namespace BareMinimum.Food
         public void Tune()
         {
             if (_cfg == null || !_cfg.BagTuner) return;
-            if (_thing == null || !_thing.Exists()) return;
 
-            Readout();
+            // ON HIS BACK, OR ON THE GROUND. The same keys dial whichever the bag is doing:
+            // hanging off his spine, or lying on the pavement next door's mod put it on. See
+            // GroundWhere. On the ground only once that mod says it has made the thing, so the
+            // keys never move numbers for a bag nobody can see.
+            var onBack = _thing != null && _thing.Exists();
+            var onFloor = !onBack && _cfg.BagShow && !Knapsack.Worn && FloorMade();
 
-            var six = Where(_cfg);
+            if (!onBack && !onFloor) return;
 
-            if (Tap(Keys.NumPad4)) Move(_cfg, 0, six[0] - Step);
-            if (Tap(Keys.NumPad6)) Move(_cfg, 0, six[0] + Step);
-            if (Tap(Keys.NumPad8)) Move(_cfg, 1, six[1] + Step);
-            if (Tap(Keys.NumPad2)) Move(_cfg, 1, six[1] - Step);
-            if (Tap(Keys.NumPad7)) Move(_cfg, 2, six[2] - Step);
-            if (Tap(Keys.NumPad9)) Move(_cfg, 2, six[2] + Step);
+            Readout(onFloor);
 
-            if (Tap(Keys.Divide)) Move(_cfg, 3, six[3] - Turn);
-            if (Tap(Keys.Multiply)) Move(_cfg, 3, six[3] + Turn);
-            if (Tap(Keys.Subtract)) Move(_cfg, 4, six[4] - Turn);
-            if (Tap(Keys.Add)) Move(_cfg, 4, six[4] + Turn);
-            if (Tap(Keys.NumPad1)) Move(_cfg, 5, six[5] - Turn);
-            if (Tap(Keys.NumPad3)) Move(_cfg, 5, six[5] + Turn);
+            var six = onFloor ? GroundWhere(_cfg) : Where(_cfg);
+
+            Action<int, float> move = (i, v) =>
+            {
+                if (onFloor) MoveGround(_cfg, i, v);
+                else Move(_cfg, i, v);
+            };
+
+            if (Tap(Keys.NumPad4)) move(0, six[0] - Step);
+            if (Tap(Keys.NumPad6)) move(0, six[0] + Step);
+            if (Tap(Keys.NumPad8)) move(1, six[1] + Step);
+            if (Tap(Keys.NumPad2)) move(1, six[1] - Step);
+            if (Tap(Keys.NumPad7)) move(2, six[2] - Step);
+            if (Tap(Keys.NumPad9)) move(2, six[2] + Step);
+
+            if (Tap(Keys.Divide)) move(3, six[3] - Turn);
+            if (Tap(Keys.Multiply)) move(3, six[3] + Turn);
+            if (Tap(Keys.Subtract)) move(4, six[4] - Turn);
+            if (Tap(Keys.Add)) move(4, six[4] + Turn);
+            if (Tap(Keys.NumPad1)) move(5, six[5] - Turn);
+            if (Tap(Keys.NumPad3)) move(5, six[5] + Turn);
 
             // NEXT BAG, so a whole wardrobe can be dialled without opening the menu between
             // each one. The model change is noticed by Update on the next pass.
@@ -606,7 +746,7 @@ namespace BareMinimum.Food
                 Dirty = true;
             }
 
-            if (Tap(Keys.End))
+            if (!onFloor && Tap(Keys.End))
             {
                 _cfg.BagBone = (_cfg.BagBone + 1) % Bones.Length;
                 Dirty = true;
@@ -614,7 +754,8 @@ namespace BareMinimum.Food
 
             if (Tap(Keys.Decimal))
             {
-                for (var i = 0; i < 6; i++) Move(_cfg, i, Start[i]);
+                // On the ground, back to exactly how it always lay; on his back, the start.
+                for (var i = 0; i < 6; i++) move(i, onFloor ? 0f : Start[i]);
             }
 
             // NOT A MOVE. Writing it down changes nothing about where it is, and re-seating
@@ -647,20 +788,24 @@ namespace BareMinimum.Food
             return false;
         }
 
-        private void Readout()
+        private void Readout(bool floor)
         {
-            var six = Where(_cfg);
+            var six = floor ? GroundWhere(_cfg) : Where(_cfg);
 
-            Line(0.012f, 0.060f, "~y~BAG~s~   " + Bags[_cfg.BagModel % Bags.Length][1], 0.34f);
+            Line(0.012f, 0.060f, "~y~" + (floor ? "BAG ON THE GROUND" : "BAG ON HIS BACK") + "~s~   " +
+                                 Bags[_cfg.BagModel % Bags.Length][1], 0.34f);
             Line(0.012f, 0.085f, Picked(_cfg), 0.26f);
             Line(0.012f, 0.110f, "4/6 across    " + six[0].ToString("0.00"), 0.30f);
-            Line(0.012f, 0.130f, "8/2 out       " + six[1].ToString("0.00"), 0.30f);
+            Line(0.012f, 0.130f, (floor ? "8/2 along     " : "8/2 out       ") + six[1].ToString("0.00"), 0.30f);
             Line(0.012f, 0.150f, "7/9 up        " + six[2].ToString("0.00"), 0.30f);
             Line(0.012f, 0.175f, "//* tip       " + six[3].ToString("0") + " deg", 0.30f);
             Line(0.012f, 0.195f, "-/+ roll      " + six[4].ToString("0") + " deg", 0.30f);
             Line(0.012f, 0.215f, "1/3 turn      " + six[5].ToString("0") + " deg", 0.30f);
-            Line(0.012f, 0.240f, "~b~5~s~ next bag   ~b~END~s~ " + BoneNames[_cfg.BagBone % Bones.Length], 0.28f);
-            Line(0.012f, 0.262f, "~g~0~s~ save it now    ~r~.~s~ back to the start", 0.28f);
+            Line(0.012f, 0.240f, floor
+                                     ? "~b~5~s~ next bag -- it changes on the ground too"
+                                     : "~b~5~s~ next bag   ~b~END~s~ " + BoneNames[_cfg.BagBone % Bones.Length], 0.28f);
+            Line(0.012f, 0.262f, "~g~0~s~ save it now    ~r~.~s~ " +
+                                 (floor ? "back to how it always lay" : "back to the start"), 0.28f);
         }
 
         private static void Line(float x, float y, string text, float scale)
@@ -693,8 +838,9 @@ namespace BareMinimum.Food
             // a line in the log is how these were recovered the one time it mattered.
             Save();
 
-            Log.Info("BAG POSITION -- saved to [Bag] Fit in BareMinimum.ini:");
+            Log.Info("BAG POSITION -- saved to [Bag] Fit and Ground in BareMinimum.ini:");
             Log.Info("    Fit = " + _cfg.BagFitLine);
+            Log.Info("    Ground = " + _cfg.BagGroundLine);
             Log.Info("    Bone = " + _cfg.BagBone + "     ; " +
                      BoneNames[_cfg.BagBone % Bones.Length]);
 
