@@ -95,6 +95,22 @@ namespace BareMinimum.Food
         /// <summary>Whether the thing is on his wrist bone right now rather than the prop bone. See Seat.</summary>
         private bool _onWrist;
 
+        /// <summary>Whether this pass's clip has taken the thing back onto the prop bone. See Handed.</summary>
+        private bool _handed;
+
+        /// <summary>
+        /// How long a clip is given to blend in before the prop bone is trusted. The clips are
+        /// asked for with a blend-in of 4, which is a quarter of a second; this is a little over.
+        /// </summary>
+        private const int BlendMs = 300;
+
+        /// <summary>
+        /// And the longest the thing waits on the wrist for the bone to line up, in case a clip
+        /// starts somewhere its end never is. Past this it goes over regardless, and the log
+        /// says by how much.
+        /// </summary>
+        private const int HandoffMs = 900;
+
         /// <summary>The weapon he had when this started. See Interrupted.</summary>
         private WeaponHash _armed = WeaponHash.Unarmed;
 
@@ -714,14 +730,15 @@ namespace BareMinimum.Food
 
             var anim = AnimFor(item, drinking);
 
-            // WHILE THE CLIP IS ON HIM, LEARN THE GRIP. See Grip: it is what makes the rest
-            // below possible, and it costs two bone reads a frame.
-            if (!_resting) Grip(me, anim);
+            // ON THE PROP BONE ONLY ONCE THE CLIP HAS HOLD OF IT. See Handed -- which is also
+            // where the grip is learnt, from a clip that has hold and never from the blend.
+            var onBone = Handed(me, anim);
 
-            // AT REST, OFF THE WRIST. See Palm. Nothing is eased between the two bones -- the
-            // six mean different things on each -- and nothing needs to be: the wrist hold is
-            // worked out from where the clip had it, so the switch itself does not move it.
-            if (_resting)
+            // AT REST, AND WHILE A CLIP BLENDS IN, OFF THE WRIST. See Palm. Nothing is eased
+            // between the two bones -- the six mean different things on each -- and nothing
+            // needs to be: the wrist hold is worked out from where the clip had it, and the
+            // handoff waits for the bone to be there, so neither switch moves it.
+            if (!onBone)
             {
                 var palm = Palm(me, _held, item, drinking);
 
@@ -746,8 +763,8 @@ namespace BareMinimum.Food
             var bone = Function.Call<int>(Hash.GET_PED_BONE_INDEX, me.Handle,
                                           anim.LeftHanded ? LeftHandBone : RightHandBone);
 
-            var spin = SpinFor(item, drinking, _resting);
-            var sits = SitsFor(item, drinking, _resting);
+            var spin = SpinFor(item, drinking, !onBone);
+            var sits = SitsFor(item, drinking, !onBone);
 
             Eased(ref sits, ref spin);
 
@@ -780,22 +797,127 @@ namespace BareMinimum.Food
         /// has settled -- see Owed -- so the pocket has it from the first frame of the next
         /// session, before anything has been eaten.
         /// </summary>
-        private void Grip(Ped me, AnimRef anim)
+        /// <summary>
+        /// Whether the clip has hold of the prop bone, so the thing can go back onto it.
+        ///
+        /// NOT THE MOMENT THE CLIP IS ASKED FOR. That is what it was, and a clip blends in over
+        /// a quarter of a second -- through which the prop bone is still most of the way to
+        /// where it sits with his arm down. So at the start of every pass the fit sat on an
+        /// idle bone for that quarter second, which is the wrong spot the wrist hold exists to
+        /// get rid of: "for a second it glitches and moves to his hand bone location",
+        /// Michael, 2026-09-26.
+        ///
+        /// SO THE WRIST HOLD CARRIES ON THROUGH THE BLEND, and the thing goes back on the prop
+        /// bone on the first frame after it that the bone is where the wrist hold already has
+        /// it -- a few millimetres and a couple of degrees -- so the switch cannot be seen.
+        /// Capped at HandoffMs in case a clip starts somewhere its end never is, and the log
+        /// says once per clip how far the handoff actually moved it.
+        ///
+        /// LATCHED FOR THE PASS. Once over, it stays on the prop bone until the pass ends, and
+        /// the grip is learnt every frame from then on, which is how the rest that follows
+        /// starts from exactly where the clip left the thing.
+        /// </summary>
+        private bool Handed(Ped me, AnimRef anim)
         {
-            if (anim == null || !anim.Valid || _cfg == null) return;
+            if (_resting)
+            {
+                _handed = false;
+                return false;
+            }
+
+            if (_handed)
+            {
+                Keep(anim, Measure(me, anim));
+                return true;
+            }
+
+            int now;
+            try { now = Game.GameTime; }
+            catch { return true; }
+
+            var since = now - _clipAt;
+            if (since < BlendMs) return false;
+
+            var live = Measure(me, anim);
+
+            float[] had = null;
+            var key = anim != null && anim.Valid ? GripKey(anim) : null;
+            if (key != null && _cfg != null) _cfg.Grip.TryGetValue(key, out had);
+
+            double mm = 0, deg = 0;
+            var lined = had == null || live == null;
+
+            if (!lined)
+            {
+                Gap(had, live, out mm, out deg);
+                lined = mm <= 6.0 && deg <= 3.0;
+            }
+
+            if (!lined && since < HandoffMs) return false;
+
+            _handed = true;
+
+            if (key != null && had != null && live != null && _handoffSaid.Add(key))
+            {
+                Log.Info("Handoff: " + key + " took the thing back onto the prop bone " + since +
+                         " ms into the pass, " + mm.ToString("0") + " mm and " + deg.ToString("0.#") +
+                         " deg from the wrist hold" +
+                         (mm > 15.0 || deg > 8.0 ? " -- that is a visible jump. Paste this line." : "."));
+            }
+
+            Keep(anim, live);
+            return true;
+        }
+
+        private readonly System.Collections.Generic.HashSet<string> _handoffSaid =
+            new System.Collections.Generic.HashSet<string>();
+
+        /// <summary>How far apart two grips are, in millimetres and degrees.</summary>
+        private static void Gap(float[] a, float[] b, out double mm, out double deg)
+        {
+            var dx = a[0] - b[0]; var dy = a[1] - b[1]; var dz = a[2] - b[2];
+            mm = Math.Sqrt(dx * dx + dy * dy + dz * dz) * 1000.0;
+
+            var dot = Math.Min(1.0, Math.Abs(a[3] * b[3] + a[4] * b[4] + a[5] * b[5] + a[6] * b[6]));
+            deg = 2.0 * Math.Acos(dot) * 180.0 / Math.PI;
+        }
+
+        /// <summary>The grip as it is this frame, or null. See Keep for what is done with it.</summary>
+        private float[] Measure(Ped me, AnimRef anim)
+        {
+            if (me == null || anim == null || !anim.Valid) return null;
 
             try
             {
                 var ph = me.Bones[anim.LeftHanded ? Bone.PHLeftHand : Bone.PHRightHand];
                 var wr = me.Bones[anim.LeftHanded ? Bone.SkelLeftHand : Bone.SkelRightHand];
 
-                if (ph == null || wr == null || ph.Index < 0 || wr.Index < 0) return;
+                if (ph == null || wr == null || ph.Index < 0 || wr.Index < 0) return null;
 
                 var rel = Clean(ph.RelativeMatrix) * Matrix.Invert(Clean(wr.RelativeMatrix));
                 var q = Quaternion.RotationMatrix(rel);
 
+                return new[] { rel.M41, rel.M42, rel.M43, q.X, q.Y, q.Z, q.W };
+            }
+            catch (Exception ex)
+            {
+                Log.Once("grip-read", "Could not read the grip off his hand: " + ex.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Remembers a grip measured while the clip has hold. The body of what used to be Grip,
+        /// which measured every frame the clip was ASKED for -- blend included, so the first
+        /// quarter second of every pass wrote half an idle pose into the ini.
+        /// </summary>
+        private void Keep(AnimRef anim, float[] seven)
+        {
+            if (anim == null || !anim.Valid || _cfg == null || seven == null) return;
+
+            try
+            {
                 var key = GripKey(anim);
-                var seven = new[] { rel.M41, rel.M42, rel.M43, q.X, q.Y, q.Z, q.W };
 
                 float[] had;
 
@@ -1367,6 +1489,9 @@ namespace BareMinimum.Food
                 _clipAt = Game.GameTime;
                 _animStarted = true;
                 _resting = false;
+
+                // A NEW PASS STARTS ON THE WRIST and is handed over once it has hold. See Handed.
+                _handed = false;
             }
             catch (Exception ex)
             {
