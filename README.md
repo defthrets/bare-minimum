@@ -38,6 +38,20 @@ No asset replacement, no .rpf edits. Legacy and Enhanced from one build. Nothing
 
 The full record, every version, is [`release/CHANGES.txt`](release/CHANGES.txt); the zips are on the [releases page](https://github.com/defthrets/bare-minimum/releases). The recent ones, in detail:
 
+### 0.9.0 — the bodies move in, a real bag, and a bench to sleep on
+
+**The dead are this mod's now.** Searching a body used to live in Posted Up and carrying one in Five0 Patrol. Both are here: stand over a body and hold E to search it — cash, food and drink, and drugs too with Posted Up 0.9.9 or newer — then hold E again to carry it. Guns fall to the ground when somebody dies, the way the game always did. If you run Five0 Patrol 0.2.1, it still has its own carry until its next update; turn one off meanwhile (`[Bodies] Carry = false` here).
+
+**A real bag on his back.** Fifteen of the game's own bag models instead of Posted Up's chest strap, picked on the F11 menu under BAG, each with its own place on his back and a numpad position tool that saves. The bag you put down is the bag you chose, with its own place on the ground too (needs Posted Up 0.9.9 or newer).
+
+**Sleep on anything you could sleep on.** Fifteen of the nineteen bed names the mod looked for did not exist, so beds were found by four models and Franklin's two never worked. Every name now comes from the game's own object list: 56 beds, 112 couches and loungers (6 hours), and 72 rough spots — park and bus-stop benches, tents, homeless shelters, mattresses and sleeping bags on the ground (5 hours). Couches and benches offer once you stop at them. Anything else goes in `[Sleeping] ExtraModels`.
+
+**Franklin's fridge on Forum Drive** works: a fridge of the mod's own stands in the spot, clear of the game's "drink beer".
+
+**The food stays where it was fitted,** between bites and in the pocket as well as mid-bite — held off his wrist in the same place relative to his palm. **Three bites or sips**, then his arm comes down and the empty drops from his side. **Smoking** stops with the cigarette, smoulders at the tip, and rests between drags.
+
+Everything between 0.4.1 and 0.9.0 is in `release/CHANGES.txt`, which ships in every zip.
+
 ### 0.4.1 — the game's health strip stays hidden
 
 The game's own health and armour strip could come back under the map and stay. The layout that hides it was asked for once and then re-asked only on a handful of moments — a pause, a fade, a switch, a cutscene — and the game undid it on a moment that was none of those, with no re-ask to follow. The log for the session showed it plainly: the ask, the rebuild, then nothing for three minutes while the strip was back on screen.

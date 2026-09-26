@@ -3,6 +3,76 @@
 ===============================================================================
 
 
+0.9.0  --  THE BODIES MOVE IN, A REAL BAG, AND A BENCH TO SLEEP ON
+-------------------------------------------------------------------------------
+
+  THE DEAD ARE THIS MOD'S NOW. Searching a body used to live in Posted Up and
+  carrying one in Five0 Patrol, so the food on a corpse was only there if you
+  ran the gang mod, and two mods reached for the same body. Both are here.
+  Stand over a body and hold E to search it -- cash, food and drink, and drugs
+  as well if Posted Up 0.9.9 or newer is installed -- then hold E again to pick
+  it up and carry it. Guns are the game's own again: they fall to the ground
+  when somebody dies, as they always did, rather than sitting on the card.
+  Settings on the F11 menu under BODIES. Asked for by NordCyborg.
+
+  IF YOU RUN FIVE0 PATROL: its current download (0.2.1) still has a body carry
+  of its own, and its next one will not. Until then, turn one of them off --
+  [Bodies] Carry = false in this mod's ini is the one this end controls.
+
+  A REAL BAG ON HIS BACK. The bag Posted Up gives you was a strap across the
+  chest -- one drawable, the same for every bag, and missing on half the tops
+  in the game. It is a real bag model now: fifteen of the game's own, picked on
+  the F11 menu under BAG, the tactical pack by default. Every one has its own
+  place on his back, and the position tool on the same page moves it a
+  centimetre at a time on the numpad and saves it.
+
+  AND THE BAG YOU PUT DOWN IS THE BAG YOU CHOSE, not a duffel. Each one has
+  its own place on the ground too, set with the same tool while it lies there.
+  Needs Posted Up 0.9.9 or newer, which is the mod the bag belongs to.
+
+  SLEEP ON ANYTHING YOU COULD SLEEP ON. Fifteen of the nineteen bed names this
+  mod looked for did not exist in the game -- written from memory and never
+  checked -- so a bed was only ever found by four models: Michael's, Jimmy's,
+  Trevor's and Lester's. Franklin's two beds never worked. Every name is read
+  out of the game's own object list now, in three kinds:
+
+      beds       56   a full night, 8 hours, and a little health back
+      couches   112   sofas, couches, loungers: 6 hours, four fifths of it
+      rough      72   park and bus-stop benches, tents, homeless shelters,
+                      mattresses and sleeping bags on the ground: 5 hours
+
+  A couch or a bench offers once you stop at it, not as you walk past. A bed
+  that a housing or interior mod stands up and this still does not know goes
+  in [Sleeping] ExtraModels. Reported by Vitalezzzz (M8T's Home Ownership
+  houses) and asked for by Jcats. How good each kind is, and whether couches
+  and rough sleeping are on at all, is on the F11 menu under SLEEP.
+
+  FRANKLIN'S FRIDGE ON FORUM DRIVE. The game's own "drink beer" is bolted to
+  that fridge and always got the button first. A fridge of this mod's own now
+  stands in the same spot, and it only offers when you are right at it. Found
+  by D_Cypher003, reported by NordCyborg.
+
+  THE FOOD STAYS WHERE IT WAS FITTED. Everything sat right in his hand while it
+  was being eaten and wrong the moment his arm came down -- between bites, and
+  in the pocket while you chose it, where it was in the wrong hand as well. The
+  animation moves the bone the food hangs from; the mod measures by how much
+  and holds the food off his wrist in the same place relative to his palm. The
+  fitting bench can still set an arm-down position for any one item by hand.
+  Asked for by GTA5gamers.
+
+  THREE BITES, AND THE EMPTY DROPS FROM HIS SIDE. A meal or a drink is three
+  passes of the animation with a pause between each, then his arm comes down
+  and the can or wrapper leaves his hand there, not at his mouth. Drinks were
+  being cut short by their own timer and never got the third sip; they do now.
+
+  SMOKING. The animation stops when the cigarette does. The lit end smoulders
+  the whole time it is in his hand, and he rests between drags instead of
+  taking them back to back -- [Eating] SmokeBreakSeconds, 3 by default.
+
+  YOUR INI IS NOT REPLACED. Everything new takes its default until you copy
+  its lines over from the ini in this download.
+
+
 0.8.4  --  THE MARKERS COME BACK, AND THE BARBER STOPS SELLING SANDWICHES
 -------------------------------------------------------------------------------
 

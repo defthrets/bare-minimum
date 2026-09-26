@@ -1,0 +1,9 @@
+0.9.0 -- for the site's changelog field. Short, no emoji; detail is in CHANGES.txt.
+
+0.9.0
+- Bodies: hold E to search a body (cash, food, drugs with Posted Up 0.9.9+), hold E again to carry it. Moved here from Posted Up and Five0 Patrol. Five0 0.2.1 users: set [Bodies] Carry = false until Five0 updates.
+- A real bag on your back: 15 models to pick from (F11 > BAG), each with its own position, and the bag you put down is the one you chose (Posted Up 0.9.9+).
+- Sleep on beds, couches, park benches, tents, homeless shelters and mattresses on the ground. The bed list was mostly wrong names; Franklin's beds work now. [Sleeping] ExtraModels for anything else.
+- Franklin's fridge on Forum Drive works, clear of the game's "drink beer".
+- Food and drink stay where they were fitted with his arm down too; three bites or sips, and the empty drops from his side.
+- Smoking stops with the cigarette, smoulders at the tip, and rests between drags.
