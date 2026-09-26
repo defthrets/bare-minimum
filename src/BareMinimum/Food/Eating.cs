@@ -1469,14 +1469,23 @@ namespace BareMinimum.Food
                 return;
             }
 
-            // AND THE MEAL ENDS WITH THE LAST PASS, which is what makes the animation and the
-            // duration one thing instead of two that have to be kept in step.
+            // AND THE MEAL ENDS A BEAT AFTER THE LAST PASS, which is what makes the animation
+            // and the duration one thing instead of two that have to be kept in step.
+            //
+            // A BEAT, NOT AT ONCE. The clip ends with the thing at his mouth, and Finish drops
+            // the empty from wherever the thing is -- so the can fell out of his face. His arm
+            // comes down first, the same rest as between two bites with the thing on his
+            // wrist, and the empty leaves his hand at his side. Michael, 2026-09-26.
             //
             // BY MOVING THE CLOCK, NOT BY CALLING Finish HERE. Finish clears _item, and the
             // rest of this tick still reads it -- the prop block below would hand a null to
-            // Give. Bringing the deadline forward lets the top of the next tick take the
-            // path it already takes, which is the one that has always worked.
-            if (_finishAt > now) _finishAt = now;
+            // Give. The rest and the deadline are the same instant, and Update asks about the
+            // deadline before it asks about the rest, so no fourth pass can start.
+            var settle = now + (int)(Math.Max(0f, _cfg.BreakSeconds) * 1000f);
+
+            _restUntil = settle;
+            _resting = true;
+            _finishAt = settle;
         }
 
         /// <summary>

@@ -1800,14 +1800,16 @@ namespace BareMinimum.Core
         ///
         /// ANIMATION, BREAK, ANIMATION. A clip looped back to back for the length of a meal
         /// reads as a man winding a handle -- the same motion three or four times with no
-        /// beat between them, which is not how anybody eats. Two passes with a pause in the
-        /// middle, holding the thing, is the shape of taking a bite and then taking another.
+        /// beat between them, which is not how anybody eats. Three passes with a pause
+        /// between them, holding the thing, is the shape of a bite, and another, and another.
+        /// Two, and a sandwich was gone in two bites; Michael asked for the third, 2026-09-26.
         ///
         /// IN THE PAUSE HIS ARM IS DOWN AND THE THING IS HELD OFF HIS WRIST, at the place the
         /// fit put it relative to his palm -- see Food.Eating.Palm. Holding the clip's last
         /// frame instead was tried and left him with a bottle at his face between sips.
         ///
-        /// THE MEAL ENDS WHEN THE LAST PASS DOES. That is what makes the animation and the
+        /// THE MEAL ENDS A BEAT AFTER THE LAST PASS -- his arm comes down and the empty is
+        /// dropped from his side, not from his mouth. That is what makes the animation and the
         /// duration the same thing rather than two numbers that have to be kept in step --
         /// the bug where a two second clip sat inside a six second drink and left him stood
         /// there holding a can. Seconds is still read and is still the backstop.
@@ -1815,7 +1817,7 @@ namespace BareMinimum.Core
         /// Smoking is timed rather than counted -- see SmokeSeconds -- and rests on its own
         /// number between drags, SmokeBreakSeconds.
         /// </summary>
-        public int Bites = 2;
+        public int Bites = 3;
 
         /// <summary>The rest between them, in seconds. The gap in animation, break, animation.</summary>
         public float BreakSeconds = 1.1f;
