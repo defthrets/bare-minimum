@@ -226,6 +226,8 @@ namespace BareMinimum.Vitals
 
             Flick();
             Refresh();
+
+            Watch(upheaval);
         }
 
         /// <summary>
@@ -304,21 +306,102 @@ namespace BareMinimum.Vitals
                 // NAMED. When the game's strip comes back, this line is the evidence of which
                 // edge did or did not fire, and a re-ask that does not say why is a re-ask that
                 // teaches nothing.
-                if (_reasks <= 6)
-                {
-                    Log.Info("Asked the minimap for layout " + cfg.VitalsHideType + " again (" +
-                             _reasks + " since the load) because " + _askWhy + ".");
-                }
-                else if (_reasks % 50 == 0)
-                {
-                    Log.Info("The minimap layout has now been re-asked " + _reasks + " times; the last was " + _askWhy + ".");
-                }
+                // EVERY ONE, NOT THE FIRST SIX. The thinning hid the one that mattered: both
+                // maps went blank after a death at 12:24 on 2026-09-27, and that respawn's
+                // re-ask was the seventh of the session, so nothing was written. These come on
+                // real events -- a car door, an interior, a fade -- not sixty times a second,
+                // so a line each is a handful a minute at most.
+                Log.Info("Asked the minimap for layout " + cfg.VitalsHideType + " again (" +
+                         _reasks + " since the load) because " + _askWhy + ".");
             }
 
             _asked = true;
             _askAgain = false;
+            _lastAskAt = now;
+            _lastAskWhy = _askWhy.Length > 0 ? _askWhy : "the first ask after the load";
             _askWhy = "";
             _repeatAt = now + Math.Max(1, cfg.VitalsHideRepeatMs);
+        }
+
+        /// <summary>When the layout last went in and why, for Watch.</summary>
+        private int _lastAskAt;
+        private string _lastAskWhy = "";
+
+        // ---- the watch ---------------------------------------------------------
+
+        private int _watchAt;
+        private bool _watchSeen;
+        private bool _wasRendering, _wasRadarHidden;
+        private int _stoppedAt;
+
+        /// <summary>
+        /// WHETHER THE GAME SAYS THE MINIMAP IS DRAWING, written down when it changes.
+        ///
+        /// DIAGNOSTIC ONLY. Both maps went blank on 2026-09-27 and nothing in the log could
+        /// say why. When it happens again this line says whether the game had stopped drawing
+        /// the minimap or was drawing it empty -- which splits the two suspects: a radar the
+        /// game has switched off, or a layout this mod pushed at a fresh movie, against a
+        /// map it is still drawing with nothing on it because its textures did not load.
+        /// With the time of the last layout call, so a blank that follows one says so.
+        ///
+        /// Twice a second, and only while the screen is up and nothing is paused or faded:
+        /// the game stops drawing the minimap for those on purpose, and that is not news.
+        /// </summary>
+        private void Watch(bool upheaval)
+        {
+            int now;
+            try { now = Game.GameTime; }
+            catch { return; }
+
+            if (now < _watchAt) return;
+            _watchAt = now + 500;
+
+            if (upheaval) return;
+
+            bool rendering, radarHidden;
+
+            try
+            {
+                rendering = Function.Call<bool>(Hash.IS_MINIMAP_RENDERING);
+                radarHidden = Function.Call<bool>(Hash.IS_RADAR_HIDDEN);
+            }
+            catch
+            {
+                return;
+            }
+
+            if (!_watchSeen)
+            {
+                _watchSeen = true;
+                _wasRendering = rendering;
+                _wasRadarHidden = radarHidden;
+                return;
+            }
+
+            if (rendering == _wasRendering && radarHidden == _wasRadarHidden) return;
+
+            var since = _lastAskAt == 0 ? "never" : ((now - _lastAskAt) / 1000f).ToString("0.0") + "s ago";
+
+            if (!rendering && _wasRendering)
+            {
+                _stoppedAt = now;
+                Log.Warn("Minimap: the game says it has STOPPED drawing (radar hidden: " + radarHidden +
+                         "). The last layout call was " + since + ", because " + _lastAskWhy + ".");
+            }
+            else if (rendering && !_wasRendering)
+            {
+                Log.Info("Minimap: drawing again" +
+                         (_stoppedAt != 0 ? " after " + ((now - _stoppedAt) / 1000f).ToString("0.0") + "s" : "") + ".");
+                _stoppedAt = 0;
+            }
+            else
+            {
+                Log.Info("Minimap: radar hidden is now " + radarHidden + " (drawing: " + rendering +
+                         "). The last layout call was " + since + ", because " + _lastAskWhy + ".");
+            }
+
+            _wasRendering = rendering;
+            _wasRadarHidden = radarHidden;
         }
 
         /// <summary>
