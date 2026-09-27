@@ -444,23 +444,15 @@ namespace BareMinimum.Core
         public float CarHours = 4f;
 
         /// <summary>
-        /// Whether a couch, a sofa or a lounger can be slept on, and for how long.
-        ///
-        /// A DECENT NIGHT, NOT A BED'S. Six hours and four fifths of the rest: better than a
-        /// bench or a car, worse than your own bed, and no health back -- that stays a bed's.
-        /// </summary>
-        public bool SleepOnCouches = true;
-        public float CouchHours = 6f;
-        public float CouchRestoreFraction = 0.8f;
-
-        /// <summary>
-        /// Whether he can sleep rough -- a park bench, a tent, a homeless shelter, a mattress
-        /// on the ground -- and for how long.
+        /// Whether he can sleep rough -- a tent, a homeless shelter, a mattress or a sleeping
+        /// bag on the ground -- and for how long.
         ///
         /// JUST ABOVE A CAR. A car is a worse sleep on purpose, so that it is not simply a bed
-        /// you carry around; a bench in the open is the same kind of night, a little longer
-        /// and a little better because at least he is lying down. Michael asked for all of
-        /// these to be sleepable, 2026-09-26; how good they are is here to change.
+        /// you carry around; a mattress in an alley is the same kind of night, a little longer
+        /// and a little better because at least he is lying down.
+        ///
+        /// NO COUCHES AND NO BENCHES. Both were sleepable for a day, 2026-09-26, and taken back
+        /// out at Michael's word the next -- see Venues.Beds.Rough.
         /// </summary>
         public bool SleepRough = true;
         public float RoughHours = 5f;
@@ -2671,11 +2663,6 @@ namespace BareMinimum.Core
                 cfg.CarHours = ini.GetFloat("Sleeping", "CarHours", cfg.CarHours, 1f, 24f);
                 cfg.CarRestoreFraction = ini.GetFloat("Sleeping", "CarRestoreFraction",
                                                       cfg.CarRestoreFraction, 0.05f, 1f);
-
-                cfg.SleepOnCouches = ini.GetBool("Sleeping", "OnCouches", cfg.SleepOnCouches);
-                cfg.CouchHours = ini.GetFloat("Sleeping", "CouchHours", cfg.CouchHours, 1f, 24f);
-                cfg.CouchRestoreFraction = ini.GetFloat("Sleeping", "CouchRestoreFraction",
-                                                        cfg.CouchRestoreFraction, 0.05f, 1f);
 
                 cfg.SleepRough = ini.GetBool("Sleeping", "Rough", cfg.SleepRough);
                 cfg.RoughHours = ini.GetFloat("Sleeping", "RoughHours", cfg.RoughHours, 1f, 24f);

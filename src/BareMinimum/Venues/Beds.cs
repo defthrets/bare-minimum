@@ -77,8 +77,6 @@ namespace BareMinimum.Venues
             "apa_mp_h_bed_double_09",
             "apa_mp_h_bed_wide_05",
             "apa_mp_h_bed_with_table_02",
-            "apa_mp_h_stn_sofa_daybed_01",
-            "apa_mp_h_stn_sofa_daybed_02",
             "apa_mp_h_yacht_bed_01",
             "apa_mp_h_yacht_bed_02",
             "h4_mp_h_yacht_bed_01",
@@ -113,81 +111,28 @@ namespace BareMinimum.Venues
         };
 
         /// <summary>
-        /// Couches, sofas and loungers: a decent sleep, not a bed. See Settings.CouchHours.
+        /// Sleeping rough: tents, homeless shelters, and the mattresses and sleeping bags on
+        /// the ground. See Settings.RoughHours.
         ///
-        /// ALL THE GAME'S OWN, checked against the two lists like the beds -- the story's
-        /// houses, the Online apartments, yachts, offices and clubhouses, and the patio and
-        /// deck loungers. A couch dumped in the street is not on here; it is on Rough.
-        /// </summary>
-        private static readonly string[] Couches =
-        {
-            "v_res_tt_sofa", "v_res_fh_sofa", "v_res_m_h_sofa", "v_res_m_h_sofa_sml",
-            "v_res_mp_sofa", "v_res_d_sofa", "v_res_j_sofa", "v_res_r_sofa",
-            "v_res_tre_sofa", "v_res_tre_sofa_s", "v_res_tre_sofa_mess_a", "v_res_tre_sofa_mess_b",
-            "v_res_tre_sofa_mess_c", "v_tre_sofa_mess_a_s", "v_tre_sofa_mess_b_s", "v_tre_sofa_mess_c_s",
-            "v_ilev_m_sofa", "v_med_p_sofa", "p_v_med_p_sofa_s", "p_lev_sofa_s",
-            "p_res_sofa_l_s", "v_16_v_sofa", "v_16_study_sofa", "v_16_low_lng_mesh_sofa1",
-            "v_16_low_lng_mesh_sofa2", "v_24_lgb_mesh_sofa", "v_club_officesofa", "prop_couch_01",
-            "prop_couch_03", "prop_couch_04", "prop_couch_lg_02", "prop_couch_lg_05",
-            "prop_couch_lg_06", "prop_couch_lg_07", "prop_couch_lg_08", "prop_couch_sm1_07",
-            "prop_couch_sm2_07", "prop_couch_sm_02", "prop_couch_sm_05", "prop_couch_sm_06",
-            "prop_couch_sm_07", "prop_t_sofa", "prop_t_sofa_02", "prop_yaught_sofa_01",
-            "p_yacht_sofa_01_s", "apa_mp_h_stn_sofa2seat_02", "apa_mp_h_stn_sofacorn_01", "apa_mp_h_stn_sofacorn_05",
-            "apa_mp_h_stn_sofacorn_06", "apa_mp_h_stn_sofacorn_07", "apa_mp_h_stn_sofacorn_08", "apa_mp_h_stn_sofacorn_09",
-            "apa_mp_h_stn_sofacorn_10", "apa_mp_h_yacht_sofa_01", "apa_mp_h_yacht_sofa_02", "h4_mp_h_yacht_sofa_01",
-            "h4_mp_h_yacht_sofa_02", "sf_mp_h_yacht_sofa_01", "sf_mp_h_yacht_sofa_02", "sum_mp_h_yacht_sofa_01",
-            "sum_mp_h_yacht_sofa_02", "hei_heist_stn_sofa2seat_02", "hei_heist_stn_sofa2seat_03", "hei_heist_stn_sofa2seat_06",
-            "hei_heist_stn_sofa3seat_01", "hei_heist_stn_sofa3seat_02", "hei_heist_stn_sofa3seat_06", "hei_heist_stn_sofacorn_05",
-            "hei_heist_stn_sofacorn_06", "ex_mp_h_off_sofa_003", "ex_mp_h_off_sofa_01", "ex_mp_h_off_sofa_02",
-            "bkr_prop_clubhouse_sofa_01a", "imp_prop_impexp_sofabed_01a", "h4_prop_h4_couch_01a", "sf_prop_sf_sofa_chefield_01a",
-            "sf_prop_sf_sofa_chefield_02a", "sf_prop_sf_sofa_studio_01a", "xm_lab_sofa_01", "xm_lab_sofa_02",
-            "xm3_int3_carware_basic_sofa", "m23_2_int4_m232_sofa_01", "m24_1_prop_m41_sofa_01a", "m25_1_prop_m51_sofa_01a",
-            "m25_1_prop_m51_couchlarge_01a", "m25_1_prop_m51_couchlarge_02a", "m25_1_prop_m51_couchsmall_01a", "m25_1_prop_m51_couchsmall_02a",
-            "m25_1_int_02_03_heli_sofa", "m25_1_int_02_03_smoke_sofa", "m25_1_int_04_low_lng_mesh_sofa1", "m25_1_int_04_low_lng_mesh_sofa2",
-            "m25_2_int_01_cine_sofas", "m25_2_int_01_gr_sofa_01", "m25_2_prop_m52_c_sofa_01", "m25_2_prop_m52_l_sofa_01",
-            "m25_2_prop_m52_r_sofa_01", "m25_2_prop_m52_sofa_01a", "m25_2_prop_m52_sofa_corner_01a", "m25_2_prop_m52_sofa_round_01a",
-            "m25_2_prop_m52_sofa_small_01a", "m26_1_int_01_sofa_001", "prop_patio_lounger1", "prop_patio_lounger1b",
-            "prop_patio_lounger_2", "prop_patio_lounger_3", "p_patio_lounger1_s", "prop_yacht_lounger",
-            "hei_prop_yah_lounger", "gr_dlc_gr_yacht_props_lounger", "m24_1_prop_m24_1_carrier_yah_lounger", "m24_1_prop_m41_lounger_01a"
-        };
-
-        /// <summary>
-        /// Sleeping rough: park, bus-stop and hospital benches, tents, homeless shelters, the
-        /// mattresses and sleeping bags on the ground, and the couches dumped outside. See
-        /// Settings.RoughHours.
-        ///
-        /// BENCHES YOU WOULD LIE ON, NOT BENCHES YOU WORK AT. The game's lists hold sixty-odd
-        /// names with "bench" in them and a good share are workbenches, grinders, a gym bench
-        /// and a piano stool. Those are left out, as are the hobo stoves and seat that sit
-        /// beside the shelters, and the level-of-detail and collision copies of all of it.
+        /// NO BENCHES AND NO COUCHES. Both were on here for a day, with a hundred and twelve
+        /// sofas as a tier of their own, and Michael took them back out on 2026-09-27. What is
+        /// left is the things somebody with nowhere to go actually sleeps in or on, and every
+        /// name is still the game's own out of the two lists.
         /// </summary>
         private static readonly string[] Rough =
         {
-            "prop_bench_01a", "prop_bench_01b", "prop_bench_01c", "prop_bench_02",
-            "prop_bench_03", "prop_bench_04", "prop_bench_05", "prop_bench_06",
-            "prop_bench_07", "prop_bench_08", "prop_bench_09", "prop_bench_10",
-            "prop_bench_11", "prop_ld_bench01", "prop_wait_bench_01", "prop_air_bench_01",
-            "prop_air_bench_02", "prop_snow_bench_01", "prop_byard_bench01", "prop_byard_bench02",
-            "prop_byard_benchset", "prop_fib_3b_bench", "prop_pris_bench_01", "v_ilev_ph_bench",
-            "v_med_bench1", "v_med_bench2", "v_med_benchcentr", "v_med_benchset1",
-            "hei_prop_hei_med_benchset1", "v_med_cor_wheelbench", "v_res_fh_benchlong", "v_res_fh_benchshort",
-            "hei_heist_stn_benchshort", "v_16_shitbench", "reh_int3_officebench", "xm3_prop_xm3_bench_03b",
-            "xm3_prop_xm3_bench_04b", "m24_1_int_01_m241_ent_bench", "m24_2_int_01_bench_01b", "m25_2_prop_m52_c_bench_01",
-            "m25_2_prop_m52_c_bench_02", "m25_2_prop_m52_l_bench_01", "m25_2_prop_m52_l_bench_02", "m25_2_prop_m52_r_bench_01",
-            "m25_2_prop_m52_r_bench_02", "prop_skid_tent_01", "prop_skid_tent_01b", "prop_skid_tent_03",
-            "prop_skid_tent_cloth", "m23_2_prop_m32_tent_01a", "xm3_prop_xm3_tent_01a", "ba_prop_battle_tent_01",
-            "ba_prop_battle_tent_02", "prop_homeles_shelter_01", "prop_homeles_shelter_02", "prop_homeless_matress_01",
-            "prop_homeless_matress_02", "prop_rub_matress_01", "prop_rub_matress_02", "prop_rub_matress_03",
-            "prop_rub_matress_04", "xm3_prop_xm3_rub_matress_01a", "v_med_mattress", "prop_skid_sleepbag_1",
-            "m23_2_prop_m32_sleepbag_01a", "prop_rub_couch01", "prop_rub_couch02", "prop_rub_couch03",
-            "prop_rub_couch04", "miss_rub_couch_01", "prop_ld_farm_couch01", "prop_ld_farm_couch02"
+            "prop_skid_tent_01", "prop_skid_tent_01b", "prop_skid_tent_03", "prop_skid_tent_cloth",
+            "m23_2_prop_m32_tent_01a", "xm3_prop_xm3_tent_01a", "ba_prop_battle_tent_01", "ba_prop_battle_tent_02",
+            "prop_homeles_shelter_01", "prop_homeles_shelter_02",
+            "prop_homeless_matress_01", "prop_homeless_matress_02", "prop_rub_matress_01", "prop_rub_matress_02",
+            "prop_rub_matress_03", "prop_rub_matress_04", "xm3_prop_xm3_rub_matress_01a", "v_med_mattress",
+            "prop_skid_sleepbag_1", "m23_2_prop_m32_sleepbag_01a"
         };
 
         /// <summary>What a found thing is, which decides how good a night it is.</summary>
         public enum Kind
         {
             Bed,
-            Couch,
             Rough
         }
 
@@ -248,7 +193,6 @@ namespace BareMinimum.Venues
             var all = new List<KeyValuePair<string, Kind>>();
 
             foreach (var name in wanted) all.Add(new KeyValuePair<string, Kind>(name, Kind.Bed));
-            foreach (var name in Couches) all.Add(new KeyValuePair<string, Kind>(name, Kind.Couch));
             foreach (var name in Rough) all.Add(new KeyValuePair<string, Kind>(name, Kind.Rough));
 
             foreach (var pair in all)
@@ -291,8 +235,7 @@ namespace BareMinimum.Venues
                      (wanted.Count > Candidates.Length
                           ? " (" + (wanted.Count - Candidates.Length) + " from the ini)"
                           : "") +
-                     ", " + Couches.Length + " couch(es) and " + Rough.Length +
-                     " bench(es), tent(s), shelter(s) and mattress(es).");
+                     " and " + Rough.Length + " tent(s), shelter(s) and mattress(es).");
 
             if (missing.Count > 0)
             {
@@ -329,13 +272,11 @@ namespace BareMinimum.Venues
         /// <summary>
         /// The nearest thing to sleep on within reach, and what kind it is, or null.
         ///
-        /// A SWEEP SPREAD OVER FRAMES. The list is over two hundred models now, and every one is a
-        /// GET_CLOSEST_OBJECT_OF_TYPE -- which is the only native that sees MAP objects, and a
-        /// bench in a park is a map object. Asked all at once that is two hundred calls in one
-        /// frame, five times a second, on a mod people have praised for not costing frames. So
-        /// each frame asks PerFrame of them, the sweep takes a handful of frames, and the one
-        /// before it stands until it finishes. The first whole sweep says in the log what it
-        /// cost, so the number is known rather than hoped.
+        /// A SWEEP SPREAD OVER FRAMES. Every model is a GET_CLOSEST_OBJECT_OF_TYPE -- the only
+        /// native that sees MAP objects, and a mattress dumped in an alley is a map object --
+        /// and the list was over two hundred for a day, with the couches and benches on it.
+        /// It is seventy-odd now; the sweep stays spread, PerFrame at a time, because it costs
+        /// nothing to keep and the first whole sweep still says in the log what it cost.
         /// </summary>
         public Prop Nearest(Vector3 from, float radius, out Kind kind)
         {
