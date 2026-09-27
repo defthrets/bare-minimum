@@ -644,6 +644,9 @@ namespace BareMinimum
                 _eating.Update();
                 _whereabouts.Update();
 
+                // What the game is holding, once a minute. Diagnostic; see Core.Memory.
+                Core.Memory.Tick();
+
                 // While the sleep sequence owns the screen, the effects and the HUD stand
                 // down -- a limp applied through a fade is still applied when you wake up,
                 // and an icon drawn over black is an icon floating on a black screen.
