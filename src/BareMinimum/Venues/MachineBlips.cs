@@ -155,12 +155,112 @@ namespace BareMinimum.Venues
             try
             {
                 Load();
-                Remark();
                 Scan();
+                Ration();
             }
             catch (Exception ex)
             {
                 Log.Once("machine-blips", "Could not mark the machines: " + ex.Message);
+            }
+
+            Census(now);
+        }
+
+        /// <summary>
+        /// Marks the nearest MachineMarkersMax remembered machines and takes the marker off the
+        /// rest. Everything stays remembered; only the markers are rationed. See
+        /// Settings.MachineMarkersMax for why.
+        ///
+        /// IN PLACE OF Remark, which marked every one of them. With no cap, or no more
+        /// remembered than the cap, it does exactly what Remark did: gives back any marker that
+        /// has gone missing, and says how many it put back. Over the cap it sorts by distance
+        /// every scan -- a few hundred comparisons every two seconds -- and only creates or
+        /// deletes the handful at the edge that moved in or out as he did.
+        /// </summary>
+        private void Ration()
+        {
+            var cap = _cfg.MachineMarkersMax;
+
+            if (cap <= 0 || _known.Count <= cap)
+            {
+                Remark();
+                return;
+            }
+
+            var me = Game.Player.Character;
+            if (me == null || !me.Exists()) return;
+
+            var here = me.Position;
+
+            var order = new List<Known>(_known);
+            order.Sort((a, b) => a.At.DistanceToSquared(here).CompareTo(b.At.DistanceToSquared(here)));
+
+            for (var i = 0; i < order.Count; i++)
+            {
+                var known = order[i];
+
+                if (i < cap)
+                {
+                    Mark(known);
+                    continue;
+                }
+
+                if (known.Mark == null) continue;
+
+                Kill(known.Mark);
+                known.Mark = null;
+            }
+
+            if (!_toldRation)
+            {
+                _toldRation = true;
+                Log.Info("Machine blips: " + _known.Count + " remembered; the nearest " + cap +
+                         " carry a marker, and they follow you round the map. See [Counters] " +
+                         "MachineMarkersMax.");
+            }
+        }
+
+        private bool _toldRation;
+
+        // ---- the census --------------------------------------------------------
+
+        private int _censusAt;
+        private int _saidBlips = -1;
+
+        /// <summary>
+        /// How many blips are on the map, and how many of them are this file's, written down
+        /// when the total moves by fifty.
+        ///
+        /// SO THE NEXT "MY MISSION BLIPS VANISHED" COMES WITH A NUMBER. The game's blip pool
+        /// has a ceiling; this line says how close a session got to it and how much of that
+        /// was machines, which is the whole question about that report.
+        /// </summary>
+        private void Census(int now)
+        {
+            if (now < _censusAt) return;
+            _censusAt = now + 60000;
+
+            try
+            {
+                var all = World.GetAllBlips().Length;
+
+                if (_saidBlips >= 0 && Math.Abs(all - _saidBlips) < 50) return;
+                _saidBlips = all;
+
+                var ours = 0;
+
+                foreach (var known in _known)
+                {
+                    try { if (known.Mark != null && known.Mark.Exists()) ours++; }
+                    catch { /* not counted */ }
+                }
+
+                Log.Info("Blips: " + all + " on the map, " + ours + " of them machine and stall " +
+                         "markers (" + _known.Count + " machines remembered).");
+            }
+            catch (Exception ex)
+            {
+                Log.Once("machine-census", "Could not count the blips: " + ex.Message);
             }
         }
 

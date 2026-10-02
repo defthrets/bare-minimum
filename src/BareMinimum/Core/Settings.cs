@@ -1695,6 +1695,20 @@ namespace BareMinimum.Core
         public bool MachineBlips = true;
 
         /// <summary>
+        /// How many of the remembered machines and stalls carry a marker at once: the nearest
+        /// this many to wherever he is. 0 marks every one of them, which is how it used to be.
+        ///
+        /// THE GAME'S BLIP POOL HAS A CEILING AND THE STORY USES IT. Every machine ever passed
+        /// used to keep a marker for good -- several hundred over a playthrough, on top of a
+        /// couple of hundred shops -- and once the pool is full the game's own scripts cannot
+        /// make theirs: the mission letters and the shop markers go first. Reported by Manfreedy
+        /// as mission and mechanic blips disappearing, 2026-09-28. Everything is still
+        /// remembered and written to machines.json; only the markers are rationed, and they
+        /// follow him round the map.
+        /// </summary>
+        public int MachineMarkersMax = 150;
+
+        /// <summary>
         /// Whether the carts the GAME placed get a man behind them and start selling.
         ///
         /// The three hot dog stands and three burger carts in vendors.json are built by this
@@ -2939,6 +2953,7 @@ namespace BareMinimum.Core
                 cfg.SurveySouth = ini.GetFloat("Map", "SurveySouth", cfg.SurveySouth, -5000f, 9000f);
                 cfg.SurveyNorth = ini.GetFloat("Map", "SurveyNorth", cfg.SurveyNorth, -5000f, 9000f);
                 cfg.MachineBlips = ini.GetBool("Counters", "MachineBlips", cfg.MachineBlips);
+                cfg.MachineMarkersMax = ini.GetInt("Counters", "MachineMarkersMax", cfg.MachineMarkersMax, 0, 5000);
                 cfg.DiscoverCarts = ini.GetBool("Counters", "DiscoverCarts", cfg.DiscoverCarts);
                 cfg.WalkIns = ini.GetBool("Counters", "WalkIns", cfg.WalkIns);
 

@@ -140,7 +140,9 @@ namespace BareMinimum.Vitals
                 var sprinting = onFoot && me.IsSprinting && !Tired;
                 var jogging = onFoot && !sprinting && me.IsRunning;
 
-                Spending = cfg.EnergyPowersSpecial && Running();
+                // NOT ON A MISSION. See Mission: the ability is the game's while one is running,
+                // so it does not drink from this bar either.
+                Spending = cfg.EnergyPowersSpecial && !Mission() && Running();
 
                 // BOTH DRAIN, AND THEY ADD UP. Sprinting through a rage costs what the sprint
                 // costs and what the rage costs, which is the honest answer and the one the bar
@@ -214,6 +216,28 @@ namespace BareMinimum.Vitals
             }
         }
 
+        /// <summary>
+        /// Whether a mission is running, in which case the special ability is left to the game.
+        ///
+        /// "MR. PHILIPS" IS THE MISSION THAT TEACHES TREVOR'S ABILITY, and it broke on this.
+        /// It switches the ability on, waits for it to run out the game's own way, and only
+        /// then clears its red screen. This class keeps the game's meter topped up every frame
+        /// -- so the ability never ran out the game's way -- and when this bar emptied it cut
+        /// the ability off and switched it off at the game's end. The screen effect stayed on
+        /// and the mission could not go on: D_Cypher003 had to take the mod out to finish it,
+        /// 2026-09-30.
+        ///
+        /// SO NONE OF IT WHILE A MISSION IS ON. Missions script the ability -- they fill it,
+        /// lock it, wait on it -- and nothing here can know what each one is waiting for. The
+        /// meter is not topped up, the ability is not cut off or disabled, and it does not drink
+        /// from this bar; the bar stays a sprint meter until the mission flag drops.
+        /// </summary>
+        public static bool Mission()
+        {
+            try { return Function.Call<bool>(Hash.GET_MISSION_FLAG); }
+            catch { return false; }
+        }
+
         /// <summary>Whether the game says the special ability is running.</summary>
         private static bool Running()
         {
@@ -237,7 +261,8 @@ namespace BareMinimum.Vitals
         /// </summary>
         private void Ability(Settings cfg)
         {
-            if (!cfg.EnergyPowersSpecial)
+            // A MISSION'S ABILITY IS THE MISSION'S. See Mission.
+            if (!cfg.EnergyPowersSpecial || Mission())
             {
                 ReleaseAbility();
                 return;

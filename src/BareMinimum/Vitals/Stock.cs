@@ -206,7 +206,10 @@ namespace BareMinimum.Vitals
 
             if (_hidden)
             {
-                if (cfg.VitalsHideSpecial) AbilityBar(false);
+                // THE GAME'S OWN ABILITY BAR COMES BACK ON A MISSION, because the ability is the
+                // game's again for as long as it lasts -- see Energy.Mission -- and its meter is
+                // the only thing that says how much is left.
+                if (cfg.VitalsHideSpecial) AbilityBar(Energy.Mission());
 
                 if (cfg.VitalsHideHealthArmour && Due(cfg, upheaval) && Setup(cfg.VitalsHideType))
                 {
