@@ -142,6 +142,11 @@ namespace BareMinimum.Venues
             // machines and does nothing at all unless the switch has actually moved.
             Redisplay();
 
+            // THE COUNT, WHATEVER THE SWITCHES SAY. It sat after the early return below, so on
+            // an install with the shop markers off -- Michael's -- it never ran, and the one
+            // number it exists for went unwritten. Its own clock is a minute. See Census.
+            Census(now);
+
             // One switch for the markers, and the two that decide whether the machines and
             // the stalls sell at all. A machine you cannot buy from should not be on the map
             // telling you that you can.
@@ -162,8 +167,6 @@ namespace BareMinimum.Venues
             {
                 Log.Once("machine-blips", "Could not mark the machines: " + ex.Message);
             }
-
-            Census(now);
         }
 
         /// <summary>
