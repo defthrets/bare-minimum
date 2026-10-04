@@ -38,6 +38,14 @@ No asset replacement, no .rpf edits. Legacy and Enhanced from one build. Nothing
 
 The full record, every version, is [`release/CHANGES.txt`](release/CHANGES.txt); the zips are on the [releases page](https://github.com/defthrets/bare-minimum/releases). The recent ones, in detail:
 
+### 0.9.1 — missions keep their special ability, and the map keeps its missions
+
+**"Mr. Philips" can be finished.** The mod runs the special ability off its energy bar and kept the game's meter topped up, so the ability never ran out the way the mission waits for, and its red screen stayed. On any mission now the special ability is left entirely to the game, and the game's own ability bar shows until the mission ends. Reported by D_Cypher003.
+
+**Mission and shop markers stop disappearing.** Every vending machine and fruit stall ever passed kept a map marker — several hundred over a playthrough — and the game's blip pool is finite, so the story's own markers were the ones that could not be made. Only the nearest 150 machines are marked now, following you; all are still remembered. `[Counters] MachineMarkersMax` sets it, 0 for the old behaviour. Reported by Manfreedy.
+
+**No sleeping on park benches or couches** — both came back out. Sleeping rough is tents, homeless shelters, and mattresses and sleeping bags on the ground.
+
 ### 0.9.0 — the bodies move in, a real bag, and a bench to sleep on
 
 **The dead are this mod's now.** Searching a body used to live in Posted Up and carrying one in Five0 Patrol. Both are here: stand over a body and hold E to search it — cash, food and drink, and drugs too with Posted Up 0.9.9 or newer — then hold E again to carry it. Guns fall to the ground when somebody dies, the way the game always did. If you run Five0 Patrol 0.2.1, it still has its own carry until its next update; turn one off meanwhile (`[Bodies] Carry = false` here).

@@ -1,0 +1,6 @@
+0.9.1 -- for the site's changelog field. Short, no emoji; detail is in CHANGES.txt.
+
+0.9.1
+- "Mr. Philips" can be finished: on any mission the special ability is left to the game, so its screen effect no longer sticks.
+- Mission and shop markers stop disappearing: only the nearest 150 vending machines carry a marker now ([Counters] MachineMarkersMax), so the game's blip pool has room for the story.
+- No more sleeping on park benches or couches; tents, shelters and mattresses on the ground still work.
